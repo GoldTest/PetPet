@@ -3,12 +3,16 @@ import { Heart, Settings, Volume2, VolumeX } from 'lucide-react';
 import {
   advancePet,
   applyPetAction,
+  claimAvailableDateRewards,
   buyItem,
   canStartPomodoro,
+  exchangeHeartForCoins,
   createDefaultPet,
+  defaultPetBirthday,
   defaultPetName,
   getEnergyRecoveryInfo,
   getNextUpgradeHeartCost,
+  heartExchangeCooldownMs,
   helpStarterGiftCoins,
   helpStarterGiftRewardId,
   getPetStatCap,
@@ -26,8 +30,12 @@ import {
   upgradePet,
   useInventoryItem,
   weatherInfo,
+  withBackfilledBirthday,
+  withPetIdentityBirthday,
+  type ClaimedDateReward,
   type ItemId,
   type PetAction,
+  type PetBirthday,
   type PetState,
   type PetStatus,
   type PomodoroDurations,
@@ -87,12 +95,7 @@ const getPomodoroPhaseDurationMs = (pet: PetState) => {
     return pet.pomodoro.phaseEndsAt - pet.pomodoro.phaseStartedAt;
   }
 
-  const minutes =
-    pet.pomodoro.phase === 'focus'
-      ? pet.pomodoro.settings.focusMinutes
-      : pet.pomodoro.phase === 'short_break'
-        ? pet.pomodoro.settings.shortBreakMinutes
-        : pet.pomodoro.settings.longBreakMinutes;
+  const minutes = pet.pomodoro.phase === 'focus' ? pet.pomodoro.settings.focusMinutes : pet.pomodoro.settings.shortBreakMinutes;
 
   return minutes * 60 * 1000;
 };
@@ -107,6 +110,7 @@ const getPomodoroProgress = (pet: PetState) => {
 type PomodoroSettingKey = keyof PomodoroDurations;
 type SoundOutcome = 'success' | 'blocked' | 'heart' | 'low_state';
 type FloatingRewardConfig = { id: string; coins: number; eventKey: string };
+type RewardPopup = ClaimedDateReward;
 
 const floatingRewardConfigs: readonly FloatingRewardConfig[] = [
   { id: helpStarterGiftRewardId, coins: helpStarterGiftCoins, eventKey: 'pet.reward.helpStarterGift' },
@@ -115,6 +119,7 @@ const floatingRewardConfigs: readonly FloatingRewardConfig[] = [
 const getInventoryCount = (pet: PetState, itemId: ItemId) => pet.inventory[itemId] ?? 0;
 const getShopItem = (itemId: ItemId) => shopItems.find((item) => item.id === itemId);
 const getDisplayItem = (items: readonly ItemDisplay[], itemId: ItemId) => items.find((item) => item.id === itemId);
+const getDefaultBirthdayForMod = (mod: ActivePetMod | null): PetBirthday | undefined => mod ? mod.manifest.birthday : defaultPetBirthday;
 
 const getActionSfx = (action: PetAction): SfxId => {
   if (action === 'clean') return 'action_bath';
@@ -170,8 +175,12 @@ export const App = () => {
   const [modMessage, setModMessage] = useState('');
   const [saveText, setSaveText] = useState('');
   const [importSaveText, setImportSaveText] = useState('');
+  const [rewardQueue, setRewardQueue] = useState<RewardPopup[]>([]);
   const petRef = useRef(pet);
   const completedFocusCountRef = useRef(pet.pomodoro.completedFocusCount);
+  const lastHeartExchangeAtRef = useRef(0);
+  const [isHeartExchangeCoolingDown, setHeartExchangeCoolingDown] = useState(false);
+  const hasLoadedModRef = useRef(false);
 
   useEffect(() => {
     petRef.current = pet;
@@ -182,9 +191,15 @@ export const App = () => {
     void loadActivePetMod()
       .then((mod) => {
         setActiveMod(mod);
+        setPet((current) => (mod ? withPetIdentityBirthday(current, mod.manifest.birthday) : withBackfilledBirthday(current, defaultPetBirthday)));
+        hasLoadedModRef.current = true;
         if (mod) setModMessage(t('ui.settings.mod.active', { name: mod.manifest.name, version: mod.manifest.version }));
       })
-      .catch((error) => setModMessage(error instanceof Error ? error.message : t('ui.settings.mod.loadFailed')));
+      .catch((error) => {
+        hasLoadedModRef.current = true;
+        setPet((current) => withBackfilledBirthday(current, defaultPetBirthday));
+        setModMessage(error instanceof Error ? error.message : t('ui.settings.mod.loadFailed'));
+      });
   }, []);
 
   useEffect(() => {
@@ -254,6 +269,10 @@ export const App = () => {
   }, [currentBgmMode, isAudioEnabled]);
 
   useEffect(() => {
+    claimDateRewards();
+  }, [pet.lastUpdatedAt, pet.birthday, activeMod]);
+
+  useEffect(() => {
     if (pet.pomodoro.completedFocusCount > completedFocusCountRef.current) {
       playSfx('notification');
     }
@@ -262,6 +281,21 @@ export const App = () => {
 
   const playAfterUnlock = (id: SfxId) => {
     void unlockAudio().then(() => playSfx(id));
+  };
+
+  const claimDateRewards = () => {
+    if (!hasLoadedModRef.current) return;
+    setPet((current) => {
+      const result = claimAvailableDateRewards(current);
+      if (result.rewards.length > 0) {
+        setRewardQueue((queue) => [
+          ...queue,
+          ...result.rewards.filter((reward) => !queue.some((queued) => queued.id === reward.id)),
+        ]);
+        playSfx('notification');
+      }
+      return result.pet;
+    });
   };
 
   const handleAudioToggle = () => {
@@ -295,6 +329,28 @@ export const App = () => {
       const didGainItem = getInventoryCount(next, itemId) > beforeCount;
       const didSpendCoins = next.coins < beforeCoins;
       playSfx(didGainItem ? (didSpendCoins ? 'purchase' : 'coin') : 'error');
+      return next;
+    });
+  };
+
+  const handleExchangeHeart = () => {
+    const now = Date.now();
+    if (now - lastHeartExchangeAtRef.current < heartExchangeCooldownMs) {
+      playAfterUnlock('error');
+      return;
+    }
+
+    lastHeartExchangeAtRef.current = now;
+    setHeartExchangeCoolingDown(true);
+    window.setTimeout(() => setHeartExchangeCoolingDown(false), heartExchangeCooldownMs);
+    playAfterUnlock('tap');
+
+    setPet((current) => {
+      const beforeCoins = current.coins;
+      const beforeHearts = current.hearts;
+      const next = exchangeHeartForCoins(current, now);
+      const didExchange = next.coins > beforeCoins && next.hearts < beforeHearts;
+      playSfx(didExchange ? 'coin' : 'error');
       return next;
     });
   };
@@ -402,11 +458,11 @@ export const App = () => {
     const fresh = createDefaultPet();
     const moddedFresh = activeMod
       ? {
-          ...fresh,
+          ...withPetIdentityBirthday(fresh, activeMod.manifest.birthday),
           name: activeMod.manifest.defaultPetName,
           recentEvent: activeMod.manifest.texts?.recentEvent ?? fresh.recentEvent,
         }
-      : fresh;
+      : withPetIdentityBirthday(fresh, defaultPetBirthday);
     setPet(moddedFresh);
     setDraftName(moddedFresh.name);
     setPomodoroOpen(false);
@@ -433,7 +489,7 @@ export const App = () => {
         const shouldUseModDefaultName = current.name === defaultPetName || current.name === oldDefaultName;
         const nextName = shouldUseModDefaultName ? parsed.manifest.defaultPetName : current.name;
         return {
-          ...current,
+          ...withPetIdentityBirthday(current, shouldUseModDefaultName ? parsed.manifest.birthday : current.birthday),
           name: nextName,
           recentEvent: parsed.manifest.texts?.recentEvent ?? t('ui.settings.mod.switched', { name: parsed.manifest.name }),
         };
@@ -449,6 +505,7 @@ export const App = () => {
     try {
       await clearActivePetMod();
       setActiveMod(null);
+      setPet((current) => withPetIdentityBirthday(current, defaultPetBirthday));
       setModMessage(t('ui.settings.mod.restored'));
     } catch (error) {
       setModMessage(error instanceof Error ? error.message : t('ui.settings.mod.restoreFailed'));
@@ -470,11 +527,17 @@ export const App = () => {
   const importSaveFromText = (text: string) => {
     try {
       const imported = parseSaveFileText(text);
-      setPet(imported.pet);
-      setDraftName(imported.pet.name);
-      setImportSaveText('');
       const importedMod = imported.activeMod;
       const hasMatchingMod = importedMod ? activeMod?.manifest.id === importedMod.id : true;
+      setPet(
+        importedMod && !hasMatchingMod
+          ? imported.pet
+          : activeMod
+            ? withPetIdentityBirthday(imported.pet, activeMod.manifest.birthday)
+            : withBackfilledBirthday(imported.pet, defaultPetBirthday),
+      );
+      setDraftName(imported.pet.name);
+      setImportSaveText('');
       setModMessage(
         importedMod && !hasMatchingMod
           ? t('ui.settings.save.importedMissingMod', { name: importedMod.name, version: importedMod.version })
@@ -499,6 +562,29 @@ export const App = () => {
   };
 
   const availableFloatingReward = floatingRewardConfigs.find((reward) => !pet.claimedRewardIds.includes(reward.id));
+  const activeRewardPopup = rewardQueue[0];
+
+  const renderRewardItems = (reward: RewardPopup) => {
+    const rewardItems = [
+      reward.coins ? { key: 'coins', icon: currencyIcon, label: t('ui.rewards.coins', { coins: reward.coins }) } : undefined,
+      reward.hearts ? { key: 'hearts', icon: undefined, label: t('ui.rewards.hearts', { hearts: reward.hearts }) } : undefined,
+      ...reward.items.map((item, index) => {
+        const displayItem = getDisplayItem(displayShopItems, item.itemId);
+        return {
+          key: `${item.itemId}:${index}`,
+          icon: itemIconMap[item.itemId],
+          label: t('ui.rewards.item', { item: displayItem?.displayName ?? item.itemId, count: item.amount }),
+        };
+      }),
+    ].filter((item): item is { key: string; icon?: string; label: string } => Boolean(item));
+
+    return rewardItems.map((item) => (
+      <div className="reward-modal__item" key={item.key}>
+        {item.icon ? <img src={item.icon} alt="" aria-hidden="true" /> : <Heart size={22} aria-hidden="true" />}
+        <span>{item.label}</span>
+      </div>
+    ));
+  };
 
   const pomodoroOverlay = showPomodoroPanel ? (
     <PomodoroOverlay
@@ -617,6 +703,30 @@ export const App = () => {
         </button>
       )}
 
+      {activeRewardPopup && (
+        <div className="modal-backdrop" role="presentation">
+          <section className="reward-modal" role="dialog" aria-modal="true" aria-labelledby="reward-title">
+            <img className="reward-modal__gift" src={giftBoxIcon} alt="" aria-hidden="true" />
+            <div className="reward-modal__copy">
+              <span>{t('ui.rewards.kicker')}</span>
+              <h2 id="reward-title">{activeRewardPopup.title}</h2>
+              <p>{activeRewardPopup.message}</p>
+            </div>
+            <div className="reward-modal__items">{renderRewardItems(activeRewardPopup)}</div>
+            <button
+              type="button"
+              className="primary-button"
+              onClick={() => {
+                playAfterUnlock('tap');
+                setRewardQueue((queue) => queue.slice(1));
+              }}
+            >
+              {t('ui.rewards.confirm')}
+            </button>
+          </section>
+        </div>
+      )}
+
       {isShopOpen && (
         <ShopModal
           pet={pet}
@@ -626,6 +736,8 @@ export const App = () => {
           onClose={handleCloseShop}
           onSelectCategory={setActiveShopCategory}
           onBuyItem={handleBuyItem}
+          onExchangeHeart={handleExchangeHeart}
+          isHeartExchangeCoolingDown={isHeartExchangeCoolingDown}
         />
       )}
       {isSettingsOpen && (

@@ -54,7 +54,13 @@
       "price": "{price} coins",
       "discountToday": "Today only",
       "discountUsed": "Used",
-      "priceNote": "Original {originalPrice} coins, {label} today"
+      "priceNote": "Original {originalPrice} coins, {label} today",
+      "exchange": {
+        "aria": "Heart exchange",
+        "rate": "1 heart = {coins} coins",
+        "progress": "Today {count}/{limit}",
+        "button": "Exchange +{coins}"
+      }
     },
     "settings": {
       "title": "Settings",
@@ -140,20 +146,20 @@
       "roundPrefix": "Round",
       "roundSuffix": "",
       "today": "Today",
-      "total": "Total",
       "start": "Start",
       "pause": "Pause",
       "reset": "Reset",
       "resetTitle": "Reset pomodoro",
-      "settings": "Duration settings",
+      "settings": "Pomodoro settings",
       "minutes": "min",
       "focus": "Focus",
       "shortBreak": "Short",
-      "longBreak": "Long",
       "sleepingTitle": "Pomodoro can run while sleeping",
       "lowEnergyTitle": "Energy is too low. Rest first.",
       "lowHealthTitle": "Health is too low. Care first.",
-      "statsAria": "Pomodoro stats"
+      "statsAria": "Pomodoro stats",
+      "rounds": "Rounds",
+      "roundUnit": "rounds"
     },
     "petDisplay": {
       "activityAlt": "{name}'s activity",
@@ -189,7 +195,15 @@
       "weatherAria": "Today's weather: {weather}"
     },
     "rewards": {
-      "claim": "Claim reward"
+      "claim": "Claim reward",
+      "kicker": "Gift received",
+      "birthdayTitle": "Happy birthday, {name}",
+      "festivalTitle": "{festival} gift",
+      "dailyTitle": "Daily login gift",
+      "coins": "+{coins} coins",
+      "hearts": "+{hearts} hearts",
+      "item": "{item} x{count}",
+      "confirm": "Take gift"
     }
   },
   "pet": {
@@ -201,11 +215,11 @@
         },
         "bento": {
           "name": "Homestyle bento",
-          "summary": "Hunger +34, mood +5"
+          "summary": "Hunger +34, mood +4"
         },
         "orange": {
           "name": "Orange",
-          "summary": "Light fruit snack, hunger +18, mood +2, health +1"
+          "summary": "Light fruit snack, hunger +18, mood +1, health +1"
         },
         "apple": {
           "name": "Apple",
@@ -213,27 +227,27 @@
         },
         "banana": {
           "name": "Banana",
-          "summary": "Filling fruit snack, hunger +24, mood +2, energy +2"
+          "summary": "Filling fruit snack, hunger +24, mood +1, energy +2"
         },
         "nutri_meal": {
           "name": "Nutri meal",
-          "summary": "Hunger +30, mood +3, health +15"
+          "summary": "Hunger +30, mood +2, health +15"
         },
         "pig_trotter": {
           "name": "Pig trotter",
-          "summary": "Furo's favorite, hunger +44, mood +9, health +5"
+          "summary": "Furo's favorite, hunger +44, mood +6, cleanliness -5, health +5"
         },
         "strawberry_cake": {
           "name": "Strawberry cake",
-          "summary": "Furo's favorite, hunger +24, mood +14"
+          "summary": "Furo's favorite, hunger +24, mood +8, cleanliness -3"
         },
         "ad_milk": {
           "name": "AD calcium milk",
-          "summary": "Furo's favorite, hunger +16, health +3"
+          "summary": "Furo's favorite, hunger +20, mood +5, health +6"
         },
         "strawberry_milk": {
           "name": "Strawberry milk",
-          "summary": "Sweet milk drink, hunger +16, mood +8, health +3"
+          "summary": "Sweet milk drink, hunger +16, mood +5, health +3"
         },
         "small_bouquet": {
           "name": "Small bouquet",
@@ -320,13 +334,11 @@
     "pomodoro": {
       "phase": {
         "focus": "Focus",
-        "short_break": "Short break",
-        "long_break": "Long break"
+        "short_break": "Short break"
       },
       "phaseCount": {
         "focus": "{count} focus",
-        "short_break": "{count} short break",
-        "long_break": "{count} long break"
+        "short_break": "{count} short break"
       },
       "completePrefix": "Pomodoro phase complete: ",
       "offlineSettlePrefix": "Pomodoro offline settlement: ",
@@ -345,7 +357,11 @@
         "sleepActionPrepare": "{name} is getting ready to rest. Pomodoro keeps running.",
         "sleepActionStarted": "{name} started resting. Pomodoro keeps running."
       },
-      "reset": "{name}'s pomodoro was reset."
+      "reset": "{name}'s pomodoro was reset.",
+      "autoStopped": " Completed {rounds} rounds. Pomodoro stopped.",
+      "rewardTick": "Pomodoro reward: focused {minutes} minutes, coins +{coins}, mood +{mood}.",
+      "bonusEvent": " Hourly bonus triggered, coins +{coins}.",
+      "resetSessionEvent": " {name} settled after focusing, coins +{coins}, mood +{mood}."
     },
     "status": {
       "content": "Doing well",
@@ -511,7 +527,24 @@
       "puddleRun": "{name} dreamed of running through puddles, energy +4, cleanliness -1."
     },
     "reward": {
-      "helpStarterGift": "Starter gift claimed, coins +{coins}."
+      "helpStarterGift": "Starter gift claimed, coins +{coins}.",
+      "birthday": "It's {name}'s birthday. Birthday reward: coins +{coins}, hearts +{hearts}.",
+      "festival": "{festival} gift arrived. A seasonal item was added to the bag.",
+      "dailyCoins": "Daily login gift: coins +{coins}.",
+      "dailyItem": "Daily login gift: a surprise item was added to the bag."
+    },
+    "exchange": {
+      "success": "Exchanged 1 heart, coins +{coins}.",
+      "notEnoughHearts": "Not enough hearts to exchange for coins.",
+      "limitReached": "Today's heart exchange limit is used up."
+    },
+    "festivals": {
+      "newYear": "New Year",
+      "valentine": "Valentine's Day",
+      "earthDay": "Earth Day",
+      "childrenDay": "Children's Day",
+      "harvestFestival": "Harvest Festival",
+      "christmas": "Christmas"
     }
   }
 }

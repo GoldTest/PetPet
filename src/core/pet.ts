@@ -5,6 +5,7 @@ export type {
   ItemEffect,
   ItemId,
   PetAction,
+  PetBirthday,
   PetState,
   PetStatus,
   PomodoroActivity,
@@ -19,8 +20,12 @@ export type {
 } from './petTypes';
 export {
   dailyBiscuitClaimLimit,
+  dailyHeartExchangeLimit,
   favoriteFoodIds,
+  getDailyHeartExchangeInfo,
   getDailyShopDiscountInfo,
+  heartExchangeCoins,
+  heartExchangeCooldownMs,
   shopCategories,
   shopItems,
 } from './items';
@@ -51,7 +56,6 @@ export {
   getDefaultPomodoroRemainingMs,
   getPomodoroPhaseDurationMs,
   getPomodoroPhaseId,
-  getPomodoroReward,
   normalizePomodoroSettings,
   normalizePomodoroState,
   pickPomodoroActivity,
@@ -71,6 +75,7 @@ export {
 export {
   applyPetAction,
   buyItem,
+  exchangeHeartForCoins,
   interactWithPet,
   pausePomodoro,
   recordPetInteraction,
@@ -82,3 +87,16 @@ export {
   getWorkReward,
   useInventoryItem,
 } from './petActions';
+
+export type { ClaimedDateReward, DateRewardItem, DateRewardKind, FestivalConfig } from './dateRewards';
+export {
+  birthdayRewardCoins,
+  birthdayRewardHearts,
+  claimAvailableDateRewards,
+  defaultPetBirthday,
+  festivalConfigs,
+  getSixAmResetDateKey,
+  normalizePetBirthday,
+  withBackfilledBirthday,
+  withPetIdentityBirthday,
+} from './dateRewards';

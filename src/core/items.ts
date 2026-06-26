@@ -4,6 +4,12 @@ import { getLocalDateKey, hashString } from './utils';
 
 export const dailyBiscuitClaimLimit = 3;
 
+export const heartExchangeCoins = 16;
+
+export const dailyHeartExchangeLimit = 3;
+
+export const heartExchangeCooldownMs = 200;
+
 export const favoriteFoodIds: readonly ItemId[] = ['pig_trotter', 'strawberry_cake', 'ad_milk'];
 
 export const favoriteFoodIdSet = new Set<ItemId>(favoriteFoodIds);
@@ -26,7 +32,7 @@ export const shopItems: readonly ShopItem[] = [
     name: t('pet.shop.items.bento.name'),
     kind: 'food',
     price: 24,
-    effect: { hunger: 34, mood: 5, cleanliness: -3 },
+    effect: { hunger: 34, mood: 4, cleanliness: -3 },
     summary: t('pet.shop.items.bento.summary'),
   },
   {
@@ -34,7 +40,7 @@ export const shopItems: readonly ShopItem[] = [
     name: t('pet.shop.items.orange.name'),
     kind: 'food',
     price: 16,
-    effect: { hunger: 18, mood: 2, health: 1 },
+    effect: { hunger: 18, mood: 1, health: 1 },
     summary: t('pet.shop.items.orange.summary'),
   },
   {
@@ -50,7 +56,7 @@ export const shopItems: readonly ShopItem[] = [
     name: t('pet.shop.items.banana.name'),
     kind: 'food',
     price: 20,
-    effect: { hunger: 24, mood: 2, energy: 2 },
+    effect: { hunger: 24, mood: 1, energy: 2 },
     summary: t('pet.shop.items.banana.summary'),
   },
   {
@@ -58,7 +64,7 @@ export const shopItems: readonly ShopItem[] = [
     name: t('pet.shop.items.nutri_meal.name'),
     kind: 'food',
     price: 38,
-    effect: { hunger: 30, mood: 3, health: 15 },
+    effect: { hunger: 30, mood: 2, health: 15 },
     summary: t('pet.shop.items.nutri_meal.summary'),
   },
   {
@@ -66,7 +72,7 @@ export const shopItems: readonly ShopItem[] = [
     name: t('pet.shop.items.pig_trotter.name'),
     kind: 'food',
     price: 48,
-    effect: { hunger: 44, mood: 9, cleanliness: -5, health: 5 },
+    effect: { hunger: 44, mood: 6, cleanliness: -5, health: 5 },
     summary: t('pet.shop.items.pig_trotter.summary'),
   },
   {
@@ -74,15 +80,15 @@ export const shopItems: readonly ShopItem[] = [
     name: t('pet.shop.items.strawberry_cake.name'),
     kind: 'food',
     price: 38,
-    effect: { hunger: 24, mood: 14, cleanliness: -3 },
+    effect: { hunger: 24, mood: 8, cleanliness: -3 },
     summary: t('pet.shop.items.strawberry_cake.summary'),
   },
   {
     id: 'ad_milk',
     name: t('pet.shop.items.ad_milk.name'),
     kind: 'food',
-    price: 28,
-    effect: { hunger: 16, mood: 8, health: 3 },
+    price: 32,
+    effect: { hunger: 20, mood: 5, health: 6 },
     summary: t('pet.shop.items.ad_milk.summary'),
   },
   {
@@ -90,7 +96,7 @@ export const shopItems: readonly ShopItem[] = [
     name: t('pet.shop.items.strawberry_milk.name'),
     kind: 'food',
     price: 28,
-    effect: { hunger: 16, mood: 8, health: 3 },
+    effect: { hunger: 16, mood: 5, health: 3 },
     summary: t('pet.shop.items.strawberry_milk.summary'),
   },
   {
@@ -226,6 +232,22 @@ const getDailyDiscountItem = (now: number) => {
 
   const dateKey = getLocalDateKey(now);
   return eligibleItems[hashString(dateKey) % eligibleItems.length];
+};
+
+export const getDailyHeartExchangeInfo = (pet: PetState, now = Date.now()) => {
+  const dateKey = getLocalDateKey(now);
+  const count =
+    pet.dailyHeartExchangeDate === dateKey
+      ? Math.min(dailyHeartExchangeLimit, Math.max(0, Math.floor(pet.dailyHeartExchangeCount)))
+      : 0;
+
+  return {
+    dateKey,
+    count,
+    limit: dailyHeartExchangeLimit,
+    coins: heartExchangeCoins,
+    canExchange: count < dailyHeartExchangeLimit,
+  };
 };
 
 export const getDailyShopDiscountInfo = (pet: PetState, now = Date.now()) => {

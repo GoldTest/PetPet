@@ -53,12 +53,12 @@ export type RecentActivity =
   | 'work_food'
   | 'work_plants';
 
-export type PomodoroPhase = 'focus' | 'short_break' | 'long_break';
+export type PomodoroPhase = 'focus' | 'short_break';
 
 export interface PomodoroDurations {
   focusMinutes: number;
   shortBreakMinutes: number;
-  longBreakMinutes: number;
+  targetRounds: number;
 }
 
 export type PomodoroActivity = Extract<RecentActivity, 'reading_books' | 'workout' | 'work_food' | 'work_plants'>;
@@ -76,6 +76,17 @@ export interface PomodoroState {
   currentActivity: PomodoroActivity;
   lastSettledPhaseId: string;
   pausedRemainingMs: number;
+  focusRewardCheckpointAt: number;
+  sessionFocusMs: number;
+  baseRewardCoinsPaid: number;
+  bonusRewardedHours: number;
+  moodRewardedBlocks: number;
+  hasTriggeredSessionResetEvent: boolean;
+}
+
+export interface PetBirthday {
+  month: number;
+  day: number;
 }
 
 export interface PetState {
@@ -101,6 +112,8 @@ export interface PetState {
   dailyBiscuitClaims: number;
   dailyDiscountDate: string;
   dailyDiscountUsed: boolean;
+  dailyHeartExchangeDate: string;
+  dailyHeartExchangeCount: number;
   weatherDate: string;
   weather: WeatherType;
   lastEnergyRecoveryAt: number;
@@ -115,6 +128,10 @@ export interface PetState {
   pomodoro: PomodoroState;
   hasOpenedHelp: boolean;
   claimedRewardIds: string[];
+  birthday?: PetBirthday;
+  lastBirthdayRewardYear?: number;
+  dailyLoginRewardDateKey?: string;
+  claimedFestivalRewardKeys: string[];
 }
 
 export type PetAction = 'play' | 'clean' | 'sleep' | 'work';

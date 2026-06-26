@@ -1,31 +1,37 @@
-﻿import { t } from '../i18n';
-import type { PomodoroActivity, PomodoroDurations, PomodoroPhase, PomodoroState } from './petTypes';
-import { clampCount } from './petStats';
+import { t } from '../i18n';
+import type { PetState, PomodoroActivity, PomodoroDurations, PomodoroPhase, PomodoroState } from './petTypes';
+import { clampCount, getPetStatCap } from './petStats';
 import { getLocalDateKey, isNumber, pickRandom, randomInt } from './utils';
 
 export const pomodoroPhaseLabels: Record<PomodoroPhase, string> = {
   focus: t('pet.pomodoro.phase.focus'),
   short_break: t('pet.pomodoro.phase.short_break'),
-  long_break: t('pet.pomodoro.phase.long_break'),
 };
 
 export const pomodoroMinHealthThreshold = 35;
+export const pomodoroRewardBlockMs = 5 * 60 * 1000;
+export const pomodoroMoodRewardBlockMs = 30 * 60 * 1000;
+export const pomodoroBonusRewardHourMs = 60 * 60 * 1000;
+export const pomodoroResetEventMinFocusMs = 60 * 60 * 1000;
 
 export const defaultPomodoroDurations: PomodoroDurations = {
   focusMinutes: 25,
   shortBreakMinutes: 5,
-  longBreakMinutes: 15,
+  targetRounds: 2,
 };
 
 export const pomodoroActivities: readonly PomodoroActivity[] = ['reading_books', 'workout', 'work_food', 'work_plants'];
 
 export const isPomodoroPhase = (value: unknown): value is PomodoroPhase =>
-  value === 'focus' || value === 'short_break' || value === 'long_break';
+  value === 'focus' || value === 'short_break';
+
+export const normalizePomodoroPhase = (value: unknown): PomodoroPhase =>
+  value === 'short_break' || value === 'long_break' ? 'short_break' : 'focus';
 
 export const isPomodoroActivity = (value: unknown): value is PomodoroActivity =>
   typeof value === 'string' && pomodoroActivities.includes(value as PomodoroActivity);
 
-export const clampPomodoroMinutes = (value: unknown, fallback: number, min: number, max: number) => {
+export const clampPomodoroInteger = (value: unknown, fallback: number, min: number, max: number) => {
   if (!isNumber(value)) return fallback;
   return Math.max(min, Math.min(max, Math.round(value)));
 };
@@ -34,24 +40,19 @@ export const normalizePomodoroSettings = (value: unknown): PomodoroDurations => 
   const raw = value && typeof value === 'object' ? (value as Record<string, unknown>) : {};
 
   return {
-    focusMinutes: clampPomodoroMinutes(raw.focusMinutes, defaultPomodoroDurations.focusMinutes, 1, 180),
-    shortBreakMinutes: clampPomodoroMinutes(raw.shortBreakMinutes, defaultPomodoroDurations.shortBreakMinutes, 1, 60),
-    longBreakMinutes: clampPomodoroMinutes(raw.longBreakMinutes, defaultPomodoroDurations.longBreakMinutes, 1, 120),
+    focusMinutes: clampPomodoroInteger(raw.focusMinutes, defaultPomodoroDurations.focusMinutes, 1, 180),
+    shortBreakMinutes: clampPomodoroInteger(raw.shortBreakMinutes, defaultPomodoroDurations.shortBreakMinutes, 1, 60),
+    targetRounds: clampPomodoroInteger(raw.targetRounds, defaultPomodoroDurations.targetRounds, 1, 8),
   };
 };
 
 export const getPomodoroPhaseDurationMs = (phase: PomodoroPhase, settings: PomodoroDurations) => {
-  const minutes =
-    phase === 'focus'
-      ? settings.focusMinutes
-      : phase === 'short_break'
-        ? settings.shortBreakMinutes
-        : settings.longBreakMinutes;
+  const minutes = phase === 'focus' ? settings.focusMinutes : settings.shortBreakMinutes;
   return minutes * 60 * 1000;
 };
 
 export const getPomodoroPhaseId = (pomodoro: PomodoroState) =>
-  `${pomodoro.phase}:${pomodoro.phaseStartedAt}:${pomodoro.phaseEndsAt}:${pomodoro.completedFocusCount}`;
+  [pomodoro.phase, pomodoro.phaseStartedAt, pomodoro.phaseEndsAt, pomodoro.completedFocusCount].join(':');
 
 export const getDefaultPomodoroRemainingMs = (phase: PomodoroPhase, settings: PomodoroDurations) =>
   getPomodoroPhaseDurationMs(phase, settings);
@@ -69,6 +70,12 @@ export const defaultPomodoroState = (now: number): PomodoroState => ({
   currentActivity: 'reading_books',
   lastSettledPhaseId: '',
   pausedRemainingMs: getPomodoroPhaseDurationMs('focus', defaultPomodoroDurations),
+  focusRewardCheckpointAt: 0,
+  sessionFocusMs: 0,
+  baseRewardCoinsPaid: 0,
+  bonusRewardedHours: 0,
+  moodRewardedBlocks: 0,
+  hasTriggeredSessionResetEvent: false,
 });
 
 export const normalizePomodoroState = (value: unknown, now: number): PomodoroState => {
@@ -77,7 +84,7 @@ export const normalizePomodoroState = (value: unknown, now: number): PomodoroSta
 
   const raw = value as Record<string, unknown>;
   const settings = normalizePomodoroSettings(raw.settings);
-  const phase = isPomodoroPhase(raw.phase) ? raw.phase : fallback.phase;
+  const phase = normalizePomodoroPhase(raw.phase);
   const isRunning = Boolean(raw.isRunning);
   const phaseStartedAt = isNumber(raw.phaseStartedAt) && raw.phaseStartedAt > 0 ? raw.phaseStartedAt : 0;
   const defaultRemainingMs = getDefaultPomodoroRemainingMs(phase, settings);
@@ -89,13 +96,14 @@ export const normalizePomodoroState = (value: unknown, now: number): PomodoroSta
         ? now + (rawPausedRemainingMs > 0 ? rawPausedRemainingMs : defaultRemainingMs)
         : 0;
   const dailyFocusDate = typeof raw.dailyFocusDate === 'string' ? raw.dailyFocusDate : getLocalDateKey(now);
+  const round = clampPomodoroInteger(raw.round, fallback.round, 1, settings.targetRounds);
 
   return {
     isRunning,
     phase,
     phaseStartedAt: isRunning && phaseStartedAt > 0 ? phaseStartedAt : 0,
     phaseEndsAt,
-    round: Math.max(1, clampCount(isNumber(raw.round) ? raw.round : fallback.round)),
+    round,
     completedFocusCount: clampCount(isNumber(raw.completedFocusCount) ? raw.completedFocusCount : 0),
     dailyFocusDate: getLocalDateKey(now),
     dailyCompletedFocusCount:
@@ -106,18 +114,30 @@ export const normalizePomodoroState = (value: unknown, now: number): PomodoroSta
     currentActivity: isPomodoroActivity(raw.currentActivity) ? raw.currentActivity : fallback.currentActivity,
     lastSettledPhaseId: typeof raw.lastSettledPhaseId === 'string' ? raw.lastSettledPhaseId : '',
     pausedRemainingMs: isRunning ? 0 : rawPausedRemainingMs > 0 ? rawPausedRemainingMs : defaultRemainingMs,
+    focusRewardCheckpointAt: isNumber(raw.focusRewardCheckpointAt) ? Math.max(0, Math.round(raw.focusRewardCheckpointAt)) : 0,
+    sessionFocusMs: isNumber(raw.sessionFocusMs) ? Math.max(0, Math.round(raw.sessionFocusMs)) : 0,
+    baseRewardCoinsPaid: clampCount(isNumber(raw.baseRewardCoinsPaid) ? raw.baseRewardCoinsPaid : 0),
+    bonusRewardedHours: clampCount(isNumber(raw.bonusRewardedHours) ? raw.bonusRewardedHours : 0),
+    moodRewardedBlocks: clampCount(isNumber(raw.moodRewardedBlocks) ? raw.moodRewardedBlocks : 0),
+    hasTriggeredSessionResetEvent: Boolean(raw.hasTriggeredSessionResetEvent),
   };
 };
 
 export const pickPomodoroActivity = () => pickRandom(pomodoroActivities);
 
-export const getPomodoroReward = (phase: PomodoroPhase, focusMinutes: number): { coins: number; mood: number } => {
-  if (phase !== 'focus') return { coins: 0, mood: 0 };
+export const getPomodoroHourlyBaseCoins = (level: number) => 20 + Math.max(0, Math.round(level) - 1);
 
-  const longFocusBonus = Math.min(8, Math.floor(Math.max(0, focusMinutes - 25) / 10));
-  return {
-    coins: randomInt(10, 18) + longFocusBonus,
-    mood: randomInt(1, 3),
-  };
+export const getPomodoroTargetBaseCoins = (sessionFocusMs: number, level: number) => {
+  const rewardableMs = Math.floor(Math.max(0, sessionFocusMs) / pomodoroRewardBlockMs) * pomodoroRewardBlockMs;
+  return Math.floor((rewardableMs / pomodoroBonusRewardHourMs) * getPomodoroHourlyBaseCoins(level));
 };
 
+export const getPomodoroMoodRewardBlocks = (sessionFocusMs: number) =>
+  Math.floor(Math.max(0, sessionFocusMs) / pomodoroMoodRewardBlockMs);
+
+export const getPomodoroBonusReward = (pet: PetState, hourlyBaseCoins = getPomodoroHourlyBaseCoins(pet.level)) => {
+  const statCap = getPetStatCap(pet);
+  const moodRatio = statCap > 0 ? Math.max(0, Math.min(1, pet.mood / statCap)) : 0;
+  const bonusChance = 0.05 + moodRatio * 0.4;
+  return Math.random() < bonusChance ? Math.max(1, Math.floor(hourlyBaseCoins * (randomInt(5, 15) / 100))) : 0;
+};

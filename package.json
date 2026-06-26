@@ -14,7 +14,8 @@
     "package:win:portable": "npm.cmd run tauri:build && powershell -NoProfile -ExecutionPolicy Bypass -File scripts/package-portable-win.ps1",
     "tauri:android:init": "tauri android init",
     "tauri:android:build": "tauri android build",
-    "package:android:arm64": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/package-android-arm64-debugsigned.ps1"
+    "package:android:arm64": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/package-android-arm64-debugsigned.ps1",
+    "package:desktop": "tauri build --ci --config scripts/tauri-bundle-config.json"
   },
   "dependencies": {
     "@vitejs/plugin-react": "^4.3.4",
@@ -31,5 +32,6 @@
     "@types/react": "^18.3.17",
     "@types/react-dom": "^18.3.5"
   },
-  "author": "FrostForge Studio"
+  "author": "FrostForge Studio",
+  "license": "GPL-3.0-or-later"
 }

@@ -23,3 +23,49 @@ src-tauri/gen/android/app/src/main/assets/tauri.conf.json
 src-tauri/gen/android/app/tauri.properties
 src-tauri/gen/android/app/tauri.build.gradle.kts
 src-tauri/gen/android/app/proguard-tauri.pro
+
+# Editors / local workspace
+.vscode/
+.idea/
+*.swp
+*.swo
+# Environment files
+.env
+.env.*
+!.env.example
+# OS metadata
+Desktop.ini
+# Package manager caches
+.npm/
+.yarn/
+.pnpm-store/
+# Test / coverage output
+coverage/
+playwright-report/
+test-results/
+# Tauri bundle output and installers
+src-tauri/target/**/bundle/
+src-tauri/target/**/wix/
+src-tauri/target/**/nsis/
+*.msi
+*.dmg
+*.AppImage
+*.deb
+*.rpm
+*.snap
+*.apk
+*.aab
+*.idsig
+# Signing keys / certificates
+*.keystore
+*.jks
+*.p12
+*.pfx
+*.cer
+*.mobileprovision
+# Android generated machine files
+src-tauri/gen/android/local.properties
+src-tauri/gen/android/**/captures/
+src-tauri/gen/android/**/*.apk
+src-tauri/gen/android/**/*.aab
+src-tauri/gen/android/**/*.idsig

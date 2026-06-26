@@ -2,8 +2,19 @@
 import { dailyBiscuitClaimLimit } from './items';
 import { applyTimedEvent, getRandomDailyEncounter, getRandomOfflineDiary, getRandomOfflineEvent, maybeApplyDreamTalk, settleSleep, startSleepSnapshot } from './petEvents';
 import { clampCoins, clampCount, clampPetHealth, clampPetStat, getEnergyRecoveryIntervalMs, getPetStatCap, lowEnergyThreshold } from './petStats';
-import type { PetState, PomodoroPhase } from './petTypes';
-import { getDefaultPomodoroRemainingMs, getPomodoroPhaseDurationMs, getPomodoroPhaseId, getPomodoroReward, pickPomodoroActivity, pomodoroMinHealthThreshold } from './pomodoro';
+import type { PetState } from './petTypes';
+import {
+  getDefaultPomodoroRemainingMs,
+  getPomodoroBonusReward,
+  getPomodoroHourlyBaseCoins,
+  getPomodoroMoodRewardBlocks,
+  getPomodoroPhaseDurationMs,
+  getPomodoroPhaseId,
+  getPomodoroTargetBaseCoins,
+  pickPomodoroActivity,
+  pomodoroBonusRewardHourMs,
+  pomodoroMinHealthThreshold,
+} from './pomodoro';
 import { normalizePet } from './petState';
 import { getWeatherForDate } from './weather';
 import { getLocalDateKey, isNightTime, isSameLocalDay } from './utils';
@@ -80,22 +91,66 @@ export const advancePomodoro = (pet: PetState, now = Date.now()): PetState => {
   let pomodoro = next.pomodoro;
   if (!pomodoro.isRunning) return next;
 
-
   let settledPhaseCount = 0;
   let settledFocusCount = 0;
   let settledShortBreakCount = 0;
-  let settledLongBreakCount = 0;
   let earnedCoins = 0;
   let earnedMood = 0;
+  let earnedBonusCoins = 0;
+  let rewardChanged = false;
+  let autoStopped = false;
   let activity = pomodoro.currentActivity;
   const today = getLocalDateKey(now);
   const maxSettlements = 1000;
 
+  const settleFocusRewardsUntil = (focusUntil: number) => {
+    if (!pomodoro.isRunning || pomodoro.phase !== 'focus' || pomodoro.phaseStartedAt <= 0) return;
+
+    const phaseEnd = pomodoro.phaseEndsAt > 0 ? Math.min(focusUntil, pomodoro.phaseEndsAt) : focusUntil;
+    const checkpoint = pomodoro.focusRewardCheckpointAt > 0 ? pomodoro.focusRewardCheckpointAt : pomodoro.phaseStartedAt;
+    const rewardStart = Math.max(pomodoro.phaseStartedAt, checkpoint);
+    const rewardEnd = Math.max(rewardStart, phaseEnd);
+    const addedFocusMs = Math.max(0, rewardEnd - rewardStart);
+    const sessionFocusMs = pomodoro.sessionFocusMs + addedFocusMs;
+    const targetBaseCoins = getPomodoroTargetBaseCoins(sessionFocusMs, next.level);
+    const baseCoins = Math.max(0, targetBaseCoins - pomodoro.baseRewardCoinsPaid);
+    const hourlyBaseCoins = getPomodoroHourlyBaseCoins(next.level);
+    const completedBonusHours = Math.floor(sessionFocusMs / pomodoroBonusRewardHourMs);
+    let bonusRewardedHours = pomodoro.bonusRewardedHours;
+    let bonusCoins = 0;
+
+    while (bonusRewardedHours < completedBonusHours) {
+      bonusRewardedHours += 1;
+      bonusCoins += getPomodoroBonusReward(next, hourlyBaseCoins);
+    }
+
+    const moodRewardedBlocks = getPomodoroMoodRewardBlocks(sessionFocusMs);
+    const mood = Math.max(0, moodRewardedBlocks - pomodoro.moodRewardedBlocks);
+
+    if (baseCoins > 0 || bonusCoins > 0 || mood > 0) {
+      rewardChanged = true;
+      earnedCoins += baseCoins + bonusCoins;
+      earnedBonusCoins += bonusCoins;
+      earnedMood += mood;
+    }
+
+    pomodoro = {
+      ...pomodoro,
+      focusRewardCheckpointAt: rewardEnd,
+      sessionFocusMs,
+      baseRewardCoinsPaid: targetBaseCoins,
+      bonusRewardedHours,
+      moodRewardedBlocks,
+    };
+  };
+
   while (pomodoro.isRunning && pomodoro.phaseEndsAt > 0 && pomodoro.phaseEndsAt <= now && settledPhaseCount < maxSettlements) {
+    if (pomodoro.phase === 'focus') {
+      settleFocusRewardsUntil(pomodoro.phaseEndsAt);
+    }
+
     const phaseId = getPomodoroPhaseId(pomodoro);
-    const shouldReward = pomodoro.lastSettledPhaseId !== phaseId;
-    const phaseMinutes = Math.max(1, Math.round((pomodoro.phaseEndsAt - pomodoro.phaseStartedAt) / 60000));
-    const reward = shouldReward ? getPomodoroReward(pomodoro.phase, phaseMinutes) : { coins: 0, mood: 0 };
+    const shouldSettlePhase = pomodoro.lastSettledPhaseId !== phaseId;
     const completedFocusCount = pomodoro.phase === 'focus' ? pomodoro.completedFocusCount + 1 : pomodoro.completedFocusCount;
     const dailyCompletedFocusCount =
       pomodoro.phase === 'focus'
@@ -103,20 +158,36 @@ export const advancePomodoro = (pet: PetState, now = Date.now()): PetState => {
         : pomodoro.dailyFocusDate === today
           ? pomodoro.dailyCompletedFocusCount
           : 0;
-    const nextPhase: PomodoroPhase =
-      pomodoro.phase === 'focus' ? (completedFocusCount % 4 === 0 ? 'long_break' : 'short_break') : 'focus';
-    const nextRound = pomodoro.phase === 'focus' ? pomodoro.round : pomodoro.round + 1;
     const nextStartedAt = pomodoro.phaseEndsAt;
 
-    if (shouldReward) {
+    if (shouldSettlePhase) {
       settledPhaseCount += 1;
-      earnedCoins += reward.coins;
-      earnedMood += reward.mood;
       settledFocusCount += pomodoro.phase === 'focus' ? 1 : 0;
       settledShortBreakCount += pomodoro.phase === 'short_break' ? 1 : 0;
-      settledLongBreakCount += pomodoro.phase === 'long_break' ? 1 : 0;
     }
 
+    if (pomodoro.phase === 'short_break' && pomodoro.round >= pomodoro.settings.targetRounds) {
+      autoStopped = true;
+      pomodoro = {
+        ...pomodoro,
+        isRunning: false,
+        phase: 'focus',
+        phaseStartedAt: 0,
+        phaseEndsAt: 0,
+        round: 1,
+        completedFocusCount,
+        dailyFocusDate: today,
+        dailyCompletedFocusCount,
+        currentActivity: 'reading_books',
+        lastSettledPhaseId: phaseId,
+        pausedRemainingMs: getDefaultPomodoroRemainingMs('focus', pomodoro.settings),
+        focusRewardCheckpointAt: 0,
+      };
+      break;
+    }
+
+    const nextPhase = pomodoro.phase === 'focus' ? 'short_break' : 'focus';
+    const nextRound = pomodoro.phase === 'focus' ? pomodoro.round : Math.min(pomodoro.settings.targetRounds, pomodoro.round + 1);
     activity = pickPomodoroActivity();
     pomodoro = {
       ...pomodoro,
@@ -130,7 +201,12 @@ export const advancePomodoro = (pet: PetState, now = Date.now()): PetState => {
       currentActivity: activity,
       lastSettledPhaseId: phaseId,
       pausedRemainingMs: 0,
+      focusRewardCheckpointAt: nextPhase === 'focus' ? nextStartedAt : 0,
     };
+  }
+
+  if (pomodoro.isRunning && pomodoro.phase === 'focus') {
+    settleFocusRewardsUntil(now);
   }
 
   next = {
@@ -138,8 +214,8 @@ export const advancePomodoro = (pet: PetState, now = Date.now()): PetState => {
     coins: clampCoins(next.coins + earnedCoins),
     mood: clampPetStat(next, next.mood + earnedMood),
     pomodoro,
-    recentActivity: activity,
-    recentActivityUntil: pomodoro.phaseEndsAt > now ? pomodoro.phaseEndsAt : now + 3000,
+    recentActivity: pomodoro.isRunning ? activity : 'idle',
+    recentActivityUntil: pomodoro.isRunning && pomodoro.phaseEndsAt > now ? pomodoro.phaseEndsAt : 0,
     lastInteractionAt: now,
   };
 
@@ -147,26 +223,33 @@ export const advancePomodoro = (pet: PetState, now = Date.now()): PetState => {
     const parts = [
       settledFocusCount > 0 ? t('pet.pomodoro.phaseCount.focus', { count: settledFocusCount }) : '',
       settledShortBreakCount > 0 ? t('pet.pomodoro.phaseCount.short_break', { count: settledShortBreakCount }) : '',
-      settledLongBreakCount > 0 ? t('pet.pomodoro.phaseCount.long_break', { count: settledLongBreakCount }) : '',
     ].filter(Boolean);
     const prefix = settledPhaseCount === 1 ? t('pet.pomodoro.completePrefix') : t('pet.pomodoro.offlineSettlePrefix');
+    const bonusText = earnedBonusCoins > 0 ? t('pet.pomodoro.bonusEvent', { coins: earnedBonusCoins }) : '';
+    const autoStopText = autoStopped ? t('pet.pomodoro.autoStopped', { rounds: pomodoro.settings.targetRounds }) : '';
     next = {
       ...next,
-      recentEvent: t('pet.pomodoro.settlementEvent', { prefix, parts: parts.join(t('common.comma')), mood: earnedMood, coins: earnedCoins }),
+      recentEvent: t('pet.pomodoro.settlementEvent', { prefix, parts: parts.join(t('common.comma')), mood: earnedMood, coins: earnedCoins }) + bonusText + autoStopText,
+    };
+  } else if (rewardChanged) {
+    const minutes = Math.floor(pomodoro.sessionFocusMs / 60000);
+    const bonusText = earnedBonusCoins > 0 ? t('pet.pomodoro.bonusEvent', { coins: earnedBonusCoins }) : '';
+    next = {
+      ...next,
+      recentEvent: t('pet.pomodoro.rewardTick', { minutes, mood: earnedMood, coins: earnedCoins }) + bonusText,
     };
   }
 
-  if (isPetLowEnergy(next)) {
+  if (next.pomodoro.isRunning && isPetLowEnergy(next)) {
     return pausePomodoroForReason(next, now, t('pet.pomodoro.pause.lowEnergy', { name: next.name }));
   }
 
-  if (next.health <= pomodoroMinHealthThreshold) {
+  if (next.pomodoro.isRunning && next.health <= pomodoroMinHealthThreshold) {
     return pausePomodoroForReason(next, now, t('pet.pomodoro.pause.lowHealth', { name: next.name }));
   }
 
   return next;
 };
-
 
 const applyDailyEncounter = (pet: PetState, now: number): PetState => {
   if (isSameLocalDay(pet.lastDailyEncounterAt, now)) return pet;

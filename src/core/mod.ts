@@ -1,5 +1,6 @@
 import JSZip from 'jszip';
-import type { ItemId, PetStatus, RecentActivity, ShopItem } from './pet';
+import { normalizePetBirthday } from './dateRewards';
+import type { ItemId, PetBirthday, PetStatus, RecentActivity, ShopItem } from './pet';
 
 export const modSchemaVersion = 1;
 
@@ -73,6 +74,7 @@ export interface PetModManifestV1 {
   defaultPetName: string;
   description?: string;
   favoriteFoodIds?: ItemId[];
+  birthday?: PetBirthday;
   texts?: PetModTexts;
 }
 
@@ -194,6 +196,12 @@ export const validatePetModManifest = (value: unknown): PetModManifestV1 => {
     }
   }
 
+  let birthday: PetBirthday | undefined;
+  if (value.birthday !== undefined) {
+    birthday = normalizePetBirthday(value.birthday);
+    if (!birthday) throw new Error('manifest.json birthday must use valid month and day numbers.');
+  }
+
   return {
     schemaVersion: 1,
     id,
@@ -203,6 +211,7 @@ export const validatePetModManifest = (value: unknown): PetModManifestV1 => {
     defaultPetName: ensureString(value.defaultPetName, 'defaultPetName', 16),
     description: asTrimmedString(value.description, 160),
     favoriteFoodIds: favoriteFoodIds && favoriteFoodIds.length > 0 ? Array.from(new Set(favoriteFoodIds)) : undefined,
+    birthday,
     texts: readTexts(value.texts),
   };
 };

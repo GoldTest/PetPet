@@ -523,20 +523,21 @@ h1 {
 
 .pomodoro-overlay {
   position: absolute;
-  top: 16px;
-  right: 16px;
+  left: 50%;
+  top: 50%;
   z-index: 5;
   display: grid;
-  width: min(260px, calc(100% - 32px));
+  width: min(74%, 300px);
   justify-items: center;
-  gap: 8px;
+  gap: clamp(5px, 1.5vw, 8px);
   pointer-events: auto;
+  transform: translate(-50%, -50%);
 }
 
 .pomodoro-orb {
   position: relative;
   display: grid;
-  width: 196px;
+  width: clamp(148px, min(46vw, 42dvh), 220px);
   aspect-ratio: 1;
   place-items: center;
   overflow: hidden;
@@ -549,7 +550,7 @@ h1 {
 
 .pomodoro-ring {
   position: absolute;
-  inset: 8px;
+  inset: clamp(6px, 2vw, 10px);
   border-radius: 50%;
   background: conic-gradient(#4f91df var(--pomodoro-progress), rgba(79, 145, 223, 0.12) 0);
   mask: radial-gradient(circle, transparent 59%, #000 60%);
@@ -562,8 +563,8 @@ h1 {
   display: grid;
   width: 100%;
   justify-items: center;
-  gap: 5px;
-  padding: 24px 18px;
+  gap: clamp(3px, 1vw, 5px);
+  padding: clamp(18px, 4vw, 26px) clamp(12px, 3vw, 18px);
   color: #172034;
   text-align: center;
 }
@@ -573,13 +574,13 @@ h1 {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  min-height: 22px;
+  min-height: clamp(19px, 4vw, 22px);
   max-width: 100%;
   padding: 0 8px;
   border-radius: 999px;
   color: #315c9b;
   background: rgba(227, 239, 255, 0.72);
-  font-size: 0.72rem;
+  font-size: clamp(0.62rem, 2.5vw, 0.72rem);
   font-weight: 900;
   line-height: 1;
 }
@@ -595,7 +596,7 @@ h1 {
 }
 
 .pomodoro-orb__content strong {
-  font-size: 2.15rem;
+  font-size: clamp(1.55rem, 7vw, 2.2rem);
   font-weight: 950;
   font-variant-numeric: tabular-nums;
   line-height: 0.96;
@@ -614,12 +615,12 @@ h1 {
   align-items: center;
   justify-content: center;
   gap: 5px;
-  min-height: 30px;
+  min-height: clamp(28px, 6vw, 30px);
   max-width: 100%;
-  padding: 0 10px;
+  padding: 0 clamp(8px, 2vw, 10px);
   border: 0;
   border-radius: 999px;
-  font-size: 0.76rem;
+  font-size: clamp(0.68rem, 2.4vw, 0.76rem);
   font-weight: 850;
 }
 
@@ -642,7 +643,7 @@ h1 {
 
 .pomodoro-meta {
   display: flex;
-  max-width: 150px;
+  max-width: min(170px, 92%);
   flex-wrap: wrap;
   justify-content: center;
   gap: 4px;
@@ -657,14 +658,14 @@ h1 {
   border-radius: 999px;
   color: #51617b;
   background: rgba(255, 255, 255, 0.38);
-  font-size: 0.68rem;
+  font-size: clamp(0.62rem, 2.2vw, 0.68rem);
   font-weight: 850;
   line-height: 1.1;
 }
 
 .pomodoro-settings {
   display: grid;
-  width: min(260px, 100%);
+  width: min(300px, 100%);
   grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 6px;
   padding: 7px;
@@ -681,13 +682,13 @@ h1 {
   justify-items: center;
   gap: 2px;
   color: #5d6d83;
-  font-size: 0.66rem;
+  font-size: clamp(0.6rem, 2.2vw, 0.66rem);
   font-weight: 850;
   line-height: 1.1;
 }
 
 .pomodoro-setting input {
-  width: 48px;
+  width: clamp(40px, 11vw, 48px);
   min-width: 0;
   height: 30px;
   padding: 0 4px;
@@ -708,7 +709,7 @@ h1 {
 
 .pomodoro-setting small {
   color: #7b8799;
-  font-size: 0.62rem;
+  font-size: clamp(0.56rem, 2vw, 0.62rem);
 }
 .inventory-panel {
   display: grid;
@@ -935,6 +936,63 @@ h1 {
   color: #4d3510;
   background: #ffe59b;
   font-weight: 900;
+}
+
+.shop-exchange {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 10px 12px;
+  border: 1px solid rgba(142, 45, 84, 0.14);
+  border-radius: 8px;
+  background: #fff1f7;
+}
+
+.shop-exchange__copy {
+  display: grid;
+  min-width: 0;
+  gap: 3px;
+}
+
+.shop-exchange__rate {
+  display: inline-flex;
+  min-width: 0;
+  align-items: center;
+  gap: 6px;
+  color: #8c2c55;
+  font-weight: 900;
+  line-height: 1.2;
+}
+
+.shop-exchange__rate svg {
+  flex: 0 0 auto;
+  fill: #f06b9b;
+  color: #c74373;
+}
+
+.shop-exchange small {
+  color: #7a5970;
+  font-size: 0.76rem;
+  font-weight: 800;
+  line-height: 1.2;
+}
+
+.shop-exchange button {
+  min-height: 38px;
+  flex: 0 0 auto;
+  padding: 0 12px;
+  border: 0;
+  border-radius: 8px;
+  color: #fff;
+  background: #c74373;
+  font-weight: 850;
+}
+
+.shop-exchange button:disabled {
+  cursor: not-allowed;
+  color: #8e7180;
+  background: #ead6df;
 }
 
 .shop-tabs {
@@ -1218,16 +1276,15 @@ h1 {
   }
 
   .pomodoro-overlay {
-    top: 10px;
-    right: auto;
     left: 50%;
-    width: calc(100% - 24px);
+    top: 50%;
+    width: min(82%, 260px);
     gap: 6px;
-    transform: translateX(-50%);
+    transform: translate(-50%, -50%);
   }
 
   .pomodoro-orb {
-    width: 166px;
+    width: clamp(142px, 42dvh, 170px);
   }
 
   .pomodoro-orb__content {
@@ -1583,7 +1640,7 @@ h1 {
 }
 
 .shop-modal {
-  grid-template-rows: auto auto auto minmax(0, 1fr);
+  grid-template-rows: auto auto auto auto minmax(0, 1fr);
   height: min(720px, calc(100dvh - 36px));
   overflow: hidden;
 }
@@ -1740,5 +1797,114 @@ h1 {
   .floating-reward-button img {
     width: 38px;
     height: 38px;
+  }
+}
+
+@media (max-width: 420px) {
+  .shop-exchange {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .shop-exchange button {
+    width: 100%;
+  }
+}
+
+
+.reward-modal {
+  width: min(100%, 380px);
+  display: grid;
+  justify-items: center;
+  gap: 14px;
+  padding: 20px;
+  border-radius: 8px;
+  background: #fff;
+  box-shadow: 0 24px 60px rgba(9, 17, 30, 0.28);
+  text-align: center;
+}
+
+.reward-modal__gift {
+  width: 76px;
+  height: 76px;
+  object-fit: contain;
+  image-rendering: pixelated;
+}
+
+.reward-modal__copy {
+  display: grid;
+  gap: 6px;
+}
+
+.reward-modal__copy span {
+  color: #8a4a06;
+  font-size: 0.78rem;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.reward-modal__copy h2 {
+  color: #172034;
+  font-size: 1.32rem;
+  line-height: 1.15;
+}
+
+.reward-modal__copy p {
+  color: #596880;
+  font-size: 0.94rem;
+  font-weight: 700;
+  line-height: 1.45;
+}
+
+.reward-modal__items {
+  display: grid;
+  width: 100%;
+  gap: 8px;
+}
+
+.reward-modal__item {
+  display: flex;
+  min-height: 46px;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 8px 10px;
+  border-radius: 8px;
+  color: #25334a;
+  background: #fff7d8;
+  font-weight: 900;
+}
+
+.reward-modal__item img {
+  width: 32px;
+  height: 32px;
+  object-fit: contain;
+  image-rendering: pixelated;
+}
+
+.reward-modal__item svg {
+  flex: 0 0 auto;
+  fill: #f06b9b;
+  color: #c74373;
+}
+
+.reward-modal > .primary-button {
+  width: 100%;
+}
+
+@media (max-width: 420px) {
+  .reward-modal {
+    width: calc(100% - 24px);
+    gap: 12px;
+    padding: 16px;
+  }
+
+  .reward-modal__gift {
+    width: 66px;
+    height: 66px;
+  }
+
+  .reward-modal__copy h2 {
+    font-size: 1.18rem;
   }
 }

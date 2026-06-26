@@ -1,0 +1,252 @@
+﻿import { t } from '../i18n';
+import { addInventoryItem } from './items';
+import { clampCoins, clampCount } from './petStats';
+import type { ItemId, PetBirthday, PetState } from './petTypes';
+import { getLocalDateKey, hashString } from './utils';
+
+export const defaultPetBirthday: PetBirthday = { month: 4, day: 23 };
+export const birthdayRewardCoins = 100;
+export const birthdayRewardHearts = 10;
+
+export type DateRewardKind = 'birthday' | 'festival' | 'daily_login';
+
+export interface DateRewardItem {
+  itemId: ItemId;
+  amount: number;
+}
+
+export interface ClaimedDateReward {
+  id: string;
+  kind: DateRewardKind;
+  title: string;
+  message: string;
+  coins?: number;
+  hearts?: number;
+  items: DateRewardItem[];
+}
+
+type WeightedEntry<T> = T & { weight: number };
+
+type FestivalRewardConfig =
+  | { type: 'pool'; items: readonly ItemId[] }
+  | { type: 'harvest_food' };
+
+export interface FestivalConfig {
+  id: string;
+  month: number;
+  day: number;
+  nameKey: string;
+  reward: FestivalRewardConfig;
+}
+
+const fruitItems: readonly ItemId[] = ['orange', 'apple', 'banana'];
+const giftItems: readonly ItemId[] = ['small_bouquet', 'shiny_sticker', 'ribbon_bell'];
+const goodFoodAndGiftItems: readonly ItemId[] = ['bento', 'nutri_meal', 'strawberry_cake', 'small_bouquet', 'ribbon_bell'];
+const cleaningItems: readonly ItemId[] = ['wet_wipes', 'shampoo'];
+const toyAndSweetItems: readonly ItemId[] = ['toy_ball', 'picture_book', 'strawberry_cake', 'strawberry_milk'];
+const christmasItems: readonly ItemId[] = ['soft_cloud_doll', 'ribbon_bell', 'strawberry_cake', 'blanket', 'small_bouquet'];
+const harvestFoodItems: readonly ItemId[] = ['orange', 'apple', 'banana', 'bento', 'nutri_meal', 'strawberry_cake'];
+
+// TODO: Allow future festival-exclusive ItemIds and Mod-provided festival reward pools.
+export const festivalConfigs: readonly FestivalConfig[] = [
+  { id: 'new_year', month: 1, day: 1, nameKey: 'pet.festivals.newYear', reward: { type: 'pool', items: goodFoodAndGiftItems } },
+  { id: 'valentine', month: 2, day: 14, nameKey: 'pet.festivals.valentine', reward: { type: 'pool', items: giftItems } },
+  { id: 'earth_day', month: 4, day: 22, nameKey: 'pet.festivals.earthDay', reward: { type: 'pool', items: [...fruitItems, ...cleaningItems] } },
+  { id: 'children_day', month: 6, day: 1, nameKey: 'pet.festivals.childrenDay', reward: { type: 'pool', items: toyAndSweetItems } },
+  { id: 'harvest_festival', month: 9, day: 23, nameKey: 'pet.festivals.harvestFestival', reward: { type: 'harvest_food' } },
+  { id: 'christmas', month: 12, day: 25, nameKey: 'pet.festivals.christmas', reward: { type: 'pool', items: christmasItems } },
+];
+
+const dailyLoginRewardPool: readonly WeightedEntry<{ coins: number } | { itemId: ItemId }>[] = [
+  { coins: 10, weight: 30 },
+  { itemId: 'orange', weight: 16 },
+  { itemId: 'apple', weight: 15 },
+  { itemId: 'banana', weight: 15 },
+  { itemId: 'emergency_biscuit', weight: 8 },
+  { coins: 20, weight: 7 },
+  { itemId: 'bento', weight: 5 },
+  { itemId: 'strawberry_milk', weight: 5 },
+  { itemId: 'wet_wipes', weight: 4 },
+  { itemId: 'toy_ball', weight: 3 },
+  { coins: 50, weight: 2 },
+  { itemId: 'nutri_meal', weight: 2 },
+  { itemId: 'strawberry_cake', weight: 2 },
+  { itemId: 'small_bouquet', weight: 2 },
+  { itemId: 'ribbon_bell', weight: 2 },
+  { itemId: 'vitamin_tablet', weight: 1 },
+  { itemId: 'medicine', weight: 1 },
+  { itemId: 'soft_cloud_doll', weight: 1 },
+];
+
+const getLocalYear = (time: number) => new Date(time).getFullYear();
+
+const getMonthDay = (time: number) => {
+  const date = new Date(time);
+  return { month: date.getMonth() + 1, day: date.getDate() };
+};
+
+const isSameMonthDay = (time: number, birthday: PetBirthday) => {
+  const current = getMonthDay(time);
+  return current.month === birthday.month && current.day === birthday.day;
+};
+
+const getAnnualRewardKey = (id: string, time: number) => `${id}:${getLocalYear(time)}`;
+
+export const getSixAmResetDateKey = (time: number) => {
+  const date = new Date(time);
+  if (date.getHours() < 6) date.setDate(date.getDate() - 1);
+  return getLocalDateKey(date.getTime());
+};
+
+export const normalizePetBirthday = (value: unknown): PetBirthday | undefined => {
+  if (!value || typeof value !== 'object' || Array.isArray(value)) return undefined;
+  const raw = value as Record<string, unknown>;
+  const month = typeof raw.month === 'number' && Number.isInteger(raw.month) ? raw.month : 0;
+  const day = typeof raw.day === 'number' && Number.isInteger(raw.day) ? raw.day : 0;
+  const maxDay = month >= 1 && month <= 12 ? new Date(2024, month, 0).getDate() : 0;
+  return month >= 1 && month <= 12 && day >= 1 && day <= maxDay ? { month, day } : undefined;
+};
+
+export const withBackfilledBirthday = (pet: PetState, birthday?: PetBirthday): PetState => {
+  if (pet.birthday || !birthday) return pet;
+  return { ...pet, birthday };
+};
+
+export const withPetIdentityBirthday = (pet: PetState, birthday?: PetBirthday): PetState => {
+  if (birthday) {
+    if (pet.birthday?.month === birthday.month && pet.birthday.day === birthday.day) return pet;
+    return { ...pet, birthday, lastBirthdayRewardYear: undefined };
+  }
+
+  if (!pet.birthday && pet.lastBirthdayRewardYear === undefined) return pet;
+  const { birthday: _birthday, lastBirthdayRewardYear: _lastBirthdayRewardYear, ...rest } = pet;
+  return rest;
+};
+
+const pickWeightedRandom = <T,>(items: readonly WeightedEntry<T>[]): T => {
+  const totalWeight = items.reduce((sum, item) => sum + Math.max(0, item.weight), 0);
+  let target = Math.floor(Math.random() * Math.max(1, totalWeight));
+
+  for (const item of items) {
+    target -= Math.max(0, item.weight);
+    if (target < 0) return item;
+  }
+
+  return items[items.length - 1];
+};
+
+const pickSeededItem = (items: readonly ItemId[], seed: string) => items[hashString(seed) % items.length];
+
+const addRewardItems = (inventory: PetState['inventory'], items: readonly DateRewardItem[]) =>
+  items.reduce((next, item) => addInventoryItem(next, item.itemId, item.amount), inventory);
+
+const applyReward = (pet: PetState, reward: ClaimedDateReward): PetState => ({
+  ...pet,
+  coins: clampCoins(pet.coins + (reward.coins ?? 0)),
+  hearts: clampCount(pet.hearts + (reward.hearts ?? 0)),
+  inventory: addRewardItems(pet.inventory, reward.items),
+  recentEvent: reward.message,
+});
+
+const getFestivalForDate = (now: number) => {
+  const current = getMonthDay(now);
+  return festivalConfigs.find((festival) => festival.month === current.month && festival.day === current.day);
+};
+
+const getFestivalItems = (festival: FestivalConfig, annualKey: string): DateRewardItem[] => {
+  if (festival.reward.type === 'harvest_food') {
+    return [
+      { itemId: pickSeededItem(harvestFoodItems, `${annualKey}:0`), amount: 1 },
+      { itemId: pickSeededItem(harvestFoodItems, `${annualKey}:1`), amount: 1 },
+    ];
+  }
+
+  return [{ itemId: pickSeededItem(festival.reward.items, annualKey), amount: 1 }];
+};
+
+const claimBirthdayReward = (pet: PetState, now: number): { pet: PetState; reward?: ClaimedDateReward } => {
+  if (!pet.birthday || !isSameMonthDay(now, pet.birthday)) return { pet };
+
+  const year = getLocalYear(now);
+  if (pet.lastBirthdayRewardYear === year) return { pet };
+
+  const reward: ClaimedDateReward = {
+    id: `birthday:${year}`,
+    kind: 'birthday',
+    title: t('ui.rewards.birthdayTitle', { name: pet.name }),
+    message: t('pet.reward.birthday', { name: pet.name, coins: birthdayRewardCoins, hearts: birthdayRewardHearts }),
+    coins: birthdayRewardCoins,
+    hearts: birthdayRewardHearts,
+    items: [],
+  };
+
+  return {
+    pet: { ...applyReward(pet, reward), lastBirthdayRewardYear: year },
+    reward,
+  };
+};
+
+const claimFestivalReward = (pet: PetState, now: number): { pet: PetState; reward?: ClaimedDateReward } => {
+  const festival = getFestivalForDate(now);
+  if (!festival) return { pet };
+
+  const annualKey = getAnnualRewardKey(festival.id, now);
+  if (pet.claimedFestivalRewardKeys.includes(annualKey)) return { pet };
+
+  const festivalName = t(festival.nameKey);
+  const items = getFestivalItems(festival, annualKey);
+  const reward: ClaimedDateReward = {
+    id: `festival:${annualKey}`,
+    kind: 'festival',
+    title: t('ui.rewards.festivalTitle', { festival: festivalName }),
+    message: t('pet.reward.festival', { festival: festivalName }),
+    items,
+  };
+
+  return {
+    pet: {
+      ...applyReward(pet, reward),
+      claimedFestivalRewardKeys: [...pet.claimedFestivalRewardKeys, annualKey],
+    },
+    reward,
+  };
+};
+
+const claimDailyLoginReward = (pet: PetState, now: number): { pet: PetState; reward?: ClaimedDateReward } => {
+  const resetDateKey = getSixAmResetDateKey(now);
+  if (pet.dailyLoginRewardDateKey === resetDateKey) return { pet };
+
+  const picked = pickWeightedRandom(dailyLoginRewardPool);
+  const coins = 'coins' in picked ? picked.coins : undefined;
+  const items: DateRewardItem[] = 'itemId' in picked ? [{ itemId: picked.itemId, amount: 1 }] : [];
+  const reward: ClaimedDateReward = {
+    id: `daily_login:${resetDateKey}`,
+    kind: 'daily_login',
+    title: t('ui.rewards.dailyTitle'),
+    message: coins
+      ? t('pet.reward.dailyCoins', { coins })
+      : t('pet.reward.dailyItem'),
+    coins,
+    items,
+  };
+
+  return {
+    pet: { ...applyReward(pet, reward), dailyLoginRewardDateKey: resetDateKey },
+    reward,
+  };
+};
+
+export const claimAvailableDateRewards = (pet: PetState, now = Date.now()) => {
+  const rewards: ClaimedDateReward[] = [];
+  let next = pet;
+
+  for (const claim of [claimBirthdayReward, claimFestivalReward, claimDailyLoginReward]) {
+    const result = claim(next, now);
+    next = result.pet;
+    if (result.reward) rewards.push(result.reward);
+  }
+
+  if (rewards.length > 0) next = { ...next, recentEvent: rewards[0].message };
+
+  return { pet: next, rewards };
+};

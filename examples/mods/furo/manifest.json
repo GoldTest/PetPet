@@ -37,5 +37,9 @@
         "summary": "Furo 喜欢，饱腹 +16，健康 +3"
       }
     }
+  },
+  "birthday": {
+    "month": 4,
+    "day": 23
   }
 }

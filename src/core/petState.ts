@@ -1,5 +1,6 @@
 ﻿import { t } from '../i18n';
-import { dailyBiscuitClaimLimit, allItemIds } from './items';
+import { defaultPetBirthday, normalizePetBirthday } from './dateRewards';
+import { allItemIds, dailyBiscuitClaimLimit, dailyHeartExchangeLimit } from './items';
 import { clampCoins, clampCount, clampHealth, clampLevel, clampStat, defaultPetName, getPetStatCap } from './petStats';
 import type { ActionStreak, Inventory, ItemId, PetState, PetStatus, RecentActivity, WeatherType } from './petTypes';
 import { defaultPomodoroState, normalizePomodoroState } from './pomodoro';
@@ -57,6 +58,8 @@ export const createDefaultPet = (now = Date.now()): PetState => ({
   dailyBiscuitClaims: 0,
   dailyDiscountDate: getLocalDateKey(now),
   dailyDiscountUsed: false,
+  dailyHeartExchangeDate: getLocalDateKey(now),
+  dailyHeartExchangeCount: 0,
   weatherDate: getLocalDateKey(now),
   weather: getWeatherForDate(now),
   lastEnergyRecoveryAt: now,
@@ -71,6 +74,8 @@ export const createDefaultPet = (now = Date.now()): PetState => ({
   pomodoro: defaultPomodoroState(now),
   hasOpenedHelp: false,
   claimedRewardIds: [],
+  birthday: defaultPetBirthday,
+  claimedFestivalRewardKeys: [],
 });
 
 export const getPrimaryStatus = (pet: PetState): PetStatus => {
@@ -106,6 +111,8 @@ export const normalizePet = (value: unknown, now = Date.now()): PetState => {
   const inventory: Inventory = {};
   const dailyDiscountDate =
     typeof raw.dailyDiscountDate === 'string' ? raw.dailyDiscountDate : fallback.dailyDiscountDate;
+  const dailyHeartExchangeDate =
+    typeof raw.dailyHeartExchangeDate === 'string' ? raw.dailyHeartExchangeDate : fallback.dailyHeartExchangeDate;
   const weatherDate = typeof raw.weatherDate === 'string' ? raw.weatherDate : fallback.weatherDate;
   const weather =
     weatherDate === getLocalDateKey(now) && typeof raw.weather === 'string' && weatherTypeSet.has(raw.weather as WeatherType)
@@ -119,6 +126,10 @@ export const normalizePet = (value: unknown, now = Date.now()): PetState => {
   if (raw.hasClaimedHelpGift === true && !claimedRewardIds.includes(helpStarterGiftRewardId)) {
     claimedRewardIds.push(helpStarterGiftRewardId);
   }
+  const claimedFestivalRewardKeys = Array.isArray(raw.claimedFestivalRewardKeys)
+    ? Array.from(new Set(raw.claimedFestivalRewardKeys.filter((id): id is string => typeof id === 'string' && id.trim().length > 0).map((id) => id.trim().slice(0, 96))))
+    : [];
+  const birthday = normalizePetBirthday(raw.birthday);
   const actionStreakKey =
     typeof rawActionStreak.key === 'string' &&
     ['play', 'clean', 'work', 'feed', 'gift', 'touch', 'none'].includes(rawActionStreak.key)
@@ -165,6 +176,11 @@ export const normalizePet = (value: unknown, now = Date.now()): PetState => {
     ),
     dailyDiscountDate,
     dailyDiscountUsed: dailyDiscountDate === getLocalDateKey(now) ? Boolean(raw.dailyDiscountUsed) : false,
+    dailyHeartExchangeDate,
+    dailyHeartExchangeCount:
+      dailyHeartExchangeDate === getLocalDateKey(now)
+        ? Math.min(dailyHeartExchangeLimit, clampCount(isNumber(raw.dailyHeartExchangeCount) ? raw.dailyHeartExchangeCount : 0))
+        : 0,
     weatherDate: getLocalDateKey(now),
     weather,
     lastEnergyRecoveryAt: isNumber(raw.lastEnergyRecoveryAt) ? raw.lastEnergyRecoveryAt : now,
@@ -188,6 +204,10 @@ export const normalizePet = (value: unknown, now = Date.now()): PetState => {
     pomodoro: normalizePomodoroState(raw.pomodoro, now),
     hasOpenedHelp: Boolean(raw.hasOpenedHelp),
     claimedRewardIds,
+    birthday,
+    lastBirthdayRewardYear: isNumber(raw.lastBirthdayRewardYear) ? Math.floor(raw.lastBirthdayRewardYear) : undefined,
+    dailyLoginRewardDateKey: typeof raw.dailyLoginRewardDateKey === 'string' ? raw.dailyLoginRewardDateKey.trim().slice(0, 16) : undefined,
+    claimedFestivalRewardKeys,
   };
 };
 

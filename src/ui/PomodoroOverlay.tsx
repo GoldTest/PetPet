@@ -13,23 +13,23 @@ const pomodoroText = {
   roundPrefix: t('ui.pomodoro.roundPrefix'),
   roundSuffix: t('ui.pomodoro.roundSuffix'),
   today: t('ui.pomodoro.today'),
-  total: t('ui.pomodoro.total'),
+  rounds: t('ui.pomodoro.rounds'),
   start: t('ui.pomodoro.start'),
   pause: t('ui.pomodoro.pause'),
   reset: t('ui.pomodoro.reset'),
   resetTitle: t('ui.pomodoro.resetTitle'),
   settings: t('ui.pomodoro.settings'),
   minutes: t('ui.pomodoro.minutes'),
+  roundUnit: t('ui.pomodoro.roundUnit'),
   focus: t('ui.pomodoro.focus'),
   shortBreak: t('ui.pomodoro.shortBreak'),
-  longBreak: t('ui.pomodoro.longBreak'),
   statsAria: t('ui.pomodoro.statsAria'),
 };
 
-const pomodoroSettingFields: readonly { key: PomodoroSettingKey; label: string; min: number; max: number }[] = [
-  { key: 'focusMinutes', label: pomodoroText.focus, min: 1, max: 180 },
-  { key: 'shortBreakMinutes', label: pomodoroText.shortBreak, min: 1, max: 60 },
-  { key: 'longBreakMinutes', label: pomodoroText.longBreak, min: 1, max: 120 },
+const pomodoroSettingFields: readonly { key: PomodoroSettingKey; label: string; min: number; max: number; unit: string }[] = [
+  { key: 'focusMinutes', label: pomodoroText.focus, min: 1, max: 180, unit: pomodoroText.minutes },
+  { key: 'shortBreakMinutes', label: pomodoroText.shortBreak, min: 1, max: 60, unit: pomodoroText.minutes },
+  { key: 'targetRounds', label: pomodoroText.rounds, min: 1, max: 8, unit: pomodoroText.roundUnit },
 ];
 
 interface PomodoroOverlayProps {
@@ -75,9 +75,8 @@ export const PomodoroOverlay = ({
           </button>
         </div>
         <div className="pomodoro-meta" aria-label={pomodoroText.statsAria}>
-          <span>{pomodoroText.roundPrefix} {pet.pomodoro.round} {pomodoroText.roundSuffix}</span>
+          <span>{pomodoroText.roundPrefix} {pet.pomodoro.round} / {pet.pomodoro.settings.targetRounds} {pomodoroText.roundSuffix}</span>
           <span>{pomodoroText.today} {pet.pomodoro.dailyCompletedFocusCount}</span>
-          <span>{pomodoroText.total} {pet.pomodoro.completedFocusCount}</span>
         </div>
       </div>
     </div>
@@ -94,7 +93,7 @@ export const PomodoroOverlay = ({
             value={pet.pomodoro.settings[field.key]}
             onChange={(event) => onSettingChange(field.key, Number(event.currentTarget.value))}
           />
-          <small>{pomodoroText.minutes}</small>
+          <small>{field.unit}</small>
         </label>
       ))}
     </div>

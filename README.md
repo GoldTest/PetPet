@@ -1,0 +1,134 @@
+# PocPet
+
+PocPet 是一个桌面与移动端虚拟宠物应用，围绕陪伴、番茄钟、道具、宠物状态和可替换宠物 Mod 展开。项目基于 Tauri、React、TypeScript 与 Rust 构建，目标是提供轻量、可定制、可跨平台分发的个人桌宠体验。
+
+当前项目仍处在早期阶段，接口、存档格式和 Mod 规范会继续演进。欢迎提交问题、建议和改造。
+
+## 功能概览
+
+- 虚拟宠物状态：饥饿、清洁、心情、精力、健康等基础状态。
+- 道具与商店：固定核心道具 ID，支持食物、礼物、护理和功能道具。
+- 番茄钟：工作与休息流程会影响宠物活动反馈。
+- Mod：通过 zip 导入替换宠物图片、道具图片、默认名称、展示文本和喜欢食物。
+- 存档导入导出：以带版本号的文本格式备份和恢复当前数据。
+- 多语言基础：当前包含中文与英文文案。
+
+## 技术栈
+
+- Tauri 2
+- React 18
+- TypeScript
+- Vite
+- Rust
+- Android Gradle 项目由 Tauri 生成并纳入仓库
+
+## 本地开发
+
+环境要求：
+
+- Node.js 18 或更新版本
+- npm
+- Rust stable
+- Tauri 2 所需系统依赖
+- Android 构建需要 Android SDK、NDK 与 Java/Gradle 环境
+
+安装依赖：
+
+```bash
+npm install
+```
+
+启动前端开发服务器：
+
+```bash
+npm run dev
+```
+
+启动 Tauri 开发模式：
+
+```bash
+npm run tauri:dev
+```
+
+前端构建检查：
+
+```bash
+npm run build
+```
+
+## 打包
+
+Windows 便携 exe：
+
+```powershell
+npm.cmd run package:win:portable
+```
+
+Android arm64 APK：
+
+```powershell
+npm.cmd run tauri:android:build
+npm.cmd run package:android:arm64
+```
+
+说明：在部分 Windows 环境中，`tauri android build` 可能因为系统未开启符号链接权限而停在 symlink 步骤；只要 arm64 Rust 库已经编译完成，可以继续运行 `package:android:arm64`，项目脚本会复制 `.so` 并完成 APK 打包和 debug 签名。
+
+macOS 与 Linux 需要在对应系统上构建：
+
+```bash
+npm run package:desktop
+```
+
+macOS 目标产物以 `.dmg` / `.app` 为主。Linux 目标产物以 `.AppImage` / `.deb` 为主，优先面向 Ubuntu 兼容环境；国产 Linux 发行版通常可优先测试 AppImage，Debian/Ubuntu 系发行版可测试 deb 包。
+
+## Gitee 自动构建与发行版
+
+仓库包含 `.gitee/workflows/release.yml` 作为自动构建模板。设计目标是每次推送或打 tag 时构建：
+
+- Windows：`PocPet-<version>.exe`
+- Android：`PocPet-<version>.apk`
+- macOS：dmg/app
+- Linux：AppImage/deb，优先 Ubuntu 兼容，也便于国产 Linux 发行版测试
+
+要启用自动发布到 Gitee Release，需要在 Gitee 仓库的流水线/Actions 密钥中配置：
+
+- `GITEE_TOKEN`：拥有创建 Release 和上传附件权限的私人令牌
+- `GITEE_OWNER`：仓库所属用户名或组织名，例如 `ferrisM`
+- `GITEE_REPO`：仓库名，例如 `poc-pet`
+
+macOS 构建需要 macOS runner。Gitee 如果没有提供对应托管 runner，需要使用自托管 runner。Linux 构建建议使用 Ubuntu 22.04 或更新版本。Android 构建需要 runner 预装 Android SDK/NDK，或在流水线中补齐安装步骤。
+
+Gitee 的流水线能力、runner 标签和 Release API 可能因账号/企业版配置不同而不同；如果平台语法或 runner 标签与当前模板不一致，请按 Gitee 当前流水线界面生成的 YAML 调整 `.gitee/workflows/release.yml`。
+
+## Mod 制作
+
+示例 Mod 位于：
+
+- `examples/mods/furo/`
+- `examples/mods/furo.zip`
+
+制作指南：
+
+- `docs/mod制作指南.md`
+- `docs/mod-guide.md`
+
+v1 Mod 只开放宠物图片、道具图片、默认姓名、展示文本和喜欢食物，不开放道具 ID、价格、效果或核心玩法数值。
+
+## 存档兼容
+
+项目保留内部旧存档 `pocpet.pet.v1` 兼容。外部导入导出使用带版本号的文本格式，并在导入时重置时间基线，避免旧备份恢复后立即触发离线衰减或番茄钟自动结算。
+
+## 许可
+
+本项目采用 GNU General Public License v3.0 or later（GPL-3.0-or-later）授权，详见 `LICENSE.md`。
+
+你可以按照 GPLv3 的条款使用、复制、修改和分发本项目。分发修改版或衍生作品时，需要同样以 GPLv3 兼容方式开放相应源代码，并保留版权与许可证声明。
+## 贡献
+
+提交贡献前请确认：
+
+- 你的贡献可在 GPLv3 许可下发布。
+- 不提交未授权素材、字体、音频或第三方资源。
+- 不破坏旧存档兼容和当前 Mod v1 格式。
+- 涉及用户数据、存档和 Mod 解析的改动需要考虑向后兼容。
+

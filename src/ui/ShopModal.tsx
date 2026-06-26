@@ -1,6 +1,8 @@
+import { Heart } from 'lucide-react';
 import type { ItemDisplay } from '../core/mod';
 import {
   getDailyBiscuitClaimInfo,
+  getDailyHeartExchangeInfo,
   getDailyShopDiscountInfo,
   shopCategories,
   type ItemId,
@@ -18,6 +20,8 @@ interface ShopModalProps {
   onClose: () => void;
   onSelectCategory: (category: ShopCategory) => void;
   onBuyItem: (itemId: ItemId) => void;
+  onExchangeHeart: () => void;
+  isHeartExchangeCoolingDown: boolean;
 }
 
 export const ShopModal = ({
@@ -28,8 +32,12 @@ export const ShopModal = ({
   onClose,
   onSelectCategory,
   onBuyItem,
+  onExchangeHeart,
+  isHeartExchangeCoolingDown,
 }: ShopModalProps) => {
   const discountInfo = getDailyShopDiscountInfo(pet);
+  const heartExchangeInfo = getDailyHeartExchangeInfo(pet);
+  const canExchangeHeart = pet.hearts > 0 && heartExchangeInfo.canExchange && !isHeartExchangeCoolingDown;
 
   return (
     <div className="modal-backdrop" role="presentation">
@@ -45,6 +53,19 @@ export const ShopModal = ({
         <div className="shop-wallet">
           <img src={currencyIcon} alt="" aria-hidden="true" />
           <span>{t('ui.shop.wallet', { coins: pet.coins })}</span>
+        </div>
+
+        <div className="shop-exchange" aria-label={t('ui.shop.exchange.aria')}>
+          <div className="shop-exchange__copy">
+            <span className="shop-exchange__rate">
+              <Heart size={16} aria-hidden="true" />
+              {t('ui.shop.exchange.rate', { coins: heartExchangeInfo.coins })}
+            </span>
+            <small>{t('ui.shop.exchange.progress', { count: heartExchangeInfo.count, limit: heartExchangeInfo.limit })}</small>
+          </div>
+          <button type="button" disabled={!canExchangeHeart} onClick={onExchangeHeart}>
+            {t('ui.shop.exchange.button', { coins: heartExchangeInfo.coins })}
+          </button>
         </div>
 
         <div className="shop-tabs" role="tablist" aria-label={t('ui.shop.tabsAria')}>

@@ -54,7 +54,13 @@
       "price": "{price} 金币",
       "discountToday": "今日特价",
       "discountUsed": "特价已用",
-      "priceNote": "原价 {originalPrice} 金币，今日 {label}"
+      "priceNote": "原价 {originalPrice} 金币，今日 {label}",
+      "exchange": {
+        "aria": "小心心兑换",
+        "rate": "1 小心心 = {coins} 金币",
+        "progress": "今日已兑换 {count}/{limit}",
+        "button": "兑换 +{coins} 金币"
+      }
     },
     "settings": {
       "title": "设置",
@@ -140,20 +146,20 @@
       "roundPrefix": "第",
       "roundSuffix": "轮",
       "today": "今日专注",
-      "total": "本次累计",
       "start": "开始",
       "pause": "暂停",
       "reset": "重置",
       "resetTitle": "重置番茄钟",
-      "settings": "时长设置",
+      "settings": "番茄钟设置",
       "minutes": "分钟",
       "focus": "专注",
       "shortBreak": "短休",
-      "longBreak": "长休",
       "sleepingTitle": "睡觉时也可以运行番茄钟",
       "lowEnergyTitle": "体力太低，先休息一下",
       "lowHealthTitle": "健康太低，先照顾一下",
-      "statsAria": "番茄钟统计"
+      "statsAria": "番茄钟统计",
+      "rounds": "轮次",
+      "roundUnit": "轮"
     },
     "petDisplay": {
       "activityAlt": "{name} 的动作",
@@ -189,7 +195,15 @@
       "weatherAria": "今日天气：{weather}"
     },
     "rewards": {
-      "claim": "领取奖励"
+      "claim": "领取奖励",
+      "kicker": "收到礼物",
+      "birthdayTitle": "{name} 生日快乐",
+      "festivalTitle": "{festival} 礼物",
+      "dailyTitle": "每日登录礼物",
+      "coins": "+{coins} 金币",
+      "hearts": "+{hearts} 小心心",
+      "item": "{item} x{count}",
+      "confirm": "收下礼物"
     }
   },
   "pet": {
@@ -201,11 +215,11 @@
         },
         "bento": {
           "name": "家常便当",
-          "summary": "饱腹 +34，心情 +5"
+          "summary": "饱腹 +34，心情 +4"
         },
         "orange": {
           "name": "橘子",
-          "summary": "轻食水果，饱腹 +18，心情 +2，健康 +1"
+          "summary": "轻食水果，饱腹 +18，心情 +1，健康 +1"
         },
         "apple": {
           "name": "苹果",
@@ -213,27 +227,27 @@
         },
         "banana": {
           "name": "香蕉",
-          "summary": "耐饿水果，饱腹 +24，心情 +2，体力 +2"
+          "summary": "耐饿水果，饱腹 +24，心情 +1，体力 +2"
         },
         "nutri_meal": {
           "name": "营养餐",
-          "summary": "饱腹 +30，心情 +3，健康 +15"
+          "summary": "饱腹 +30，心情 +2，健康 +15"
         },
         "pig_trotter": {
           "name": "猪蹄",
-          "summary": "Furo 喜欢，饱腹 +44，心情 +9，健康 +5"
+          "summary": "Furo 喜欢，饱腹 +44，心情 +6，清洁 -5，健康 +5"
         },
         "strawberry_cake": {
           "name": "草莓蛋糕",
-          "summary": "Furo 喜欢，饱腹 +24，心情 +14"
+          "summary": "Furo 喜欢，饱腹 +24，心情 +8，清洁 -3"
         },
         "ad_milk": {
           "name": "AD 钙奶",
-          "summary": "Furo 喜欢，饱腹 +16，健康 +3"
+          "summary": "Furo 喜欢，饱腹 +20，心情 +5，健康 +6"
         },
         "strawberry_milk": {
           "name": "草莓牛奶",
-          "summary": "甜味牛奶饮品，饱腹 +16，心情 +8，健康 +3"
+          "summary": "甜味牛奶饮品，饱腹 +16，心情 +5，健康 +3"
         },
         "small_bouquet": {
           "name": "小花束",
@@ -320,13 +334,11 @@
     "pomodoro": {
       "phase": {
         "focus": "专注",
-        "short_break": "短休",
-        "long_break": "长休"
+        "short_break": "短休"
       },
       "phaseCount": {
         "focus": "专注 {count} 个",
-        "short_break": "短休 {count} 个",
-        "long_break": "长休 {count} 个"
+        "short_break": "短休 {count} 个"
       },
       "completePrefix": "番茄钟阶段完成：",
       "offlineSettlePrefix": "番茄钟离线结算：",
@@ -345,7 +357,11 @@
         "sleepActionPrepare": "{name} 准备休息，番茄钟继续计时。",
         "sleepActionStarted": "{name} 开始休息，番茄钟继续计时。"
       },
-      "reset": "{name} 的番茄钟已重置。"
+      "reset": "{name} 的番茄钟已重置。",
+      "autoStopped": " 已完成 {rounds} 轮，番茄钟已停止。",
+      "rewardTick": "番茄钟收益：专注 {minutes} 分钟，金币 +{coins}，心情 +{mood}。",
+      "bonusEvent": " 小时奖励触发，金币 +{coins}。",
+      "resetSessionEvent": " {name} 休整了一下，金币 +{coins}，心情 +{mood}。"
     },
     "status": {
       "content": "状态不错",
@@ -511,7 +527,24 @@
       "puddleRun": "{name} 梦见踩着水洼跑步，体力 +4，清洁 -1。"
     },
     "reward": {
-      "helpStarterGift": "已领取启程赠礼，金币 +{coins}。"
+      "helpStarterGift": "已领取启程赠礼，金币 +{coins}。",
+      "birthday": "今天是 {name} 的生日，生日奖励：金币 +{coins}，小心心 +{hearts}。",
+      "festival": "{festival} 礼物送到，背包里多了一份节日道具。",
+      "dailyCoins": "每日登录礼物：金币 +{coins}。",
+      "dailyItem": "每日登录礼物：背包里多了一件惊喜道具。"
+    },
+    "exchange": {
+      "success": "兑换了 1 个小心心，金币 +{coins}。",
+      "notEnoughHearts": "小心心不足，暂时不能兑换金币。",
+      "limitReached": "今天的小心心兑换次数用完了。"
+    },
+    "festivals": {
+      "newYear": "新年",
+      "valentine": "情人节",
+      "earthDay": "地球日",
+      "childrenDay": "儿童节",
+      "harvestFestival": "秋收节",
+      "christmas": "圣诞节"
     }
   }
 }

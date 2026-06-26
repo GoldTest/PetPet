@@ -1,10 +1,10 @@
 import { t } from '../i18n';
-import { addInventoryItem, dailyBiscuitClaimLimit, favoriteFoodIdSet, getDailyShopDiscountInfo, getInventoryCount, getShopItem, giftItemIdSet, removeInventoryItem } from './items';
+import { addInventoryItem, dailyBiscuitClaimLimit, favoriteFoodIdSet, getDailyHeartExchangeInfo, getDailyShopDiscountInfo, getInventoryCount, getShopItem, giftItemIdSet, heartExchangeCoins, removeInventoryItem } from './items';
 import { applyActionStreak, getRandomHealthIncident, getRandomPetInteractionCost, lowSleepMoodWarningThreshold, markInteraction, petInteractionCooldownMs, petInteractionOveruseCooldownMs, withActivity } from './petCommon';
 import { advancePet, getDailyBiscuitClaimInfo, isPetLowEnergy, pausePomodoroForReason } from './petLifecycle';
-import { clampCount, clampPetHealth, clampPetStat, getPetStatCap, getUpgradeHeartCost, maxPetLevel, statCapPerLevel } from './petStats';
+import { clampCoins, clampCount, clampPetHealth, clampPetStat, getPetStatCap, getUpgradeHeartCost, maxPetLevel, statCapPerLevel } from './petStats';
 import type { CareActionKey, ItemId, PetAction, PetState, PomodoroDurations, RecentActivity, UseInventoryItemOptions } from './petTypes';
-import { defaultPomodoroState, getDefaultPomodoroRemainingMs, getPomodoroPhaseDurationMs, normalizePomodoroSettings, pickPomodoroActivity, pomodoroMinHealthThreshold, pomodoroPhaseLabels } from './pomodoro';
+import { defaultPomodoroState, getDefaultPomodoroRemainingMs, getPomodoroPhaseDurationMs, normalizePomodoroSettings, pickPomodoroActivity, pomodoroMinHealthThreshold, pomodoroPhaseLabels, pomodoroResetEventMinFocusMs } from './pomodoro';
 import { settleSleep, startSleepSnapshot } from './petEvents';
 import { getLocalDateKey, randomInt } from './utils';
 
@@ -60,6 +60,28 @@ export const upgradePet = (pet: PetState, now = Date.now()): PetState => {
   return withActivity(upgraded, 'level_up', now, 4200);
 };
 
+
+export const exchangeHeartForCoins = (pet: PetState, now = Date.now()): PetState => {
+  const current = markInteraction(advancePet(pet, now), now);
+  const exchangeInfo = getDailyHeartExchangeInfo(current, now);
+
+  if (current.hearts < 1) {
+    return { ...current, recentEvent: t('pet.exchange.notEnoughHearts') };
+  }
+
+  if (!exchangeInfo.canExchange) {
+    return { ...current, recentEvent: t('pet.exchange.limitReached') };
+  }
+
+  return {
+    ...current,
+    hearts: clampCount(current.hearts - 1),
+    coins: clampCoins(current.coins + heartExchangeCoins),
+    dailyHeartExchangeDate: exchangeInfo.dateKey,
+    dailyHeartExchangeCount: exchangeInfo.count + 1,
+    recentEvent: t('pet.exchange.success', { coins: heartExchangeCoins }),
+  };
+};
 
 export const applyPetAction = (pet: PetState, action: PetAction, now = Date.now()): PetState => {
   const current = markInteraction(advancePet(pet, now), now);
@@ -377,6 +399,7 @@ export const startPomodoro = (pet: PetState, now = Date.now()): PetState => {
       phaseEndsAt,
       currentActivity: activity,
       pausedRemainingMs: 0,
+      focusRewardCheckpointAt: current.pomodoro.phase === 'focus' ? now : 0,
     },
   };
 };
@@ -393,10 +416,22 @@ export const resetPomodoro = (pet: PetState, now = Date.now()): PetState => {
   const settings = current.pomodoro.settings;
   const dailyCompletedFocusCount =
     current.pomodoro.dailyFocusDate === today ? current.pomodoro.dailyCompletedFocusCount : 0;
+  const shouldTriggerResetEvent =
+    current.pomodoro.sessionFocusMs >= pomodoroResetEventMinFocusMs && !current.pomodoro.hasTriggeredSessionResetEvent;
+  const resetEventCoins = shouldTriggerResetEvent ? randomInt(1, 3) : 0;
+  const resetEventMood = shouldTriggerResetEvent ? 1 : 0;
+  const resetEventText = shouldTriggerResetEvent
+    ? t('pet.pomodoro.resetSessionEvent', { name: current.name, coins: resetEventCoins, mood: resetEventMood })
+    : '';
+  const resetBase = {
+    ...current,
+    coins: clampCoins(current.coins + resetEventCoins),
+    mood: clampPetStat(current, current.mood + resetEventMood),
+  };
 
   return {
-    ...current,
-    recentEvent: t('pet.pomodoro.reset', { name: current.name }),
+    ...resetBase,
+    recentEvent: t('pet.pomodoro.reset', { name: current.name }) + resetEventText,
     recentActivity: 'idle',
     recentActivityUntil: 0,
     lastInteractionAt: now,
