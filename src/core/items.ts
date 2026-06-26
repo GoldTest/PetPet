@@ -197,15 +197,30 @@ export const shopItems: readonly ShopItem[] = [
   },
 ] as const;
 
+export const specialItems: readonly ShopItem[] = [
+  {
+    id: 'birthday_cake',
+    name: t('pet.shop.items.birthday_cake.name'),
+    kind: 'food',
+    price: 0,
+    effect: {},
+    summary: t('pet.shop.items.birthday_cake.summary'),
+  },
+] as const;
+
+export const inventoryItems: readonly ShopItem[] = [...shopItems, ...specialItems];
+
 export const shopCategories: readonly { id: ShopCategory; label: string }[] = [
   { id: 'food', label: t('pet.shop.categories.food') },
   { id: 'item', label: t('pet.shop.categories.item') },
   { id: 'care', label: t('pet.shop.categories.care') },
 ];
 
-export const allItemIds = new Set<ItemId>(shopItems.map((item) => item.id));
+export const allItemIds = new Set<ItemId>(inventoryItems.map((item) => item.id));
 
 export const getShopItem = (id: ItemId) => shopItems.find((item) => item.id === id);
+
+export const getInventoryItem = (id: ItemId) => inventoryItems.find((item) => item.id === id);
 
 export const getInventoryCount = (inventory: Inventory, id: ItemId) => inventory[id] ?? 0;
 

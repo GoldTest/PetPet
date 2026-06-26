@@ -1,5 +1,6 @@
 ﻿import { ArrowLeft, CircleHelp, Download, FileText, RotateCcw, Upload } from 'lucide-react';
 import { useRef, useState, type ChangeEvent } from 'react';
+import { defaultPetBirthday, getPetBirthdayMaxDay, type PetBirthday } from '../core/pet';
 import type { ActivePetMod } from '../core/mod';
 import { languages, list, t, type LanguageCode } from '../i18n';
 
@@ -7,16 +8,18 @@ interface SettingsModalProps {
   activeMod: ActivePetMod | null;
   modMessage: string;
   draftName: string;
+  draftBirthday?: PetBirthday;
   language: LanguageCode;
   saveText: string;
   importSaveText: string;
   hasOpenedHelp: boolean;
   onDraftNameChange: (value: string) => void;
+  onDraftBirthdayChange: (value: PetBirthday) => void;
   onLanguageChange: (value: LanguageCode) => void;
   onImportSaveTextChange: (value: string) => void;
   onOpenHelp: () => void;
   onClose: () => void;
-  onRename: () => void;
+  onSaveProfile: () => void;
   onReset: () => void;
   onClearMod: () => void;
   onExportSave: () => void;
@@ -28,20 +31,24 @@ interface SettingsModalProps {
 
 type SettingsPage = 'main' | 'mod' | 'save';
 
+const birthdayMonths = Array.from({ length: 12 }, (_, index) => index + 1);
+
 export const SettingsModal = ({
   activeMod,
   modMessage,
   draftName,
+  draftBirthday,
   language,
   saveText,
   importSaveText,
   hasOpenedHelp,
   onDraftNameChange,
+  onDraftBirthdayChange,
   onLanguageChange,
   onImportSaveTextChange,
   onOpenHelp,
   onClose,
-  onRename,
+  onSaveProfile,
   onReset,
   onClearMod,
   onExportSave,
@@ -63,6 +70,20 @@ export const SettingsModal = ({
   const activeModSummary = activeMod
     ? t('ui.settings.mod.current', { name: activeMod.manifest.name, version: activeMod.manifest.version })
     : t('ui.settings.mod.currentDefault');
+  const birthdayMonth = draftBirthday?.month ?? defaultPetBirthday.month;
+  const birthdayMaxDay = getPetBirthdayMaxDay(birthdayMonth);
+  const birthdayDay = Math.min(draftBirthday?.day ?? defaultPetBirthday.day, birthdayMaxDay);
+  const birthdayDays = Array.from({ length: birthdayMaxDay }, (_, index) => index + 1);
+
+  const handleBirthdayMonthChange = (value: string) => {
+    const month = Number(value);
+    const maxDay = getPetBirthdayMaxDay(month);
+    onDraftBirthdayChange({ month, day: Math.min(birthdayDay, maxDay) });
+  };
+
+  const handleBirthdayDayChange = (value: string) => {
+    onDraftBirthdayChange({ month: birthdayMonth, day: Number(value) });
+  };
 
   const handleOpenHelp = () => {
     onOpenHelp();
@@ -110,12 +131,43 @@ export const SettingsModal = ({
             <>
               <p className="settings-free-notice">{t('ui.settings.freeNotice')}</p>
 
-              <label className="field">
+              <label className="field settings-inline-field settings-name-field">
                 <span>{t('ui.settings.petName')}</span>
-                <input value={draftName} maxLength={16} onChange={(event) => onDraftNameChange(event.target.value)} />
+                <input value={draftName} maxLength={32} onChange={(event) => onDraftNameChange(event.target.value)} />
               </label>
 
-              <label className="field">
+              <div className="field settings-birthday-field">
+                <div className="settings-birthday-heading">
+                  <span>{t('ui.settings.petBirthday')}</span>
+                  <small>
+                    {draftBirthday ? t('ui.settings.birthdayValue', { month: birthdayMonth, day: birthdayDay }) : t('ui.settings.birthdayUnset')}
+                  </small>
+                </div>
+                <div className="settings-birthday-grid">
+                  <label>
+                    <span className="settings-date-label">{t('ui.settings.birthdayMonth')}</span>
+                    <select value={birthdayMonth} onChange={(event) => handleBirthdayMonthChange(event.target.value)}>
+                      {birthdayMonths.map((month) => (
+                        <option key={month} value={month}>
+                          {month}
+                        </option>
+                      ))}
+                    </select>
+                  </label>
+                  <label>
+                    <span className="settings-date-label">{t('ui.settings.birthdayDay')}</span>
+                    <select value={birthdayDay} onChange={(event) => handleBirthdayDayChange(event.target.value)}>
+                      {birthdayDays.map((day) => (
+                        <option key={day} value={day}>
+                          {day}
+                        </option>
+                      ))}
+                    </select>
+                  </label>
+                </div>
+              </div>
+
+              <label className="field settings-inline-field settings-language-field" title={t('ui.settings.languageHint')}>
                 <span>{t('ui.settings.language')}</span>
                 <select value={language} onChange={(event) => onLanguageChange(event.target.value as LanguageCode)}>
                   {languages.map((item) => (
@@ -124,7 +176,6 @@ export const SettingsModal = ({
                     </option>
                   ))}
                 </select>
-                <small>{t('ui.settings.languageHint')}</small>
               </label>
 
               <button type="button" className="settings-nav-card" onClick={() => setPage('mod')}>
@@ -197,7 +248,7 @@ export const SettingsModal = ({
 
         {page === 'main' && (
           <div className="modal-actions settings-modal__footer">
-            <button type="button" className="primary-button" onClick={onRename}>{t('ui.settings.saveName')}</button>
+            <button type="button" className="primary-button" onClick={onSaveProfile}>{t('ui.settings.saveName')}</button>
             <button type="button" className="danger-button" onClick={onReset}>
               <RotateCcw size={18} aria-hidden="true" />
               {t('ui.settings.resetSave')}

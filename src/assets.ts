@@ -54,6 +54,7 @@ export const itemIcons: Record<ItemId, string> = {
   nutri_meal: itemNutriMeal,
   pig_trotter: iconPigTotters,
   strawberry_cake: iconBerryCake,
+  birthday_cake: iconBerryCake,
   ad_milk: iconAdMilk,
   strawberry_milk: itemStrawberryMilk,
   small_bouquet: iconFlowers,

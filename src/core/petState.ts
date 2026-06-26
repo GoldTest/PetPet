@@ -146,7 +146,7 @@ export const normalizePet = (value: unknown, now = Date.now()): PetState => {
   const statCap = getPetStatCap(level);
 
   return {
-    name: typeof raw.name === 'string' && raw.name.trim() ? raw.name.trim().slice(0, 16) : fallback.name,
+    name: typeof raw.name === 'string' && raw.name.trim() ? raw.name.trim().slice(0, 32) : fallback.name,
     level,
     hunger: clampStat(isNumber(raw.hunger) ? raw.hunger : fallback.hunger, statCap),
     mood: clampStat(isNumber(raw.mood) ? raw.mood : fallback.mood, statCap),

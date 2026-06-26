@@ -11,6 +11,7 @@ import {
 } from '../core/pet';
 import { currencyIcon } from '../assets';
 import { t } from '../i18n';
+import { formatCompactNumber } from './numberFormat';
 
 interface ShopModalProps {
   pet: PetState;
@@ -38,33 +39,45 @@ export const ShopModal = ({
   const discountInfo = getDailyShopDiscountInfo(pet);
   const heartExchangeInfo = getDailyHeartExchangeInfo(pet);
   const canExchangeHeart = pet.hearts > 0 && heartExchangeInfo.canExchange && !isHeartExchangeCoolingDown;
+  const fullCoinText = t('ui.shop.wallet', { coins: pet.coins });
+  const fullHeartText = t('ui.top.heartsAria', { hearts: pet.hearts });
+  const fullExchangeRateText = t('ui.shop.exchange.rate', { coins: heartExchangeInfo.coins });
+  const fullExchangeButtonText = t('ui.shop.exchange.button', { coins: heartExchangeInfo.coins });
+  const exchangeCoinsText = formatCompactNumber(heartExchangeInfo.coins);
 
   return (
     <div className="modal-backdrop" role="presentation">
       <section className="shop-modal" role="dialog" aria-modal="true" aria-labelledby="shop-title">
         <header>
-          <div>
-            <p className="eyebrow">{t('ui.shop.eyebrow')}</p>
-            <h2 id="shop-title">{t('ui.shop.title')}</h2>
+          <div className="shop-title-row">
+            <div className="shop-title-copy">
+              <p className="eyebrow">{t('ui.shop.eyebrow')}</p>
+              <h2 id="shop-title">{t('ui.shop.title')}</h2>
+            </div>
+            <div className="shop-resource-row">
+              <span className="shop-resource-pill shop-resource-pill--coins" aria-label={fullCoinText} title={fullCoinText}>
+                <img src={currencyIcon} alt="" aria-hidden="true" />
+                <strong>{formatCompactNumber(pet.coins)}</strong>
+              </span>
+              <span className="shop-resource-pill shop-resource-pill--hearts" aria-label={fullHeartText} title={fullHeartText}>
+                <Heart size={15} aria-hidden="true" />
+                <strong>{formatCompactNumber(pet.hearts)}</strong>
+              </span>
+            </div>
           </div>
           <button type="button" className="text-button" onClick={onClose}>{t('ui.shop.close')}</button>
         </header>
 
-        <div className="shop-wallet">
-          <img src={currencyIcon} alt="" aria-hidden="true" />
-          <span>{t('ui.shop.wallet', { coins: pet.coins })}</span>
-        </div>
-
         <div className="shop-exchange" aria-label={t('ui.shop.exchange.aria')}>
           <div className="shop-exchange__copy">
-            <span className="shop-exchange__rate">
+            <span className="shop-exchange__rate" title={fullExchangeRateText}>
               <Heart size={16} aria-hidden="true" />
-              {t('ui.shop.exchange.rate', { coins: heartExchangeInfo.coins })}
+              {t('ui.shop.exchange.rate', { coins: exchangeCoinsText })}
             </span>
             <small>{t('ui.shop.exchange.progress', { count: heartExchangeInfo.count, limit: heartExchangeInfo.limit })}</small>
           </div>
-          <button type="button" disabled={!canExchangeHeart} onClick={onExchangeHeart}>
-            {t('ui.shop.exchange.button', { coins: heartExchangeInfo.coins })}
+          <button type="button" disabled={!canExchangeHeart} title={fullExchangeButtonText} onClick={onExchangeHeart}>
+            {t('ui.shop.exchange.button', { coins: exchangeCoinsText })}
           </button>
         </div>
 
@@ -88,6 +101,12 @@ export const ShopModal = ({
             const isDiscountItem = discountInfo?.itemId === item.id;
             const isDiscountAvailable = Boolean(isDiscountItem && !discountInfo?.used);
             const displayPrice = isDiscountAvailable ? discountInfo?.price ?? item.price : item.price;
+            const displayPriceText = formatCompactNumber(displayPrice);
+            const priceTitle = t('ui.shop.price', { price: displayPrice });
+            const originalPriceText = discountInfo?.originalPrice === undefined ? '' : formatCompactNumber(discountInfo.originalPrice);
+            const originalPriceTitle = discountInfo?.originalPrice === undefined
+              ? ''
+              : t('ui.shop.priceNote', { originalPrice: discountInfo.originalPrice, label: discountInfo.label });
             const canAfford = pet.coins >= displayPrice;
             const biscuitClaimInfo = item.id === 'emergency_biscuit' ? getDailyBiscuitClaimInfo(pet) : undefined;
             const isClaimedOut = biscuitClaimInfo ? !biscuitClaimInfo.canClaim : false;
@@ -95,7 +114,7 @@ export const ShopModal = ({
               ? isClaimedOut
                 ? t('ui.shop.claimedOut')
                 : t('ui.shop.freeClaim', { claimed: biscuitClaimInfo.claimed, limit: biscuitClaimInfo.limit })
-              : t('ui.shop.price', { price: displayPrice });
+              : t('ui.shop.price', { price: displayPriceText });
 
             return (
               <article className="shop-item" key={item.id} data-item-id={item.id}>
@@ -106,9 +125,9 @@ export const ShopModal = ({
                     {isDiscountItem && <em className={isDiscountAvailable ? 'shop-badge' : 'shop-badge shop-badge--used'}>{isDiscountAvailable ? t('ui.shop.discountToday') : t('ui.shop.discountUsed')}</em>}
                   </strong>
                   <span>{item.displaySummary}</span>
-                  {isDiscountAvailable && <small className="shop-price-note">{t('ui.shop.priceNote', { originalPrice: discountInfo?.originalPrice, label: discountInfo?.label })}</small>}
+                  {isDiscountAvailable && <small className="shop-price-note" title={originalPriceTitle}>{t('ui.shop.priceNote', { originalPrice: originalPriceText, label: discountInfo?.label })}</small>}
                 </div>
-                <button type="button" data-buy-item={item.id} disabled={isClaimedOut || !canAfford} onClick={() => onBuyItem(item.id)}>{buttonLabel}</button>
+                <button type="button" data-buy-item={item.id} disabled={isClaimedOut || !canAfford} title={biscuitClaimInfo ? undefined : priceTitle} onClick={() => onBuyItem(item.id)}>{buttonLabel}</button>
               </article>
             );
           })}

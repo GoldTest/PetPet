@@ -9,6 +9,7 @@ export type ItemId =
   | 'nutri_meal'
   | 'pig_trotter'
   | 'strawberry_cake'
+  | 'birthday_cake'
   | 'ad_milk'
   | 'strawberry_milk'
   | 'small_bouquet'

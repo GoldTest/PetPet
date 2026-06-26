@@ -87,10 +87,11 @@ h1 {
 
 .coin-pill {
   display: inline-flex;
+  min-width: 72px;
+  max-width: 112px;
   align-items: center;
   justify-content: center;
   gap: 7px;
-  min-width: 78px;
   height: 46px;
   padding: 0 13px;
   border-radius: 999px;
@@ -101,10 +102,11 @@ h1 {
 
 .heart-pill {
   display: inline-flex;
+  min-width: 64px;
+  max-width: 104px;
   align-items: center;
   justify-content: center;
   gap: 7px;
-  min-width: 68px;
   height: 46px;
   padding: 0 13px;
   border-radius: 999px;
@@ -120,13 +122,18 @@ h1 {
 
 .coin-pill strong,
 .heart-pill strong {
+  min-width: 0;
+  overflow: hidden;
   font-size: 1rem;
+  font-variant-numeric: tabular-nums;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
-.coin-pill img,
-.shop-wallet img {
+.coin-pill img {
   width: 24px;
   height: 24px;
+  flex: 0 0 auto;
   object-fit: contain;
   image-rendering: pixelated;
 }
@@ -926,16 +933,74 @@ h1 {
   overflow: auto;
 }
 
-.shop-wallet {
-  display: inline-flex;
+.shop-title-row {
+  display: flex;
+  min-width: 0;
+  flex: 1 1 auto;
   align-items: center;
-  gap: 8px;
-  width: fit-content;
-  padding: 8px 11px;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.shop-title-copy {
+  min-width: 0;
+}
+
+.shop-resource-row {
+  display: inline-flex;
+  min-width: 0;
+  flex: 0 1 auto;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 6px;
+}
+
+.shop-resource-pill {
+  display: inline-flex;
+  min-width: 0;
+  max-width: 88px;
+  height: 32px;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  padding: 0 9px;
   border-radius: 999px;
+  font-weight: 900;
+  font-variant-numeric: tabular-nums;
+}
+
+.shop-resource-pill strong {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.shop-resource-pill img {
+  width: 20px;
+  height: 20px;
+  flex: 0 0 auto;
+  object-fit: contain;
+  image-rendering: pixelated;
+}
+
+.shop-resource-pill svg {
+  flex: 0 0 auto;
+}
+
+.shop-resource-pill--coins {
   color: #4d3510;
   background: #ffe59b;
-  font-weight: 900;
+}
+
+.shop-resource-pill--hearts {
+  color: #8c2c55;
+  background: #ffe4ee;
+}
+
+.shop-resource-pill--hearts svg {
+  fill: #f06b9b;
+  color: #c74373;
 }
 
 .shop-exchange {
@@ -960,9 +1025,13 @@ h1 {
   min-width: 0;
   align-items: center;
   gap: 6px;
+  overflow: hidden;
   color: #8c2c55;
   font-weight: 900;
+  font-variant-numeric: tabular-nums;
   line-height: 1.2;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .shop-exchange__rate svg {
@@ -980,13 +1049,18 @@ h1 {
 
 .shop-exchange button {
   min-height: 38px;
+  max-width: 150px;
   flex: 0 0 auto;
+  overflow: hidden;
   padding: 0 12px;
   border: 0;
   border-radius: 8px;
   color: #fff;
   background: #c74373;
   font-weight: 850;
+  font-variant-numeric: tabular-nums;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .shop-exchange button:disabled {
@@ -1087,12 +1161,17 @@ h1 {
 
 .shop-item button {
   min-width: 88px;
+  max-width: 128px;
   min-height: 40px;
+  overflow: hidden;
   border: 0;
   border-radius: 8px;
   color: #fff;
   background: #2d6fd3;
   font-weight: 850;
+  font-variant-numeric: tabular-nums;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .shop-item button:disabled {
@@ -1135,6 +1214,84 @@ h1 {
   font-size: 0.78rem;
   font-weight: 700;
   line-height: 1.35;
+}
+
+.settings-inline-field {
+  display: grid;
+  grid-template-columns: minmax(72px, auto) minmax(0, 1fr);
+  align-items: center;
+  gap: 10px;
+}
+
+.settings-inline-field > span {
+  margin: 0;
+  white-space: nowrap;
+}
+
+.settings-inline-field input,
+.settings-inline-field select {
+  width: 100%;
+  min-width: 0;
+}
+
+.settings-language-field {
+  grid-template-columns: minmax(56px, auto) minmax(118px, 160px);
+  justify-content: start;
+}
+
+.settings-language-field select {
+  width: min(160px, 48vw);
+}
+
+.settings-birthday-field {
+  display: grid;
+  gap: 8px;
+}
+
+.settings-birthday-heading {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.settings-birthday-heading > span {
+  color: #172034;
+  font-weight: 800;
+}
+
+.settings-birthday-heading small {
+  color: #64728a;
+  font-size: 0.78rem;
+  font-weight: 800;
+  line-height: 1.3;
+  white-space: nowrap;
+}
+
+.settings-birthday-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.settings-birthday-grid label {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.settings-birthday-grid select {
+  width: min(74px, 24vw);
+  flex: 0 0 auto;
+}
+
+.settings-date-label {
+  color: #64728a;
+  font-size: 0.76rem;
+  font-weight: 800;
+  white-space: nowrap;
 }
 .modal-actions {
   display: flex;
@@ -1640,7 +1797,7 @@ h1 {
 }
 
 .shop-modal {
-  grid-template-rows: auto auto auto auto minmax(0, 1fr);
+  grid-template-rows: auto auto auto minmax(0, 1fr);
   height: min(720px, calc(100dvh - 36px));
   overflow: hidden;
 }
@@ -1678,6 +1835,25 @@ h1 {
 
   .shop-modal {
     height: calc(100dvh - 24px);
+  }
+
+  .shop-modal header {
+    align-items: flex-start;
+  }
+
+  .shop-title-row {
+    flex-wrap: wrap;
+    row-gap: 6px;
+  }
+
+  .shop-resource-row {
+    width: 100%;
+    justify-content: flex-start;
+  }
+
+  .shop-resource-pill {
+    max-width: 82px;
+    height: 30px;
   }
 
   .settings-back-button {
@@ -1808,6 +1984,7 @@ h1 {
 
   .shop-exchange button {
     width: 100%;
+    max-width: none;
   }
 }
 
@@ -1892,6 +2069,72 @@ h1 {
   width: 100%;
 }
 
+.modal-backdrop--confirm {
+  z-index: 30;
+}
+
+.confirm-modal {
+  width: min(100%, 400px);
+  display: grid;
+  justify-items: center;
+  gap: 14px;
+  padding: 20px;
+  border-radius: 8px;
+  background: #fff;
+  box-shadow: 0 24px 60px rgba(9, 17, 30, 0.3);
+  text-align: center;
+}
+
+.confirm-modal__icon {
+  display: inline-grid;
+  width: 56px;
+  height: 56px;
+  place-items: center;
+  border-radius: 50%;
+  color: #b83d3d;
+  background: #ffe7e7;
+}
+
+.confirm-modal__copy {
+  display: grid;
+  gap: 8px;
+}
+
+.confirm-modal__copy h2 {
+  color: #172034;
+  font-size: 1.24rem;
+  line-height: 1.18;
+}
+
+.confirm-modal__copy p {
+  color: #596880;
+  font-size: 0.94rem;
+  font-weight: 700;
+  line-height: 1.45;
+}
+
+.confirm-modal__actions {
+  display: grid;
+  width: 100%;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.confirm-modal__cancel,
+.confirm-modal__confirm {
+  min-width: 0;
+}
+
+.confirm-modal__cancel {
+  min-height: 44px;
+  border-radius: 8px;
+  background: #f1f5fa;
+}
+
+.confirm-modal__confirm {
+  color: #fff;
+  background: #c93e3e;
+}
 @media (max-width: 420px) {
   .reward-modal {
     width: calc(100% - 24px);
@@ -1906,5 +2149,15 @@ h1 {
 
   .reward-modal__copy h2 {
     font-size: 1.18rem;
+  }
+
+  .confirm-modal {
+    width: calc(100% - 24px);
+    gap: 12px;
+    padding: 16px;
+  }
+
+  .confirm-modal__actions {
+    grid-template-columns: 1fr;
   }
 }

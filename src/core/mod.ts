@@ -281,7 +281,7 @@ export const formatFavoriteFoodText = (mod: ActivePetMod | null | undefined, amo
 export const getModStatusText = (mod: ActivePetMod | null | undefined, status: PetStatus) =>
   mod?.manifest.texts?.status?.[status];
 
-export const getDisplayShopItems = (
+export const getDisplayItems = (
   items: readonly ShopItem[],
   mod: ActivePetMod | null | undefined,
 ): readonly ItemDisplay[] =>
@@ -290,3 +290,5 @@ export const getDisplayShopItems = (
     displayName: mod?.manifest.texts?.items?.[item.id]?.name ?? item.name,
     displaySummary: mod?.manifest.texts?.items?.[item.id]?.summary ?? item.summary,
   }));
+
+export const getDisplayShopItems = getDisplayItems;

@@ -66,11 +66,24 @@
       "title": "设置",
       "close": "关闭",
       "petName": "宠物名字",
+      "petBirthday": "宠物生日",
+      "birthdayValue": "{month}月{day}日",
+      "birthdayUnset": "未设置",
+      "birthdayMonth": "月份",
+      "birthdayDay": "日期",
+      "birthdayHint": "生日奖励会使用这个日期，直到重新应用 Mod。",
+      "birthdayUnsetHint": "当前没有生日奖励日期，修改月份或日期后会启用。",
       "language": "语言",
       "languageHint": "切换后会重新载入界面，存档不会丢失。",
-      "saveName": "保存名字",
+      "saveName": "保存资料",
       "resetSave": "重置存档",
       "resetConfirm": "确定要重置当前宠物吗？这个操作会清空本地存档。",
+      "resetDialog": {
+        "title": "重置存档？",
+        "message": "这个操作会清空当前本地存档，并重新创建宠物。",
+        "cancel": "取消",
+        "confirm": "确认重置"
+      },
       "mod": {
         "sectionAria": "宠物 Mod",
         "title": "宠物 Mod",
@@ -296,6 +309,10 @@
         "energy_drink": {
           "name": "能量饮料",
           "summary": "应急体力护理，体力 +32，心情 -1"
+        },
+        "birthday_cake": {
+          "name": "生日蛋糕",
+          "summary": "生日限定道具，使用后全属性回满"
         }
       },
       "categories": {
@@ -501,11 +518,16 @@
         "careWoke": "{name} 醒来使用了{item}。",
         "favorite": "这是 Furo 喜欢的味道，心情额外 +{amount}。",
         "stickerHeart": "贴纸闪闪发亮，小心心 +1。",
-        "stickerSaved": "贴纸被认真收好了。"
+        "stickerSaved": "贴纸被认真收好了。",
+        "birthdayCake": "{name} 吃下了{item}，全属性回满。",
+        "birthdayCakeWoke": "{name} 醒来吃下了{item}，全属性回满。"
       }
     },
     "rename": {
       "updated": "名字已经更新为 {name}。"
+    },
+    "profile": {
+      "updated": "{name} 的资料已保存。"
     },
     "upgrade": {
       "success": "升级到 Lv.{level}，消耗 {cost} 个小心心，属性上限提升到 {max}。",
@@ -528,7 +550,7 @@
     },
     "reward": {
       "helpStarterGift": "已领取启程赠礼，金币 +{coins}。",
-      "birthday": "今天是 {name} 的生日，生日奖励：金币 +{coins}，小心心 +{hearts}。",
+      "birthday": "今天是 {name} 的生日，生日奖励：金币 +{coins}，小心心 +{hearts}，生日蛋糕 +1。",
       "festival": "{festival} 礼物送到，背包里多了一份节日道具。",
       "dailyCoins": "每日登录礼物：金币 +{coins}。",
       "dailyItem": "每日登录礼物：背包里多了一件惊喜道具。"

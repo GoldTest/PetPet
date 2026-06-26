@@ -1,9 +1,10 @@
 import { t } from '../i18n';
-import { addInventoryItem, dailyBiscuitClaimLimit, favoriteFoodIdSet, getDailyHeartExchangeInfo, getDailyShopDiscountInfo, getInventoryCount, getShopItem, giftItemIdSet, heartExchangeCoins, removeInventoryItem } from './items';
+import { addInventoryItem, dailyBiscuitClaimLimit, favoriteFoodIdSet, getDailyHeartExchangeInfo, getDailyShopDiscountInfo, getInventoryCount, getInventoryItem, getShopItem, giftItemIdSet, heartExchangeCoins, removeInventoryItem } from './items';
 import { applyActionStreak, getRandomHealthIncident, getRandomPetInteractionCost, lowSleepMoodWarningThreshold, markInteraction, petInteractionCooldownMs, petInteractionOveruseCooldownMs, withActivity } from './petCommon';
+import { normalizePetBirthday } from './dateRewards';
 import { advancePet, getDailyBiscuitClaimInfo, isPetLowEnergy, pausePomodoroForReason } from './petLifecycle';
 import { clampCoins, clampCount, clampPetHealth, clampPetStat, getPetStatCap, getUpgradeHeartCost, maxPetLevel, statCapPerLevel } from './petStats';
-import type { CareActionKey, ItemId, PetAction, PetState, PomodoroDurations, RecentActivity, UseInventoryItemOptions } from './petTypes';
+import type { CareActionKey, ItemId, PetAction, PetBirthday, PetState, PomodoroDurations, RecentActivity, UseInventoryItemOptions } from './petTypes';
 import { defaultPomodoroState, getDefaultPomodoroRemainingMs, getPomodoroPhaseDurationMs, normalizePomodoroSettings, pickPomodoroActivity, pomodoroMinHealthThreshold, pomodoroPhaseLabels, pomodoroResetEventMinFocusMs } from './pomodoro';
 import { settleSleep, startSleepSnapshot } from './petEvents';
 import { getLocalDateKey, randomInt } from './utils';
@@ -234,7 +235,7 @@ export const useInventoryItem = (
   options: UseInventoryItemOptions = {},
 ): PetState => {
   const current = markInteraction(advancePet(pet, now), now);
-  const item = getShopItem(itemId);
+  const item = getInventoryItem(itemId);
   if (!item) return { ...current, recentEvent: t('pet.item.missing') };
   const displayItemName = options.itemName ?? item.name;
 
@@ -244,6 +245,25 @@ export const useInventoryItem = (
   }
 
   const wokePet = current.isSleeping;
+
+  if (itemId === 'birthday_cake') {
+    const statCap = getPetStatCap(current);
+    return {
+      ...withActivity(current, 'eat_cookie', now),
+      isSleeping: false,
+      hunger: statCap,
+      mood: statCap,
+      cleanliness: statCap,
+      energy: statCap,
+      health: statCap,
+      inventory: removeInventoryItem(current.inventory, itemId),
+      recentEvent: t(wokePet ? 'pet.item.use.birthdayCakeWoke' : 'pet.item.use.birthdayCake', {
+        name: current.name,
+        item: displayItemName,
+      }),
+    };
+  }
+
   const effect = item.effect;
   const runtimeFavoriteFoodIdSet = options.favoriteFoodIds ? new Set<ItemId>(options.favoriteFoodIds) : favoriteFoodIdSet;
   const favoriteMoodBonus = runtimeFavoriteFoodIdSet.has(itemId) ? 4 : 0;
@@ -260,6 +280,7 @@ export const useInventoryItem = (
     nutri_meal: 'eat_meat',
     pig_trotter: 'eat_meat',
     strawberry_cake: 'eat_cookie',
+    birthday_cake: 'eat_cookie',
     ad_milk: 'eat_cookie',
     strawberry_milk: 'eat_cookie',
     small_bouquet: 'give_heart',
@@ -469,11 +490,27 @@ export const updatePomodoroSettings = (
 };
 
 export const renamePet = (pet: PetState, name: string): PetState => {
-  const nextName = name.trim().slice(0, 16) || pet.name;
+  const nextName = name.trim().slice(0, 32) || pet.name;
   return {
     ...pet,
     name: nextName,
     recentEvent: t('pet.rename.updated', { name: nextName }),
+  };
+};
+
+const isSameBirthday = (left?: PetBirthday, right?: PetBirthday) => left?.month === right?.month && left?.day === right?.day;
+
+export const updatePetProfile = (pet: PetState, name: string, birthday?: PetBirthday): PetState => {
+  const nextName = name.trim().slice(0, 32) || pet.name;
+  const nextBirthday = normalizePetBirthday(birthday);
+  const birthdayChanged = nextBirthday ? !isSameBirthday(pet.birthday, nextBirthday) : false;
+
+  return {
+    ...pet,
+    name: nextName,
+    ...(nextBirthday ? { birthday: nextBirthday } : {}),
+    lastBirthdayRewardYear: birthdayChanged ? undefined : pet.lastBirthdayRewardYear,
+    recentEvent: t('pet.profile.updated', { name: nextName }),
   };
 };
 

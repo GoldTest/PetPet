@@ -1,6 +1,7 @@
 ﻿import { Cloud, CloudRain, Sparkles, Sun, Timer, Wind, type LucideIcon } from 'lucide-react';
 import { weatherInfo, type PetState, type WeatherType } from '../core/pet';
 import { t } from '../i18n';
+import { formatCompactNumber } from './numberFormat';
 import { formatPomodoroTime } from './time';
 
 const weatherIcons: Record<WeatherType, LucideIcon> = {
@@ -32,6 +33,7 @@ export const FeatureRow = ({
   onOpenPomodoro,
 }: FeatureRowProps) => {
   const WeatherIcon = weatherIcons[pet.weather];
+  const upgradeCostText = nextUpgradeCost > 0 ? formatCompactNumber(nextUpgradeCost) : '';
 
   return (
     <div className="feature-row" aria-label={t('ui.features.aria')}>
@@ -44,7 +46,7 @@ export const FeatureRow = ({
         <Sparkles size={20} aria-hidden="true" />
         <span>
           {t('ui.features.upgrade')}
-          <small>{t('ui.features.level', { level: pet.level })} - {nextUpgradeCost > 0 ? t('ui.features.cost', { cost: nextUpgradeCost }) : t('ui.features.maxLevel')}</small>
+          <small>{t('ui.features.level', { level: pet.level })} - {nextUpgradeCost > 0 ? t('ui.features.cost', { cost: upgradeCostText }) : t('ui.features.maxLevel')}</small>
         </span>
       </button>
 

@@ -1,4 +1,4 @@
-﻿import { t } from '../i18n';
+import { t } from '../i18n';
 import { addInventoryItem } from './items';
 import { clampCoins, clampCount } from './petStats';
 import type { ItemId, PetBirthday, PetState } from './petTypes';
@@ -98,12 +98,14 @@ export const getSixAmResetDateKey = (time: number) => {
   return getLocalDateKey(date.getTime());
 };
 
+export const getPetBirthdayMaxDay = (month: number) => (month >= 1 && month <= 12 ? new Date(2024, month, 0).getDate() : 0);
+
 export const normalizePetBirthday = (value: unknown): PetBirthday | undefined => {
   if (!value || typeof value !== 'object' || Array.isArray(value)) return undefined;
   const raw = value as Record<string, unknown>;
   const month = typeof raw.month === 'number' && Number.isInteger(raw.month) ? raw.month : 0;
   const day = typeof raw.day === 'number' && Number.isInteger(raw.day) ? raw.day : 0;
-  const maxDay = month >= 1 && month <= 12 ? new Date(2024, month, 0).getDate() : 0;
+  const maxDay = getPetBirthdayMaxDay(month);
   return month >= 1 && month <= 12 && day >= 1 && day <= maxDay ? { month, day } : undefined;
 };
 
@@ -177,7 +179,7 @@ const claimBirthdayReward = (pet: PetState, now: number): { pet: PetState; rewar
     message: t('pet.reward.birthday', { name: pet.name, coins: birthdayRewardCoins, hearts: birthdayRewardHearts }),
     coins: birthdayRewardCoins,
     hearts: birthdayRewardHearts,
-    items: [],
+    items: [{ itemId: 'birthday_cake', amount: 1 }],
   };
 
   return {

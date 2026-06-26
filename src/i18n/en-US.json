@@ -66,11 +66,24 @@
       "title": "Settings",
       "close": "Close",
       "petName": "Pet name",
+      "petBirthday": "Birthday",
+      "birthdayValue": "{month}/{day}",
+      "birthdayUnset": "Not set",
+      "birthdayMonth": "Month",
+      "birthdayDay": "Day",
+      "birthdayHint": "Birthday rewards use this date until a mod is reapplied.",
+      "birthdayUnsetHint": "No birthday reward is active. Pick a month or day to set one.",
       "language": "Language",
       "languageHint": "Changing language reloads the interface. Your save is kept.",
-      "saveName": "Save name",
+      "saveName": "Save profile",
       "resetSave": "Reset save",
       "resetConfirm": "Reset the current pet? This clears the local save.",
+      "resetDialog": {
+        "title": "Reset save?",
+        "message": "This clears the current local save and creates the pet again.",
+        "cancel": "Cancel",
+        "confirm": "Reset save"
+      },
       "mod": {
         "sectionAria": "Pet mod",
         "title": "Pet Mod",
@@ -296,6 +309,10 @@
         "energy_drink": {
           "name": "Energy drink",
           "summary": "Emergency energy care, energy +32, mood -1"
+        },
+        "birthday_cake": {
+          "name": "Birthday Cake",
+          "summary": "Birthday-only item. Use it to refill all stats."
         }
       },
       "categories": {
@@ -501,11 +518,16 @@
         "careWoke": "{name} woke up and used {item}.",
         "favorite": "This is Furo's favorite flavor, mood +{amount} extra.",
         "stickerHeart": "The sticker sparkled, heart +1.",
-        "stickerSaved": "The sticker was carefully saved."
+        "stickerSaved": "The sticker was carefully saved.",
+        "birthdayCake": "{name} enjoyed {item}. All stats are full.",
+        "birthdayCakeWoke": "{name} woke up and enjoyed {item}. All stats are full."
       }
     },
     "rename": {
       "updated": "Name updated to {name}."
+    },
+    "profile": {
+      "updated": "Profile saved for {name}."
     },
     "upgrade": {
       "success": "Upgraded to Lv.{level}, spent {cost} hearts, stat cap increased to {max}.",
@@ -528,7 +550,7 @@
     },
     "reward": {
       "helpStarterGift": "Starter gift claimed, coins +{coins}.",
-      "birthday": "It's {name}'s birthday. Birthday reward: coins +{coins}, hearts +{hearts}.",
+      "birthday": "It's {name}'s birthday. Birthday reward: coins +{coins}, hearts +{hearts}, Birthday Cake +1.",
       "festival": "{festival} gift arrived. A seasonal item was added to the bag.",
       "dailyCoins": "Daily login gift: coins +{coins}.",
       "dailyItem": "Daily login gift: a surprise item was added to the bag."

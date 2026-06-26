@@ -12,6 +12,7 @@ import {
   defaultPetName,
   getEnergyRecoveryInfo,
   getNextUpgradeHeartCost,
+  getInventoryItem,
   heartExchangeCooldownMs,
   helpStarterGiftCoins,
   helpStarterGiftRewardId,
@@ -22,7 +23,8 @@ import {
   resetPomodoro,
   pomodoroMinHealthThreshold,
   recordPetInteraction,
-  renamePet,
+  updatePetProfile,
+  inventoryItems,
   shopCategories,
   shopItems,
   startPomodoro,
@@ -53,7 +55,7 @@ import {
 import { clearPet, loadPet, savePet } from '../core/storage';
 import {
   formatFavoriteFoodText,
-  getDisplayShopItems,
+  getDisplayItems,
   getModFavoriteFoodIds,
   getModStatusText,
   parsePetModZip,
@@ -63,6 +65,7 @@ import {
 import { clearActivePetMod, loadActivePetMod, saveActivePetMod } from '../core/modStorage';
 import { createSaveFileText, parseSaveFileText } from '../core/saveCodec';
 import { ActionDock } from './ActionDock';
+import { ConfirmDialog } from './ConfirmDialog';
 import { FeatureRow } from './FeatureRow';
 import { InventoryPanel } from './InventoryPanel';
 import { PetDisplay } from './PetDisplay';
@@ -70,6 +73,7 @@ import { PomodoroOverlay } from './PomodoroOverlay';
 import { SettingsModal } from './SettingsModal';
 import { ShopModal } from './ShopModal';
 import { StatusBar } from './StatusBar';
+import { formatCompactNumber } from './numberFormat';
 import { getLanguage, setLanguage, t, type LanguageCode } from '../i18n';
 
 const formatSharedTime = (seconds: number) => {
@@ -111,16 +115,14 @@ type PomodoroSettingKey = keyof PomodoroDurations;
 type SoundOutcome = 'success' | 'blocked' | 'heart' | 'low_state';
 type FloatingRewardConfig = { id: string; coins: number; eventKey: string };
 type RewardPopup = ClaimedDateReward;
+type RewardDisplayItem = { key: string; icon?: string; label: string; title?: string };
 
 const floatingRewardConfigs: readonly FloatingRewardConfig[] = [
   { id: helpStarterGiftRewardId, coins: helpStarterGiftCoins, eventKey: 'pet.reward.helpStarterGift' },
 ];
 
 const getInventoryCount = (pet: PetState, itemId: ItemId) => pet.inventory[itemId] ?? 0;
-const getShopItem = (itemId: ItemId) => shopItems.find((item) => item.id === itemId);
 const getDisplayItem = (items: readonly ItemDisplay[], itemId: ItemId) => items.find((item) => item.id === itemId);
-const getDefaultBirthdayForMod = (mod: ActivePetMod | null): PetBirthday | undefined => mod ? mod.manifest.birthday : defaultPetBirthday;
-
 const getActionSfx = (action: PetAction): SfxId => {
   if (action === 'clean') return 'action_bath';
   if (action === 'play' || action === 'work') return 'action_work_play_medicine';
@@ -128,7 +130,7 @@ const getActionSfx = (action: PetAction): SfxId => {
 };
 
 const getItemSfx = (itemId: ItemId): SfxId => {
-  const item = getShopItem(itemId);
+  const item = getInventoryItem(itemId);
   if (item?.kind === 'food') return 'action_eat';
   if (itemId === 'shampoo' || itemId === 'wet_wipes') return 'action_bath';
   if (itemId === 'blanket' || itemId === 'soft_cloud_doll' || itemId === 'picture_book') return 'action_blanket';
@@ -171,11 +173,13 @@ export const App = () => {
   const [language, setLanguageState] = useState<LanguageCode>(() => getLanguage());
   const [activeShopCategory, setActiveShopCategory] = useState(shopCategories[0].id);
   const [draftName, setDraftName] = useState(pet.name);
+  const [draftBirthday, setDraftBirthday] = useState<PetBirthday | undefined>(pet.birthday);
   const [activeMod, setActiveMod] = useState<ActivePetMod | null>(null);
   const [modMessage, setModMessage] = useState('');
   const [saveText, setSaveText] = useState('');
   const [importSaveText, setImportSaveText] = useState('');
   const [rewardQueue, setRewardQueue] = useState<RewardPopup[]>([]);
+  const [isResetConfirmOpen, setResetConfirmOpen] = useState(false);
   const petRef = useRef(pet);
   const completedFocusCountRef = useRef(pet.pomodoro.completedFocusCount);
   const lastHeartExchangeAtRef = useRef(0);
@@ -191,7 +195,7 @@ export const App = () => {
     void loadActivePetMod()
       .then((mod) => {
         setActiveMod(mod);
-        setPet((current) => (mod ? withPetIdentityBirthday(current, mod.manifest.birthday) : withBackfilledBirthday(current, defaultPetBirthday)));
+        setPet((current) => (mod ? withBackfilledBirthday(current, mod.manifest.birthday) : withBackfilledBirthday(current, defaultPetBirthday)));
         hasLoadedModRef.current = true;
         if (mod) setModMessage(t('ui.settings.mod.active', { name: mod.manifest.name, version: mod.manifest.version }));
       })
@@ -223,7 +227,8 @@ export const App = () => {
   const itemIconMap = useMemo(() => resolveItemIcons(activeMod), [activeMod]);
   const petStatusImageMap = useMemo(() => resolvePetStatusImages(activeMod), [activeMod]);
   const petActivityImageMap = useMemo(() => resolvePetActivityImages(activeMod), [activeMod]);
-  const displayShopItems = useMemo(() => getDisplayShopItems(shopItems, activeMod), [activeMod]);
+  const displayInventoryItems = useMemo(() => getDisplayItems(inventoryItems, activeMod), [activeMod]);
+  const displayShopItems = useMemo(() => getDisplayItems(shopItems, activeMod), [activeMod]);
   const getStatusLabel = (status: PetStatus) => getModStatusText(activeMod, status) ?? t(`pet.status.${status}`);
   const statCap = getPetStatCap(pet);
   const energyRecoveryInfo = getEnergyRecoveryInfo(pet);
@@ -240,8 +245,8 @@ export const App = () => {
   );
 
   const ownedItems = useMemo(
-    () => displayShopItems.filter((item) => (pet.inventory[item.id] ?? 0) > 0),
-    [displayShopItems, pet.inventory],
+    () => displayInventoryItems.filter((item) => (pet.inventory[item.id] ?? 0) > 0),
+    [displayInventoryItems, pet.inventory],
   );
   const visibleShopItems = useMemo(
     () => displayShopItems.filter((item) => item.kind === activeShopCategory),
@@ -359,7 +364,7 @@ export const App = () => {
     playAfterUnlock('tap');
     setPet((current) => {
       const beforeCount = getInventoryCount(current, itemId);
-      const displayItem = getDisplayItem(displayShopItems, itemId);
+      const displayItem = getDisplayItem(displayInventoryItems, itemId);
       const next = useInventoryItem(current, itemId, Date.now(), {
         favoriteFoodIds: getModFavoriteFoodIds(activeMod),
         favoriteText: (amount) => formatFavoriteFoodText(activeMod, amount),
@@ -419,9 +424,9 @@ export const App = () => {
     setPet((current) => updatePomodoroSettings(current, { [key]: value }));
   };
 
-  const handleRename = () => {
+  const handleSaveProfile = () => {
     playAfterUnlock('tap');
-    setPet((current) => renamePet(current, draftName));
+    setPet((current) => updatePetProfile(current, draftName, draftBirthday));
     setSettingsOpen(false);
   };
 
@@ -452,8 +457,16 @@ export const App = () => {
 
   const handleReset = () => {
     playAfterUnlock('tap');
-    const confirmed = window.confirm(t('ui.settings.resetConfirm'));
-    if (!confirmed) return;
+    setResetConfirmOpen(true);
+  };
+
+  const handleCancelReset = () => {
+    playAfterUnlock('close');
+    setResetConfirmOpen(false);
+  };
+
+  const handleConfirmReset = () => {
+    playAfterUnlock('tap');
     clearPet();
     const fresh = createDefaultPet();
     const moddedFresh = activeMod
@@ -465,8 +478,10 @@ export const App = () => {
       : withPetIdentityBirthday(fresh, defaultPetBirthday);
     setPet(moddedFresh);
     setDraftName(moddedFresh.name);
+    setDraftBirthday(moddedFresh.birthday);
     setPomodoroOpen(false);
     setSettingsOpen(false);
+    setResetConfirmOpen(false);
   };
 
   const handleModFileChange = async (event: ChangeEvent<HTMLInputElement>) => {
@@ -489,12 +504,13 @@ export const App = () => {
         const shouldUseModDefaultName = current.name === defaultPetName || current.name === oldDefaultName;
         const nextName = shouldUseModDefaultName ? parsed.manifest.defaultPetName : current.name;
         return {
-          ...withPetIdentityBirthday(current, shouldUseModDefaultName ? parsed.manifest.birthday : current.birthday),
+          ...withPetIdentityBirthday(current, parsed.manifest.birthday),
           name: nextName,
           recentEvent: parsed.manifest.texts?.recentEvent ?? t('ui.settings.mod.switched', { name: parsed.manifest.name }),
         };
       });
       setDraftName((current) => (current === defaultPetName || current === oldDefaultName ? parsed.manifest.defaultPetName : current));
+      setDraftBirthday(parsed.manifest.birthday);
     } catch (error) {
       setModMessage(error instanceof Error ? error.message : t('ui.settings.mod.importFailed'));
       playSfx('error');
@@ -506,6 +522,7 @@ export const App = () => {
       await clearActivePetMod();
       setActiveMod(null);
       setPet((current) => withPetIdentityBirthday(current, defaultPetBirthday));
+      setDraftBirthday(defaultPetBirthday);
       setModMessage(t('ui.settings.mod.restored'));
     } catch (error) {
       setModMessage(error instanceof Error ? error.message : t('ui.settings.mod.restoreFailed'));
@@ -529,14 +546,14 @@ export const App = () => {
       const imported = parseSaveFileText(text);
       const importedMod = imported.activeMod;
       const hasMatchingMod = importedMod ? activeMod?.manifest.id === importedMod.id : true;
-      setPet(
-        importedMod && !hasMatchingMod
-          ? imported.pet
-          : activeMod
-            ? withPetIdentityBirthday(imported.pet, activeMod.manifest.birthday)
-            : withBackfilledBirthday(imported.pet, defaultPetBirthday),
-      );
-      setDraftName(imported.pet.name);
+      const nextPet = importedMod && !hasMatchingMod
+        ? imported.pet
+        : activeMod
+          ? withBackfilledBirthday(imported.pet, activeMod.manifest.birthday)
+          : withBackfilledBirthday(imported.pet, defaultPetBirthday);
+      setPet(nextPet);
+      setDraftName(nextPet.name);
+      setDraftBirthday(nextPet.birthday);
       setImportSaveText('');
       setModMessage(
         importedMod && !hasMatchingMod
@@ -565,21 +582,36 @@ export const App = () => {
   const activeRewardPopup = rewardQueue[0];
 
   const renderRewardItems = (reward: RewardPopup) => {
-    const rewardItems = [
-      reward.coins ? { key: 'coins', icon: currencyIcon, label: t('ui.rewards.coins', { coins: reward.coins }) } : undefined,
-      reward.hearts ? { key: 'hearts', icon: undefined, label: t('ui.rewards.hearts', { hearts: reward.hearts }) } : undefined,
-      ...reward.items.map((item, index) => {
-        const displayItem = getDisplayItem(displayShopItems, item.itemId);
-        return {
-          key: `${item.itemId}:${index}`,
-          icon: itemIconMap[item.itemId],
-          label: t('ui.rewards.item', { item: displayItem?.displayName ?? item.itemId, count: item.amount }),
-        };
-      }),
-    ].filter((item): item is { key: string; icon?: string; label: string } => Boolean(item));
+    const rewardItems: RewardDisplayItem[] = [];
+
+    if (reward.coins) {
+      rewardItems.push({
+        key: 'coins',
+        icon: currencyIcon,
+        label: t('ui.rewards.coins', { coins: formatCompactNumber(reward.coins) }),
+        title: t('ui.rewards.coins', { coins: reward.coins }),
+      });
+    }
+
+    if (reward.hearts) {
+      rewardItems.push({
+        key: 'hearts',
+        label: t('ui.rewards.hearts', { hearts: formatCompactNumber(reward.hearts) }),
+        title: t('ui.rewards.hearts', { hearts: reward.hearts }),
+      });
+    }
+
+    reward.items.forEach((item, index) => {
+      const displayItem = getDisplayItem(displayInventoryItems, item.itemId);
+      rewardItems.push({
+        key: `${item.itemId}:${index}`,
+        icon: itemIconMap[item.itemId],
+        label: t('ui.rewards.item', { item: displayItem?.displayName ?? item.itemId, count: item.amount }),
+      });
+    });
 
     return rewardItems.map((item) => (
-      <div className="reward-modal__item" key={item.key}>
+      <div className="reward-modal__item" key={item.key} title={item.title}>
         {item.icon ? <img src={item.icon} alt="" aria-hidden="true" /> : <Heart size={22} aria-hidden="true" />}
         <span>{item.label}</span>
       </div>
@@ -606,13 +638,19 @@ export const App = () => {
           <h1>{pet.name}</h1>
         </div>
         <div className="top-actions">
-          <button type="button" className="coin-pill" onClick={handleOpenShop} aria-label={t('ui.top.openShop')}>
+          <button
+            type="button"
+            className="coin-pill"
+            onClick={handleOpenShop}
+            aria-label={`${t('ui.top.openShop')}: ${t('ui.shop.wallet', { coins: pet.coins })}`}
+            title={t('ui.shop.wallet', { coins: pet.coins })}
+          >
             <img src={currencyIcon} alt="" aria-hidden="true" />
-            <strong>{pet.coins}</strong>
+            <strong>{formatCompactNumber(pet.coins)}</strong>
           </button>
-          <div className="heart-pill" aria-label={t('ui.top.heartsAria', { hearts: pet.hearts })} title={t('ui.top.heartsTitle')}>
+          <div className="heart-pill" aria-label={t('ui.top.heartsAria', { hearts: pet.hearts })} title={t('ui.top.heartsAria', { hearts: pet.hearts })}>
             <Heart size={20} aria-hidden="true" />
-            <strong>{pet.hearts}</strong>
+            <strong>{formatCompactNumber(pet.hearts)}</strong>
           </div>
           <button
             type="button"
@@ -632,6 +670,7 @@ export const App = () => {
             onClick={() => {
               playAfterUnlock('open');
               setDraftName(pet.name);
+              setDraftBirthday(pet.birthday);
               setSettingsOpen(true);
             }}
           >
@@ -745,11 +784,13 @@ export const App = () => {
           activeMod={activeMod}
           modMessage={modMessage}
           draftName={draftName}
+          draftBirthday={draftBirthday}
           language={language}
           saveText={saveText}
           importSaveText={importSaveText}
           hasOpenedHelp={pet.hasOpenedHelp}
           onDraftNameChange={setDraftName}
+          onDraftBirthdayChange={setDraftBirthday}
           onLanguageChange={handleLanguageChange}
           onImportSaveTextChange={setImportSaveText}
           onOpenHelp={handleOpenHelp}
@@ -757,7 +798,7 @@ export const App = () => {
             playAfterUnlock('close');
             setSettingsOpen(false);
           }}
-          onRename={handleRename}
+          onSaveProfile={handleSaveProfile}
           onReset={handleReset}
           onClearMod={handleClearMod}
           onExportSave={handleExportSave}
@@ -765,6 +806,16 @@ export const App = () => {
           onImportPastedSave={() => importSaveFromText(importSaveText)}
           onModFileChange={handleModFileChange}
           onImportSaveFileChange={handleImportSaveFileChange}
+        />
+      )}
+      {isResetConfirmOpen && (
+        <ConfirmDialog
+          title={t('ui.settings.resetDialog.title')}
+          message={t('ui.settings.resetDialog.message')}
+          cancelLabel={t('ui.settings.resetDialog.cancel')}
+          confirmLabel={t('ui.settings.resetDialog.confirm')}
+          onCancel={handleCancelReset}
+          onConfirm={handleConfirmReset}
         />
       )}
     </main>
