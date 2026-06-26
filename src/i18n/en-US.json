@@ -79,7 +79,8 @@
         "loadFailed": "Failed to load mod.",
         "restored": "Restored the default pet.",
         "restoreFailed": "Failed to restore default.",
-        "switched": "Switched to {name}."
+        "switched": "Switched to {name}.",
+        "manage": "Manage mod"
       },
       "save": {
         "sectionAria": "Save management",
@@ -96,7 +97,8 @@
         "importedMissingMod": "Save imported, but it references {name} v{version}. Import the matching mod zip for the same appearance.",
         "importFailed": "Failed to import save.",
         "readFailed": "Failed to read save file.",
-        "readFileFailed": "Could not read file."
+        "readFileFailed": "Could not read file.",
+        "manage": "Save management"
       },
       "freeNotice": "This app is free software and should not be obtained through paid access.",
       "help": {
@@ -123,8 +125,10 @@
           "The shop sells food, gifts, and care items. Free soda biscuits have a daily limit.",
           "Pomodoro can run while idle or sleeping, and completed focus phases grant a small amount of mood and coins.",
           "Frequent interaction triggers a short cooldown to prevent too much stat loss at once."
-        ]
-      }
+        ],
+        "authorLink": "Author page and feedback"
+      },
+      "back": "Back"
     },
     "pomodoro": {
       "panelAria": "Pomodoro",
@@ -183,6 +187,9 @@
       "maxLevel": "Max level",
       "pomodoro": "Pomodoro",
       "weatherAria": "Today's weather: {weather}"
+    },
+    "rewards": {
+      "claim": "Claim reward"
     }
   },
   "pet": {
@@ -196,13 +203,25 @@
           "name": "Homestyle bento",
           "summary": "Hunger +34, mood +5"
         },
+        "orange": {
+          "name": "Orange",
+          "summary": "Light fruit snack, hunger +18, mood +2, health +1"
+        },
+        "apple": {
+          "name": "Apple",
+          "summary": "Crisp fruit snack, hunger +20, mood +1, health +2"
+        },
+        "banana": {
+          "name": "Banana",
+          "summary": "Filling fruit snack, hunger +24, mood +2, energy +2"
+        },
         "nutri_meal": {
           "name": "Nutri meal",
-          "summary": "Hunger +26, health +12"
+          "summary": "Hunger +30, mood +3, health +15"
         },
         "pig_trotter": {
           "name": "Pig trotter",
-          "summary": "Furo's favorite, hunger +42, mood +8"
+          "summary": "Furo's favorite, hunger +44, mood +9, health +5"
         },
         "strawberry_cake": {
           "name": "Strawberry cake",
@@ -212,37 +231,57 @@
           "name": "AD calcium milk",
           "summary": "Furo's favorite, hunger +16, health +3"
         },
+        "strawberry_milk": {
+          "name": "Strawberry milk",
+          "summary": "Sweet milk drink, hunger +16, mood +8, health +3"
+        },
         "small_bouquet": {
           "name": "Small bouquet",
           "summary": "Gift, mood +18"
         },
         "shiny_sticker": {
           "name": "Shiny sticker",
-          "summary": "Gift, mood +12, small chance to gain a heart"
+          "summary": "Gift, mood +16, small chance to gain a heart"
         },
         "soft_cloud_doll": {
           "name": "Soft cloud doll",
-          "summary": "Premium gift, mood +30, energy +3"
+          "summary": "Premium gift, mood +40, energy +6"
         },
         "ribbon_bell": {
           "name": "Ribbon bell",
-          "summary": "Gift, mood +20"
+          "summary": "Gift, mood +24"
         },
         "toy_ball": {
           "name": "Toy ball",
           "summary": "Mood +25, energy -4"
         },
+        "picture_book": {
+          "name": "Picture book",
+          "summary": "Quiet reading item, mood +40, energy +2"
+        },
         "shampoo": {
           "name": "Bubble shampoo",
-          "summary": "Cleanliness +35, health +3"
+          "summary": "Emergency clean care, cleanliness +50, health +5"
+        },
+        "wet_wipes": {
+          "name": "Wet wipes",
+          "summary": "Quick clean care, cleanliness +32, health +1"
         },
         "medicine": {
           "name": "Tiny medicine",
-          "summary": "Health +30, mood -2"
+          "summary": "Emergency health care, health +45, mood -1"
+        },
+        "vitamin_tablet": {
+          "name": "Vitamin tablet",
+          "summary": "Light health care, health +20, mood +1"
         },
         "blanket": {
           "name": "Warm blanket",
-          "summary": "Energy +20, mood +2"
+          "summary": "Emergency rest care, energy +40, mood +4"
+        },
+        "energy_drink": {
+          "name": "Energy drink",
+          "summary": "Emergency energy care, energy +32, mood -1"
         }
       },
       "categories": {
@@ -418,12 +457,13 @@
       "play": "{name} had a great time playing.",
       "clean": "{name} got clean and relaxed a little. Hunger -3, mood +1, energy +2.",
       "lowEnergyWork": "Not enough energy. Sleep or use an item before working.",
-      "work": "{name} worked with you and earned 24 coins.",
+      "work": "{name} worked with you and earned {coins} coins.",
       "sleep": {
         "pomodoroPaused": "{name} started resting. Pomodoro keeps running.",
         "lowMood": "{name}'s mood is low and sleep may be uneasy.",
         "normal": "{name} started resting. Energy will recover faster."
-      }
+      },
+      "workBonus": " Good mood brought an extra {coins} coins."
     },
     "buy": {
       "missing": "This shop item does not exist.",
@@ -469,6 +509,9 @@
       "sticker": "{name} dreamed of receiving a glowing sticker, heart +1.",
       "biscuit": "The dream snack basket left a soda biscuit, inventory +1.",
       "puddleRun": "{name} dreamed of running through puddles, energy +4, cleanliness -1."
+    },
+    "reward": {
+      "helpStarterGift": "Starter gift claimed, coins +{coins}."
     }
   }
 }

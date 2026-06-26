@@ -3,18 +3,26 @@ export type PetStatus = 'content' | 'hungry' | 'sad' | 'dirty' | 'tired' | 'sick
 export type ItemId =
   | 'emergency_biscuit'
   | 'bento'
+  | 'orange'
+  | 'apple'
+  | 'banana'
   | 'nutri_meal'
   | 'pig_trotter'
   | 'strawberry_cake'
   | 'ad_milk'
+  | 'strawberry_milk'
   | 'small_bouquet'
   | 'shiny_sticker'
   | 'soft_cloud_doll'
   | 'ribbon_bell'
   | 'toy_ball'
+  | 'picture_book'
   | 'shampoo'
+  | 'wet_wipes'
   | 'medicine'
-  | 'blanket';
+  | 'vitamin_tablet'
+  | 'blanket'
+  | 'energy_drink';
 
 export type Inventory = Partial<Record<ItemId, number>>;
 
@@ -105,6 +113,8 @@ export interface PetState {
   lastInteractionAt: number;
   lastPetInteractionAt: number;
   pomodoro: PomodoroState;
+  hasOpenedHelp: boolean;
+  claimedRewardIds: string[];
 }
 
 export type PetAction = 'play' | 'clean' | 'sleep' | 'work';
@@ -131,3 +141,5 @@ export interface UseInventoryItemOptions {
   favoriteText?: (amount: number) => string | undefined;
   itemName?: string;
 }
+
+

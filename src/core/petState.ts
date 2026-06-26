@@ -1,10 +1,13 @@
-import { t } from '../i18n';
+﻿import { t } from '../i18n';
 import { dailyBiscuitClaimLimit, allItemIds } from './items';
 import { clampCoins, clampCount, clampHealth, clampLevel, clampStat, defaultPetName, getPetStatCap } from './petStats';
 import type { ActionStreak, Inventory, ItemId, PetState, PetStatus, RecentActivity, WeatherType } from './petTypes';
 import { defaultPomodoroState, normalizePomodoroState } from './pomodoro';
 import { getWeatherForDate, weatherTypeSet } from './weather';
 import { getLocalDateKey, isNumber } from './utils';
+
+export const helpStarterGiftRewardId = 'starter_help_gift_v1';
+export const helpStarterGiftCoins = 180;
 
 export const defaultActionStreak = (now: number): ActionStreak => ({
   key: 'none',
@@ -66,6 +69,8 @@ export const createDefaultPet = (now = Date.now()): PetState => ({
   lastInteractionAt: now,
   lastPetInteractionAt: 0,
   pomodoro: defaultPomodoroState(now),
+  hasOpenedHelp: false,
+  claimedRewardIds: [],
 });
 
 export const getPrimaryStatus = (pet: PetState): PetStatus => {
@@ -108,6 +113,12 @@ export const normalizePet = (value: unknown, now = Date.now()): PetState => {
       : getWeatherForDate(now);
   const rawActionStreak =
     raw.actionStreak && typeof raw.actionStreak === 'object' ? (raw.actionStreak as Record<string, unknown>) : {};
+  const claimedRewardIds = Array.isArray(raw.claimedRewardIds)
+    ? Array.from(new Set(raw.claimedRewardIds.filter((id): id is string => typeof id === 'string' && id.trim().length > 0).map((id) => id.trim().slice(0, 64))))
+    : [];
+  if (raw.hasClaimedHelpGift === true && !claimedRewardIds.includes(helpStarterGiftRewardId)) {
+    claimedRewardIds.push(helpStarterGiftRewardId);
+  }
   const actionStreakKey =
     typeof rawActionStreak.key === 'string' &&
     ['play', 'clean', 'work', 'feed', 'gift', 'touch', 'none'].includes(rawActionStreak.key)
@@ -175,5 +186,10 @@ export const normalizePet = (value: unknown, now = Date.now()): PetState => {
         : now,
     lastPetInteractionAt: isNumber(raw.lastPetInteractionAt) ? raw.lastPetInteractionAt : 0,
     pomodoro: normalizePomodoroState(raw.pomodoro, now),
+    hasOpenedHelp: Boolean(raw.hasOpenedHelp),
+    claimedRewardIds,
   };
 };
+
+
+

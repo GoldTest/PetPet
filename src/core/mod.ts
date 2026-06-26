@@ -30,18 +30,26 @@ export const petActivityImageKeys = [
 export const itemImageKeys = [
   'emergency_biscuit',
   'bento',
+  'orange',
+  'apple',
+  'banana',
   'nutri_meal',
   'pig_trotter',
   'strawberry_cake',
   'ad_milk',
+  'strawberry_milk',
   'small_bouquet',
   'shiny_sticker',
   'soft_cloud_doll',
   'ribbon_bell',
   'toy_ball',
+  'picture_book',
   'shampoo',
+  'wet_wipes',
   'medicine',
+  'vitamin_tablet',
   'blanket',
+  'energy_drink',
 ] as const satisfies readonly ItemId[];
 
 export type PetStatusImageKey = (typeof petStatusImageKeys)[number];

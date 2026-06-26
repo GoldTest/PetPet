@@ -1488,3 +1488,257 @@ h1 {
     font-size: 0.8rem;
   }
 }
+
+.settings-modal {
+  grid-template-rows: auto minmax(0, 1fr) auto;
+  max-height: min(720px, calc(100dvh - 36px));
+  overflow: hidden;
+}
+
+.settings-title-row {
+  display: inline-flex;
+  min-width: 0;
+  align-items: center;
+  gap: 10px;
+}
+
+.settings-title-row h2 {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.settings-back-button {
+  display: inline-grid;
+  width: 38px;
+  height: 38px;
+  flex: 0 0 auto;
+  place-items: center;
+  border: 0;
+  border-radius: 999px;
+  color: #2d6fd3;
+  background: #eaf2ff;
+  box-shadow: inset 0 0 0 1px rgba(45, 111, 211, 0.14);
+}
+
+.settings-back-button:active {
+  transform: translateY(1px);
+}
+
+.settings-modal__body {
+  display: grid;
+  min-height: 0;
+  gap: 14px;
+  overflow: auto;
+  padding-right: 2px;
+  overscroll-behavior: contain;
+}
+
+.settings-modal__footer {
+  padding-top: 2px;
+}
+
+.settings-nav-card {
+  display: flex;
+  width: 100%;
+  min-height: 70px;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px;
+  border: 1px solid rgba(44, 58, 78, 0.12);
+  border-radius: 8px;
+  color: #172034;
+  background: #f7faff;
+  text-align: left;
+}
+
+.settings-nav-card::after {
+  content: '›';
+  flex: 0 0 auto;
+  color: #2d6fd3;
+  font-size: 1.35rem;
+  font-weight: 900;
+  line-height: 1;
+}
+
+.settings-nav-card span {
+  display: grid;
+  min-width: 0;
+  gap: 4px;
+}
+
+.settings-nav-card strong {
+  font-size: 0.95rem;
+}
+
+.settings-nav-card small {
+  overflow: hidden;
+  color: #64728a;
+  font-size: 0.82rem;
+  font-weight: 700;
+  line-height: 1.35;
+  text-overflow: ellipsis;
+}
+
+.shop-modal {
+  grid-template-rows: auto auto auto minmax(0, 1fr);
+  height: min(720px, calc(100dvh - 36px));
+  overflow: hidden;
+}
+
+.shop-grid {
+  min-height: 0;
+  overflow: auto;
+  padding-right: 2px;
+  overscroll-behavior: contain;
+}
+
+.inventory-panel {
+  min-height: 0;
+}
+
+.inventory-list {
+  max-height: min(360px, 42dvh);
+  min-height: 0;
+  overflow: auto;
+  padding-right: 2px;
+  overscroll-behavior: contain;
+}
+
+@media (max-width: 420px) {
+  .modal-backdrop {
+    padding: 12px;
+  }
+
+  .settings-modal,
+  .shop-modal {
+    max-height: calc(100dvh - 24px);
+    gap: 14px;
+    padding: 14px;
+  }
+
+  .shop-modal {
+    height: calc(100dvh - 24px);
+  }
+
+  .settings-back-button {
+    width: 36px;
+    height: 36px;
+  }
+
+  .settings-nav-card {
+    min-height: 64px;
+    padding: 10px;
+  }
+
+  .settings-nav-card small {
+    font-size: 0.76rem;
+  }
+
+  .inventory-list {
+    max-height: 34dvh;
+  }
+}
+
+.settings-help-button {
+  position: relative;
+}
+
+.settings-help-button--unread::after {
+  content: '';
+  position: absolute;
+  top: 3px;
+  right: 3px;
+  width: 9px;
+  height: 9px;
+  border: 2px solid #fff;
+  border-radius: 50%;
+  background: #df3d3d;
+  box-shadow: 0 0 0 2px rgba(223, 61, 61, 0.14);
+}
+
+.help-modal {
+  position: fixed;
+}
+
+.help-author-link {
+  display: flex;
+  align-items: center;
+  min-height: 34px;
+  padding: 8px 10px;
+  border-radius: 8px;
+  background: #eef9f5;
+  font-size: 0.82rem;
+  font-weight: 800;
+  line-height: 1.35;
+}
+
+.help-author-link a {
+  color: #256b53;
+  text-decoration: none;
+}
+
+.help-author-link a:hover {
+  text-decoration: underline;
+}
+
+
+@media (max-width: 420px) {
+  .settings-help-button--unread::after {
+    top: 2px;
+    right: 2px;
+  }
+
+  .help-author-link {
+    font-size: 0.76rem;
+  }
+}
+
+.floating-reward-button {
+  position: fixed;
+  right: 18px;
+  bottom: calc(96px + var(--safe-bottom));
+  z-index: 12;
+  display: inline-grid;
+  width: 58px;
+  height: 58px;
+  place-items: center;
+  border: 0;
+  border-radius: 999px;
+  background: #fff5cc;
+  box-shadow: 0 16px 32px rgba(131, 87, 19, 0.22);
+}
+
+.floating-reward-button img {
+  width: 42px;
+  height: 42px;
+  object-fit: contain;
+  image-rendering: pixelated;
+}
+
+.floating-reward-button:active {
+  transform: translateY(1px);
+}
+
+@media (min-width: 760px) {
+  .floating-reward-button {
+    right: max(24px, calc((100vw - 1120px) / 2 + 24px));
+    bottom: calc(24px + var(--safe-bottom));
+  }
+}
+
+@media (max-width: 420px) {
+  .floating-reward-button {
+    right: 14px;
+    bottom: calc(88px + var(--safe-bottom));
+    width: 52px;
+    height: 52px;
+  }
+
+  .floating-reward-button img {
+    width: 38px;
+    height: 38px;
+  }
+}

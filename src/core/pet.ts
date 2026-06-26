@@ -58,7 +58,7 @@ export {
   pomodoroMinHealthThreshold,
   pomodoroPhaseLabels,
 } from './pomodoro';
-export { createDefaultPet, getPrimaryStatus, getStatusText, normalizePet } from './petState';
+export { createDefaultPet, getPrimaryStatus, getStatusText, helpStarterGiftCoins, helpStarterGiftRewardId, normalizePet } from './petState';
 export { lowSleepMoodWarningThreshold } from './petCommon';
 export {
   advancePet,
@@ -79,5 +79,6 @@ export {
   startPomodoro,
   updatePomodoroSettings,
   upgradePet,
+  getWorkReward,
   useInventoryItem,
 } from './petActions';

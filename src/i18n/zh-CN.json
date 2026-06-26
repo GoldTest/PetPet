@@ -79,7 +79,8 @@
         "loadFailed": "读取 Mod 失败。",
         "restored": "已恢复默认宠物。",
         "restoreFailed": "恢复默认失败。",
-        "switched": "已切换到 {name}。"
+        "switched": "已切换到 {name}。",
+        "manage": "Mod 管理"
       },
       "save": {
         "sectionAria": "存档管理",
@@ -96,7 +97,8 @@
         "importedMissingMod": "存档已导入，但它引用了 {name} v{version}。如需外观一致，请导入对应 Mod zip。",
         "importFailed": "导入存档失败。",
         "readFailed": "读取存档文件失败。",
-        "readFileFailed": "无法读取文件。"
+        "readFileFailed": "无法读取文件。",
+        "manage": "存档管理"
       },
       "freeNotice": "本软件为免费软件，不应通过付费方式获得。",
       "help": {
@@ -123,8 +125,10 @@
           "商店可购买食物、礼物和护理道具，免费苏打饼干每日限量领取。",
           "番茄钟可在挂机或睡觉时运行，完成专注阶段会获得少量心情和金币。",
           "频繁互动会触发短暂冷却，避免一次性扣除太多属性。"
-        ]
-      }
+        ],
+        "authorLink": "作者地址，反馈请到"
+      },
+      "back": "返回"
     },
     "pomodoro": {
       "panelAria": "番茄钟",
@@ -183,6 +187,9 @@
       "maxLevel": "已满级",
       "pomodoro": "番茄钟",
       "weatherAria": "今日天气：{weather}"
+    },
+    "rewards": {
+      "claim": "领取奖励"
     }
   },
   "pet": {
@@ -196,13 +203,25 @@
           "name": "家常便当",
           "summary": "饱腹 +34，心情 +5"
         },
+        "orange": {
+          "name": "橘子",
+          "summary": "轻食水果，饱腹 +18，心情 +2，健康 +1"
+        },
+        "apple": {
+          "name": "苹果",
+          "summary": "清爽水果，饱腹 +20，心情 +1，健康 +2"
+        },
+        "banana": {
+          "name": "香蕉",
+          "summary": "耐饿水果，饱腹 +24，心情 +2，体力 +2"
+        },
         "nutri_meal": {
           "name": "营养餐",
-          "summary": "饱腹 +26，健康 +12"
+          "summary": "饱腹 +30，心情 +3，健康 +15"
         },
         "pig_trotter": {
           "name": "猪蹄",
-          "summary": "Furo 喜欢，饱腹 +42，心情 +8"
+          "summary": "Furo 喜欢，饱腹 +44，心情 +9，健康 +5"
         },
         "strawberry_cake": {
           "name": "草莓蛋糕",
@@ -212,37 +231,57 @@
           "name": "AD 钙奶",
           "summary": "Furo 喜欢，饱腹 +16，健康 +3"
         },
+        "strawberry_milk": {
+          "name": "草莓牛奶",
+          "summary": "甜味牛奶饮品，饱腹 +16，心情 +8，健康 +3"
+        },
         "small_bouquet": {
           "name": "小花束",
           "summary": "礼物，心情 +18"
         },
         "shiny_sticker": {
           "name": "亮晶晶贴纸",
-          "summary": "礼物，心情 +12，小概率获得小心心"
+          "summary": "礼物，心情 +16，小概率获得小心心"
         },
         "soft_cloud_doll": {
           "name": "软乎乎云朵玩偶",
-          "summary": "高级礼物，心情 +30，体力 +3"
+          "summary": "高级礼物，心情 +40，体力 +6"
         },
         "ribbon_bell": {
           "name": "缎带铃铛",
-          "summary": "礼物，心情 +20"
+          "summary": "礼物，心情 +24"
         },
         "toy_ball": {
           "name": "玩具球",
           "summary": "心情 +25，体力 -4"
         },
+        "picture_book": {
+          "name": "绘本",
+          "summary": "安静阅读道具，心情 +40，体力 +2"
+        },
         "shampoo": {
           "name": "泡泡香波",
-          "summary": "清洁 +35，健康 +3"
+          "summary": "应急清洁护理，清洁 +50，健康 +5"
+        },
+        "wet_wipes": {
+          "name": "湿巾",
+          "summary": "快速清洁护理，清洁 +32，健康 +1"
         },
         "medicine": {
           "name": "小药丸",
-          "summary": "健康 +30，心情 -2"
+          "summary": "应急健康护理，健康 +45，心情 -1"
+        },
+        "vitamin_tablet": {
+          "name": "维生素片",
+          "summary": "轻量健康护理，健康 +20，心情 +1"
         },
         "blanket": {
           "name": "暖毯",
-          "summary": "体力 +20，心情 +2"
+          "summary": "应急休息护理，体力 +40，心情 +4"
+        },
+        "energy_drink": {
+          "name": "能量饮料",
+          "summary": "应急体力护理，体力 +32，心情 -1"
         }
       },
       "categories": {
@@ -418,12 +457,13 @@
       "play": "{name} 玩得很开心。",
       "clean": "{name} 变干净了，也放松了一点。饱腹 -3，心情 +1，体力 +2。",
       "lowEnergyWork": "体力不足，睡觉或使用道具恢复后再打工。",
-      "work": "{name} 陪你打工，赚到 24 金币。",
+      "work": "{name} 陪你打工，赚到 {coins} 金币。",
       "sleep": {
         "pomodoroPaused": "{name} 开始休息，番茄钟继续计时。",
         "lowMood": "{name} 心情很低，可能会睡得不太安稳。",
         "normal": "{name} 开始休息，体力会更快恢复。"
-      }
+      },
+      "workBonus": " 心情不错，额外赚到 {coins} 金币。"
     },
     "buy": {
       "missing": "这个商品不存在。",
@@ -469,6 +509,9 @@
       "sticker": "{name} 梦见收到一张会发光的贴纸，小心心 +1。",
       "biscuit": "梦里的点心篮留下了一块苏打饼干，背包 +1。",
       "puddleRun": "{name} 梦见踩着水洼跑步，体力 +4，清洁 -1。"
+    },
+    "reward": {
+      "helpStarterGift": "已领取启程赠礼，金币 +{coins}。"
     }
   }
 }

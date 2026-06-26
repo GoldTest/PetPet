@@ -9,6 +9,8 @@ import {
   defaultPetName,
   getEnergyRecoveryInfo,
   getNextUpgradeHeartCost,
+  helpStarterGiftCoins,
+  helpStarterGiftRewardId,
   getPetStatCap,
   interactWithPet,
   isPetLowEnergy,
@@ -30,7 +32,7 @@ import {
   type PetStatus,
   type PomodoroDurations,
 } from '../core/pet';
-import { currencyIcon, resolveItemIcons, resolvePetActivityImages, resolvePetStatusImages } from '../assets';
+import { currencyIcon, giftBoxIcon, resolveItemIcons, resolvePetActivityImages, resolvePetStatusImages } from '../assets';
 import {
   getAudioEnabled,
   playSfx,
@@ -104,6 +106,11 @@ const getPomodoroProgress = (pet: PetState) => {
 
 type PomodoroSettingKey = keyof PomodoroDurations;
 type SoundOutcome = 'success' | 'blocked' | 'heart' | 'low_state';
+type FloatingRewardConfig = { id: string; coins: number; eventKey: string };
+
+const floatingRewardConfigs: readonly FloatingRewardConfig[] = [
+  { id: helpStarterGiftRewardId, coins: helpStarterGiftCoins, eventKey: 'pet.reward.helpStarterGift' },
+];
 
 const getInventoryCount = (pet: PetState, itemId: ItemId) => pet.inventory[itemId] ?? 0;
 const getShopItem = (itemId: ItemId) => shopItems.find((item) => item.id === itemId);
@@ -118,9 +125,9 @@ const getActionSfx = (action: PetAction): SfxId => {
 const getItemSfx = (itemId: ItemId): SfxId => {
   const item = getShopItem(itemId);
   if (item?.kind === 'food') return 'action_eat';
-  if (itemId === 'shampoo') return 'action_bath';
-  if (itemId === 'blanket' || itemId === 'soft_cloud_doll') return 'action_blanket';
-  if (itemId === 'medicine') return 'action_work_play_medicine';
+  if (itemId === 'shampoo' || itemId === 'wet_wipes') return 'action_bath';
+  if (itemId === 'blanket' || itemId === 'soft_cloud_doll' || itemId === 'picture_book') return 'action_blanket';
+  if (itemId === 'medicine' || itemId === 'vitamin_tablet' || itemId === 'energy_drink') return 'action_work_play_medicine';
   return 'pet_heart';
 };
 const downloadTextFile = (fileName: string, text: string) => {
@@ -362,6 +369,24 @@ export const App = () => {
     setSettingsOpen(false);
   };
 
+  const handleOpenHelp = () => {
+    setPet((current) => (current.hasOpenedHelp ? current : { ...current, hasOpenedHelp: true }));
+  };
+
+  const handleClaimFloatingReward = (reward: FloatingRewardConfig) => {
+    playAfterUnlock('coin');
+    setPet((current) => {
+      if (current.claimedRewardIds.includes(reward.id)) return current;
+
+      return {
+        ...current,
+        coins: current.coins + reward.coins,
+        claimedRewardIds: [...current.claimedRewardIds, reward.id],
+        recentEvent: t(reward.eventKey, { coins: reward.coins }),
+      };
+    });
+  };
+
   const handleLanguageChange = (nextLanguage: LanguageCode) => {
     if (nextLanguage === language) return;
     setLanguage(nextLanguage);
@@ -439,7 +464,7 @@ export const App = () => {
   const handleDownloadSave = () => {
     const text = saveText || createSaveFileText(petRef.current, activeMod?.manifest);
     setSaveText(text);
-    downloadTextFile(`pocpet-save-${new Date().toISOString().slice(0, 10)}.json`, text);
+    downloadTextFile(`pocpet-save-${new Date().toISOString().slice(0, 10)}.pocpet`, text);
   };
 
   const importSaveFromText = (text: string) => {
@@ -472,6 +497,8 @@ export const App = () => {
       setModMessage(error instanceof Error ? error.message : t('ui.settings.save.readFailed'));
     }
   };
+
+  const availableFloatingReward = floatingRewardConfigs.find((reward) => !pet.claimedRewardIds.includes(reward.id));
 
   const pomodoroOverlay = showPomodoroPanel ? (
     <PomodoroOverlay
@@ -578,6 +605,18 @@ export const App = () => {
 
       <ActionDock isSleeping={pet.isSleeping} isLowEnergy={isLowEnergy} onAction={handleAction} onOpenShop={handleOpenShop} />
 
+      {availableFloatingReward && (
+        <button
+          type="button"
+          className="floating-reward-button"
+          aria-label={t('ui.rewards.claim')}
+          title={t('ui.rewards.claim')}
+          onClick={() => handleClaimFloatingReward(availableFloatingReward)}
+        >
+          <img src={giftBoxIcon} alt="" aria-hidden="true" />
+        </button>
+      )}
+
       {isShopOpen && (
         <ShopModal
           pet={pet}
@@ -597,9 +636,11 @@ export const App = () => {
           language={language}
           saveText={saveText}
           importSaveText={importSaveText}
+          hasOpenedHelp={pet.hasOpenedHelp}
           onDraftNameChange={setDraftName}
           onLanguageChange={handleLanguageChange}
           onImportSaveTextChange={setImportSaveText}
+          onOpenHelp={handleOpenHelp}
           onClose={() => {
             playAfterUnlock('close');
             setSettingsOpen(false);

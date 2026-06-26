@@ -28,7 +28,7 @@ my-pet-mod.zip
 `- items/*.png
 ```
 
-`items` 目录支持这些固定文件名：`emergency_biscuit.png`、`bento.png`、`nutri_meal.png`、`pig_trotter.png`、`strawberry_cake.png`、`ad_milk.png`、`small_bouquet.png`、`shiny_sticker.png`、`soft_cloud_doll.png`、`ribbon_bell.png`、`toy_ball.png`、`shampoo.png`、`medicine.png`、`blanket.png`。
+`items` 目录支持这些固定文件名：`emergency_biscuit.png`、`bento.png`、`orange.png`、`apple.png`、`banana.png`、`nutri_meal.png`、`pig_trotter.png`、`strawberry_cake.png`、`ad_milk.png`、`strawberry_milk.png`、`small_bouquet.png`、`shiny_sticker.png`、`soft_cloud_doll.png`、`ribbon_bell.png`、`toy_ball.png`、`picture_book.png`、`shampoo.png`、`wet_wipes.png`、`medicine.png`、`vitamin_tablet.png`、`blanket.png` 和 `energy_drink.png`。
 
 缺少图片不会导入失败，会回退到内置资源；zip 里出现未知文件会被拒绝。
 

@@ -9,10 +9,19 @@ import iconShinyStickers from './assets/icon/icon_shiny_stickers.png';
 import itemBento from './assets/icon/item_bento.png';
 import itemBlanket from './assets/icon/item_blanket.png';
 import itemEmergencyBiscuit from './assets/icon/item_emergency_biscuit.png';
+import itemEnergyDrink from './assets/icon/item_energy_drink.png';
+import itemGiftBox from './assets/icon/item_gift_box1.png';
 import itemMedicine from './assets/icon/item_medicine.png';
 import itemNutriMeal from './assets/icon/item_nutri_meal.png';
+import itemOrange from './assets/icon/item_orange.png';
+import itemApple from './assets/icon/item_apple.png';
+import itemBanana from './assets/icon/item_banana.png';
+import itemPictureBook from './assets/icon/item_picture_book.png';
+import itemStrawberryMilk from './assets/icon/item_strawberry_milk.png';
 import itemShampoo from './assets/icon/item_shampoo.png';
 import itemToyBall from './assets/icon/item_toy_ball.png';
+import itemVitaminTablet from './assets/icon/item_vitamin_tablet.png';
+import itemWetWipes from './assets/icon/item_wet_wipes.png';
 import petBath from './assets/pet/pet_bath.png';
 import petDirtySad from './assets/pet/pet_dirty_sad.png';
 import petEatCookie from './assets/pet/pet_eat_cookie.png';
@@ -34,22 +43,31 @@ import type { ActivePetMod } from './core/mod';
 import type { ItemId, PetStatus, RecentActivity } from './core/pet';
 
 export const currencyIcon = coin;
+export const giftBoxIcon = itemGiftBox;
 
 export const itemIcons: Record<ItemId, string> = {
   emergency_biscuit: itemEmergencyBiscuit,
   bento: itemBento,
+  orange: itemOrange,
+  apple: itemApple,
+  banana: itemBanana,
   nutri_meal: itemNutriMeal,
   pig_trotter: iconPigTotters,
   strawberry_cake: iconBerryCake,
   ad_milk: iconAdMilk,
+  strawberry_milk: itemStrawberryMilk,
   small_bouquet: iconFlowers,
   shiny_sticker: iconShinyStickers,
   soft_cloud_doll: iconCloudPuff,
   ribbon_bell: iconBeltedBell,
   toy_ball: itemToyBall,
+  picture_book: itemPictureBook,
   shampoo: itemShampoo,
+  wet_wipes: itemWetWipes,
   medicine: itemMedicine,
+  vitamin_tablet: itemVitaminTablet,
   blanket: itemBlanket,
+  energy_drink: itemEnergyDrink,
 };
 
 export const petStatusImages: Record<PetStatus, string> = {

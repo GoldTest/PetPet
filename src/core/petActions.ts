@@ -1,4 +1,4 @@
-﻿import { t } from '../i18n';
+import { t } from '../i18n';
 import { addInventoryItem, dailyBiscuitClaimLimit, favoriteFoodIdSet, getDailyShopDiscountInfo, getInventoryCount, getShopItem, giftItemIdSet, removeInventoryItem } from './items';
 import { applyActionStreak, getRandomHealthIncident, getRandomPetInteractionCost, lowSleepMoodWarningThreshold, markInteraction, petInteractionCooldownMs, petInteractionOveruseCooldownMs, withActivity } from './petCommon';
 import { advancePet, getDailyBiscuitClaimInfo, isPetLowEnergy, pausePomodoroForReason } from './petLifecycle';
@@ -6,10 +6,27 @@ import { clampCount, clampPetHealth, clampPetStat, getPetStatCap, getUpgradeHear
 import type { CareActionKey, ItemId, PetAction, PetState, PomodoroDurations, RecentActivity, UseInventoryItemOptions } from './petTypes';
 import { defaultPomodoroState, getDefaultPomodoroRemainingMs, getPomodoroPhaseDurationMs, normalizePomodoroSettings, pickPomodoroActivity, pomodoroMinHealthThreshold, pomodoroPhaseLabels } from './pomodoro';
 import { settleSleep, startSleepSnapshot } from './petEvents';
-import { getLocalDateKey } from './utils';
+import { getLocalDateKey, randomInt } from './utils';
 
 export const recordPetInteraction = (pet: PetState, now = Date.now()): PetState =>
   markInteraction(advancePet(pet, now), now);
+
+export const getWorkReward = (pet: PetState) => {
+  const baseCoins = (pet.weather === 'rainy' ? 20 : 24) + Math.max(0, pet.level - 1);
+  const statCap = getPetStatCap(pet);
+  const moodRatio = statCap > 0 ? Math.max(0, Math.min(1, pet.mood / statCap)) : 0;
+  const bonusChance = 0.05 + moodRatio * 0.4;
+  const bonusCoins =
+    Math.random() < bonusChance
+      ? Math.max(1, Math.floor(baseCoins * (randomInt(5, 15) / 100)))
+      : 0;
+
+  return {
+    baseCoins,
+    bonusCoins,
+    totalCoins: baseCoins + bonusCoins,
+  };
+};
 
 export const upgradePet = (pet: PetState, now = Date.now()): PetState => {
   const current = advancePet(pet, now);
@@ -101,15 +118,17 @@ export const applyPetAction = (pet: PetState, action: PetAction, now = Date.now(
         const incident = getRandomHealthIncident('work');
         const healthDrop = incident?.amount ?? 0;
         const incidentText = incident ? ` ${incident.text}` : '';
+        const reward = getWorkReward(base);
+        const bonusText = reward.bonusCoins > 0 ? t('pet.action.workBonus', { coins: reward.bonusCoins }) : '';
 
         return {
           ...withActivity(base, Math.floor(base.ageSeconds / 60) % 2 === 0 ? 'work_food' : 'work_plants', now, 2200),
-          coins: base.coins + (base.weather === 'rainy' ? 20 : 24),
+          coins: base.coins + reward.totalCoins,
           energy: clampPetStat(base, base.energy - (base.weather === 'breezy' ? 10 : 12)),
           mood: clampPetStat(base, base.mood - 5),
           hunger: clampPetStat(base, base.hunger - 6),
           health: clampPetHealth(base, base.health - healthDrop),
-          recentEvent: `${t('pet.action.work', { name: base.name })}${base.weather === 'rainy' ? t('pet.weather.effect.rainyWork') : ''}${base.weather === 'breezy' ? t('pet.weather.effect.breezyWork') : ''}${incidentText}${overuse.text}`,
+          recentEvent: `${t('pet.action.work', { name: base.name, coins: reward.totalCoins })}${bonusText}${base.weather === 'rainy' ? t('pet.weather.effect.rainyWork') : ''}${base.weather === 'breezy' ? t('pet.weather.effect.breezyWork') : ''}${incidentText}${overuse.text}`,
         };
       }
     case 'sleep':
@@ -213,18 +232,26 @@ export const useInventoryItem = (
   const itemActivity: Record<ItemId, RecentActivity> = {
     emergency_biscuit: 'eat_cookie',
     bento: 'eat_noodles',
+    orange: 'eat_cookie',
+    apple: 'eat_cookie',
+    banana: 'eat_cookie',
     nutri_meal: 'eat_meat',
     pig_trotter: 'eat_meat',
     strawberry_cake: 'eat_cookie',
     ad_milk: 'eat_cookie',
+    strawberry_milk: 'eat_cookie',
     small_bouquet: 'give_heart',
     shiny_sticker: 'give_heart',
     soft_cloud_doll: 'happy',
     ribbon_bell: 'give_heart',
     toy_ball: 'happy',
+    picture_book: 'reading_books',
     shampoo: 'bath',
+    wet_wipes: 'bath',
     medicine: 'give_heart',
+    vitamin_tablet: 'give_heart',
     blanket: 'happy',
+    energy_drink: 'happy',
   };
   const baseEvent =
     item.kind === 'food'

@@ -28,7 +28,7 @@ my-pet-mod.zip
 `- items/*.png
 ```
 
-Supported item image names are: `emergency_biscuit.png`, `bento.png`, `nutri_meal.png`, `pig_trotter.png`, `strawberry_cake.png`, `ad_milk.png`, `small_bouquet.png`, `shiny_sticker.png`, `soft_cloud_doll.png`, `ribbon_bell.png`, `toy_ball.png`, `shampoo.png`, `medicine.png`, and `blanket.png`.
+Supported item image names are: `emergency_biscuit.png`, `bento.png`, `orange.png`, `apple.png`, `banana.png`, `nutri_meal.png`, `pig_trotter.png`, `strawberry_cake.png`, `ad_milk.png`, `strawberry_milk.png`, `small_bouquet.png`, `shiny_sticker.png`, `soft_cloud_doll.png`, `ribbon_bell.png`, `toy_ball.png`, `picture_book.png`, `shampoo.png`, `wet_wipes.png`, `medicine.png`, `vitamin_tablet.png`, `blanket.png`, and `energy_drink.png`.
 
 Missing images are allowed and will fall back to built-in assets. Unknown files are rejected.
 
