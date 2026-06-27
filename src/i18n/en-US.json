@@ -242,6 +242,70 @@
         "gift": "Gift",
         "touch": "Touch"
       }
+    },
+    "wishes": {
+      "progress": "Progress {progress}/{target}",
+      "rewardCoins": "Reward {coins} coins",
+      "claim": "Claim",
+      "claimed": "Claimed",
+      "inProgress": "In progress",
+      "actions": {
+        "feed": "Feed",
+        "clean": "Clean",
+        "play": "Play",
+        "touch": "Pat",
+        "work": "Work",
+        "sleep": "Sleep"
+      }
+    },
+    "dailyWish": {
+      "aria": "Daily wish",
+      "kicker": "Daily wish",
+      "wishes": {
+        "feed_once": {
+          "title": "Share a bite",
+          "description": "Feed your pet once and help its belly feel better."
+        },
+        "clean_once": {
+          "title": "Fresh and clean",
+          "description": "Clean once so your pet and room feel better."
+        },
+        "play_once": {
+          "title": "Play a little",
+          "description": "Play once and add a little happiness to today."
+        },
+        "touch_once": {
+          "title": "A gentle pat",
+          "description": "Interact once and let your pet know you checked in."
+        },
+        "work_once": {
+          "title": "Work together",
+          "description": "Work once and earn a little spending money for today."
+        }
+      }
+    },
+    "returnWelcome": {
+      "aria": "Return welcome",
+      "kicker": "Welcome back",
+      "reward": "Return supplies: {coins} coins, items x{count}",
+      "tasks": {
+        "feed_once": {
+          "title": "Eat first",
+          "description": "You were away for {days} days. Feed once so your pet can settle down."
+        },
+        "clean_once": {
+          "title": "Tidy up",
+          "description": "You were away for {days} days. Clean once to recover together."
+        },
+        "touch_once": {
+          "title": "You are back",
+          "description": "You were away for {days} days. Pat your pet so it knows you returned."
+        },
+        "sleep_once": {
+          "title": "Rest well",
+          "description": "You were away for {days} days. Let your pet sleep and recover energy slowly."
+        }
+      }
     }
   },
   "pet": {
@@ -249,91 +313,91 @@
       "items": {
         "emergency_biscuit": {
           "name": "Soda biscuit",
-          "summary": "Daily fallback food, hunger +14, mood -1"
+          "summary": "A plain-tasting cracker."
         },
         "bento": {
           "name": "Homestyle bento",
-          "summary": "Hunger +34, mood +4"
+          "summary": "A bento box with a generous serving of rice."
         },
         "orange": {
           "name": "Orange",
-          "summary": "Light fruit snack, hunger +18, mood +1, health +1"
+          "summary": "A sweet and tangy fruit."
         },
         "apple": {
           "name": "Apple",
-          "summary": "Crisp fruit snack, hunger +20, mood +1, health +2"
+          "summary": "An inviting red fruit."
         },
         "banana": {
           "name": "Banana",
-          "summary": "Filling fruit snack, hunger +24, mood +1, energy +2"
+          "summary": "A sweet fruit that keeps hunger away."
         },
         "nutri_meal": {
-          "name": "Nutri meal",
-          "summary": "Hunger +30, mood +2, health +15"
+          "name": "Light salad",
+          "summary": "A light salad said to be good for health."
         },
         "pig_trotter": {
-          "name": "Pig trotter",
-          "summary": "Furo's favorite, hunger +44, mood +6, cleanliness -5, health +5"
+          "name": "Grilled trotter",
+          "summary": "Tempting grilled trotter, but it gets messy."
         },
         "strawberry_cake": {
           "name": "Strawberry cake",
-          "summary": "Furo's favorite, hunger +24, mood +8, cleanliness -3"
+          "summary": "A strawberry cake everyone loves."
         },
         "ad_milk": {
           "name": "AD calcium milk",
-          "summary": "Furo's favorite, hunger +20, mood +5, health +6"
+          "summary": "A flavored milk drink said to be nutritious."
         },
         "strawberry_milk": {
           "name": "Strawberry milk",
-          "summary": "Sweet milk drink, hunger +16, mood +5, health +3"
+          "summary": "Strawberry-flavored milk."
         },
         "small_bouquet": {
           "name": "Small bouquet",
-          "summary": "Gift, mood +18"
+          "summary": "A small bunch of fresh flowers."
         },
         "shiny_sticker": {
           "name": "Shiny sticker",
-          "summary": "Gift, mood +16, small chance to gain a heart"
+          "summary": "A little sticker that shines brightly."
         },
         "soft_cloud_doll": {
           "name": "Soft cloud doll",
-          "summary": "Premium gift, mood +40, energy +6"
+          "summary": "A cloud doll that feels soft to hug."
         },
         "ribbon_bell": {
           "name": "Ribbon bell",
-          "summary": "Gift, mood +24"
+          "summary": "A small bell tied with a ribbon."
         },
         "toy_ball": {
           "name": "Toy ball",
-          "summary": "Mood +25, energy -4"
+          "summary": "A bouncy ball made for playing together."
         },
         "picture_book": {
           "name": "Picture book",
-          "summary": "Quiet reading item, mood +40, energy +2"
+          "summary": "A picture book for quiet reading."
         },
         "shampoo": {
           "name": "Bubble shampoo",
-          "summary": "Emergency clean care, cleanliness +50, health +5"
+          "summary": "A pleasantly scented bath shampoo."
         },
         "wet_wipes": {
           "name": "Wet wipes",
-          "summary": "Quick clean care, cleanliness +32, health +1"
+          "summary": "Handy wipes for quick cleaning."
         },
         "medicine": {
-          "name": "Tiny medicine",
-          "summary": "Emergency health care, health +45, mood -1"
+          "name": "Emergency medicine vial",
+          "summary": "A little bitter, but cures almost anything."
         },
         "vitamin_tablet": {
           "name": "Vitamin tablet",
-          "summary": "Light health care, health +20, mood +1"
+          "summary": "A slightly sweet vitamin tablet."
         },
         "blanket": {
           "name": "Warm blanket",
-          "summary": "Emergency rest care, energy +40, mood +4"
+          "summary": "A soft little blanket that makes you sleepy. 💤"
         },
         "energy_drink": {
           "name": "Energy drink",
-          "summary": "Emergency energy care, energy +32, mood -1"
+          "summary": "A drink with a curious flavor."
         },
         "birthday_cake": {
           "name": "Birthday Cake",
@@ -624,6 +688,17 @@
         "summerClean": " Summer care helped a bit more.",
         "autumnWork": " Autumn work paid a little extra."
       }
+    },
+    "dailyWish": {
+      "claimed": "Daily wish complete, coins +{coins}.",
+      "notReady": "Daily wish is not complete yet.",
+      "alreadyClaimed": "Daily wish reward was already claimed."
+    },
+    "returnWelcome": {
+      "started": "Welcome back. {name} waited for {days} days. Finish one small recovery task first.",
+      "claimed": "Return supplies claimed, coins +{coins}, and care items were added to the bag.",
+      "notReady": "Finish the return recovery task before claiming supplies.",
+      "alreadyClaimed": "Return supplies were already claimed."
     }
   }
 }

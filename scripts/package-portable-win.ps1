@@ -15,7 +15,7 @@ if ([string]::IsNullOrWhiteSpace($version)) {
 $source = Join-Path $root 'src-tauri\target\release\app.exe'
 $distIndex = Join-Path $root 'dist\index.html'
 $releaseDir = Join-Path $root 'release'
-$target = Join-Path $releaseDir "PocPet-$version-windows-portable.exe"
+$target = Join-Path $releaseDir "pocket$version.exe"
 
 if (-not (Test-Path -LiteralPath $distIndex)) {
   throw "Vite index.html not found: $distIndex"

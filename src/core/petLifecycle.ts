@@ -1,4 +1,5 @@
 import { t } from '../i18n';
+import { ensureDailyWishForDate, maybeCreateReturnWelcome, returnWelcomeMinAwayMs } from './dailyWishes';
 import { dailyBiscuitClaimLimit } from './items';
 import { applyTimedEvent, getRandomDailyEncounter, getRandomOfflineDiary, getRandomOfflineEvent, maybeApplyDreamTalk, settleSleep, startSleepSnapshot } from './petEvents';
 import { clampCoins, clampCount, clampPetHealth, clampPetStat, getEnergyRecoveryIntervalMs, getPetStatCap, lowEnergyThreshold } from './petStats';
@@ -265,7 +266,7 @@ const applyDailyEncounter = (pet: PetState, now: number): PetState => {
 };
 
 export const advancePet = (pet: PetState, now = Date.now()): PetState => {
-  const current = ensureYearlyStatsForDate(normalizePet(pet, now), now);
+  const current = ensureDailyWishForDate(ensureYearlyStatsForDate(normalizePet(pet, now), now), now);
   const deltaMs = Math.max(0, now - current.lastUpdatedAt);
   const elapsedSeconds = deltaMs / 1000;
   const weather = getWeatherForDate(now);
@@ -374,12 +375,23 @@ export const advancePet = (pet: PetState, now = Date.now()): PetState => {
   }
 
   if (wokeUp) {
-    return settleSleep(next, now);
+    const settled = settleSleep(next, now);
+    return !currentForActivity.pomodoro.isRunning && deltaMs >= returnWelcomeMinAwayMs
+      ? maybeCreateReturnWelcome(settled, deltaMs, now)
+      : settled;
   }
 
   next = maybeApplyDreamTalk(next, now);
 
   next = advancePomodoro(next, now);
+
+  if (!currentForActivity.pomodoro.isRunning && deltaMs >= returnWelcomeMinAwayMs) {
+    const withReturnWelcome = maybeCreateReturnWelcome(next, deltaMs, now);
+    if (withReturnWelcome.returnWelcome && !withReturnWelcome.returnWelcome.claimedAt) {
+      return withReturnWelcome;
+    }
+    next = withReturnWelcome;
+  }
 
   if (offlineEventDue) {
     return applyTimedEvent(next, getRandomOfflineEvent(next.name, weather), now, t('pet.prefix.offlineEvent'));

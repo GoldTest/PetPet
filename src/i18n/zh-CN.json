@@ -42,7 +42,7 @@
       "kicker": "背包",
       "title": "食物和道具",
       "shop": "商店",
-      "empty": "背包是空的，商店里每天可以领取 3 份苏打饼干。"
+      "empty": "背包是空的，商店里每天可以领取免费饼干。"
     },
     "shop": {
       "eyebrow": "Shop",
@@ -146,7 +146,7 @@
           "番茄钟是挂机计时工具，清醒时宠物会陪你守时，睡觉时仍保持休息；完成专注阶段会获得金币和少量心情。",
           "频繁互动会触发短暂冷却，避免一次性扣除太多属性。"
         ],
-        "authorLink": "作者地址，反馈请到"
+        "authorLink": "作者地址，反馈请点击"
       },
       "back": "返回"
     },
@@ -242,6 +242,70 @@
         "gift": "送礼",
         "touch": "互动"
       }
+    },
+    "wishes": {
+      "progress": "进度 {progress}/{target}",
+      "rewardCoins": "奖励 {coins} 金币",
+      "claim": "领取",
+      "claimed": "已领取",
+      "inProgress": "进行中",
+      "actions": {
+        "feed": "去喂食",
+        "clean": "去清洁",
+        "play": "去玩耍",
+        "touch": "去摸摸",
+        "work": "去打工",
+        "sleep": "去睡觉"
+      }
+    },
+    "dailyWish": {
+      "aria": "每日小愿望",
+      "kicker": "今日愿望",
+      "wishes": {
+        "feed_once": {
+          "title": "一起吃点东西",
+          "description": "喂食一次，帮宠物把肚子照顾好。"
+        },
+        "clean_once": {
+          "title": "清清爽爽",
+          "description": "清洁一次，让宠物舒服一点。"
+        },
+        "play_once": {
+          "title": "玩一小会儿",
+          "description": "陪宠物玩一次，今天也要一起开心。"
+        },
+        "touch_once": {
+          "title": "摸摸头",
+          "description": "点击互动一次。"
+        },
+        "work_once": {
+          "title": "一起打工",
+          "description": "打工一次，轻松赚点今天的零花钱。"
+        }
+      }
+    },
+    "returnWelcome": {
+      "aria": "回归欢迎",
+      "kicker": "欢迎回来",
+      "reward": "回归补给 {coins} 金币，道具 x{count}",
+      "tasks": {
+        "feed_once": {
+          "title": "先吃点东西",
+          "description": "你离开了 {days} 天，先喂食一次，让宠物安心下来。"
+        },
+        "clean_once": {
+          "title": "整理一下",
+          "description": "你离开了 {days} 天，先清洁一次，把状态恢复过来。"
+        },
+        "touch_once": {
+          "title": "回来就好",
+          "description": "你离开了 {days} 天，摸摸宠物，让它知道你回来了。"
+        },
+        "sleep_once": {
+          "title": "好好休息",
+          "description": "你离开了 {days} 天，让宠物睡一觉，慢慢恢复体力。"
+        }
+      }
     }
   },
   "pet": {
@@ -249,91 +313,91 @@
       "items": {
         "emergency_biscuit": {
           "name": "苏打饼干",
-          "summary": "每日保底食物，饱腹 +14，心情 -1"
+          "summary": "味道平淡的饼干"
         },
         "bento": {
           "name": "家常便当",
-          "summary": "饱腹 +34，心情 +4"
+          "summary": "米饭份量很足的盒饭"
         },
         "orange": {
           "name": "橘子",
-          "summary": "轻食水果，饱腹 +18，心情 +1，健康 +1"
+          "summary": "酸酸甜甜的水果"
         },
         "apple": {
           "name": "苹果",
-          "summary": "清爽水果，饱腹 +20，心情 +1，健康 +2"
+          "summary": "诱人的红色水果"
         },
         "banana": {
           "name": "香蕉",
-          "summary": "耐饿水果，饱腹 +24，心情 +1，体力 +2"
+          "summary": "香甜的水果，耐饿"
         },
         "nutri_meal": {
-          "name": "营养餐",
-          "summary": "饱腹 +30，心情 +2，健康 +15"
+          "name": "轻沙拉",
+          "summary": "据说吃了对健康有好处"
         },
         "pig_trotter": {
-          "name": "猪蹄",
-          "summary": "Furo 喜欢，饱腹 +44，心情 +6，清洁 -5，健康 +5"
+          "name": "烧烤猪蹄",
+          "summary": "诱人的猪蹄，不过吃起来容易弄脏"
         },
         "strawberry_cake": {
           "name": "草莓蛋糕",
-          "summary": "Furo 喜欢，饱腹 +24，心情 +8，清洁 -3"
+          "summary": "人人都爱的草莓蛋糕"
         },
         "ad_milk": {
           "name": "AD 钙奶",
-          "summary": "Furo 喜欢，饱腹 +20，心情 +5，健康 +6"
+          "summary": "风味牛奶饮料，据说有营养"
         },
         "strawberry_milk": {
           "name": "草莓牛奶",
-          "summary": "甜味牛奶饮品，饱腹 +16，心情 +5，健康 +3"
+          "summary": "草莓味牛奶"
         },
         "small_bouquet": {
           "name": "小花束",
-          "summary": "礼物，心情 +18"
+          "summary": "一小束新鲜的花"
         },
         "shiny_sticker": {
           "name": "亮晶晶贴纸",
-          "summary": "礼物，心情 +16，小概率获得小心心"
+          "summary": "闪闪发亮的小贴纸"
         },
         "soft_cloud_doll": {
           "name": "软乎乎云朵玩偶",
-          "summary": "高级礼物，心情 +40，体力 +6"
+          "summary": "抱起来很舒服的云朵玩偶"
         },
         "ribbon_bell": {
           "name": "缎带铃铛",
-          "summary": "礼物，心情 +24"
+          "summary": "系着缎带的小铃铛"
         },
         "toy_ball": {
           "name": "玩具球",
-          "summary": "心情 +25，体力 -4"
+          "summary": "很有弹力的小球"
         },
         "picture_book": {
           "name": "绘本",
-          "summary": "安静阅读道具，心情 +40，体力 +2"
+          "summary": "适合安静翻看的绘本"
         },
         "shampoo": {
           "name": "泡泡香波",
-          "summary": "应急清洁护理，清洁 +50，健康 +5"
+          "summary": "香香的洗浴香波"
         },
         "wet_wipes": {
           "name": "湿巾",
-          "summary": "快速清洁护理，清洁 +32，健康 +1"
+          "summary": "方便擦拭的小湿巾"
         },
         "medicine": {
-          "name": "小药丸",
-          "summary": "应急健康护理，健康 +45，心情 -1"
+          "name": "应急小药瓶",
+          "summary": "有点苦，不过治愈百病"
         },
         "vitamin_tablet": {
           "name": "维生素片",
-          "summary": "轻量健康护理，健康 +20，心情 +1"
+          "summary": "有点甜的维生素片"
         },
         "blanket": {
           "name": "暖毯",
-          "summary": "应急休息护理，体力 +40，心情 +4"
+          "summary": "柔软的小毯子，让人想睡觉💤"
         },
         "energy_drink": {
           "name": "能量饮料",
-          "summary": "应急体力护理，体力 +32，心情 -1"
+          "summary": "奇妙风味的饮料"
         },
         "birthday_cake": {
           "name": "生日蛋糕",
@@ -561,7 +625,7 @@
     },
     "dreamTalk": [
       "{name} 小声说想把云朵藏进背包里。",
-      "{name} 翻了个身，嘟囔着要再数一枚金币。",
+      "{name} 翻了个身，嘟囔着要再数数金币。",
       "{name} 像是在梦里追着亮晶晶的贴纸跑。",
       "{name} 迷迷糊糊地念着你的名字。",
       "{name} 抱紧小毯子，轻轻哼了一声。"
@@ -624,6 +688,17 @@
         "summerClean": " 夏季护理让清洁效果更好。",
         "autumnWork": " 秋季打工多赚了一点。"
       }
+    },
+    "dailyWish": {
+      "claimed": "今日愿望完成，金币 +{coins}。",
+      "notReady": "今日愿望还没完成。",
+      "alreadyClaimed": "今日愿望奖励已经领取过了。"
+    },
+    "returnWelcome": {
+      "started": "欢迎回来，{name} 等了你 {days} 天。先完成一个小恢复任务吧。",
+      "claimed": "回归补给已领取，金币 +{coins}，背包里也多了照顾道具。",
+      "notReady": "先完成回归恢复任务，再领取补给。",
+      "alreadyClaimed": "回归补给已经领取过了。"
     }
   }
 }

@@ -1,16 +1,19 @@
-﻿import { useEffect, useMemo, useRef, useState, type ChangeEvent } from 'react';
+import { useEffect, useMemo, useRef, useState, type ChangeEvent } from 'react';
 import { Heart, Settings, Volume2, VolumeX } from 'lucide-react';
 import {
   advancePet,
   applyPetAction,
   claimAvailableDateRewards,
+  claimReturnWelcomeReward,
   buyItem,
   canStartPomodoro,
+  claimDailyWishReward,
   exchangeHeartForCoins,
   createDefaultPet,
   defaultPetBirthday,
   defaultPetName,
   dismissYearReview,
+  getDailyWishView,
   getEnergyRecoveryInfo,
   getSeasonInfo,
   getNextUpgradeHeartCost,
@@ -19,6 +22,7 @@ import {
   helpStarterGiftCoins,
   helpStarterGiftRewardId,
   getPetStatCap,
+  getReturnWelcomeView,
   interactWithPet,
   isPetLowEnergy,
   pausePomodoro,
@@ -120,6 +124,7 @@ type SoundOutcome = 'success' | 'blocked' | 'heart' | 'low_state';
 type FloatingRewardConfig = { id: string; coins: number; eventKey: string };
 type RewardPopup = ClaimedDateReward;
 type RewardDisplayItem = { key: string; icon?: string; label: string; title?: string };
+type WishQuickAction = PetState['dailyWish']['action'] | NonNullable<PetState['returnWelcome']>['action'];
 
 const floatingRewardConfigs: readonly FloatingRewardConfig[] = [
   { id: helpStarterGiftRewardId, coins: helpStarterGiftCoins, eventKey: 'pet.reward.helpStarterGift' },
@@ -132,6 +137,8 @@ const getActionSfx = (action: PetAction): SfxId => {
   if (action === 'play' || action === 'work') return 'action_work_play_medicine';
   return 'pet_touch';
 };
+const getWishActionButtonLabel = (action: WishQuickAction) => t(`ui.wishes.actions.${action}`);
+
 
 const getItemSfx = (itemId: ItemId): SfxId => {
   const item = getInventoryItem(itemId);
@@ -276,6 +283,17 @@ export const App = () => {
         : undefined;
   const isPomodoroActionDisabled = !pet.pomodoro.isRunning && !canRunPomodoro;
   const currentBgmMode: BgmMode = isShopOpen ? 'shop' : pet.isSleeping ? 'sleep' : 'room';
+  const dailyWishView = getDailyWishView(pet);
+  const returnWelcomeView = getReturnWelcomeView(pet);
+  const dailyWishButtonLabel = dailyWishView.canClaim || dailyWishView.claimed
+    ? dailyWishView.buttonLabel
+    : getWishActionButtonLabel(pet.dailyWish.action);
+  const returnWelcomeButtonLabel =
+    returnWelcomeView && pet.returnWelcome
+      ? returnWelcomeView.canClaim
+        ? returnWelcomeView.buttonLabel
+        : getWishActionButtonLabel(pet.returnWelcome.action)
+      : '';
 
   useEffect(() => {
     syncBgm(currentBgmMode);
@@ -454,6 +472,96 @@ export const App = () => {
         recentEvent: t(reward.eventKey, { coins: reward.coins }),
       };
     });
+  };
+
+  const handleClaimDailyWish = () => {
+    playAfterUnlock('tap');
+    setPet((current) => {
+      const beforeClaimedAt = current.dailyWish.claimedAt;
+      const next = claimDailyWishReward(current);
+      const didClaim = next.dailyWish.claimedAt !== beforeClaimedAt;
+      playSfx(didClaim ? 'coin' : 'error');
+      return next;
+    });
+  };
+
+  const completeFeedWishAction = () => {
+    const foodItem = displayInventoryItems.find((item) => item.kind === 'food' && getInventoryCount(petRef.current, item.id) > 0);
+    if (!foodItem) {
+      playAfterUnlock('open');
+      setActiveShopCategory('food');
+      setPet((current) => recordPetInteraction(current));
+      setShopOpen(true);
+      return;
+    }
+
+    playAfterUnlock('tap');
+    setPet((current) => {
+      const beforeCount = getInventoryCount(current, foodItem.id);
+      const displayItem = getDisplayItem(displayInventoryItems, foodItem.id);
+      const next = useInventoryItem(current, foodItem.id, Date.now(), {
+        favoriteFoodIds: getModFavoriteFoodIds(activeMod),
+        favoriteText: (amount) => formatFavoriteFoodText(activeMod, amount),
+        itemName: displayItem?.displayName,
+      });
+      playSfx(getInventoryCount(next, foodItem.id) < beforeCount ? getItemSfx(foodItem.id) : 'error');
+      return next;
+    });
+  };
+
+  const handleWishQuickAction = (action: WishQuickAction) => {
+    switch (action) {
+      case 'feed':
+        completeFeedWishAction();
+        return;
+      case 'touch':
+        handleInteract();
+        return;
+      case 'clean':
+      case 'play':
+      case 'work':
+      case 'sleep':
+        handleAction(action);
+        return;
+    }
+  };
+
+  const handleDailyWishButton = () => {
+    const wish = petRef.current.dailyWish;
+    if (wish.claimedAt) {
+      playAfterUnlock('error');
+      return;
+    }
+    if (wish.completedAt) {
+      handleClaimDailyWish();
+      return;
+    }
+    handleWishQuickAction(wish.action);
+  };
+
+  const handleClaimReturnWelcome = () => {
+    playAfterUnlock('tap');
+    setPet((current) => {
+      const beforeClaimedAt = current.returnWelcome?.claimedAt;
+      const next = claimReturnWelcomeReward(current);
+      const didClaim = next.returnWelcome?.claimedAt !== beforeClaimedAt;
+      playSfx(didClaim ? 'coin' : 'error');
+      return next;
+    });
+  };
+
+  const handleReturnWelcomeButton = () => {
+    const welcome = petRef.current.returnWelcome;
+    if (!welcome) return;
+    if (welcome.claimedAt) {
+      playAfterUnlock('error');
+      return;
+    }
+    if (welcome.completedAt) {
+      handleClaimReturnWelcome();
+      return;
+    }
+    handleWishQuickAction(welcome.action);
   };
 
   const handleLanguageChange = (nextLanguage: LanguageCode) => {
@@ -707,6 +815,35 @@ export const App = () => {
           <div className="event-panel">
             <span>{t('ui.dashboard.event')}</span>
             <p>{pet.recentEvent}</p>
+          </div>
+
+          <div className="wish-stack">
+            {returnWelcomeView && (
+              <section className="wish-panel wish-panel--return" aria-label={t('ui.returnWelcome.aria')}>
+                <div className="wish-panel__copy">
+                  <span>{t('ui.returnWelcome.kicker')}</span>
+                  <h2>{returnWelcomeView.title}</h2>
+                  <p>{returnWelcomeView.description}</p>
+                  <small>{returnWelcomeView.progressText} · {returnWelcomeView.rewardText}</small>
+                </div>
+                <button type="button" className="primary-button wish-panel__button" onClick={handleReturnWelcomeButton}>
+                  {returnWelcomeButtonLabel}
+                </button>
+              </section>
+            )}
+            {!dailyWishView.claimed && (
+              <section className="wish-panel" aria-label={t('ui.dailyWish.aria')}>
+                <div className="wish-panel__copy">
+                  <span>{t('ui.dailyWish.kicker')}</span>
+                  <h2>{dailyWishView.title}</h2>
+                  <p>{dailyWishView.description}</p>
+                  <small>{dailyWishView.progressText} · {dailyWishView.rewardText}</small>
+                </div>
+                <button type="button" className="primary-button wish-panel__button" disabled={dailyWishView.claimed} onClick={handleDailyWishButton}>
+                  {dailyWishButtonLabel}
+                </button>
+              </section>
+            )}
           </div>
 
           <div className="stat-grid">

@@ -1,6 +1,9 @@
 export type {
   ActionStreak,
   CareActionKey,
+  DailyWishActionKey,
+  DailyWishId,
+  DailyWishState,
   Inventory,
   ItemEffect,
   ItemId,
@@ -13,6 +16,9 @@ export type {
   PomodoroPhase,
   PomodoroState,
   RecentActivity,
+  ReturnWelcomeActionKey,
+  ReturnWelcomeState,
+  ReturnWelcomeTaskId,
   ShopCategory,
   ShopItem,
   UseInventoryItemOptions,
@@ -70,6 +76,16 @@ export {
 } from './pomodoro';
 export { createDefaultPet, getPrimaryStatus, getStatusText, helpStarterGiftCoins, helpStarterGiftRewardId, normalizePet } from './petState';
 export { lowSleepMoodWarningThreshold } from './petCommon';
+export {
+  claimDailyWishReward,
+  claimReturnWelcomeReward,
+  ensureDailyWishForDate,
+  getDailyWishView,
+  getReturnWelcomeView,
+  maybeCreateReturnWelcome,
+  recordWishProgress,
+  returnWelcomeMinAwayMs,
+} from './dailyWishes';
 export { dismissYearReview } from './yearlyStats';
 export {
   advancePet,

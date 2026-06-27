@@ -106,6 +106,6 @@ A Mod birthday is the pet's default birthday. Users can edit the current pet bir
 ## Compatibility
 
 - v1 mods cannot add or remove item IDs.
-- v1 mods cannot change item prices, item effects, shop categories, coins, hearts, levels, Pomodoro rules, save rules, or offline rules.
-- v1 mods cannot add festival-exclusive items, customize the built-in `birthday_cake`, or define birthday, festival, daily login, anniversary, monthly gift, seasonal effect, or year review content yet.
+- v1 mods cannot change item prices, item effects, shop categories, coins, hearts, levels, Pomodoro rules, daily wish rules, return welcome rules, save rules, or offline rules.
+- v1 mods cannot add festival-exclusive items, customize the built-in `birthday_cake`, or define birthday, festival, daily login, daily wish, return welcome, anniversary, monthly gift, seasonal effect, or year review content yet.
 - Save export includes current data and a Mod summary, but does not include Mod images. Re-import the zip on another device before or after importing the save.

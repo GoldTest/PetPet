@@ -109,6 +109,38 @@ export interface YearReview {
   pomodoroFocusCount: number;
   topCareAction?: YearlyCareActionKey;
 }
+
+export type DailyWishActionKey = 'feed' | 'clean' | 'play' | 'touch' | 'work';
+
+export type DailyWishId = 'feed_once' | 'clean_once' | 'play_once' | 'touch_once' | 'work_once';
+
+export interface DailyWishState {
+  dateKey: string;
+  id: DailyWishId;
+  action: DailyWishActionKey;
+  progress: number;
+  target: number;
+  rewardCoins: number;
+  completedAt?: number;
+  claimedAt?: number;
+}
+
+export type ReturnWelcomeActionKey = 'feed' | 'clean' | 'touch' | 'sleep';
+
+export type ReturnWelcomeTaskId = 'feed_once' | 'clean_once' | 'touch_once' | 'sleep_once';
+
+export interface ReturnWelcomeState {
+  startedAt: number;
+  awayDays: number;
+  taskId: ReturnWelcomeTaskId;
+  action: ReturnWelcomeActionKey;
+  progress: number;
+  target: number;
+  rewardCoins: number;
+  rewardItemIds: ItemId[];
+  completedAt?: number;
+  claimedAt?: number;
+}
 export interface PetState {
   name: string;
   level: number;
@@ -158,6 +190,8 @@ export interface PetState {
   yearlyStats: YearlyStats;
   pendingYearReview?: YearReview;
   lastYearReviewYear?: number;
+  dailyWish: DailyWishState;
+  returnWelcome?: ReturnWelcomeState;
 }
 
 export type PetAction = 'play' | 'clean' | 'sleep' | 'work';

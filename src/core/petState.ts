@@ -1,5 +1,6 @@
 import { t } from '../i18n';
 import { defaultPetBirthday, normalizePetBirthday } from './dateRewards';
+import { createDailyWish, normalizeDailyWishState, normalizeReturnWelcomeState } from './dailyWishes';
 import { allItemIds, dailyBiscuitClaimLimit, dailyHeartExchangeLimit } from './items';
 import { clampCoins, clampCount, clampHealth, clampLevel, clampStat, defaultPetName, getPetStatCap } from './petStats';
 import type { ActionStreak, Inventory, ItemId, PetState, PetStatus, RecentActivity, WeatherType } from './petTypes';
@@ -79,6 +80,13 @@ export const createDefaultPet = (now = Date.now()): PetState => ({
   birthday: defaultPetBirthday,
   claimedFestivalRewardKeys: [],
   yearlyStats: defaultYearlyStats(now),
+  dailyWish: createDailyWish({
+    createdAt: now,
+    name: defaultPetName,
+    energy: 76,
+    health: 90,
+    isSleeping: false,
+  }, now),
 });
 
 export const getPrimaryStatus = (pet: PetState): PetStatus => {
@@ -153,19 +161,30 @@ export const normalizePet = (value: unknown, now = Date.now()): PetState => {
       ? Math.max(0, now - ageSeconds * 1000)
       : now;
   const pendingYearReview = normalizeYearReview(raw.pendingYearReview);
+  const normalizedName = typeof raw.name === 'string' && raw.name.trim() ? raw.name.trim().slice(0, 32) : fallback.name;
+  const normalizedEnergy = clampStat(isNumber(raw.energy) ? raw.energy : fallback.energy, statCap);
+  const normalizedHealth = clampHealth(isNumber(raw.health) ? raw.health : fallback.health, statCap);
+  const normalizedIsSleeping = Boolean(raw.isSleeping);
+  const dailyWish = normalizeDailyWishState(raw.dailyWish, {
+    createdAt,
+    name: normalizedName,
+    energy: normalizedEnergy,
+    health: normalizedHealth,
+    isSleeping: normalizedIsSleeping,
+  }, now);
 
   return {
-    name: typeof raw.name === 'string' && raw.name.trim() ? raw.name.trim().slice(0, 32) : fallback.name,
+    name: normalizedName,
     level,
     hunger: clampStat(isNumber(raw.hunger) ? raw.hunger : fallback.hunger, statCap),
     mood: clampStat(isNumber(raw.mood) ? raw.mood : fallback.mood, statCap),
     cleanliness: clampStat(isNumber(raw.cleanliness) ? raw.cleanliness : fallback.cleanliness, statCap),
-    energy: clampStat(isNumber(raw.energy) ? raw.energy : fallback.energy, statCap),
-    health: clampHealth(isNumber(raw.health) ? raw.health : fallback.health, statCap),
+    energy: normalizedEnergy,
+    health: normalizedHealth,
     createdAt,
     ageSeconds,
     lastUpdatedAt: isNumber(raw.lastUpdatedAt) ? raw.lastUpdatedAt : now,
-    isSleeping: Boolean(raw.isSleeping),
+    isSleeping: normalizedIsSleeping,
     recentEvent: typeof raw.recentEvent === 'string' ? raw.recentEvent : t('pet.default.welcomeBack'),
     recentActivity: isRecentActivity(raw.recentActivity) ? raw.recentActivity : 'idle',
     recentActivityUntil: isNumber(raw.recentActivityUntil) ? raw.recentActivityUntil : 0,
@@ -223,6 +242,8 @@ export const normalizePet = (value: unknown, now = Date.now()): PetState => {
     yearlyStats: normalizeYearlyStats(raw.yearlyStats, now),
     pendingYearReview,
     lastYearReviewYear: isNumber(raw.lastYearReviewYear) ? Math.floor(raw.lastYearReviewYear) : undefined,
+    dailyWish,
+    returnWelcome: normalizeReturnWelcomeState(raw.returnWelcome),
   };
 };
 

@@ -22,8 +22,8 @@ $sourceSo = Join-Path $root 'src-tauri\target\aarch64-linux-android\release\liba
 $jniDir = Join-Path $appDir 'src\main\jniLibs\arm64-v8a'
 $jniSo = Join-Path $jniDir 'libapp_lib.so'
 $releaseDir = Join-Path $root 'release'
-$alignedApk = Join-Path $releaseDir "PocPet-$version-arm64-release-aligned.apk"
-$finalApk = Join-Path $releaseDir "PocPet-$version-arm64-release-debugsigned.apk"
+$alignedApk = Join-Path $releaseDir "pocket$version-aligned.apk"
+$finalApk = Join-Path $releaseDir "pocket$version.apk"
 
 function Convert-VersionNameToCode([string]$versionName) {
   $core = ($versionName -split '[-+]')[0]

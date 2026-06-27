@@ -32,7 +32,7 @@ export const shopItems: readonly ShopItem[] = [
     name: t('pet.shop.items.bento.name'),
     kind: 'food',
     price: 24,
-    effect: { hunger: 34, mood: 4, cleanliness: -3 },
+    effect: { hunger: 34, cleanliness: -3 },
     summary: t('pet.shop.items.bento.summary'),
   },
   {
@@ -168,7 +168,7 @@ export const shopItems: readonly ShopItem[] = [
     name: t('pet.shop.items.medicine.name'),
     kind: 'care',
     price: 42,
-    effect: { health: 45, mood: -1 },
+    effect: { health: 45, mood: -5 },
     summary: t('pet.shop.items.medicine.summary'),
   },
   {

@@ -330,6 +330,66 @@ h1 {
 .event-panel p {
   line-height: 1.5;
 }
+.wish-stack {
+  display: grid;
+  gap: 10px;
+}
+
+.wish-panel {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 12px;
+  align-items: center;
+  padding: 12px;
+  border: 1px solid rgba(45, 111, 211, 0.14);
+  border-radius: 8px;
+  background: #eef5ff;
+}
+
+.wish-panel--return {
+  border-color: rgba(199, 67, 115, 0.18);
+  background: #fff1f7;
+}
+
+.wish-panel__copy {
+  display: grid;
+  min-width: 0;
+  gap: 4px;
+}
+
+.wish-panel__copy span {
+  color: #2d6fd3;
+  font-size: 0.72rem;
+  font-weight: 900;
+  letter-spacing: 0;
+  text-transform: uppercase;
+}
+
+.wish-panel--return .wish-panel__copy span {
+  color: #c74373;
+}
+
+.wish-panel__copy h2 {
+  overflow-wrap: anywhere;
+  color: #172034;
+  font-size: 1rem;
+  line-height: 1.2;
+}
+
+.wish-panel__copy p,
+.wish-panel__copy small {
+  color: #5b6a82;
+  font-size: 0.82rem;
+  font-weight: 750;
+  line-height: 1.35;
+}
+
+.wish-panel__button {
+  min-width: 86px;
+  min-height: 40px;
+  padding: 0 12px;
+  white-space: nowrap;
+}
 
 .stat-grid {
   display: grid;
@@ -1126,9 +1186,17 @@ h1 {
   image-rendering: pixelated;
 }
 
-.shop-item div {
+.shop-item > div {
   display: grid;
   gap: 4px;
+}
+
+.shop-item__title-row {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 8px;
+  min-width: 0;
 }
 
 .shop-item strong {
@@ -1137,6 +1205,29 @@ h1 {
   align-items: center;
   gap: 6px;
   color: #172034;
+}
+
+.shop-effect-badges {
+  display: flex;
+  flex: 0 1 auto;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 4px;
+  min-width: 0;
+}
+
+.shop-effect-badge {
+  display: inline-flex;
+  align-items: center;
+  min-height: 20px;
+  padding: 0 6px;
+  border-radius: 999px;
+  color: #47566d;
+  background: #eaf0f7;
+  font-size: 0.7rem;
+  font-weight: 900;
+  line-height: 1;
+  white-space: nowrap;
 }
 
 .shop-item span {
@@ -1504,6 +1595,15 @@ h1 {
 
   .shop-item {
     grid-template-columns: 52px minmax(0, 1fr);
+  }
+
+  .shop-item__title-row {
+    display: grid;
+    justify-content: stretch;
+  }
+
+  .shop-effect-badges {
+    justify-content: flex-start;
   }
 
   .shop-tabs {
@@ -2268,5 +2368,15 @@ h1 {
 
   .year-review-modal__grid {
     grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 520px) {
+  .wish-panel {
+    grid-template-columns: 1fr;
+  }
+
+  .wish-panel__button {
+    width: 100%;
   }
 }
