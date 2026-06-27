@@ -1,4 +1,4 @@
-﻿:root {
+:root {
   color: #182133;
   background: #edf6ff;
   font-family:
@@ -670,6 +670,16 @@ h1 {
   line-height: 1.1;
 }
 
+.pomodoro-description {
+  width: min(300px, 100%);
+  margin: 0;
+  padding: 0 8px;
+  color: #526179;
+  font-size: 0.72rem;
+  font-weight: 750;
+  line-height: 1.35;
+  text-align: center;
+}
 .pomodoro-settings {
   display: grid;
   width: min(300px, 100%);
@@ -1475,6 +1485,11 @@ h1 {
     font-size: 0.6rem;
   }
 
+  .pomodoro-description {
+    width: min(236px, 100%);
+    font-size: 0.66rem;
+    line-height: 1.28;
+  }
   .pomodoro-settings {
     width: min(236px, 100%);
     border-radius: 12px;
@@ -2158,6 +2173,100 @@ h1 {
   }
 
   .confirm-modal__actions {
+    grid-template-columns: 1fr;
+  }
+}
+
+
+.year-review-modal {
+  width: min(520px, 100%);
+  max-height: min(86vh, 680px);
+  overflow: auto;
+  border-radius: 24px;
+  background: rgba(255, 252, 246, 0.98);
+  border: 1px solid rgba(116, 83, 56, 0.16);
+  box-shadow: 0 24px 70px rgba(85, 57, 32, 0.22);
+  padding: 24px;
+  color: var(--ink);
+}
+
+.year-review-modal__header {
+  display: grid;
+  gap: 8px;
+  text-align: center;
+}
+
+.year-review-modal__header span {
+  color: var(--accent-strong);
+  font-size: 0.74rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.year-review-modal__header h2 {
+  margin: 0;
+  font-size: 1.45rem;
+}
+
+.year-review-modal__header p {
+  margin: 0;
+  color: var(--muted);
+  line-height: 1.55;
+}
+
+.year-review-modal__grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+  margin: 20px 0;
+}
+
+.year-review-modal__metric {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  grid-template-areas:
+    "icon label"
+    "icon value";
+  gap: 3px 10px;
+  align-items: center;
+  min-width: 0;
+  border-radius: 14px;
+  border: 1px solid rgba(116, 83, 56, 0.12);
+  background: rgba(255, 247, 233, 0.72);
+  padding: 12px;
+}
+
+.year-review-modal__metric svg {
+  grid-area: icon;
+  color: var(--accent-strong);
+}
+
+.year-review-modal__metric span {
+  grid-area: label;
+  color: var(--muted);
+  font-size: 0.78rem;
+  font-weight: 700;
+}
+
+.year-review-modal__metric strong {
+  grid-area: value;
+  min-width: 0;
+  overflow-wrap: anywhere;
+  font-size: 1.08rem;
+}
+
+.year-review-modal > .primary-button {
+  width: 100%;
+}
+
+@media (max-width: 560px) {
+  .year-review-modal {
+    padding: 20px;
+    border-radius: 20px;
+  }
+
+  .year-review-modal__grid {
     grid-template-columns: 1fr;
   }
 }

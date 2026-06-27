@@ -1,4 +1,4 @@
-﻿import { t } from '../i18n';
+import { t } from '../i18n';
 import { dailyBiscuitClaimLimit } from './items';
 import { applyTimedEvent, getRandomDailyEncounter, getRandomOfflineDiary, getRandomOfflineEvent, maybeApplyDreamTalk, settleSleep, startSleepSnapshot } from './petEvents';
 import { clampCoins, clampCount, clampPetHealth, clampPetStat, getEnergyRecoveryIntervalMs, getPetStatCap, lowEnergyThreshold } from './petStats';
@@ -16,13 +16,15 @@ import {
   pomodoroMinHealthThreshold,
 } from './pomodoro';
 import { normalizePet } from './petState';
+import { getCleanlinessDecaySeasonModifier, getMoodDecaySeasonModifier } from './season';
+import { ensureYearlyStatsForDate, recordYearlyPomodoroFocus } from './yearlyStats';
 import { getWeatherForDate } from './weather';
 import { getLocalDateKey, isNightTime, isSameLocalDay } from './utils';
 
 export const getEnergyRecoveryInfo = (pet: PetState, now = Date.now()) => {
   const current = normalizePet(pet, now);
   const statCap = getPetStatCap(current);
-  const intervalMs = getEnergyRecoveryIntervalMs(current);
+  const intervalMs = getEnergyRecoveryIntervalMs(current, current.isSleeping, now);
   if (current.energy >= statCap) {
     return { intervalMs, remainingMs: 0, isFull: true };
   }
@@ -87,7 +89,7 @@ export const pausePomodoroForReason = (pet: PetState, now: number, recentEvent: 
 };
 
 export const advancePomodoro = (pet: PetState, now = Date.now()): PetState => {
-  let next = normalizePet(pet, now);
+  let next = ensureYearlyStatsForDate(normalizePet(pet, now), now);
   let pomodoro = next.pomodoro;
   if (!pomodoro.isRunning) return next;
 
@@ -188,7 +190,9 @@ export const advancePomodoro = (pet: PetState, now = Date.now()): PetState => {
 
     const nextPhase = pomodoro.phase === 'focus' ? 'short_break' : 'focus';
     const nextRound = pomodoro.phase === 'focus' ? pomodoro.round : Math.min(pomodoro.settings.targetRounds, pomodoro.round + 1);
-    activity = pickPomodoroActivity();
+    if (!next.isSleeping) {
+      activity = pickPomodoroActivity();
+    }
     pomodoro = {
       ...pomodoro,
       phase: nextPhase,
@@ -214,10 +218,12 @@ export const advancePomodoro = (pet: PetState, now = Date.now()): PetState => {
     coins: clampCoins(next.coins + earnedCoins),
     mood: clampPetStat(next, next.mood + earnedMood),
     pomodoro,
-    recentActivity: pomodoro.isRunning ? activity : 'idle',
-    recentActivityUntil: pomodoro.isRunning && pomodoro.phaseEndsAt > now ? pomodoro.phaseEndsAt : 0,
+    recentActivity: !pomodoro.isRunning ? 'idle' : next.isSleeping ? next.recentActivity : activity,
+    recentActivityUntil: !pomodoro.isRunning ? 0 : next.isSleeping ? next.recentActivityUntil : pomodoro.phaseEndsAt > now ? pomodoro.phaseEndsAt : 0,
     lastInteractionAt: now,
   };
+
+  next = recordYearlyPomodoroFocus(next, settledFocusCount, now);
 
   if (settledPhaseCount > 0) {
     const parts = [
@@ -259,7 +265,7 @@ const applyDailyEncounter = (pet: PetState, now: number): PetState => {
 };
 
 export const advancePet = (pet: PetState, now = Date.now()): PetState => {
-  const current = normalizePet(pet, now);
+  const current = ensureYearlyStatsForDate(normalizePet(pet, now), now);
   const deltaMs = Math.max(0, now - current.lastUpdatedAt);
   const elapsedSeconds = deltaMs / 1000;
   const weather = getWeatherForDate(now);
@@ -283,7 +289,9 @@ export const advancePet = (pet: PetState, now = Date.now()): PetState => {
 
   const statCap = getPetStatCap(currentForActivity);
   const weatherMoodModifier = weather === 'sunny' ? 0.75 : 1;
+  const seasonMoodModifier = getMoodDecaySeasonModifier(now);
   const weatherCleanlinessModifier = weather === 'rainy' ? 1.3 : 1;
+  const seasonCleanlinessModifier = getCleanlinessDecaySeasonModifier(now);
   const pressure = [currentForActivity.hunger <= 18, currentForActivity.cleanliness <= 22, currentForActivity.mood <= 18].filter(Boolean).length;
   const autoSleepByIdle =
     !currentForActivity.pomodoro.isRunning &&
@@ -292,8 +300,12 @@ export const advancePet = (pet: PetState, now = Date.now()): PetState => {
     now - currentForActivity.lastInteractionAt >= 30 * 60 * 1000;
   const sleepingForDecay = currentForActivity.isSleeping || autoSleepByIdle;
   const hungerDelta = sleepingForDecay ? -(elapsedSeconds / 3600) * 2 : -(elapsedSeconds / 3600) * 7;
-  const moodDelta = sleepingForDecay ? (elapsedSeconds / 3600) * 2 : -(elapsedSeconds / 3600) * (pressure > 0 ? 5 : 2) * weatherMoodModifier;
-  const cleanDelta = sleepingForDecay ? -(elapsedSeconds / 3600) * 1 : -(elapsedSeconds / 3600) * 4 * weatherCleanlinessModifier;
+  const moodDelta = sleepingForDecay
+    ? (elapsedSeconds / 3600) * 2
+    : -(elapsedSeconds / 3600) * (pressure > 0 ? 5 : 2) * weatherMoodModifier * seasonMoodModifier;
+  const cleanDelta = sleepingForDecay
+    ? -(elapsedSeconds / 3600) * 1
+    : -(elapsedSeconds / 3600) * 4 * weatherCleanlinessModifier * seasonCleanlinessModifier;
   const healthDelta =
     pressure >= 2
       ? -(elapsedSeconds / 3600) * 4
@@ -301,7 +313,7 @@ export const advancePet = (pet: PetState, now = Date.now()): PetState => {
         ? (elapsedSeconds / 3600) * 1.5
         : 0;
 
-  const energyRecoveryIntervalMs = getEnergyRecoveryIntervalMs(currentForActivity, sleepingForDecay);
+  const energyRecoveryIntervalMs = getEnergyRecoveryIntervalMs(currentForActivity, sleepingForDecay, now);
   const recoveryStartedAt = Math.min(currentForActivity.lastEnergyRecoveryAt, now);
   const elapsedRecoveryMs = Math.max(0, now - recoveryStartedAt);
   const recoverableEnergy = Math.max(0, statCap - currentForActivity.energy);

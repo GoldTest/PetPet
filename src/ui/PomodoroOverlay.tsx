@@ -24,6 +24,7 @@ const pomodoroText = {
   focus: t('ui.pomodoro.focus'),
   shortBreak: t('ui.pomodoro.shortBreak'),
   statsAria: t('ui.pomodoro.statsAria'),
+  description: t('ui.pomodoro.description'),
 };
 
 const pomodoroSettingFields: readonly { key: PomodoroSettingKey; label: string; min: number; max: number; unit: string }[] = [
@@ -80,6 +81,8 @@ export const PomodoroOverlay = ({
         </div>
       </div>
     </div>
+
+    <p className="pomodoro-description">{pomodoroText.description}</p>
 
     <div className="pomodoro-settings" aria-label={pomodoroText.settings}>
       {pomodoroSettingFields.map((field) => (

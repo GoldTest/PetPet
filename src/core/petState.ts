@@ -1,4 +1,4 @@
-﻿import { t } from '../i18n';
+import { t } from '../i18n';
 import { defaultPetBirthday, normalizePetBirthday } from './dateRewards';
 import { allItemIds, dailyBiscuitClaimLimit, dailyHeartExchangeLimit } from './items';
 import { clampCoins, clampCount, clampHealth, clampLevel, clampStat, defaultPetName, getPetStatCap } from './petStats';
@@ -6,6 +6,7 @@ import type { ActionStreak, Inventory, ItemId, PetState, PetStatus, RecentActivi
 import { defaultPomodoroState, normalizePomodoroState } from './pomodoro';
 import { getWeatherForDate, weatherTypeSet } from './weather';
 import { getLocalDateKey, isNumber } from './utils';
+import { defaultYearlyStats, normalizeYearReview, normalizeYearlyStats } from './yearlyStats';
 
 export const helpStarterGiftRewardId = 'starter_help_gift_v1';
 export const helpStarterGiftCoins = 180;
@@ -43,6 +44,7 @@ export const createDefaultPet = (now = Date.now()): PetState => ({
   cleanliness: 82,
   energy: 76,
   health: 90,
+  createdAt: now,
   ageSeconds: 0,
   lastUpdatedAt: now,
   isSleeping: false,
@@ -76,6 +78,7 @@ export const createDefaultPet = (now = Date.now()): PetState => ({
   claimedRewardIds: [],
   birthday: defaultPetBirthday,
   claimedFestivalRewardKeys: [],
+  yearlyStats: defaultYearlyStats(now),
 });
 
 export const getPrimaryStatus = (pet: PetState): PetStatus => {
@@ -144,6 +147,12 @@ export const normalizePet = (value: unknown, now = Date.now()): PetState => {
 
   const level = clampLevel(isNumber(raw.level) ? raw.level : fallback.level);
   const statCap = getPetStatCap(level);
+  const createdAt = isNumber(raw.createdAt)
+    ? Math.min(now, raw.createdAt)
+    : ageSeconds > 0
+      ? Math.max(0, now - ageSeconds * 1000)
+      : now;
+  const pendingYearReview = normalizeYearReview(raw.pendingYearReview);
 
   return {
     name: typeof raw.name === 'string' && raw.name.trim() ? raw.name.trim().slice(0, 32) : fallback.name,
@@ -153,6 +162,7 @@ export const normalizePet = (value: unknown, now = Date.now()): PetState => {
     cleanliness: clampStat(isNumber(raw.cleanliness) ? raw.cleanliness : fallback.cleanliness, statCap),
     energy: clampStat(isNumber(raw.energy) ? raw.energy : fallback.energy, statCap),
     health: clampHealth(isNumber(raw.health) ? raw.health : fallback.health, statCap),
+    createdAt,
     ageSeconds,
     lastUpdatedAt: isNumber(raw.lastUpdatedAt) ? raw.lastUpdatedAt : now,
     isSleeping: Boolean(raw.isSleeping),
@@ -206,8 +216,13 @@ export const normalizePet = (value: unknown, now = Date.now()): PetState => {
     claimedRewardIds,
     birthday,
     lastBirthdayRewardYear: isNumber(raw.lastBirthdayRewardYear) ? Math.floor(raw.lastBirthdayRewardYear) : undefined,
+    lastAnniversaryRewardYear: isNumber(raw.lastAnniversaryRewardYear) ? Math.floor(raw.lastAnniversaryRewardYear) : undefined,
     dailyLoginRewardDateKey: typeof raw.dailyLoginRewardDateKey === 'string' ? raw.dailyLoginRewardDateKey.trim().slice(0, 16) : undefined,
+    monthlyGiftDateKey: typeof raw.monthlyGiftDateKey === 'string' ? raw.monthlyGiftDateKey.trim().slice(0, 16) : undefined,
     claimedFestivalRewardKeys,
+    yearlyStats: normalizeYearlyStats(raw.yearlyStats, now),
+    pendingYearReview,
+    lastYearReviewYear: isNumber(raw.lastYearReviewYear) ? Math.floor(raw.lastYearReviewYear) : undefined,
   };
 };
 

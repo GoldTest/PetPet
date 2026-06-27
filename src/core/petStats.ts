@@ -1,3 +1,4 @@
+import { getEnergyRecoverySeasonModifier } from './season';
 import type { PetState } from './petTypes';
 
 export const lowEnergyThreshold = 10;
@@ -40,5 +41,7 @@ export const getUpgradeHeartCost = (targetLevel: number) => clampLevel(targetLev
 export const getNextUpgradeHeartCost = (pet: PetState) =>
   pet.level >= maxPetLevel ? 0 : getUpgradeHeartCost(pet.level + 1);
 
-export const getEnergyRecoveryIntervalMs = (pet: PetState, isSleeping = pet.isSleeping) =>
-  isSleeping ? sleepEnergyRecoveryMs : pet.weather === 'breezy' ? breezyEnergyRecoveryMs : awakeEnergyRecoveryMs;
+export const getEnergyRecoveryIntervalMs = (pet: PetState, isSleeping = pet.isSleeping, now = Date.now()) => {
+  const baseIntervalMs = isSleeping ? sleepEnergyRecoveryMs : pet.weather === 'breezy' ? breezyEnergyRecoveryMs : awakeEnergyRecoveryMs;
+  return Math.max(1, Math.round(baseIntervalMs * getEnergyRecoverySeasonModifier(now, isSleeping)));
+};

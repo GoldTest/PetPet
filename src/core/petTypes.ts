@@ -90,6 +90,25 @@ export interface PetBirthday {
   day: number;
 }
 
+export type YearlyCareActionKey = Extract<CareActionKey, 'play' | 'clean' | 'work' | 'feed' | 'gift' | 'touch'>;
+
+export interface YearlyStats {
+  year: number;
+  activeDateKeys: string[];
+  careActionCounts: Record<YearlyCareActionKey, number>;
+  itemUseCount: number;
+  pomodoroFocusCount: number;
+}
+
+export interface YearReview {
+  year: number;
+  companionDays: number;
+  activeDays: number;
+  careActions: number;
+  itemUseCount: number;
+  pomodoroFocusCount: number;
+  topCareAction?: YearlyCareActionKey;
+}
 export interface PetState {
   name: string;
   level: number;
@@ -98,6 +117,7 @@ export interface PetState {
   cleanliness: number;
   energy: number;
   health: number;
+  createdAt: number;
   ageSeconds: number;
   lastUpdatedAt: number;
   isSleeping: boolean;
@@ -131,8 +151,13 @@ export interface PetState {
   claimedRewardIds: string[];
   birthday?: PetBirthday;
   lastBirthdayRewardYear?: number;
+  lastAnniversaryRewardYear?: number;
   dailyLoginRewardDateKey?: string;
+  monthlyGiftDateKey?: string;
   claimedFestivalRewardKeys: string[];
+  yearlyStats: YearlyStats;
+  pendingYearReview?: YearReview;
+  lastYearReviewYear?: number;
 }
 
 export type PetAction = 'play' | 'clean' | 'sleep' | 'work';

@@ -10,7 +10,9 @@ import {
   createDefaultPet,
   defaultPetBirthday,
   defaultPetName,
+  dismissYearReview,
   getEnergyRecoveryInfo,
+  getSeasonInfo,
   getNextUpgradeHeartCost,
   getInventoryItem,
   heartExchangeCooldownMs,
@@ -47,6 +49,7 @@ import {
   getAudioEnabled,
   playSfx,
   setAudioEnabled,
+  setAudioTemporarilyMuted,
   syncBgm,
   unlockAudio,
   type BgmMode,
@@ -72,6 +75,7 @@ import { PetDisplay } from './PetDisplay';
 import { PomodoroOverlay } from './PomodoroOverlay';
 import { SettingsModal } from './SettingsModal';
 import { ShopModal } from './ShopModal';
+import { YearReviewModal } from './YearReviewModal';
 import { StatusBar } from './StatusBar';
 import { formatCompactNumber } from './numberFormat';
 import { getLanguage, setLanguage, t, type LanguageCode } from '../i18n';
@@ -195,7 +199,7 @@ export const App = () => {
     void loadActivePetMod()
       .then((mod) => {
         setActiveMod(mod);
-        setPet((current) => (mod ? withBackfilledBirthday(current, mod.manifest.birthday) : withBackfilledBirthday(current, defaultPetBirthday)));
+        setPet((current) => (mod ? withPetIdentityBirthday(current, mod.manifest.birthday) : withBackfilledBirthday(current, defaultPetBirthday)));
         hasLoadedModRef.current = true;
         if (mod) setModMessage(t('ui.settings.mod.active', { name: mod.manifest.name, version: mod.manifest.version }));
       })
@@ -216,11 +220,14 @@ export const App = () => {
 
   useEffect(() => {
     const handleVisibilityChange = () => {
-      if (document.visibilityState === 'visible') {
+      const isVisible = document.visibilityState === 'visible';
+      setAudioTemporarilyMuted(!isVisible);
+      if (isVisible) {
         setPet((current) => advancePet(current));
       }
     };
 
+    handleVisibilityChange();
     document.addEventListener('visibilitychange', handleVisibilityChange);
     return () => document.removeEventListener('visibilitychange', handleVisibilityChange);
   }, []);
@@ -231,6 +238,7 @@ export const App = () => {
   const displayShopItems = useMemo(() => getDisplayItems(shopItems, activeMod), [activeMod]);
   const getStatusLabel = (status: PetStatus) => getModStatusText(activeMod, status) ?? t(`pet.status.${status}`);
   const statCap = getPetStatCap(pet);
+  const seasonInfo = getSeasonInfo(pet.lastUpdatedAt);
   const energyRecoveryInfo = getEnergyRecoveryInfo(pet);
   const energyRecoveryText = energyRecoveryInfo.isFull ? '' : formatCountdownTime(energyRecoveryInfo.remainingMs);
   const stats = useMemo(
@@ -549,7 +557,7 @@ export const App = () => {
       const nextPet = importedMod && !hasMatchingMod
         ? imported.pet
         : activeMod
-          ? withBackfilledBirthday(imported.pet, activeMod.manifest.birthday)
+          ? withPetIdentityBirthday(imported.pet, activeMod.manifest.birthday)
           : withBackfilledBirthday(imported.pet, defaultPetBirthday);
       setPet(nextPet);
       setDraftName(nextPet.name);
@@ -580,6 +588,12 @@ export const App = () => {
 
   const availableFloatingReward = floatingRewardConfigs.find((reward) => !pet.claimedRewardIds.includes(reward.id));
   const activeRewardPopup = rewardQueue[0];
+  const activeYearReview = !activeRewardPopup && !isShopOpen && !isSettingsOpen && !isResetConfirmOpen ? pet.pendingYearReview : undefined;
+
+  const handleCloseYearReview = () => {
+    playAfterUnlock('tap');
+    setPet((current) => dismissYearReview(current));
+  };
 
   const renderRewardItems = (reward: RewardPopup) => {
     const rewardItems: RewardDisplayItem[] = [];
@@ -715,6 +729,7 @@ export const App = () => {
           <div className="meta-row" aria-label={t('ui.dashboard.metaAria')}>
             <span>{t('ui.dashboard.sharedTime', { time: formatSharedTime(pet.ageSeconds) })}</span>
             <span title={weatherInfo[pet.weather].summary}>{t('ui.dashboard.weather', { weather: weatherInfo[pet.weather].label })}</span>
+            <span title={seasonInfo.summary}>{t('ui.dashboard.season', { season: seasonInfo.label })}</span>
             <span>{pet.isSleeping ? t('ui.dashboard.resting') : t('ui.dashboard.active')}</span>
           </div>
 
@@ -765,6 +780,8 @@ export const App = () => {
           </section>
         </div>
       )}
+
+      {activeYearReview && <YearReviewModal review={activeYearReview} onClose={handleCloseYearReview} />}
 
       {isShopOpen && (
         <ShopModal

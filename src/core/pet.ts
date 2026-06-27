@@ -17,6 +17,9 @@ export type {
   ShopItem,
   UseInventoryItemOptions,
   WeatherType,
+  YearReview,
+  YearlyCareActionKey,
+  YearlyStats,
 } from './petTypes';
 export {
   dailyBiscuitClaimLimit,
@@ -53,6 +56,7 @@ export {
   statCapPerLevel,
 } from './petStats';
 export { getWeatherForDate, weatherInfo, weatherTypeSet, weatherTypes } from './weather';
+export { getSeasonForDate, getSeasonInfo } from './season';
 export {
   defaultPomodoroState,
   getDefaultPomodoroRemainingMs,
@@ -66,6 +70,7 @@ export {
 } from './pomodoro';
 export { createDefaultPet, getPrimaryStatus, getStatusText, helpStarterGiftCoins, helpStarterGiftRewardId, normalizePet } from './petState';
 export { lowSleepMoodWarningThreshold } from './petCommon';
+export { dismissYearReview } from './yearlyStats';
 export {
   advancePet,
   advancePomodoro,

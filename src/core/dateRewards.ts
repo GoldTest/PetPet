@@ -7,8 +7,11 @@ import { getLocalDateKey, hashString } from './utils';
 export const defaultPetBirthday: PetBirthday = { month: 4, day: 23 };
 export const birthdayRewardCoins = 100;
 export const birthdayRewardHearts = 10;
+export const anniversaryRewardCoins = 50;
+export const anniversaryRewardHearts = 3;
+export const monthlyGiftCoins = 20;
 
-export type DateRewardKind = 'birthday' | 'festival' | 'daily_login';
+export type DateRewardKind = 'birthday' | 'anniversary' | 'festival' | 'monthly_gift' | 'daily_login';
 
 export interface DateRewardItem {
   itemId: ItemId;
@@ -36,6 +39,7 @@ export interface FestivalConfig {
   month: number;
   day: number;
   nameKey: string;
+  dialogueKey: string;
   reward: FestivalRewardConfig;
 }
 
@@ -49,12 +53,12 @@ const harvestFoodItems: readonly ItemId[] = ['orange', 'apple', 'banana', 'bento
 
 // TODO: Allow future festival-exclusive ItemIds and Mod-provided festival reward pools.
 export const festivalConfigs: readonly FestivalConfig[] = [
-  { id: 'new_year', month: 1, day: 1, nameKey: 'pet.festivals.newYear', reward: { type: 'pool', items: goodFoodAndGiftItems } },
-  { id: 'valentine', month: 2, day: 14, nameKey: 'pet.festivals.valentine', reward: { type: 'pool', items: giftItems } },
-  { id: 'earth_day', month: 4, day: 22, nameKey: 'pet.festivals.earthDay', reward: { type: 'pool', items: [...fruitItems, ...cleaningItems] } },
-  { id: 'children_day', month: 6, day: 1, nameKey: 'pet.festivals.childrenDay', reward: { type: 'pool', items: toyAndSweetItems } },
-  { id: 'harvest_festival', month: 9, day: 23, nameKey: 'pet.festivals.harvestFestival', reward: { type: 'harvest_food' } },
-  { id: 'christmas', month: 12, day: 25, nameKey: 'pet.festivals.christmas', reward: { type: 'pool', items: christmasItems } },
+  { id: 'new_year', month: 1, day: 1, nameKey: 'pet.festivals.newYear', dialogueKey: 'pet.festivalDialogue.newYear', reward: { type: 'pool', items: goodFoodAndGiftItems } },
+  { id: 'valentine', month: 2, day: 14, nameKey: 'pet.festivals.valentine', dialogueKey: 'pet.festivalDialogue.valentine', reward: { type: 'pool', items: giftItems } },
+  { id: 'earth_day', month: 4, day: 22, nameKey: 'pet.festivals.earthDay', dialogueKey: 'pet.festivalDialogue.earthDay', reward: { type: 'pool', items: [...fruitItems, ...cleaningItems] } },
+  { id: 'children_day', month: 6, day: 1, nameKey: 'pet.festivals.childrenDay', dialogueKey: 'pet.festivalDialogue.childrenDay', reward: { type: 'pool', items: toyAndSweetItems } },
+  { id: 'harvest_festival', month: 9, day: 23, nameKey: 'pet.festivals.harvestFestival', dialogueKey: 'pet.festivalDialogue.harvestFestival', reward: { type: 'harvest_food' } },
+  { id: 'christmas', month: 12, day: 25, nameKey: 'pet.festivals.christmas', dialogueKey: 'pet.festivalDialogue.christmas', reward: { type: 'pool', items: christmasItems } },
 ];
 
 const dailyLoginRewardPool: readonly WeightedEntry<{ coins: number } | { itemId: ItemId }>[] = [
@@ -84,6 +88,11 @@ const getMonthDay = (time: number) => {
   const date = new Date(time);
   return { month: date.getMonth() + 1, day: date.getDate() };
 };
+
+const getMonthKey = (time: number) => getLocalDateKey(time).slice(0, 7);
+
+const getMonthMaxDayForYear = (month: number, year: number) =>
+  month >= 1 && month <= 12 ? new Date(year, month, 0).getDate() : 0;
 
 const isSameMonthDay = (time: number, birthday: PetBirthday) => {
   const current = getMonthDay(time);
@@ -166,6 +175,14 @@ const getFestivalItems = (festival: FestivalConfig, annualKey: string): DateRewa
   return [{ itemId: pickSeededItem(festival.reward.items, annualKey), amount: 1 }];
 };
 
+const getAnniversaryDateForYear = (createdAt: number, year: number): PetBirthday => {
+  const created = new Date(createdAt);
+  const month = created.getMonth() + 1;
+  const day = created.getDate();
+  if (month === 2 && day === 29 && getMonthMaxDayForYear(2, year) === 28) return { month: 2, day: 28 };
+  return { month, day };
+};
+
 const claimBirthdayReward = (pet: PetState, now: number): { pet: PetState; reward?: ClaimedDateReward } => {
   if (!pet.birthday || !isSameMonthDay(now, pet.birthday)) return { pet };
 
@@ -188,6 +205,29 @@ const claimBirthdayReward = (pet: PetState, now: number): { pet: PetState; rewar
   };
 };
 
+const claimAnniversaryReward = (pet: PetState, now: number): { pet: PetState; reward?: ClaimedDateReward } => {
+  const year = getLocalYear(now);
+  const createdYear = getLocalYear(pet.createdAt);
+  if (year <= createdYear) return { pet };
+  if (pet.lastAnniversaryRewardYear === year) return { pet };
+  if (!isSameMonthDay(now, getAnniversaryDateForYear(pet.createdAt, year))) return { pet };
+
+  const reward: ClaimedDateReward = {
+    id: `anniversary:${year}`,
+    kind: 'anniversary',
+    title: t('ui.rewards.anniversaryTitle', { name: pet.name }),
+    message: t('pet.reward.anniversary', { name: pet.name, coins: anniversaryRewardCoins, hearts: anniversaryRewardHearts }),
+    coins: anniversaryRewardCoins,
+    hearts: anniversaryRewardHearts,
+    items: [{ itemId: 'shiny_sticker', amount: 1 }],
+  };
+
+  return {
+    pet: { ...applyReward(pet, reward), lastAnniversaryRewardYear: year },
+    reward,
+  };
+};
+
 const claimFestivalReward = (pet: PetState, now: number): { pet: PetState; reward?: ClaimedDateReward } => {
   const festival = getFestivalForDate(now);
   if (!festival) return { pet };
@@ -201,7 +241,7 @@ const claimFestivalReward = (pet: PetState, now: number): { pet: PetState; rewar
     id: `festival:${annualKey}`,
     kind: 'festival',
     title: t('ui.rewards.festivalTitle', { festival: festivalName }),
-    message: t('pet.reward.festival', { festival: festivalName }),
+    message: t(festival.dialogueKey, { name: pet.name, festival: festivalName }),
     items,
   };
 
@@ -210,6 +250,29 @@ const claimFestivalReward = (pet: PetState, now: number): { pet: PetState; rewar
       ...applyReward(pet, reward),
       claimedFestivalRewardKeys: [...pet.claimedFestivalRewardKeys, annualKey],
     },
+    reward,
+  };
+};
+
+const claimMonthlyGiftReward = (pet: PetState, now: number): { pet: PetState; reward?: ClaimedDateReward } => {
+  const current = getMonthDay(now);
+  if (current.day !== 1) return { pet };
+
+  const monthKey = getMonthKey(now);
+  if (pet.monthlyGiftDateKey === monthKey) return { pet };
+
+  const fruit = pickSeededItem(fruitItems, `monthly:${monthKey}`);
+  const reward: ClaimedDateReward = {
+    id: `monthly_gift:${monthKey}`,
+    kind: 'monthly_gift',
+    title: t('ui.rewards.monthlyTitle'),
+    message: t('pet.reward.monthlyGift', { coins: monthlyGiftCoins }),
+    coins: monthlyGiftCoins,
+    items: [{ itemId: fruit, amount: 1 }],
+  };
+
+  return {
+    pet: { ...applyReward(pet, reward), monthlyGiftDateKey: monthKey },
     reward,
   };
 };
@@ -242,7 +305,7 @@ export const claimAvailableDateRewards = (pet: PetState, now = Date.now()) => {
   const rewards: ClaimedDateReward[] = [];
   let next = pet;
 
-  for (const claim of [claimBirthdayReward, claimFestivalReward, claimDailyLoginReward]) {
+  for (const claim of [claimBirthdayReward, claimAnniversaryReward, claimFestivalReward, claimMonthlyGiftReward, claimDailyLoginReward]) {
     const result = claim(next, now);
     next = result.pet;
     if (result.reward) rewards.push(result.reward);

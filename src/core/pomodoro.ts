@@ -13,6 +13,7 @@ export const pomodoroRewardBlockMs = 5 * 60 * 1000;
 export const pomodoroMoodRewardBlockMs = 30 * 60 * 1000;
 export const pomodoroBonusRewardHourMs = 60 * 60 * 1000;
 export const pomodoroResetEventMinFocusMs = 60 * 60 * 1000;
+export const pomodoroCoinRewardMultiplier = 1.5;
 
 export const defaultPomodoroDurations: PomodoroDurations = {
   focusMinutes: 25,
@@ -127,9 +128,16 @@ export const pickPomodoroActivity = () => pickRandom(pomodoroActivities);
 
 export const getPomodoroHourlyBaseCoins = (level: number) => 20 + Math.max(0, Math.round(level) - 1);
 
+export const applyPomodoroCoinRewardMultiplier = (coins: number) => {
+  const baseCoins = Math.max(0, Math.floor(coins));
+  if (baseCoins <= 0) return 0;
+  return Math.max(baseCoins + 1, Math.floor(baseCoins * pomodoroCoinRewardMultiplier));
+};
+
 export const getPomodoroTargetBaseCoins = (sessionFocusMs: number, level: number) => {
   const rewardableMs = Math.floor(Math.max(0, sessionFocusMs) / pomodoroRewardBlockMs) * pomodoroRewardBlockMs;
-  return Math.floor((rewardableMs / pomodoroBonusRewardHourMs) * getPomodoroHourlyBaseCoins(level));
+  const baseCoins = Math.floor((rewardableMs / pomodoroBonusRewardHourMs) * getPomodoroHourlyBaseCoins(level));
+  return applyPomodoroCoinRewardMultiplier(baseCoins);
 };
 
 export const getPomodoroMoodRewardBlocks = (sessionFocusMs: number) =>
@@ -139,5 +147,6 @@ export const getPomodoroBonusReward = (pet: PetState, hourlyBaseCoins = getPomod
   const statCap = getPetStatCap(pet);
   const moodRatio = statCap > 0 ? Math.max(0, Math.min(1, pet.mood / statCap)) : 0;
   const bonusChance = 0.05 + moodRatio * 0.4;
-  return Math.random() < bonusChance ? Math.max(1, Math.floor(hourlyBaseCoins * (randomInt(5, 15) / 100))) : 0;
+  if (Math.random() >= bonusChance) return 0;
+  return applyPomodoroCoinRewardMultiplier(Math.max(1, Math.floor(hourlyBaseCoins * (randomInt(5, 15) / 100))));
 };

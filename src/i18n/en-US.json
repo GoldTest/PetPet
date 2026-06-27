@@ -34,7 +34,8 @@
       "sharedTime": "Together: {time}",
       "weather": "Weather: {weather}",
       "resting": "Resting",
-      "active": "Active"
+      "active": "Active",
+      "season": "Season: {season}"
     },
     "inventory": {
       "aria": "Inventory",
@@ -142,7 +143,7 @@
         ],
         "other": [
           "The shop sells food, gifts, and care items. Free soda biscuits have a daily limit.",
-          "Pomodoro can run while idle or sleeping, and completed focus phases grant a small amount of mood and coins.",
+          "Pomodoro is an idle focus timer. When awake, your pet keeps you company; while sleeping, it keeps resting. Completed focus phases grant coins and a little mood.",
           "Frequent interaction triggers a short cooldown to prevent too much stat loss at once."
         ],
         "authorLink": "Author page and feedback"
@@ -167,10 +168,11 @@
       "minutes": "min",
       "focus": "Focus",
       "shortBreak": "Short",
-      "sleepingTitle": "Pomodoro can run while sleeping",
+      "sleepingTitle": "Timer keeps running while your pet rests",
       "lowEnergyTitle": "Energy is too low. Rest first.",
       "lowHealthTitle": "Health is too low. Care first.",
       "statsAria": "Pomodoro stats",
+      "description": "Awake pets keep you company; sleeping pets keep resting. Complete focus time to earn coins.",
       "rounds": "Rounds",
       "roundUnit": "rounds"
     },
@@ -183,7 +185,7 @@
     "actionDock": {
       "dock": "Care actions",
       "lowEnergy": "Energy is too low. Rest first.",
-      "pomodoroSleeping": "Pomodoro can run while sleeping",
+      "pomodoroSleeping": "Timer keeps running while your pet rests",
       "pomodoroBlocked": "Energy or health is too low. Care first.",
       "play": "Play",
       "clean": "Clean",
@@ -216,7 +218,30 @@
       "coins": "+{coins} coins",
       "hearts": "+{hearts} hearts",
       "item": "{item} x{count}",
-      "confirm": "Take gift"
+      "confirm": "Take gift",
+      "anniversaryTitle": "{name} anniversary",
+      "monthlyTitle": "First day gift"
+    },
+    "yearReview": {
+      "kicker": "Year in review",
+      "title": "{year} review",
+      "message": "A quick look at the time you spent together in {year}.",
+      "companionDays": "Companion days",
+      "activeDays": "Active days",
+      "careActions": "Care actions",
+      "itemUseCount": "Items used",
+      "pomodoroFocusCount": "Focus sessions",
+      "topCareAction": "Most common care",
+      "noTopCareAction": "No favorite yet",
+      "confirm": "Close review",
+      "actions": {
+        "play": "Play",
+        "clean": "Clean",
+        "work": "Work",
+        "feed": "Feed",
+        "gift": "Gift",
+        "touch": "Touch"
+      }
     }
   },
   "pet": {
@@ -357,28 +382,28 @@
         "focus": "{count} focus",
         "short_break": "{count} short break"
       },
-      "completePrefix": "Pomodoro phase complete: ",
-      "offlineSettlePrefix": "Pomodoro offline settlement: ",
-      "settlementEvent": "{prefix}{parts}, mood +{mood}, coins +{coins}.",
+      "completePrefix": "Timer phase complete: ",
+      "offlineSettlePrefix": "Idle timer offline settlement: ",
+      "settlementEvent": "{prefix}{parts}, companion mood +{mood}, coins +{coins}.",
       "start": {
-        "sleeping": "Pomodoro can start while sleeping.",
-        "lowEnergy": "{name}'s energy is too low. Rest before starting pomodoro.",
-        "lowHealth": "{name}'s health is too low. Care before starting pomodoro.",
-        "started": "{name} started a {phase} pomodoro."
+        "sleeping": "The timer can start while sleeping; your pet will keep resting.",
+        "lowEnergy": "{name}'s energy is too low. Care first before timing together.",
+        "lowHealth": "{name}'s health is too low. Care first before timing together.",
+        "started": "Started {phase} timing. {name} will keep you company."
       },
       "pause": {
         "sleeping": "{name} is resting. Pomodoro keeps running.",
         "lowEnergy": "{name}'s energy is too low. Pomodoro paused.",
         "lowHealth": "{name}'s health is too low. Pomodoro paused.",
-        "manual": "{name}'s pomodoro paused.",
-        "sleepActionPrepare": "{name} is getting ready to rest. Pomodoro keeps running.",
-        "sleepActionStarted": "{name} started resting. Pomodoro keeps running."
+        "manual": "Focus timing paused. {name} will wait for you.",
+        "sleepActionPrepare": "{name} is getting ready to rest. Timing keeps running.",
+        "sleepActionStarted": "{name} started resting. Timing keeps running."
       },
-      "reset": "{name}'s pomodoro was reset.",
-      "autoStopped": " Completed {rounds} rounds. Pomodoro stopped.",
-      "rewardTick": "Pomodoro reward: focused {minutes} minutes, coins +{coins}, mood +{mood}.",
-      "bonusEvent": " Hourly bonus triggered, coins +{coins}.",
-      "resetSessionEvent": " {name} settled after focusing, coins +{coins}, mood +{mood}."
+      "reset": "Focus timing was reset.",
+      "autoStopped": " Completed {rounds} rounds. Timing stopped.",
+      "rewardTick": "Idle timer reward: timed {minutes} minutes, coins +{coins}, companion mood +{mood}.",
+      "bonusEvent": " Hourly timing bonus triggered, coins +{coins}.",
+      "resetSessionEvent": " Timing companion settlement, coins +{coins}, mood +{mood}."
     },
     "status": {
       "content": "Doing well",
@@ -492,7 +517,7 @@
       "lowEnergyWork": "Not enough energy. Sleep or use an item before working.",
       "work": "{name} worked with you and earned {coins} coins.",
       "sleep": {
-        "pomodoroPaused": "{name} started resting. Pomodoro keeps running.",
+        "pomodoroPaused": "{name} started resting. Timing keeps running.",
         "lowMood": "{name}'s mood is low and sleep may be uneasy.",
         "normal": "{name} started resting. Energy will recover faster."
       },
@@ -553,7 +578,9 @@
       "birthday": "It's {name}'s birthday. Birthday reward: coins +{coins}, hearts +{hearts}, Birthday Cake +1.",
       "festival": "{festival} gift arrived. A seasonal item was added to the bag.",
       "dailyCoins": "Daily login gift: coins +{coins}.",
-      "dailyItem": "Daily login gift: a surprise item was added to the bag."
+      "dailyItem": "Daily login gift: a surprise item was added to the bag.",
+      "anniversary": "Today is the day you met {name}. Anniversary reward: coins +{coins}, hearts +{hearts}, Shiny Sticker +1.",
+      "monthlyGift": "A fresh month begins. Gift: coins +{coins} and a fruit snack."
     },
     "exchange": {
       "success": "Exchanged 1 heart, coins +{coins}.",
@@ -567,6 +594,36 @@
       "childrenDay": "Children's Day",
       "harvestFestival": "Harvest Festival",
       "christmas": "Christmas"
+    },
+    "festivalDialogue": {
+      "newYear": "Happy New Year. {name} tucked a lucky gift into the bag for a fresh start.",
+      "valentine": "Valentine's Day feels a little warmer. {name} saved a sweet gift for today.",
+      "earthDay": "Earth Day arrived. {name} wants to keep the room and the little planet cleaner.",
+      "childrenDay": "Children's Day is for play. {name} found something lighthearted for the bag.",
+      "harvestFestival": "Harvest Festival is here. {name} brought back two autumn bites to share.",
+      "christmas": "Christmas lights are up. {name} left a cozy seasonal gift in the bag."
+    },
+    "season": {
+      "spring": {
+        "label": "Spring",
+        "summary": "Mood drains about 10% slower."
+      },
+      "summer": {
+        "label": "Summer",
+        "summary": "Cleanliness drains about 8% faster, but cleaning gives +3 extra cleanliness."
+      },
+      "autumn": {
+        "label": "Autumn",
+        "summary": "Work earns +2 base coins."
+      },
+      "winter": {
+        "label": "Winter",
+        "summary": "Sleeping restores energy about 10% sooner."
+      },
+      "effect": {
+        "summerClean": " Summer care helped a bit more.",
+        "autumnWork": " Autumn work paid a little extra."
+      }
     }
   }
 }

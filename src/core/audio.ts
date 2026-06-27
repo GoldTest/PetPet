@@ -90,18 +90,60 @@ const stopFade = () => {
   }
 };
 
-const stopBgm = () => {
+let audioTemporarilyMuted = typeof document !== 'undefined' ? document.visibilityState !== 'visible' : false;
+
+const pauseBgm = () => {
   stopFade();
   if (!bgmAudio) return;
   bgmAudio.pause();
+};
+
+const stopBgm = () => {
+  pauseBgm();
+  if (!bgmAudio) return;
   bgmAudio.currentTime = 0;
   bgmAudio = undefined;
   currentBgmMode = undefined;
 };
 
+const fadeInBgm = (audio: HTMLAudioElement) => {
+  stopFade();
+  fadeTimer = window.setInterval(() => {
+    if (!bgmAudio || bgmAudio !== audio || audioTemporarilyMuted || !audioEnabled) {
+      stopFade();
+      return;
+    }
+    bgmAudio.volume = Math.min(bgmVolume, bgmAudio.volume + 0.03);
+    if (bgmAudio.volume >= bgmVolume) stopFade();
+  }, 60);
+};
+
+const startBgmAudio = (audio: HTMLAudioElement) => {
+  audio.volume = Math.min(audio.volume, bgmVolume);
+  if (!audio.paused) {
+    if (audio.volume < bgmVolume) fadeInBgm(audio);
+    return;
+  }
+
+  const playPromise = audio.play();
+  if (playPromise) {
+    void playPromise
+      .then(() => {
+        if (!bgmAudio || bgmAudio !== audio || !audioEnabled || audioTemporarilyMuted) return;
+        fadeInBgm(audio);
+      })
+      .catch(() => {
+        audioUnlocked = false;
+      });
+  }
+};
+
 const playDesiredBgm = () => {
-  if (!audioEnabled || !audioUnlocked || !canUseAudio()) return;
-  if (currentBgmMode === desiredBgmMode && bgmAudio) return;
+  if (!audioEnabled || !audioUnlocked || !canUseAudio() || audioTemporarilyMuted) return;
+  if (currentBgmMode === desiredBgmMode && bgmAudio) {
+    startBgmAudio(bgmAudio);
+    return;
+  }
 
   stopBgm();
   const nextAudio = new Audio(bgmSources[desiredBgmMode]);
@@ -111,25 +153,7 @@ const playDesiredBgm = () => {
   bgmAudio = nextAudio;
   currentBgmMode = desiredBgmMode;
 
-  const playPromise = nextAudio.play();
-  if (playPromise) {
-    void playPromise
-      .then(() => {
-        if (!bgmAudio || bgmAudio !== nextAudio || !audioEnabled) return;
-        stopFade();
-        fadeTimer = window.setInterval(() => {
-          if (!bgmAudio || bgmAudio !== nextAudio) {
-            stopFade();
-            return;
-          }
-          bgmAudio.volume = Math.min(bgmVolume, bgmAudio.volume + 0.03);
-          if (bgmAudio.volume >= bgmVolume) stopFade();
-        }, 60);
-      })
-      .catch(() => {
-        audioUnlocked = false;
-      });
-  }
+  startBgmAudio(nextAudio);
 };
 
 export const getAudioEnabled = () => audioEnabled;
@@ -138,7 +162,17 @@ export const setAudioEnabled = (value: boolean) => {
   audioEnabled = value;
   writeAudioEnabled(value);
   if (!value) {
-    stopBgm();
+    pauseBgm();
+    return;
+  }
+  playDesiredBgm();
+};
+
+export const setAudioTemporarilyMuted = (value: boolean) => {
+  if (audioTemporarilyMuted === value) return;
+  audioTemporarilyMuted = value;
+  if (value) {
+    pauseBgm();
     return;
   }
   playDesiredBgm();
@@ -168,14 +202,14 @@ export const unlockAudio = async () => {
 export const syncBgm = (mode: BgmMode) => {
   desiredBgmMode = mode;
   if (!audioEnabled) {
-    stopBgm();
+    pauseBgm();
     return;
   }
   playDesiredBgm();
 };
 
 export const playSfx = (id: SfxId) => {
-  if (!audioEnabled || !canUseAudio()) return;
+  if (!audioEnabled || audioTemporarilyMuted || !canUseAudio()) return;
   const audio = new Audio(sfxSources[id]);
   audio.preload = 'auto';
   audio.volume = sfxVolume;

@@ -34,7 +34,8 @@
       "sharedTime": "共度时间：{time}",
       "weather": "天气：{weather}",
       "resting": "休息中",
-      "active": "活动中"
+      "active": "活动中",
+      "season": "季节：{season}"
     },
     "inventory": {
       "aria": "背包",
@@ -142,7 +143,7 @@
         ],
         "other": [
           "商店可购买食物、礼物和护理道具，免费苏打饼干每日限量领取。",
-          "番茄钟可在挂机或睡觉时运行，完成专注阶段会获得少量心情和金币。",
+          "番茄钟是挂机计时工具，清醒时宠物会陪你守时，睡觉时仍保持休息；完成专注阶段会获得金币和少量心情。",
           "频繁互动会触发短暂冷却，避免一次性扣除太多属性。"
         ],
         "authorLink": "作者地址，反馈请到"
@@ -167,10 +168,11 @@
       "minutes": "分钟",
       "focus": "专注",
       "shortBreak": "短休",
-      "sleepingTitle": "睡觉时也可以运行番茄钟",
+      "sleepingTitle": "睡觉时计时继续，宠物仍会休息",
       "lowEnergyTitle": "体力太低，先休息一下",
       "lowHealthTitle": "健康太低，先照顾一下",
       "statsAria": "番茄钟统计",
+      "description": "清醒时陪你计时，睡觉时保持休息；完成专注可获得金币。",
       "rounds": "轮次",
       "roundUnit": "轮"
     },
@@ -183,7 +185,7 @@
     "actionDock": {
       "dock": "照顾操作",
       "lowEnergy": "体力太低，先休息一下",
-      "pomodoroSleeping": "睡觉时也可以运行番茄钟",
+      "pomodoroSleeping": "睡觉时计时继续，宠物仍会休息",
       "pomodoroBlocked": "体力或健康太低，先照顾一下",
       "play": "玩耍",
       "clean": "清洁",
@@ -216,7 +218,30 @@
       "coins": "+{coins} 金币",
       "hearts": "+{hearts} 小心心",
       "item": "{item} x{count}",
-      "confirm": "收下礼物"
+      "confirm": "收下礼物",
+      "anniversaryTitle": "{name} 的相遇纪念日",
+      "monthlyTitle": "月初小礼物"
+    },
+    "yearReview": {
+      "kicker": "年度回顾",
+      "title": "{year} 年回顾",
+      "message": "看看 {year} 年你们一起度过的时间。",
+      "companionDays": "陪伴天数",
+      "activeDays": "活跃天数",
+      "careActions": "照顾次数",
+      "itemUseCount": "使用道具",
+      "pomodoroFocusCount": "专注次数",
+      "topCareAction": "最常照顾",
+      "noTopCareAction": "还没有偏好",
+      "confirm": "收起回顾",
+      "actions": {
+        "play": "玩耍",
+        "clean": "清洁",
+        "work": "打工",
+        "feed": "喂食",
+        "gift": "送礼",
+        "touch": "互动"
+      }
     }
   },
   "pet": {
@@ -357,28 +382,28 @@
         "focus": "专注 {count} 个",
         "short_break": "短休 {count} 个"
       },
-      "completePrefix": "番茄钟阶段完成：",
-      "offlineSettlePrefix": "番茄钟离线结算：",
-      "settlementEvent": "{prefix}{parts}，心情 +{mood}，金币 +{coins}。",
+      "completePrefix": "计时阶段完成：",
+      "offlineSettlePrefix": "挂机计时离线结算：",
+      "settlementEvent": "{prefix}{parts}，陪伴心情 +{mood}，金币 +{coins}。",
       "start": {
-        "sleeping": "睡觉时也可以开始番茄钟。",
-        "lowEnergy": "{name} 体力太低，先休息一下再开始番茄钟。",
-        "lowHealth": "{name} 健康太低，先照顾一下再开始番茄钟。",
-        "started": "{name} 开始{phase}番茄钟。"
+        "sleeping": "睡觉时也可以开始计时，宠物会继续休息。",
+        "lowEnergy": "{name} 体力太低，先照顾一下再陪你计时。",
+        "lowHealth": "{name} 健康太低，先照顾一下再陪你计时。",
+        "started": "已开始{phase}计时，{name} 会陪你守时。"
       },
       "pause": {
         "sleeping": "{name} 正在休息，番茄钟继续计时。",
         "lowEnergy": "{name} 体力太低，番茄钟已暂停。",
         "lowHealth": "{name} 健康太低，番茄钟已暂停。",
-        "manual": "{name} 的番茄钟已暂停。",
-        "sleepActionPrepare": "{name} 准备休息，番茄钟继续计时。",
-        "sleepActionStarted": "{name} 开始休息，番茄钟继续计时。"
+        "manual": "专注计时已暂停，{name} 会等你回来。",
+        "sleepActionPrepare": "{name} 准备休息，计时继续进行。",
+        "sleepActionStarted": "{name} 开始休息，计时继续进行。"
       },
-      "reset": "{name} 的番茄钟已重置。",
-      "autoStopped": " 已完成 {rounds} 轮，番茄钟已停止。",
-      "rewardTick": "番茄钟收益：专注 {minutes} 分钟，金币 +{coins}，心情 +{mood}。",
-      "bonusEvent": " 小时奖励触发，金币 +{coins}。",
-      "resetSessionEvent": " {name} 休整了一下，金币 +{coins}，心情 +{mood}。"
+      "reset": "专注计时已重置。",
+      "autoStopped": " 已完成 {rounds} 轮，计时已停止。",
+      "rewardTick": "挂机计时收益：已计时 {minutes} 分钟，金币 +{coins}，陪伴心情 +{mood}。",
+      "bonusEvent": " 守时小时奖励触发，金币 +{coins}。",
+      "resetSessionEvent": " 本次计时陪伴结算，金币 +{coins}，心情 +{mood}。"
     },
     "status": {
       "content": "状态不错",
@@ -492,7 +517,7 @@
       "lowEnergyWork": "体力不足，睡觉或使用道具恢复后再打工。",
       "work": "{name} 陪你打工，赚到 {coins} 金币。",
       "sleep": {
-        "pomodoroPaused": "{name} 开始休息，番茄钟继续计时。",
+        "pomodoroPaused": "{name} 开始休息，计时继续进行。",
         "lowMood": "{name} 心情很低，可能会睡得不太安稳。",
         "normal": "{name} 开始休息，体力会更快恢复。"
       },
@@ -553,7 +578,9 @@
       "birthday": "今天是 {name} 的生日，生日奖励：金币 +{coins}，小心心 +{hearts}，生日蛋糕 +1。",
       "festival": "{festival} 礼物送到，背包里多了一份节日道具。",
       "dailyCoins": "每日登录礼物：金币 +{coins}。",
-      "dailyItem": "每日登录礼物：背包里多了一件惊喜道具。"
+      "dailyItem": "每日登录礼物：背包里多了一件惊喜道具。",
+      "anniversary": "今天是和 {name} 相遇的日子，纪念日奖励：金币 +{coins}，小心心 +{hearts}，闪亮贴纸 +1。",
+      "monthlyGift": "新的月份开始了，月初礼物：金币 +{coins}，还有一份水果。"
     },
     "exchange": {
       "success": "兑换了 1 个小心心，金币 +{coins}。",
@@ -567,6 +594,36 @@
       "childrenDay": "儿童节",
       "harvestFestival": "秋收节",
       "christmas": "圣诞节"
+    },
+    "festivalDialogue": {
+      "newYear": "新年快乐。{name} 把一份开年礼物悄悄放进了背包。",
+      "valentine": "情人节的空气甜了一点，{name} 为今天留了一份小礼物。",
+      "earthDay": "地球日到了，{name} 想把房间和小小星球都照顾得更干净。",
+      "childrenDay": "儿童节适合玩耍，{name} 找到了一份轻快的小礼物。",
+      "harvestFestival": "秋收节到了，{name} 带回了两份秋天的食物。",
+      "christmas": "圣诞灯亮起来了，{name} 在背包里放好了一份暖暖的节日礼物。"
+    },
+    "season": {
+      "spring": {
+        "label": "春季",
+        "summary": "心情自然下降约慢 10%。"
+      },
+      "summer": {
+        "label": "夏季",
+        "summary": "清洁自然下降约快 8%，但清洁操作额外 +3 清洁。"
+      },
+      "autumn": {
+        "label": "秋季",
+        "summary": "打工基础金币 +2。"
+      },
+      "winter": {
+        "label": "冬季",
+        "summary": "睡眠恢复体力的间隔约缩短 10%。"
+      },
+      "effect": {
+        "summerClean": " 夏季护理让清洁效果更好。",
+        "autumnWork": " 秋季打工多赚了一点。"
+      }
     }
   }
 }

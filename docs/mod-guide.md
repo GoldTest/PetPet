@@ -87,7 +87,7 @@ Missing images are allowed and fall back to built-in assets. Unknown files are r
 - `texts.status`: optional labels for existing pet status IDs, max 24 chars each.
 - `texts.items`: optional item names and summaries for existing item IDs. Names are max 28 chars; summaries are max 96 chars.
 
-A Mod birthday is the pet's default birthday. Users can edit the current pet birthday in Settings, and ordinary app reloads keep that edited date. Importing, restoring, resetting, or switching Mods applies the active Mod manifest birthday again. If a Mod has no `birthday`, that Mod does not provide a birthday default.
+A Mod birthday is the pet's default birthday. Users can edit the current pet birthday in Settings, and that edit is kept until the next app startup with an active Mod, save import with a matching active Mod, restore, reset, or Mod switch reapplies the active Mod manifest birthday. If a Mod has no `birthday`, that Mod does not provide a birthday default.
 
 ## Image Guidelines
 
@@ -107,5 +107,5 @@ A Mod birthday is the pet's default birthday. Users can edit the current pet bir
 
 - v1 mods cannot add or remove item IDs.
 - v1 mods cannot change item prices, item effects, shop categories, coins, hearts, levels, Pomodoro rules, save rules, or offline rules.
-- v1 mods cannot add festival-exclusive items, customize the built-in `birthday_cake`, or define birthday, festival, or daily login reward pools yet.
+- v1 mods cannot add festival-exclusive items, customize the built-in `birthday_cake`, or define birthday, festival, daily login, anniversary, monthly gift, seasonal effect, or year review content yet.
 - Save export includes current data and a Mod summary, but does not include Mod images. Re-import the zip on another device before or after importing the save.
