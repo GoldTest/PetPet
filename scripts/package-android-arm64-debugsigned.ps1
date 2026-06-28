@@ -124,11 +124,18 @@ $keytool = Resolve-Keytool
 $debugKeystore = Ensure-DebugKeystore $keytool
 
 if ($RebuildRust -or -not (Test-Path -LiteralPath $sourceSo)) {
-  Write-Host 'Building arm64 Rust library with Tauri Android script...'
+  $previousSourceSoWriteTime = if (Test-Path -LiteralPath $sourceSo) { (Get-Item -LiteralPath $sourceSo).LastWriteTimeUtc } else { $null }
+  Write-Host 'Rebuilding arm64 Rust library and Tauri Android assets...'
   Push-Location $root
   try {
-    & npm.cmd run tauri -- android android-studio-script --release --target aarch64
-    if ($LASTEXITCODE -ne 0) { throw 'Tauri Android Rust build failed.' }
+    & npm.cmd run tauri -- android build --target aarch64 --apk --ci
+    if ($LASTEXITCODE -ne 0) {
+      $rebuiltSourceSo = Test-Path -LiteralPath $sourceSo
+      $currentSourceSoWriteTime = if ($rebuiltSourceSo) { (Get-Item -LiteralPath $sourceSo).LastWriteTimeUtc } else { $null }
+      $sourceSoUpdated = $rebuiltSourceSo -and ($null -eq $previousSourceSoWriteTime -or $currentSourceSoWriteTime -gt $previousSourceSoWriteTime)
+      if (-not $sourceSoUpdated) { throw 'Tauri Android rebuild failed before refreshing the arm64 Rust library.' }
+      Write-Host 'Tauri Android build returned a non-zero exit code after refreshing the arm64 Rust library; continuing with manual APK assembly.'
+    }
   } finally {
     Pop-Location
   }
@@ -137,6 +144,9 @@ if ($RebuildRust -or -not (Test-Path -LiteralPath $sourceSo)) {
 if (-not (Test-Path -LiteralPath $sourceSo)) {
   throw "Rust arm64 library not found: $sourceSo"
 }
+Write-Host "Using arm64 Rust library:"
+Write-Host $sourceSo
+Write-Host ("Rust library timestamp: " + (Get-Item -LiteralPath $sourceSo).LastWriteTime.ToString('yyyy-MM-dd HH:mm:ss'))
 
 $androidVersionCode = Convert-VersionNameToCode $version
 $tauriProperties = Join-Path $appDir 'tauri.properties'
@@ -175,5 +185,6 @@ if ($LASTEXITCODE -ne 0) { throw 'apksigner sign failed.' }
 if ($LASTEXITCODE -ne 0) { throw 'apksigner verify failed.' }
 
 Remove-Item -LiteralPath $alignedApk -Force
+if (Test-Path -LiteralPath "$finalApk.idsig") { Remove-Item -LiteralPath "$finalApk.idsig" -Force }
 Write-Host 'Android arm64 debug-signed APK:'
 Write-Host $finalApk

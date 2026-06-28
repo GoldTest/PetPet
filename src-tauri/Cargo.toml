@@ -1,6 +1,6 @@
 [package]
 name = "app"
-version = "1.0.9"
+version = "1.0.10"
 description = "PocPet"
 authors = ["FrostForge Studio"]
 license = "GPL-3.0-or-later"
