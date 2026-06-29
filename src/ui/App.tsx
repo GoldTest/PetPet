@@ -15,7 +15,6 @@ import {
   dismissYearReview,
   getDailyWishView,
   getEnergyRecoveryInfo,
-  getSeasonInfo,
   getNextUpgradeHeartCost,
   getInventoryItem,
   heartExchangeCooldownMs,
@@ -24,6 +23,7 @@ import {
   getPetStatCap,
   getReturnWelcomeView,
   interactWithPet,
+  isPetCriticallyHungry,
   isPetLowEnergy,
   pausePomodoro,
   resetPomodoro,
@@ -37,7 +37,6 @@ import {
   updatePomodoroSettings,
   upgradePet,
   useInventoryItem,
-  weatherInfo,
   withBackfilledBirthday,
   withPetIdentityBirthday,
   type ClaimedDateReward,
@@ -191,6 +190,7 @@ export const App = () => {
   const [importSaveText, setImportSaveText] = useState('');
   const [rewardQueue, setRewardQueue] = useState<RewardPopup[]>([]);
   const [isResetConfirmOpen, setResetConfirmOpen] = useState(false);
+  const [featureInfoMessage, setFeatureInfoMessage] = useState<{ message: string; recentEvent: string } | null>(null);
   const petRef = useRef(pet);
   const completedFocusCountRef = useRef(pet.pomodoro.completedFocusCount);
   const lastHeartExchangeAtRef = useRef(0);
@@ -201,6 +201,10 @@ export const App = () => {
     petRef.current = pet;
     savePet(pet);
   }, [pet]);
+
+  useEffect(() => {
+    setFeatureInfoMessage((current) => (current && current.recentEvent !== pet.recentEvent ? null : current));
+  }, [pet.recentEvent]);
 
   useEffect(() => {
     void loadActivePetMod()
@@ -245,7 +249,6 @@ export const App = () => {
   const displayShopItems = useMemo(() => getDisplayItems(shopItems, activeMod), [activeMod]);
   const getStatusLabel = (status: PetStatus) => getModStatusText(activeMod, status) ?? t(`pet.status.${status}`);
   const statCap = getPetStatCap(pet);
-  const seasonInfo = getSeasonInfo(pet.lastUpdatedAt);
   const energyRecoveryInfo = getEnergyRecoveryInfo(pet);
   const energyRecoveryText = energyRecoveryInfo.isFull ? '' : formatCountdownTime(energyRecoveryInfo.remainingMs);
   const stats = useMemo(
@@ -268,6 +271,8 @@ export const App = () => {
     [activeShopCategory, displayShopItems],
   );
   const isLowEnergy = isPetLowEnergy(pet);
+  const isCriticallyHungry = isPetCriticallyHungry(pet);
+  const dashboardEventText = featureInfoMessage?.message ?? pet.recentEvent;
   const nextUpgradeCost = getNextUpgradeHeartCost(pet);
   const canUpgrade = nextUpgradeCost > 0 && pet.hearts >= nextUpgradeCost;
   const canRunPomodoro = canStartPomodoro(pet);
@@ -415,6 +420,10 @@ export const App = () => {
   const handleCloseShop = () => {
     playAfterUnlock('close');
     setShopOpen(false);
+  };
+
+  const handleShowFeatureInfo = (message: string) => {
+    setFeatureInfoMessage({ message, recentEvent: petRef.current.recentEvent });
   };
 
   const handleOpenPomodoro = () => {
@@ -814,7 +823,7 @@ export const App = () => {
         <section className="dashboard" aria-label={t('ui.dashboard.aria')}>
           <div className="event-panel">
             <span>{t('ui.dashboard.event')}</span>
-            <p>{pet.recentEvent}</p>
+            <p>{dashboardEventText}</p>
           </div>
 
           <div className="wish-stack">
@@ -861,12 +870,11 @@ export const App = () => {
             pomodoroStartTitle={pomodoroStartTitle}
             onUpgrade={handleUpgrade}
             onOpenPomodoro={handleOpenPomodoro}
+            onShowInfo={handleShowFeatureInfo}
           />
 
           <div className="meta-row" aria-label={t('ui.dashboard.metaAria')}>
             <span>{t('ui.dashboard.sharedTime', { time: formatSharedTime(pet.ageSeconds) })}</span>
-            <span title={weatherInfo[pet.weather].summary}>{t('ui.dashboard.weather', { weather: weatherInfo[pet.weather].label })}</span>
-            <span title={seasonInfo.summary}>{t('ui.dashboard.season', { season: seasonInfo.label })}</span>
             <span>{pet.isSleeping ? t('ui.dashboard.resting') : t('ui.dashboard.active')}</span>
           </div>
 
@@ -880,7 +888,7 @@ export const App = () => {
         </section>
       </div>
 
-      <ActionDock isSleeping={pet.isSleeping} isLowEnergy={isLowEnergy} onAction={handleAction} onOpenShop={handleOpenShop} />
+      <ActionDock isSleeping={pet.isSleeping} isLowEnergy={isLowEnergy} isCriticallyHungry={isCriticallyHungry} onAction={handleAction} onOpenShop={handleOpenShop} />
 
       {availableFloatingReward && (
         <button

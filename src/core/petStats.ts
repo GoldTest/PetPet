@@ -3,6 +3,14 @@ import type { PetState } from './petTypes';
 
 export const lowEnergyThreshold = 10;
 
+export const criticalHungerActionThreshold = 10;
+
+export const lowCleanlinessSleepWarningThreshold = 25;
+
+export const lowCleanlinessSleepConfirmClicks = 3;
+
+export const lowCleanlinessSleepMoodPenalty = 12;
+
 export const defaultPetName = 'Furo';
 
 export const maxPetLevel = 99;

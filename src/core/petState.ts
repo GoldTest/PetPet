@@ -2,7 +2,7 @@ import { t } from '../i18n';
 import { defaultPetBirthday, normalizePetBirthday } from './dateRewards';
 import { createDailyWish, normalizeDailyWishState, normalizeReturnWelcomeState } from './dailyWishes';
 import { allItemIds, dailyBiscuitClaimLimit, dailyHeartExchangeLimit } from './items';
-import { clampCoins, clampCount, clampHealth, clampLevel, clampStat, defaultPetName, getPetStatCap } from './petStats';
+import { clampCoins, clampCount, clampHealth, clampLevel, clampStat, defaultPetName, getPetStatCap, lowCleanlinessSleepConfirmClicks } from './petStats';
 import type { ActionStreak, Inventory, ItemId, PetState, PetStatus, RecentActivity, WeatherType } from './petTypes';
 import { defaultPomodoroState, normalizePomodoroState } from './pomodoro';
 import { getWeatherForDate, weatherTypeSet } from './weather';
@@ -70,6 +70,7 @@ export const createDefaultPet = (now = Date.now()): PetState => ({
   sleepStartMood: 0,
   sleepStartHunger: 0,
   sleepStartCleanliness: 0,
+  lowCleanlinessSleepConfirmCount: 0,
   lastDreamTalkAt: 0,
   actionStreak: defaultActionStreak(now),
   lastInteractionAt: now,
@@ -217,6 +218,7 @@ export const normalizePet = (value: unknown, now = Date.now()): PetState => {
     sleepStartMood: clampStat(isNumber(raw.sleepStartMood) ? raw.sleepStartMood : 0, statCap),
     sleepStartHunger: clampStat(isNumber(raw.sleepStartHunger) ? raw.sleepStartHunger : 0, statCap),
     sleepStartCleanliness: clampStat(isNumber(raw.sleepStartCleanliness) ? raw.sleepStartCleanliness : 0, statCap),
+    lowCleanlinessSleepConfirmCount: Math.min(lowCleanlinessSleepConfirmClicks - 1, clampCount(isNumber(raw.lowCleanlinessSleepConfirmCount) ? raw.lowCleanlinessSleepConfirmCount : 0)),
     lastDreamTalkAt: isNumber(raw.lastDreamTalkAt) ? raw.lastDreamTalkAt : 0,
     actionStreak: {
       key: actionStreakKey,

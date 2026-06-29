@@ -2,7 +2,7 @@ import { t } from '../i18n';
 import { ensureDailyWishForDate, maybeCreateReturnWelcome, returnWelcomeMinAwayMs } from './dailyWishes';
 import { dailyBiscuitClaimLimit } from './items';
 import { applyTimedEvent, getRandomDailyEncounter, getRandomOfflineDiary, getRandomOfflineEvent, maybeApplyDreamTalk, settleSleep, startSleepSnapshot } from './petEvents';
-import { clampCoins, clampCount, clampPetHealth, clampPetStat, getEnergyRecoveryIntervalMs, getPetStatCap, lowEnergyThreshold } from './petStats';
+import { clampCoins, clampCount, clampPetHealth, clampPetStat, criticalHungerActionThreshold, getEnergyRecoveryIntervalMs, getPetStatCap, lowEnergyThreshold } from './petStats';
 import type { PetState } from './petTypes';
 import {
   getDefaultPomodoroRemainingMs,
@@ -64,6 +64,8 @@ export const getDailyBiscuitClaimInfo = (pet: PetState, now = Date.now()) => {
 
 
 export const isPetLowEnergy = (pet: PetState) => pet.energy < lowEnergyThreshold;
+
+export const isPetCriticallyHungry = (pet: PetState) => pet.hunger < criticalHungerActionThreshold;
 
 export const canStartPomodoro = (pet: PetState) =>
   !isPetLowEnergy(pet) && pet.health > pomodoroMinHealthThreshold;

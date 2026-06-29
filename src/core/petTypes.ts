@@ -174,6 +174,7 @@ export interface PetState {
   sleepStartMood: number;
   sleepStartHunger: number;
   sleepStartCleanliness: number;
+  lowCleanlinessSleepConfirmCount: number;
   lastDreamTalkAt: number;
   actionStreak: ActionStreak;
   lastInteractionAt: number;

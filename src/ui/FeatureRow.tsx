@@ -1,5 +1,5 @@
-﻿import { Cloud, CloudRain, Sparkles, Sun, Timer, Wind, type LucideIcon } from 'lucide-react';
-import { weatherInfo, type PetState, type WeatherType } from '../core/pet';
+import { CalendarDays, Cloud, CloudRain, Sparkles, Sun, Timer, Wind, type LucideIcon } from 'lucide-react';
+import { getSeasonInfo, weatherInfo, type PetState, type WeatherType } from '../core/pet';
 import { t } from '../i18n';
 import { formatCompactNumber } from './numberFormat';
 import { formatPomodoroTime } from './time';
@@ -20,6 +20,7 @@ interface FeatureRowProps {
   pomodoroStartTitle?: string;
   onUpgrade: () => void;
   onOpenPomodoro: () => void;
+  onShowInfo: (message: string) => void;
 }
 
 export const FeatureRow = ({
@@ -31,8 +32,11 @@ export const FeatureRow = ({
   pomodoroStartTitle,
   onUpgrade,
   onOpenPomodoro,
+  onShowInfo,
 }: FeatureRowProps) => {
   const WeatherIcon = weatherIcons[pet.weather];
+  const currentWeather = weatherInfo[pet.weather];
+  const seasonInfo = getSeasonInfo(pet.lastUpdatedAt);
   const upgradeCostText = nextUpgradeCost > 0 ? formatCompactNumber(nextUpgradeCost) : '';
 
   return (
@@ -65,16 +69,27 @@ export const FeatureRow = ({
         {pet.pomodoro.isRunning && <i aria-hidden="true" />}
       </button>
 
-      <div className="feature-button feature-button--weather" title={weatherInfo[pet.weather].summary} aria-label={t('ui.features.weatherAria', { weather: weatherInfo[pet.weather].label })}>
+      <button
+        type="button"
+        className="feature-button feature-button--weather"
+        title={currentWeather.summary}
+        aria-label={t('ui.features.weatherAria', { weather: currentWeather.label })}
+        onClick={() => onShowInfo(currentWeather.summary)}
+      >
         <WeatherIcon size={20} aria-hidden="true" />
-        <span>
-          {weatherInfo[pet.weather].label}
-          <small>{weatherInfo[pet.weather].summary}</small>
-        </span>
-      </div>
+        <span>{currentWeather.label}</span>
+      </button>
+
+      <button
+        type="button"
+        className="feature-button feature-button--season"
+        title={seasonInfo.summary}
+        aria-label={t('ui.dashboard.season', { season: seasonInfo.label })}
+        onClick={() => onShowInfo(seasonInfo.summary)}
+      >
+        <CalendarDays size={20} aria-hidden="true" />
+        <span>{seasonInfo.label}</span>
+      </button>
     </div>
   );
 };
-
-
-

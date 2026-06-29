@@ -137,7 +137,7 @@
         ],
         "actions": [
           "玩耍会提升心情，但会消耗体力和饱腹。",
-          "清洁会提升清洁度和少量健康，也会消耗一点饱腹。",
+          "清洁会提升清洁度和少量健康，也会消耗一点饱腹和体力。",
           "打工会获得金币，但会消耗体力，并可能影响心情或健康。",
           "睡觉会更快恢复体力，醒来时可能触发睡眠或梦境结算。"
         ],
@@ -185,6 +185,7 @@
     "actionDock": {
       "dock": "照顾操作",
       "lowEnergy": "体力太低，先休息一下",
+      "lowHunger": "饱腹太低，先喂点东西",
       "pomodoroSleeping": "睡觉时计时继续，宠物仍会休息",
       "pomodoroBlocked": "体力或健康太低，先照顾一下",
       "play": "玩耍",
@@ -501,6 +502,7 @@
       "overuseCooldown": "{name} 需要缓一缓，等一会儿再互动。",
       "sleeping": "{name} 睡得很香，先不要吵醒它。",
       "lowEnergy": "{name} 体力太低了，先休息一下再互动吧。",
+      "lowHunger": "{name} 饿得不想互动，先喂点东西吧。",
       "heart": "{name} 心情很好，送给你一颗小心心。",
       "touch": "你摸了摸 {name}，它放松了一点。"
     },
@@ -576,13 +578,17 @@
     "action": {
       "woke": "{name} 被叫醒了。",
       "lowEnergyPlay": "{name} 体力太低了，先睡一会儿或用道具恢复吧。",
+      "lowHungerBlocked": "{name} 饿得没力气做这些事，先喂点东西吧。",
       "play": "{name} 玩得很开心。",
-      "clean": "{name} 变干净了，也放松了一点。饱腹 -3，心情 +1，体力 +2。",
+      "clean": "{name} 变干净了，也放松了一点。饱腹 -3，心情 +1，体力 -3。",
       "lowEnergyWork": "体力不足，睡觉或使用道具恢复后再打工。",
       "work": "{name} 陪你打工，赚到 {coins} 金币。",
       "sleep": {
         "pomodoroPaused": "{name} 开始休息，计时继续进行。",
         "lowMood": "{name} 心情很低，可能会睡得不太安稳。",
+        "lowCleanlinessWarning": "{name} 身上太脏了，这样睡觉会大幅降低心情。先清洁一下吧；连续点睡觉 3 次才会继续。",
+        "lowCleanlinessFinalWarning": "{name} 还是不太舒服。再点一次睡觉会强制入睡，并立刻心情 -{amount}。",
+        "lowCleanlinessStarted": "{name} 勉强睡下，但不干净让它很难受，心情 -{amount}。",
         "normal": "{name} 开始休息，体力会更快恢复。"
       },
       "workBonus": " 心情不错，额外赚到 {coins} 金币。"

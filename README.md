@@ -108,7 +108,13 @@ macOS 构建需要 macOS runner。Gitee 如果没有提供对应托管 runner，
 
 Gitee 的流水线能力、runner 标签和 Release API 可能因账号/企业版配置不同而不同；如果平台语法或 runner 标签与当前模板不一致，请按 Gitee 当前流水线界面生成的 YAML 调整 `.gitee/workflows/release.yml`。
 
-## 开发文档
+## 文档
+
+玩家可见文档：
+
+- `docs/开发路线图.md`
+
+开发维护文档：
 
 - `docs/dev/项目CodeWiki.md`
 - `docs/dev/开发路线图.md`

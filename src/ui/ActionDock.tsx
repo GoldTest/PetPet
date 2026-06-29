@@ -5,6 +5,7 @@ import { t } from '../i18n';
 interface ActionDockProps {
   isSleeping: boolean;
   isLowEnergy: boolean;
+  isCriticallyHungry: boolean;
   onAction: (action: PetAction) => void;
   onOpenShop: () => void;
 }
@@ -12,31 +13,34 @@ interface ActionDockProps {
 export const ActionDock = ({
   isSleeping,
   isLowEnergy,
+  isCriticallyHungry,
   onAction,
   onOpenShop,
 }: ActionDockProps) => {
   const lowEnergyTitle = isLowEnergy ? t('ui.actionDock.lowEnergy') : undefined;
+  const lowHungerTitle = isCriticallyHungry ? t('ui.actionDock.lowHunger') : undefined;
+  const playWorkBlockedTitle = lowHungerTitle ?? lowEnergyTitle;
   return (
     <div className="action-dock" aria-label={t('ui.actionDock.dock')}>
       <button
         type="button"
         className="action-button action-button--play"
-        disabled={isLowEnergy}
-        title={lowEnergyTitle}
+        disabled={isLowEnergy || isCriticallyHungry}
+        title={playWorkBlockedTitle}
         onClick={() => onAction('play')}
       >
         <Gamepad2 size={20} aria-hidden="true" />
         <span>{t('ui.actionDock.play')}</span>
       </button>
-      <button type="button" className="action-button action-button--clean" onClick={() => onAction('clean')}>
+      <button type="button" className="action-button action-button--clean" disabled={isCriticallyHungry} title={lowHungerTitle} onClick={() => onAction('clean')}>
         <Bath size={20} aria-hidden="true" />
         <span>{t('ui.actionDock.clean')}</span>
       </button>
       <button
         type="button"
         className="action-button action-button--work"
-        disabled={isLowEnergy}
-        title={lowEnergyTitle}
+        disabled={isLowEnergy || isCriticallyHungry}
+        title={playWorkBlockedTitle}
         onClick={() => onAction('work')}
       >
         <BriefcaseBusiness size={20} aria-hidden="true" />

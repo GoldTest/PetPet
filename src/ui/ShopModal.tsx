@@ -11,9 +11,8 @@ import {
 } from '../core/pet';
 import { currencyIcon } from '../assets';
 import { t } from '../i18n';
+import { getItemEffectBadges } from './itemEffectBadges';
 import { formatCompactNumber } from './numberFormat';
-
-const effectKeys = ['hunger', 'mood', 'cleanliness', 'energy', 'health'] as const;
 
 interface ShopModalProps {
   pet: PetState;
@@ -46,18 +45,6 @@ export const ShopModal = ({
   const fullExchangeRateText = t('ui.shop.exchange.rate', { coins: heartExchangeInfo.coins });
   const fullExchangeButtonText = t('ui.shop.exchange.button', { coins: heartExchangeInfo.coins });
   const exchangeCoinsText = formatCompactNumber(heartExchangeInfo.coins);
-  const getEffectBadges = (item: ItemDisplay) =>
-    effectKeys
-      .map((key) => {
-        const value = item.effect[key];
-        if (!value) return undefined;
-        const amount = value > 0 ? `+${value}` : String(value);
-        return {
-          key,
-          label: `${t(`ui.stats.${key}`)} ${amount}`,
-        };
-      })
-      .filter((badge): badge is { key: (typeof effectKeys)[number]; label: string } => Boolean(badge));
 
   return (
     <div className="modal-backdrop" role="presentation">
@@ -114,7 +101,7 @@ export const ShopModal = ({
           {visibleItems.map((item) => {
             const isDiscountItem = discountInfo?.itemId === item.id;
             const isDiscountAvailable = Boolean(isDiscountItem && !discountInfo?.used);
-            const effectBadges = getEffectBadges(item);
+            const effectBadges = getItemEffectBadges(item.effect);
             const displayPrice = isDiscountAvailable ? discountInfo?.price ?? item.price : item.price;
             const displayPriceText = formatCompactNumber(displayPrice);
             const priceTitle = t('ui.shop.price', { price: displayPrice });

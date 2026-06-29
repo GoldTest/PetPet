@@ -29,6 +29,9 @@ src-tauri/gen/android/app/proguard-tauri.pro
 .idea/
 *.swp
 *.swo
+# Private development notes
+docs/dev/
+
 # Environment files
 .env
 .env.*

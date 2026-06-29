@@ -3,17 +3,20 @@ import { addInventoryItem, dailyBiscuitClaimLimit, favoriteFoodIdSet, getDailyHe
 import { applyActionStreak, getRandomHealthIncident, getRandomPetInteractionCost, lowSleepMoodWarningThreshold, markInteraction, petInteractionCooldownMs, petInteractionOveruseCooldownMs, withActivity } from './petCommon';
 import { normalizePetBirthday } from './dateRewards';
 import { recordWishProgress } from './dailyWishes';
-import { advancePet, getDailyBiscuitClaimInfo, isPetLowEnergy, pausePomodoroForReason } from './petLifecycle';
+import { advancePet, getDailyBiscuitClaimInfo, isPetCriticallyHungry, isPetLowEnergy, pausePomodoroForReason } from './petLifecycle';
 import { getCleanActionSeasonBonus, getWorkSeasonCoinBonus } from './season';
 import { recordYearlyCareAction, recordYearlyItemUse } from './yearlyStats';
-import { clampCoins, clampCount, clampPetHealth, clampPetStat, getPetStatCap, getUpgradeHeartCost, maxPetLevel, statCapPerLevel } from './petStats';
+import { clampCoins, clampCount, clampPetHealth, clampPetStat, getPetStatCap, getUpgradeHeartCost, lowCleanlinessSleepConfirmClicks, lowCleanlinessSleepMoodPenalty, lowCleanlinessSleepWarningThreshold, maxPetLevel, statCapPerLevel } from './petStats';
 import type { CareActionKey, ItemId, PetAction, PetBirthday, PetState, PomodoroDurations, RecentActivity, UseInventoryItemOptions } from './petTypes';
 import { defaultPomodoroState, getDefaultPomodoroRemainingMs, getPomodoroPhaseDurationMs, normalizePomodoroSettings, pickPomodoroActivity, pomodoroMinHealthThreshold, pomodoroPhaseLabels, pomodoroResetEventMinFocusMs } from './pomodoro';
 import { settleSleep, startSleepSnapshot } from './petEvents';
 import { getLocalDateKey, randomInt } from './utils';
 
+const clearLowCleanlinessSleepConfirm = (pet: PetState): PetState =>
+  pet.lowCleanlinessSleepConfirmCount > 0 ? { ...pet, lowCleanlinessSleepConfirmCount: 0 } : pet;
+
 export const recordPetInteraction = (pet: PetState, now = Date.now()): PetState =>
-  markInteraction(advancePet(pet, now), now);
+  clearLowCleanlinessSleepConfirm(markInteraction(advancePet(pet, now), now));
 
 export const getWorkReward = (pet: PetState, now = Date.now()) => {
   const baseCoins = (pet.weather === 'rainy' ? 20 : 24) + Math.max(0, pet.level - 1) + getWorkSeasonCoinBonus(now);
@@ -33,7 +36,7 @@ export const getWorkReward = (pet: PetState, now = Date.now()) => {
 };
 
 export const upgradePet = (pet: PetState, now = Date.now()): PetState => {
-  const current = advancePet(pet, now);
+  const current = clearLowCleanlinessSleepConfirm(advancePet(pet, now));
   if (current.level >= maxPetLevel) {
     return { ...current, recentEvent: t('pet.upgrade.maxLevel', { level: current.level }) };
   }
@@ -66,7 +69,7 @@ export const upgradePet = (pet: PetState, now = Date.now()): PetState => {
 
 
 export const exchangeHeartForCoins = (pet: PetState, now = Date.now()): PetState => {
-  const current = markInteraction(advancePet(pet, now), now);
+  const current = clearLowCleanlinessSleepConfirm(markInteraction(advancePet(pet, now), now));
   const exchangeInfo = getDailyHeartExchangeInfo(current, now);
 
   if (current.hearts < 1) {
@@ -88,14 +91,24 @@ export const exchangeHeartForCoins = (pet: PetState, now = Date.now()): PetState
 };
 
 export const applyPetAction = (pet: PetState, action: PetAction, now = Date.now()): PetState => {
-  const current = markInteraction(advancePet(pet, now), now);
+  const advanced = markInteraction(advancePet(pet, now), now);
+  const current = action === 'sleep' ? advanced : clearLowCleanlinessSleepConfirm(advanced);
 
   if (action !== 'sleep' && current.isSleeping) {
     return {
       ...current,
       isSleeping: false,
       mood: clampPetStat(current, current.mood - 4),
+      lowCleanlinessSleepConfirmCount: 0,
       recentEvent: t('pet.action.woke', { name: current.name }),
+    };
+  }
+
+  if (action !== 'sleep' && isPetCriticallyHungry(current)) {
+    return {
+      ...current,
+      lowCleanlinessSleepConfirmCount: 0,
+      recentEvent: t('pet.action.lowHungerBlocked', { name: current.name }),
     };
   }
 
@@ -165,6 +178,7 @@ export const applyPetAction = (pet: PetState, action: PetAction, now = Date.now(
           {
             ...current,
             isSleeping: false,
+            lowCleanlinessSleepConfirmCount: 0,
             mood: clampPetStat(current, current.mood - 2),
           },
           now,
@@ -172,16 +186,37 @@ export const applyPetAction = (pet: PetState, action: PetAction, now = Date.now(
       }
 
       {
+        const needsCleanlinessConfirm = current.cleanliness <= lowCleanlinessSleepWarningThreshold;
+        const confirmCount = current.lowCleanlinessSleepConfirmCount;
+        if (needsCleanlinessConfirm && confirmCount < lowCleanlinessSleepConfirmClicks - 1) {
+          const nextCount = confirmCount + 1;
+          return {
+            ...current,
+            lowCleanlinessSleepConfirmCount: nextCount,
+            recentEvent: t(
+              nextCount >= lowCleanlinessSleepConfirmClicks - 1
+                ? 'pet.action.sleep.lowCleanlinessFinalWarning'
+                : 'pet.action.sleep.lowCleanlinessWarning',
+              { name: current.name, amount: lowCleanlinessSleepMoodPenalty },
+            ),
+          };
+        }
+
+        const cleanlinessMoodPenalty = needsCleanlinessConfirm ? lowCleanlinessSleepMoodPenalty : 0;
         return recordWishProgress(
           startSleepSnapshot(
             {
               ...current,
               isSleeping: true,
-              recentEvent: current.pomodoro.isRunning
-                ? t('pet.action.sleep.pomodoroPaused', { name: current.name })
-                : current.mood <= lowSleepMoodWarningThreshold
-                  ? t('pet.action.sleep.lowMood', { name: current.name })
-                  : t('pet.action.sleep.normal', { name: current.name }),
+              lowCleanlinessSleepConfirmCount: 0,
+              mood: clampPetStat(current, current.mood - cleanlinessMoodPenalty),
+              recentEvent: needsCleanlinessConfirm
+                ? t('pet.action.sleep.lowCleanlinessStarted', { name: current.name, amount: lowCleanlinessSleepMoodPenalty })
+                : current.pomodoro.isRunning
+                  ? t('pet.action.sleep.pomodoroPaused', { name: current.name })
+                  : current.mood <= lowSleepMoodWarningThreshold
+                    ? t('pet.action.sleep.lowMood', { name: current.name })
+                    : t('pet.action.sleep.normal', { name: current.name }),
             },
             now,
           ),
@@ -192,7 +227,7 @@ export const applyPetAction = (pet: PetState, action: PetAction, now = Date.now(
   }
 };
 export const buyItem = (pet: PetState, itemId: ItemId, now = Date.now()): PetState => {
-  const current = markInteraction(advancePet(pet, now), now);
+  const current = clearLowCleanlinessSleepConfirm(markInteraction(advancePet(pet, now), now));
   const item = getShopItem(itemId);
   if (!item) return { ...current, recentEvent: t('pet.buy.missing') };
 
@@ -243,7 +278,7 @@ export const useInventoryItem = (
   now = Date.now(),
   options: UseInventoryItemOptions = {},
 ): PetState => {
-  const current = markInteraction(advancePet(pet, now), now);
+  const current = clearLowCleanlinessSleepConfirm(markInteraction(advancePet(pet, now), now));
   const item = getInventoryItem(itemId);
   if (!item) return { ...current, recentEvent: t('pet.item.missing') };
   const displayItemName = options.itemName ?? item.name;
@@ -343,7 +378,7 @@ export const useInventoryItem = (
 };
 
 export const interactWithPet = (pet: PetState, now = Date.now()): PetState => {
-  const current = markInteraction(advancePet(pet, now), now);
+  const current = clearLowCleanlinessSleepConfirm(markInteraction(advancePet(pet, now), now));
   if (now - current.lastPetInteractionAt < petInteractionCooldownMs) {
     return {
       ...current,
@@ -356,6 +391,14 @@ export const interactWithPet = (pet: PetState, now = Date.now()): PetState => {
       ...current,
       lastPetInteractionAt: now,
       recentEvent: t('pet.interaction.sleeping', { name: current.name }),
+    };
+  }
+
+  if (isPetCriticallyHungry(current)) {
+    return {
+      ...current,
+      lastPetInteractionAt: now,
+      recentEvent: t('pet.interaction.lowHunger', { name: current.name }),
     };
   }
 
@@ -400,7 +443,7 @@ export const interactWithPet = (pet: PetState, now = Date.now()): PetState => {
 };
 
 export const startPomodoro = (pet: PetState, now = Date.now()): PetState => {
-  const current = advancePet(pet, now);
+  const current = clearLowCleanlinessSleepConfirm(advancePet(pet, now));
   if (current.pomodoro.isRunning) return current;
 
 
@@ -441,13 +484,13 @@ export const startPomodoro = (pet: PetState, now = Date.now()): PetState => {
 };
 
 export const pausePomodoro = (pet: PetState, now = Date.now()): PetState => {
-  const current = advancePet(pet, now);
+  const current = clearLowCleanlinessSleepConfirm(advancePet(pet, now));
   if (!current.pomodoro.isRunning) return current;
 
   return pausePomodoroForReason(current, now, t('pet.pomodoro.pause.manual', { name: current.name }));
 };
 export const resetPomodoro = (pet: PetState, now = Date.now()): PetState => {
-  const current = advancePet(pet, now);
+  const current = clearLowCleanlinessSleepConfirm(advancePet(pet, now));
   const today = getLocalDateKey(now);
   const settings = current.pomodoro.settings;
   const dailyCompletedFocusCount =

@@ -51,11 +51,15 @@ export {
   clampPetHealth,
   clampPetStat,
   clampStat,
+  criticalHungerActionThreshold,
   defaultPetName,
   getEnergyRecoveryIntervalMs,
   getNextUpgradeHeartCost,
   getPetStatCap,
   getUpgradeHeartCost,
+  lowCleanlinessSleepConfirmClicks,
+  lowCleanlinessSleepMoodPenalty,
+  lowCleanlinessSleepWarningThreshold,
   lowEnergyThreshold,
   maxPetLevel,
   sleepEnergyRecoveryMs,
@@ -93,6 +97,7 @@ export {
   canStartPomodoro,
   getDailyBiscuitClaimInfo,
   getEnergyRecoveryInfo,
+  isPetCriticallyHungry,
   isPetLowEnergy,
 } from './petLifecycle';
 export {

@@ -1,4 +1,4 @@
-import { Pause, Play, RotateCcw } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Pause, Play, RotateCcw } from 'lucide-react';
 import type { CSSProperties } from 'react';
 import { pomodoroPhaseLabels, type PetState, type PomodoroDurations } from '../core/pet';
 import { t } from '../i18n';
@@ -27,11 +27,13 @@ const pomodoroText = {
   description: t('ui.pomodoro.description'),
 };
 
-const pomodoroSettingFields: readonly { key: PomodoroSettingKey; label: string; min: number; max: number; unit: string }[] = [
+const pomodoroMinuteSettingFields: readonly { key: Exclude<PomodoroSettingKey, 'targetRounds'>; label: string; min: number; max: number; unit: string }[] = [
   { key: 'focusMinutes', label: pomodoroText.focus, min: 1, max: 180, unit: pomodoroText.minutes },
   { key: 'shortBreakMinutes', label: pomodoroText.shortBreak, min: 1, max: 60, unit: pomodoroText.minutes },
-  { key: 'targetRounds', label: pomodoroText.rounds, min: 1, max: 8, unit: pomodoroText.roundUnit },
 ];
+
+const targetRoundsMin = 1;
+const targetRoundsMax = 8;
 
 interface PomodoroOverlayProps {
   pet: PetState;
@@ -53,52 +55,88 @@ export const PomodoroOverlay = ({
   onToggle,
   onReset,
   onSettingChange,
-}: PomodoroOverlayProps) => (
-  <section
-    className={pet.pomodoro.isRunning ? 'pomodoro-overlay pomodoro-overlay--running' : 'pomodoro-overlay'}
-    aria-label={pomodoroText.panelAria}
-    style={{ '--pomodoro-progress': progress + '%' } as CSSProperties}
-  >
-    <div className="pomodoro-orb">
-      <div className="pomodoro-ring" aria-hidden="true" />
-      <div className="pomodoro-orb__content">
-        <span className="pomodoro-state">{pet.pomodoro.isRunning ? pomodoroText.running : pomodoroText.paused}</span>
-        <span className="pomodoro-phase">{pomodoroPhaseLabels[pet.pomodoro.phase]}</span>
-        <strong>{formatPomodoroTime(remainingMs)}</strong>
-        <div className="pomodoro-controls">
-          <button type="button" className="pomodoro-control" disabled={isActionDisabled} title={startTitle} onClick={onToggle}>
-            {pet.pomodoro.isRunning ? <Pause size={16} aria-hidden="true" /> : <Play size={16} aria-hidden="true" />}
-            <span>{pet.pomodoro.isRunning ? pomodoroText.pause : pomodoroText.start}</span>
-          </button>
-          <button type="button" className="pomodoro-reset" title={pomodoroText.resetTitle} onClick={onReset}>
-            <RotateCcw size={15} aria-hidden="true" />
-            <span>{pomodoroText.reset}</span>
-          </button>
-        </div>
-        <div className="pomodoro-meta" aria-label={pomodoroText.statsAria}>
-          <span>{pomodoroText.roundPrefix} {pet.pomodoro.round} / {pet.pomodoro.settings.targetRounds} {pomodoroText.roundSuffix}</span>
-          <span>{pomodoroText.today} {pet.pomodoro.dailyCompletedFocusCount}</span>
+}: PomodoroOverlayProps) => {
+  const targetRounds = pet.pomodoro.settings.targetRounds;
+  const canDecreaseRounds = targetRounds > targetRoundsMin;
+  const canIncreaseRounds = targetRounds < targetRoundsMax;
+
+  const changeTargetRounds = (delta: number) => {
+    const next = Math.max(targetRoundsMin, Math.min(targetRoundsMax, targetRounds + delta));
+    onSettingChange('targetRounds', next);
+  };
+
+  return (
+    <section
+      className={pet.pomodoro.isRunning ? 'pomodoro-overlay pomodoro-overlay--running' : 'pomodoro-overlay'}
+      aria-label={pomodoroText.panelAria}
+      style={{ '--pomodoro-progress': progress + '%' } as CSSProperties}
+    >
+      <div className="pomodoro-orb">
+        <div className="pomodoro-ring" aria-hidden="true" />
+        <div className="pomodoro-orb__content">
+          <span className="pomodoro-state">{pet.pomodoro.isRunning ? pomodoroText.running : pomodoroText.paused}</span>
+          <span className="pomodoro-phase">{pomodoroPhaseLabels[pet.pomodoro.phase]}</span>
+          <strong>{formatPomodoroTime(remainingMs)}</strong>
+          <div className="pomodoro-controls">
+            <button type="button" className="pomodoro-control" disabled={isActionDisabled} title={startTitle} onClick={onToggle}>
+              {pet.pomodoro.isRunning ? <Pause size={16} aria-hidden="true" /> : <Play size={16} aria-hidden="true" />}
+              <span>{pet.pomodoro.isRunning ? pomodoroText.pause : pomodoroText.start}</span>
+            </button>
+            <button type="button" className="pomodoro-reset" title={pomodoroText.resetTitle} onClick={onReset}>
+              <RotateCcw size={15} aria-hidden="true" />
+              <span>{pomodoroText.reset}</span>
+            </button>
+          </div>
+          <div className="pomodoro-meta" aria-label={pomodoroText.statsAria}>
+            <span>{pomodoroText.roundPrefix} {pet.pomodoro.round} / {pet.pomodoro.settings.targetRounds} {pomodoroText.roundSuffix}</span>
+            <span>{pomodoroText.today} {pet.pomodoro.dailyCompletedFocusCount}</span>
+          </div>
         </div>
       </div>
-    </div>
 
-    <p className="pomodoro-description">{pomodoroText.description}</p>
+      <p className="pomodoro-description">{pomodoroText.description}</p>
 
-    <div className="pomodoro-settings" aria-label={pomodoroText.settings}>
-      {pomodoroSettingFields.map((field) => (
-        <label className="pomodoro-setting" key={field.key}>
-          <span>{field.label}</span>
-          <input
-            type="number"
-            min={field.min}
-            max={field.max}
-            step={1}
-            value={pet.pomodoro.settings[field.key]}
-            onChange={(event) => onSettingChange(field.key, Number(event.currentTarget.value))}
-          />
-          <small>{field.unit}</small>
-        </label>
-      ))}
-    </div>
-  </section>
-);
+      <div className="pomodoro-settings" aria-label={pomodoroText.settings}>
+        {pomodoroMinuteSettingFields.map((field) => (
+          <label className="pomodoro-setting" key={field.key}>
+            <span>{field.label}</span>
+            <input
+              type="number"
+              min={field.min}
+              max={field.max}
+              step={1}
+              value={pet.pomodoro.settings[field.key]}
+              onChange={(event) => onSettingChange(field.key, Number(event.currentTarget.value))}
+            />
+            <small>{field.unit}</small>
+          </label>
+        ))}
+        <div className="pomodoro-setting pomodoro-setting--rounds">
+          <span>{pomodoroText.rounds}</span>
+          <div className="pomodoro-stepper" aria-label={pomodoroText.rounds}>
+            <button
+              type="button"
+              disabled={!canDecreaseRounds}
+              title={pomodoroText.rounds + ' - 1'}
+              aria-label={pomodoroText.rounds + ' - 1'}
+              onClick={() => changeTargetRounds(-1)}
+            >
+              <ChevronLeft size={15} aria-hidden="true" />
+            </button>
+            <strong>{targetRounds}</strong>
+            <button
+              type="button"
+              disabled={!canIncreaseRounds}
+              title={pomodoroText.rounds + ' + 1'}
+              aria-label={pomodoroText.rounds + ' + 1'}
+              onClick={() => changeTargetRounds(1)}
+            >
+              <ChevronRight size={15} aria-hidden="true" />
+            </button>
+          </div>
+          <small>{pomodoroText.roundUnit}</small>
+        </div>
+      </div>
+    </section>
+  );
+};
