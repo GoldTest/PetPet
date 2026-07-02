@@ -25,7 +25,8 @@
       "audioOn": "关闭声音",
       "audioOff": "打开声音",
       "settings": "设置",
-      "openSettings": "打开设置"
+      "openSettings": "打开设置",
+      "openAchievements": "打开成就"
     },
     "dashboard": {
       "aria": "宠物数值",
@@ -307,6 +308,48 @@
           "description": "你离开了 {days} 天，让宠物睡一觉，慢慢恢复体力。"
         }
       }
+    },
+    "achievements": {
+      "aria": "成就",
+      "back": "返回",
+      "kicker": "Achievement",
+      "title": "成就",
+      "unlocked": "已解锁",
+      "unlockedProgress": "已解锁 {unlocked}/{total}",
+      "claimable": "可领取",
+      "dailyStipend": "每日成就津贴",
+      "dailyStipendAmount": "+{coins} 金币",
+      "claim": "领取",
+      "dailyStipendClaimed": "今日已领取",
+      "reviewNotice": "旧存档或多项成就已整理完毕，可以在这里查看。",
+      "tabsAria": "成就分类",
+      "locked": "未完成",
+      "claimed": "已领取",
+      "active": "已生效",
+      "progress": "{progress}/{target}",
+      "rarity": {
+        "rare": "稀有",
+        "hidden": "隐藏",
+        "normal": "普通"
+      },
+      "categories": {
+        "all": "全部",
+        "care": "照顾",
+        "daily": "日常",
+        "shop": "商店",
+        "inventory": "背包",
+        "pomodoro": "番茄钟",
+        "growth": "成长",
+        "date": "日期",
+        "ending": "结局",
+        "hidden": "隐藏"
+      },
+      "toast": {
+        "single": "成就已解锁",
+        "review": "成就已更新",
+        "reviewTitle": "去成就页查看"
+      },
+      "dailyStipendAuto": "随每日登录奖励自动发放"
     }
   },
   "pet": {
@@ -331,6 +374,10 @@
         "banana": {
           "name": "香蕉",
           "summary": "香甜的水果，耐饿"
+        },
+        "watermelon": {
+          "name": "西瓜",
+          "summary": "清甜多汁的夏日水果"
         },
         "nutri_meal": {
           "name": "轻沙拉",
@@ -612,10 +659,13 @@
         "care": "{name} 使用了{item}。",
         "careWoke": "{name} 醒来使用了{item}。",
         "favorite": "这是 Furo 喜欢的味道，心情额外 +{amount}。",
-        "stickerHeart": "贴纸闪闪发亮，小心心 +1。",
-        "stickerSaved": "贴纸被认真收好了。",
+        "giftHeart": "礼物带来了一个小心心。",
         "birthdayCake": "{name} 吃下了{item}，全属性回满。",
         "birthdayCakeWoke": "{name} 醒来吃下了{item}，全属性回满。"
+      },
+      "unknown": {
+        "name": "未知 Mod 道具",
+        "summary": "这个道具来自当前未加载的 Mod：{id}。重新导入对应 Mod 后可恢复显示和使用。"
       }
     },
     "rename": {
@@ -650,7 +700,10 @@
       "dailyCoins": "每日登录礼物：金币 +{coins}。",
       "dailyItem": "每日登录礼物：背包里多了一件惊喜道具。",
       "anniversary": "今天是和 {name} 相遇的日子，纪念日奖励：金币 +{coins}，小心心 +{hearts}，闪亮贴纸 +1。",
-      "monthlyGift": "新的月份开始了，月初礼物：金币 +{coins}，还有一份水果。"
+      "monthlyGift": "新的月份开始了，月初礼物：金币 +{coins}，还有一份水果。",
+      "dailyWithStipend": "每日登录礼物：金币 +{coins}（含成就津贴 +{stipend}）。",
+      "dailyWithBonusItems": "每日登录礼物送达，成就额外道具 +{count}。",
+      "dailyWithStipendAndBonusItems": "每日登录礼物：金币 +{coins}（含成就津贴 +{stipend}），成就额外道具 +{count}。"
     },
     "exchange": {
       "success": "兑换了 1 个小心心，金币 +{coins}。",
@@ -705,6 +758,319 @@
       "claimed": "回归补给已领取，金币 +{coins}，背包里也多了照顾道具。",
       "notReady": "先完成回归恢复任务，再领取补给。",
       "alreadyClaimed": "回归补给已经领取过了。"
+    },
+    "achievements": {
+      "events": {
+        "rewardClaimed": "成就「{title}」奖励已领取。",
+        "unlocked": "成就「{title}」已解锁。",
+        "dailyStipendClaimed": "已领取每日成就津贴：{coins} 金币。"
+      },
+      "rewards": {
+        "coins": "金币 +{coins}",
+        "item": "{item} x{count}",
+        "workCoinBonus": "打工金币 +{amount}",
+        "pomodoroCoinBonus": "番茄钟金币 +{amount}",
+        "cleanCooldown": "清洁冷却 {seconds} 秒",
+        "extraHeartChance": "额外小心心概率 +{percent}%",
+        "globalFlatBonus": "全局收益 +{amount}",
+        "dailyStipend": "每日成就津贴 +{coins} 金币",
+        "careStatBonus": "喂食和清洁恢复 +{amount}",
+        "cg": "解锁纪念内容",
+        "badge": "纪念徽章",
+        "hearts": "小心心 +{hearts}",
+        "dailyLoginItemBonus": "每日登录道具 +{amount}",
+        "hiddenReveal": "显示所有隐藏成就条件"
+      },
+      "extraYear": {
+        "title": "第 {year} 年的好结局",
+        "description": "又一年温柔又稳定的陪伴记录被保存了下来。"
+      },
+      "definitions": {
+        "first_feed": {
+          "title": "第一口点心",
+          "description": "第一次喂食或使用食物。"
+        },
+        "first_clean": {
+          "title": "洗得香香",
+          "description": "第一次清洁或使用清洁道具。"
+        },
+        "first_play": {
+          "title": "玩一下吧",
+          "description": "第一次陪宠物玩耍。"
+        },
+        "first_touch": {
+          "title": "摸摸脑袋",
+          "description": "第一次摸摸宠物。"
+        },
+        "first_work": {
+          "title": "小小打工人",
+          "description": "第一次完成打工。"
+        },
+        "first_sleep": {
+          "title": "好好休息",
+          "description": "第一次让宠物进入睡眠。"
+        },
+        "first_gift": {
+          "title": "礼物时间",
+          "description": "第一次使用礼物类道具。"
+        },
+        "care_25": {
+          "title": "熟悉的节奏",
+          "description": "任意照顾行为累计 25 次。"
+        },
+        "care_100": {
+          "title": "每天都更熟一点",
+          "description": "任意照顾行为累计 100 次。"
+        },
+        "feed_30": {
+          "title": "喂饱饱",
+          "description": "喂食累计 30 次。"
+        },
+        "clean_30": {
+          "title": "清爽护理",
+          "description": "清洁累计 30 次。"
+        },
+        "play_30": {
+          "title": "开心消耗能量",
+          "description": "玩耍累计 30 次。"
+        },
+        "touch_30": {
+          "title": "信赖的手心",
+          "description": "摸摸累计 30 次。"
+        },
+        "work_10": {
+          "title": "零花钱起步",
+          "description": "打工累计 10 次。"
+        },
+        "work_50": {
+          "title": "熟练打工",
+          "description": "打工累计 50 次。"
+        },
+        "work_100": {
+          "title": "稳定收入",
+          "description": "打工累计 100 次。"
+        },
+        "daily_wish_1": {
+          "title": "今日小愿望",
+          "description": "领取 1 次每日愿望奖励。"
+        },
+        "daily_wish_7": {
+          "title": "不赶时间的习惯",
+          "description": "累计领取 7 次每日愿望奖励。"
+        },
+        "daily_wish_30": {
+          "title": "愿望积少成多",
+          "description": "累计领取 30 次每日愿望奖励。"
+        },
+        "daily_wish_100": {
+          "title": "每天的小约定",
+          "description": "累计领取 100 次每日愿望奖励。"
+        },
+        "return_welcome_1": {
+          "title": "欢迎回来",
+          "description": "领取 1 次回归欢迎奖励。"
+        },
+        "daily_login_7": {
+          "title": "路过也很好",
+          "description": "领取 7 次每日登录奖励，不要求连续。"
+        },
+        "first_purchase": {
+          "title": "第一次采购",
+          "description": "第一次购买非免费道具。"
+        },
+        "purchase_20": {
+          "title": "小仓库补货中",
+          "description": "累计购买或领取 20 次道具。"
+        },
+        "item_use_20": {
+          "title": "背包不是摆设",
+          "description": "累计使用 20 次道具。"
+        },
+        "fruit_taster": {
+          "title": "水果试吃员",
+          "description": "橙子、苹果、香蕉、西瓜各使用 1 次。"
+        },
+        "watermelon_first": {
+          "title": "夏天的一口",
+          "description": "第一次使用西瓜。"
+        },
+        "care_kit": {
+          "title": "护理小工具",
+          "description": "湿巾、洗发水、维生素片各使用 1 次。"
+        },
+        "pomodoro_1": {
+          "title": "第一枚番茄",
+          "description": "完成 1 次专注阶段。"
+        },
+        "pomodoro_10": {
+          "title": "专注开始发芽",
+          "description": "累计完成 10 次专注阶段。"
+        },
+        "pomodoro_50": {
+          "title": "桌边陪伴",
+          "description": "累计完成 50 次专注阶段。"
+        },
+        "pomodoro_100": {
+          "title": "深度专注",
+          "description": "累计完成 100 次专注阶段。"
+        },
+        "pomodoro_day_4": {
+          "title": "今天很专心",
+          "description": "同一天完成 4 次专注阶段。"
+        },
+        "level_2": {
+          "title": "长大一点点",
+          "description": "宠物升到 2 级。"
+        },
+        "level_5": {
+          "title": "可靠伙伴",
+          "description": "宠物升到 5 级。"
+        },
+        "heart_10": {
+          "title": "小心心收藏盒",
+          "description": "累计获得 10 颗小心心。"
+        },
+        "coin_500": {
+          "title": "小金库起步",
+          "description": "累计获得 500 金币。"
+        },
+        "coin_2000": {
+          "title": "稳定存钱",
+          "description": "累计获得 2000 金币。"
+        },
+        "heart_50": {
+          "title": "满满心意",
+          "description": "累计获得 50 颗小心心。"
+        },
+        "birthday_first": {
+          "title": "生日快乐",
+          "description": "领取 1 次生日奖励。"
+        },
+        "monthly_gift_3": {
+          "title": "月初小礼物",
+          "description": "领取 3 次月初礼物。"
+        },
+        "festival_1": {
+          "title": "节日来信",
+          "description": "领取 1 次节日奖励。"
+        },
+        "anniversary_first": {
+          "title": "相遇纪念",
+          "description": "领取 1 次相遇纪念日奖励。"
+        },
+        "sleep_30": {
+          "title": "安稳入睡",
+          "description": "累计进入睡眠 30 次。"
+        },
+        "manual_wake_10": {
+          "title": "叫醒服务",
+          "description": "手动叫醒宠物 10 次。"
+        },
+        "natural_wake_10": {
+          "title": "睡到自然醒",
+          "description": "宠物自然醒 10 次。"
+        },
+        "sleep_rhythm_30": {
+          "title": "规律作息",
+          "description": "累计进入睡眠和自然醒都达到 30 次。"
+        },
+        "rare_trusted_companion": {
+          "title": "值得信赖的陪伴",
+          "description": "陪伴满 30 天，且累计活跃 10 天。"
+        },
+        "rare_fruit_collector": {
+          "title": "水果收藏家",
+          "description": "橙子、苹果、香蕉、西瓜各使用 3 次。"
+        },
+        "rare_gentle_caretaker": {
+          "title": "温柔照顾者",
+          "description": "喂食、清洁、玩耍、摸摸各累计 50 次。"
+        },
+        "rare_level_10": {
+          "title": "闪闪发光的伙伴",
+          "description": "宠物升到 10 级。"
+        },
+        "hidden_good_ending_year_1": {
+          "title": "好结局",
+          "description": "第一年留下了温柔又稳定的陪伴记录。"
+        },
+        "work_master": {
+          "title": "打工大师",
+          "description": "打工累计 300 次。"
+        },
+        "work_play_balance": {
+          "title": "工作玩耍两不误",
+          "description": "打工和玩耍各累计 50 次。"
+        },
+        "companion_100": {
+          "title": "百日伙伴",
+          "description": "陪伴满 100 天，且累计活跃 60 天。"
+        },
+        "shop_item_collector": {
+          "title": "小小收藏家",
+          "description": "使用过所有商店道具。"
+        },
+        "fruit_master": {
+          "title": "水果大师",
+          "description": "橙子、苹果、香蕉、西瓜各使用 20 次。"
+        },
+        "omnivore": {
+          "title": "不挑食的孩子",
+          "description": "使用过所有商店食物。"
+        },
+        "heart_100": {
+          "title": "心意满满",
+          "description": "累计获得 100 颗小心心。"
+        },
+        "heart_200": {
+          "title": "心意闪闪发亮",
+          "description": "累计获得 200 颗小心心。"
+        },
+        "max_coin_500": {
+          "title": "攒到一小袋",
+          "description": "历史最高持有金币达到 500。"
+        },
+        "max_coin_2000": {
+          "title": "认真存钱",
+          "description": "历史最高持有金币达到 2000。"
+        },
+        "heart_500": {
+          "title": "心意成河",
+          "description": "累计获得 500 颗小心心。"
+        },
+        "hidden_never_give_you_up": {
+          "title": "never give you up",
+          "description": "领取 3 次回归奖励。"
+        },
+        "hidden_never_let_you_down": {
+          "title": "never let you down",
+          "description": "领取 10 次回归奖励。"
+        },
+        "hidden_quiet_companion": {
+          "title": "默默陪伴",
+          "description": "累计活跃 100 天。"
+        },
+        "hidden_prepared_bag": {
+          "title": "有备无患",
+          "description": "背包道具总数超过 10 个。"
+        },
+        "hidden_hoarder": {
+          "title": "囤积癖",
+          "description": "背包道具总数超过 50 个。"
+        },
+        "hidden_regular_life": {
+          "title": "规律生活",
+          "description": "累计进入睡眠 100 次。"
+        },
+        "hidden_big_watermelon": {
+          "title": "合成大西瓜",
+          "description": "橙子、苹果、香蕉各累计使用 20 次。"
+        },
+        "hidden_full_catalogue": {
+          "title": "全图鉴",
+          "description": "达成所有普通成就。"
+        }
+      }
     }
   }
 }

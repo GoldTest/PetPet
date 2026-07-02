@@ -16,6 +16,7 @@ import itemNutriMeal from './assets/icon/item_nutri_meal.png';
 import itemOrange from './assets/icon/item_orange.png';
 import itemApple from './assets/icon/item_apple.png';
 import itemBanana from './assets/icon/item_banana.png';
+import itemWatermelon from './assets/icon/item_watermelon.png';
 import itemPictureBook from './assets/icon/item_picture_book.png';
 import itemStrawberryMilk from './assets/icon/item_strawberry_milk.png';
 import itemShampoo from './assets/icon/item_shampoo.png';
@@ -40,17 +41,19 @@ import petWorkout from './assets/pet/pet_workout.png';
 import petWorkMakingFood from './assets/pet/pet_work_making_food.png';
 import petWorkWateringPlants from './assets/pet/pet_work_watering_plants.png';
 import type { ActivePetMod } from './core/mod';
-import type { ItemId, PetStatus, RecentActivity } from './core/pet';
+import type { BuiltinItemId, PetStatus, RecentActivity } from './core/petTypes';
 
 export const currencyIcon = coin;
 export const giftBoxIcon = itemGiftBox;
+export const unknownItemIcon = itemGiftBox;
 
-export const itemIcons: Record<ItemId, string> = {
+export const itemIcons: Record<BuiltinItemId, string> = {
   emergency_biscuit: itemEmergencyBiscuit,
   bento: itemBento,
   orange: itemOrange,
   apple: itemApple,
   banana: itemBanana,
+  watermelon: itemWatermelon,
   nutri_meal: itemNutriMeal,
   pig_trotter: iconPigTotters,
   strawberry_cake: iconBerryCake,
@@ -96,17 +99,25 @@ export const petActivityImages: Partial<Record<RecentActivity, string>> = {
 };
 
 
-export const resolveItemIcons = (mod?: ActivePetMod | null): Record<ItemId, string> => ({
+const omitUndefinedValues = <T extends string>(values?: Partial<Record<T, string>>): Partial<Record<T, string>> => {
+  const result: Partial<Record<T, string>> = {};
+  Object.entries(values ?? {}).forEach(([key, value]) => {
+    if (typeof value === 'string') result[key as T] = value;
+  });
+  return result;
+};
+
+export const resolveItemIcons = (mod?: ActivePetMod | null): Record<string, string> => ({
   ...itemIcons,
-  ...mod?.itemImageUrls,
+  ...omitUndefinedValues(mod?.itemImageUrls),
 });
 
 export const resolvePetStatusImages = (mod?: ActivePetMod | null): Record<PetStatus, string> => ({
   ...petStatusImages,
-  ...mod?.petImageUrls,
+  ...omitUndefinedValues(mod?.petImageUrls),
 });
 
 export const resolvePetActivityImages = (mod?: ActivePetMod | null): Partial<Record<RecentActivity, string>> => ({
   ...petActivityImages,
-  ...mod?.petImageUrls,
+  ...omitUndefinedValues(mod?.petImageUrls),
 });

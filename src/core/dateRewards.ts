@@ -1,6 +1,7 @@
 import { t } from '../i18n';
 import { addInventoryItem } from './items';
-import { clampCoins, clampCount } from './petStats';
+import { applyHeartGain, claimAchievementDailyStipendWithResult, getAchievementEffects, incrementAchievementDateReward, recordEarnedCoins, recordEarnedHearts } from './achievements';
+import { clampCoins } from './petStats';
 import type { ItemId, PetBirthday, PetState } from './petTypes';
 import { getLocalDateKey, hashString } from './utils';
 
@@ -26,6 +27,7 @@ export interface ClaimedDateReward {
   coins?: number;
   hearts?: number;
   items: DateRewardItem[];
+  achievementBonusItemCount?: number;
 }
 
 type WeightedEntry<T> = T & { weight: number };
@@ -43,13 +45,13 @@ export interface FestivalConfig {
   reward: FestivalRewardConfig;
 }
 
-const fruitItems: readonly ItemId[] = ['orange', 'apple', 'banana'];
+const fruitItems: readonly ItemId[] = ['orange', 'apple', 'banana', 'watermelon'];
 const giftItems: readonly ItemId[] = ['small_bouquet', 'shiny_sticker', 'ribbon_bell'];
 const goodFoodAndGiftItems: readonly ItemId[] = ['bento', 'nutri_meal', 'strawberry_cake', 'small_bouquet', 'ribbon_bell'];
 const cleaningItems: readonly ItemId[] = ['wet_wipes', 'shampoo'];
 const toyAndSweetItems: readonly ItemId[] = ['toy_ball', 'picture_book', 'strawberry_cake', 'strawberry_milk'];
 const christmasItems: readonly ItemId[] = ['soft_cloud_doll', 'ribbon_bell', 'strawberry_cake', 'blanket', 'small_bouquet'];
-const harvestFoodItems: readonly ItemId[] = ['orange', 'apple', 'banana', 'bento', 'nutri_meal', 'strawberry_cake'];
+const harvestFoodItems: readonly ItemId[] = ['orange', 'apple', 'banana', 'watermelon', 'bento', 'nutri_meal', 'strawberry_cake'];
 
 // TODO: Allow future festival-exclusive ItemIds and Mod-provided festival reward pools.
 export const festivalConfigs: readonly FestivalConfig[] = [
@@ -66,6 +68,7 @@ const dailyLoginRewardPool: readonly WeightedEntry<{ coins: number } | { itemId:
   { itemId: 'orange', weight: 16 },
   { itemId: 'apple', weight: 15 },
   { itemId: 'banana', weight: 15 },
+  { itemId: 'watermelon', weight: 10 },
   { itemId: 'emergency_biscuit', weight: 8 },
   { coins: 20, weight: 7 },
   { itemId: 'bento', weight: 5 },
@@ -81,6 +84,9 @@ const dailyLoginRewardPool: readonly WeightedEntry<{ coins: number } | { itemId:
   { itemId: 'medicine', weight: 1 },
   { itemId: 'soft_cloud_doll', weight: 1 },
 ];
+
+const dailyLoginBonusItemPool: readonly WeightedEntry<{ itemId: ItemId }>[] = dailyLoginRewardPool
+  .filter((entry): entry is WeightedEntry<{ itemId: ItemId }> => 'itemId' in entry);
 
 const getLocalYear = (time: number) => new Date(time).getFullYear();
 
@@ -148,16 +154,56 @@ const pickWeightedRandom = <T,>(items: readonly WeightedEntry<T>[]): T => {
 
 const pickSeededItem = (items: readonly ItemId[], seed: string) => items[hashString(seed) % items.length];
 
+const mergeRewardItems = (items: readonly DateRewardItem[]): DateRewardItem[] => {
+  const amounts: Partial<Record<ItemId, number>> = {};
+  items.forEach((item) => {
+    amounts[item.itemId] = (amounts[item.itemId] ?? 0) + Math.max(0, Math.floor(item.amount));
+  });
+  return Object.entries(amounts)
+    .filter(([, amount]) => (amount ?? 0) > 0)
+    .map(([itemId, amount]) => ({ itemId: itemId as ItemId, amount: amount ?? 0 }));
+};
+
+const pickDailyLoginBonusItems = (count: number): DateRewardItem[] => {
+  const amount = Math.max(0, Math.floor(count));
+  return mergeRewardItems(Array.from({ length: amount }, () => ({
+    itemId: pickWeightedRandom(dailyLoginBonusItemPool).itemId,
+    amount: 1,
+  })));
+};
+
+const updateDailyLoginAchievementMessage = (reward: ClaimedDateReward, stipendCoins: number) => {
+  const bonusItemCount = reward.achievementBonusItemCount ?? 0;
+  if (stipendCoins > 0 && bonusItemCount > 0) {
+    reward.message = t('pet.reward.dailyWithStipendAndBonusItems', { coins: reward.coins ?? 0, stipend: stipendCoins, count: bonusItemCount });
+    return;
+  }
+  if (stipendCoins > 0) {
+    reward.message = t('pet.reward.dailyWithStipend', { coins: reward.coins ?? 0, stipend: stipendCoins });
+    return;
+  }
+  if (bonusItemCount > 0) {
+    reward.message = t('pet.reward.dailyWithBonusItems', { count: bonusItemCount });
+  }
+};
+
 const addRewardItems = (inventory: PetState['inventory'], items: readonly DateRewardItem[]) =>
   items.reduce((next, item) => addInventoryItem(next, item.itemId, item.amount), inventory);
 
-const applyReward = (pet: PetState, reward: ClaimedDateReward): PetState => ({
-  ...pet,
-  coins: clampCoins(pet.coins + (reward.coins ?? 0)),
-  hearts: clampCount(pet.hearts + (reward.hearts ?? 0)),
-  inventory: addRewardItems(pet.inventory, reward.items),
-  recentEvent: reward.message,
-});
+const applyReward = (pet: PetState, reward: ClaimedDateReward): { pet: PetState; reward: ClaimedDateReward } => {
+  const heartGain = applyHeartGain(pet, reward.hearts ?? 0);
+  const actualReward = reward.hearts && heartGain.amount !== reward.hearts ? { ...reward, hearts: heartGain.amount } : reward;
+  return {
+    pet: {
+      ...pet,
+      coins: clampCoins(pet.coins + (actualReward.coins ?? 0)),
+      hearts: actualReward.hearts ? heartGain.hearts : pet.hearts,
+      inventory: addRewardItems(pet.inventory, actualReward.items),
+      recentEvent: actualReward.message,
+    },
+    reward: actualReward,
+  };
+};
 
 const getFestivalForDate = (now: number) => {
   const current = getMonthDay(now);
@@ -199,9 +245,10 @@ const claimBirthdayReward = (pet: PetState, now: number): { pet: PetState; rewar
     items: [{ itemId: 'birthday_cake', amount: 1 }],
   };
 
+  const applied = applyReward(pet, reward);
   return {
-    pet: { ...applyReward(pet, reward), lastBirthdayRewardYear: year },
-    reward,
+    pet: { ...applied.pet, lastBirthdayRewardYear: year },
+    reward: applied.reward,
   };
 };
 
@@ -222,9 +269,10 @@ const claimAnniversaryReward = (pet: PetState, now: number): { pet: PetState; re
     items: [{ itemId: 'shiny_sticker', amount: 1 }],
   };
 
+  const applied = applyReward(pet, reward);
   return {
-    pet: { ...applyReward(pet, reward), lastAnniversaryRewardYear: year },
-    reward,
+    pet: { ...applied.pet, lastAnniversaryRewardYear: year },
+    reward: applied.reward,
   };
 };
 
@@ -245,12 +293,13 @@ const claimFestivalReward = (pet: PetState, now: number): { pet: PetState; rewar
     items,
   };
 
+  const applied = applyReward(pet, reward);
   return {
     pet: {
-      ...applyReward(pet, reward),
+      ...applied.pet,
       claimedFestivalRewardKeys: [...pet.claimedFestivalRewardKeys, annualKey],
     },
-    reward,
+    reward: applied.reward,
   };
 };
 
@@ -271,9 +320,10 @@ const claimMonthlyGiftReward = (pet: PetState, now: number): { pet: PetState; re
     items: [{ itemId: fruit, amount: 1 }],
   };
 
+  const applied = applyReward(pet, reward);
   return {
-    pet: { ...applyReward(pet, reward), monthlyGiftDateKey: monthKey },
-    reward,
+    pet: { ...applied.pet, monthlyGiftDateKey: monthKey },
+    reward: applied.reward,
   };
 };
 
@@ -283,7 +333,9 @@ const claimDailyLoginReward = (pet: PetState, now: number): { pet: PetState; rew
 
   const picked = pickWeightedRandom(dailyLoginRewardPool);
   const coins = 'coins' in picked ? picked.coins : undefined;
-  const items: DateRewardItem[] = 'itemId' in picked ? [{ itemId: picked.itemId, amount: 1 }] : [];
+  const baseItems: DateRewardItem[] = 'itemId' in picked ? [{ itemId: picked.itemId, amount: 1 }] : [];
+  const bonusItems = pickDailyLoginBonusItems(getAchievementEffects(pet).dailyLoginItemBonus);
+  const bonusItemCount = bonusItems.reduce((sum, item) => sum + item.amount, 0);
   const reward: ClaimedDateReward = {
     id: `daily_login:${resetDateKey}`,
     kind: 'daily_login',
@@ -292,12 +344,15 @@ const claimDailyLoginReward = (pet: PetState, now: number): { pet: PetState; rew
       ? t('pet.reward.dailyCoins', { coins })
       : t('pet.reward.dailyItem'),
     coins,
-    items,
+    items: mergeRewardItems([...baseItems, ...bonusItems]),
+    achievementBonusItemCount: bonusItemCount > 0 ? bonusItemCount : undefined,
   };
+  updateDailyLoginAchievementMessage(reward, 0);
 
+  const applied = applyReward(pet, reward);
   return {
-    pet: { ...applyReward(pet, reward), dailyLoginRewardDateKey: resetDateKey },
-    reward,
+    pet: { ...applied.pet, dailyLoginRewardDateKey: resetDateKey },
+    reward: applied.reward,
   };
 };
 
@@ -311,7 +366,23 @@ export const claimAvailableDateRewards = (pet: PetState, now = Date.now()) => {
     if (result.reward) rewards.push(result.reward);
   }
 
-  if (rewards.length > 0) next = { ...next, recentEvent: rewards[0].message };
+  if (rewards.length > 0) {
+    rewards.forEach((reward) => {
+      next = incrementAchievementDateReward(next, reward.kind);
+      if (reward.coins) next = recordEarnedCoins(next, reward.coins);
+      if (reward.hearts) next = recordEarnedHearts(next, reward.hearts);
+    });
+    const dailyLoginReward = rewards.find((reward) => reward.kind === 'daily_login');
+    if (dailyLoginReward) {
+      const stipend = claimAchievementDailyStipendWithResult(next, now, getSixAmResetDateKey(now));
+      next = stipend.pet;
+      if (stipend.coins > 0) {
+        dailyLoginReward.coins = (dailyLoginReward.coins ?? 0) + stipend.coins;
+      }
+      updateDailyLoginAchievementMessage(dailyLoginReward, stipend.coins);
+    }
+    next = { ...next, recentEvent: rewards[0].message };
+  }
 
   return { pet: next, rewards };
 };

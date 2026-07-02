@@ -1,13 +1,13 @@
 import { ShoppingBag } from 'lucide-react';
-import type { ItemDisplay } from '../core/mod';
-import type { Inventory, ItemId } from '../core/pet';
+import type { Inventory, InventoryItemDefinition, ItemId } from '../core/pet';
+import { unknownItemIcon } from '../assets';
 import { t } from '../i18n';
 import { getItemEffectBadges, getItemEffectTitle } from './itemEffectBadges';
 
 interface InventoryPanelProps {
-  ownedItems: readonly ItemDisplay[];
+  ownedItems: readonly InventoryItemDefinition[];
   inventory: Inventory;
-  itemIconMap: Record<ItemId, string>;
+  itemIconMap: Partial<Record<string, string>>;
   onOpenShop: () => void;
   onUseItem: (itemId: ItemId) => void;
 }
@@ -29,9 +29,10 @@ export const InventoryPanel = ({ ownedItems, inventory, itemIconMap, onOpenShop,
       <div className="inventory-list">
         {ownedItems.map((item) => {
           const effectBadges = getItemEffectBadges(item.effect);
+          const icon = itemIconMap[item.id] ?? item.imageUrl ?? unknownItemIcon;
           return (
-            <button type="button" key={item.id} className="inventory-item" onClick={() => onUseItem(item.id)} title={getItemEffectTitle(item.displaySummary, item.effect)}>
-              <img src={itemIconMap[item.id]} alt="" aria-hidden="true" />
+            <button type="button" key={item.id} className="inventory-item" disabled={!item.usable} onClick={() => onUseItem(item.id)} title={getItemEffectTitle(item.displaySummary, item.effect)}>
+              <img src={icon} alt="" aria-hidden="true" />
               <div className="inventory-item__copy">
                 <div className="inventory-item__title-row">
                   <span className="inventory-item__name">{item.displayName}</span>

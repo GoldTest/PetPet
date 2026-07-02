@@ -1,5 +1,6 @@
 import { t } from '../i18n';
 import { ensureDailyWishForDate, maybeCreateReturnWelcome, returnWelcomeMinAwayMs } from './dailyWishes';
+import { getAchievementEffects, incrementAchievementPomodoroFocus, incrementNaturalWake, recordEarnedCoins } from './achievements';
 import { dailyBiscuitClaimLimit } from './items';
 import { applyTimedEvent, getRandomDailyEncounter, getRandomOfflineDiary, getRandomOfflineEvent, maybeApplyDreamTalk, settleSleep, startSleepSnapshot } from './petEvents';
 import { clampCoins, clampCount, clampPetHealth, clampPetStat, criticalHungerActionThreshold, getEnergyRecoveryIntervalMs, getPetStatCap, lowEnergyThreshold } from './petStats';
@@ -134,7 +135,7 @@ export const advancePomodoro = (pet: PetState, now = Date.now()): PetState => {
 
     if (baseCoins > 0 || bonusCoins > 0 || mood > 0) {
       rewardChanged = true;
-      earnedCoins += baseCoins + bonusCoins;
+      earnedCoins += baseCoins + bonusCoins + (baseCoins + bonusCoins > 0 ? getAchievementEffects(next).pomodoroCoinBonus : 0);
       earnedBonusCoins += bonusCoins;
       earnedMood += mood;
     }
@@ -226,7 +227,7 @@ export const advancePomodoro = (pet: PetState, now = Date.now()): PetState => {
     lastInteractionAt: now,
   };
 
-  next = recordYearlyPomodoroFocus(next, settledFocusCount, now);
+  next = recordEarnedCoins(incrementAchievementPomodoroFocus(recordYearlyPomodoroFocus(next, settledFocusCount, now), settledFocusCount), earnedCoins);
 
   if (settledPhaseCount > 0) {
     const parts = [
@@ -377,7 +378,7 @@ export const advancePet = (pet: PetState, now = Date.now()): PetState => {
   }
 
   if (wokeUp) {
-    const settled = settleSleep(next, now);
+    const settled = incrementNaturalWake(settleSleep(next, now));
     return !currentForActivity.pomodoro.isRunning && deltaMs >= returnWelcomeMinAwayMs
       ? maybeCreateReturnWelcome(settled, deltaMs, now)
       : settled;
@@ -405,6 +406,4 @@ export const advancePet = (pet: PetState, now = Date.now()): PetState => {
 
   return applyDailyEncounter(next, now);
 };
-
-
 

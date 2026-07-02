@@ -1,5 +1,6 @@
 import { t } from '../i18n';
-import type { Inventory, ItemId, PetState, ShopCategory, ShopItem } from './petTypes';
+import type { ActivePetMod, PetModCustomItem, PetModItemOverride } from './mod';
+import type { BuiltinItemId, Inventory, InventoryItemDefinition, ItemDefinition, ItemId, ItemRegistry, PetState, ShopCategory, ShopItem } from './petTypes';
 import { getLocalDateKey, hashString } from './utils';
 
 export const dailyBiscuitClaimLimit = 3;
@@ -32,7 +33,7 @@ export const shopItems: readonly ShopItem[] = [
     name: t('pet.shop.items.bento.name'),
     kind: 'food',
     price: 24,
-    effect: { hunger: 34, cleanliness: -3 },
+    effect: { hunger: 30 },
     summary: t('pet.shop.items.bento.summary'),
   },
   {
@@ -60,10 +61,18 @@ export const shopItems: readonly ShopItem[] = [
     summary: t('pet.shop.items.banana.summary'),
   },
   {
+    id: 'watermelon',
+    name: t('pet.shop.items.watermelon.name'),
+    kind: 'food',
+    price: 26,
+    effect: { hunger: 28, mood: 2, cleanliness: -2 },
+    summary: t('pet.shop.items.watermelon.summary'),
+  },
+  {
     id: 'nutri_meal',
     name: t('pet.shop.items.nutri_meal.name'),
     kind: 'food',
-    price: 38,
+    price: 36,
     effect: { hunger: 30, mood: 2, health: 15 },
     summary: t('pet.shop.items.nutri_meal.summary'),
   },
@@ -79,47 +88,47 @@ export const shopItems: readonly ShopItem[] = [
     id: 'strawberry_cake',
     name: t('pet.shop.items.strawberry_cake.name'),
     kind: 'food',
-    price: 38,
-    effect: { hunger: 24, mood: 8, cleanliness: -3 },
+    price: 30,
+    effect: { hunger: 28, mood: 8, cleanliness: -3 },
     summary: t('pet.shop.items.strawberry_cake.summary'),
   },
   {
     id: 'ad_milk',
     name: t('pet.shop.items.ad_milk.name'),
     kind: 'food',
-    price: 32,
-    effect: { hunger: 20, mood: 5, health: 6 },
+    price: 24,
+    effect: { hunger: 22, mood: 5, health: 6 },
     summary: t('pet.shop.items.ad_milk.summary'),
   },
   {
     id: 'strawberry_milk',
     name: t('pet.shop.items.strawberry_milk.name'),
     kind: 'food',
-    price: 28,
-    effect: { hunger: 16, mood: 5, health: 3 },
+    price: 22,
+    effect: { hunger: 20, mood: 5, health: 3 },
     summary: t('pet.shop.items.strawberry_milk.summary'),
   },
   {
     id: 'small_bouquet',
     name: t('pet.shop.items.small_bouquet.name'),
     kind: 'item',
-    price: 28,
-    effect: { mood: 18 },
+    price: 18,
+    effect: { mood: 16 },
     summary: t('pet.shop.items.small_bouquet.summary'),
   },
   {
     id: 'shiny_sticker',
     name: t('pet.shop.items.shiny_sticker.name'),
     kind: 'item',
-    price: 30,
-    effect: { mood: 16 },
+    price: 24,
+    effect: { mood: 20 },
     summary: t('pet.shop.items.shiny_sticker.summary'),
   },
   {
     id: 'soft_cloud_doll',
     name: t('pet.shop.items.soft_cloud_doll.name'),
     kind: 'item',
-    price: 54,
+    price: 56,
     effect: { mood: 40, energy: 6 },
     summary: t('pet.shop.items.soft_cloud_doll.summary'),
   },
@@ -151,7 +160,7 @@ export const shopItems: readonly ShopItem[] = [
     id: 'shampoo',
     name: t('pet.shop.items.shampoo.name'),
     kind: 'care',
-    price: 28,
+    price: 20,
     effect: { cleanliness: 50, health: 5 },
     summary: t('pet.shop.items.shampoo.summary'),
   },
@@ -159,7 +168,7 @@ export const shopItems: readonly ShopItem[] = [
     id: 'wet_wipes',
     name: t('pet.shop.items.wet_wipes.name'),
     kind: 'care',
-    price: 18,
+    price: 10,
     effect: { cleanliness: 32, health: 1 },
     summary: t('pet.shop.items.wet_wipes.summary'),
   },
@@ -167,7 +176,7 @@ export const shopItems: readonly ShopItem[] = [
     id: 'medicine',
     name: t('pet.shop.items.medicine.name'),
     kind: 'care',
-    price: 42,
+    price: 34,
     effect: { health: 45, mood: -5 },
     summary: t('pet.shop.items.medicine.summary'),
   },
@@ -175,7 +184,7 @@ export const shopItems: readonly ShopItem[] = [
     id: 'vitamin_tablet',
     name: t('pet.shop.items.vitamin_tablet.name'),
     kind: 'care',
-    price: 28,
+    price: 20,
     effect: { health: 20, mood: 1 },
     summary: t('pet.shop.items.vitamin_tablet.summary'),
   },
@@ -183,16 +192,16 @@ export const shopItems: readonly ShopItem[] = [
     id: 'blanket',
     name: t('pet.shop.items.blanket.name'),
     kind: 'care',
-    price: 30,
-    effect: { energy: 40, mood: 4 },
+    price: 42,
+    effect: { energy: 36, mood: 4 },
     summary: t('pet.shop.items.blanket.summary'),
   },
   {
     id: 'energy_drink',
     name: t('pet.shop.items.energy_drink.name'),
     kind: 'care',
-    price: 24,
-    effect: { energy: 32, mood: -1 },
+    price: 36,
+    effect: { energy: 30, mood: -1 },
     summary: t('pet.shop.items.energy_drink.summary'),
   },
 ] as const;
@@ -216,20 +225,120 @@ export const shopCategories: readonly { id: ShopCategory; label: string }[] = [
   { id: 'care', label: t('pet.shop.categories.care') },
 ];
 
-export const allItemIds = new Set<ItemId>(inventoryItems.map((item) => item.id));
+export const allItemIds = new Set<string>(inventoryItems.map((item) => item.id));
 
-export const getShopItem = (id: ItemId) => shopItems.find((item) => item.id === id);
+export const builtinItemIds = Array.from(allItemIds);
 
-export const getInventoryItem = (id: ItemId) => inventoryItems.find((item) => item.id === id);
+export const isBuiltinItemId = (id: string): id is BuiltinItemId => allItemIds.has(id);
 
-export const getInventoryCount = (inventory: Inventory, id: ItemId) => inventory[id] ?? 0;
+export const getShopItem = (id: ItemId) => (isBuiltinItemId(id) ? shopItems.find((item) => item.id === id) : undefined);
 
-export const addInventoryItem = (inventory: Inventory, id: ItemId, amount: number): Inventory => ({
+export const getInventoryItem = (id: ItemId) => (isBuiltinItemId(id) ? inventoryItems.find((item) => item.id === id) : undefined);
+
+const toItemDefinition = (item: ShopItem, imageUrl?: string): ItemDefinition => ({
+  ...item,
+  imageUrl,
+  source: 'builtin',
+  shop: shopItems.some((shopItem) => shopItem.id === item.id),
+  tags: [],
+  usable: true,
+});
+
+const applyItemOverride = (item: ItemDefinition, override: PetModItemOverride | undefined, imageUrl?: string): ItemDefinition => ({
+  ...item,
+  name: override?.name ?? item.name,
+  summary: override?.summary ?? item.summary,
+  imageUrl: imageUrl ?? item.imageUrl,
+});
+
+const toCustomItemDefinition = (item: PetModCustomItem, imageUrl?: string): ItemDefinition => ({
+  id: item.id,
+  name: item.name,
+  kind: item.kind,
+  price: item.price,
+  effect: item.effect,
+  summary: item.summary,
+  imageUrl,
+  source: 'mod',
+  shop: item.shop,
+  tags: item.tags,
+  usable: true,
+});
+
+export const createBuiltinItemRegistry = (imageUrls: Partial<Record<string, string>> = {}): Map<string, ItemDefinition> => {
+  const registry = new Map<string, ItemDefinition>();
+  inventoryItems.forEach((item) => registry.set(item.id, toItemDefinition(item, imageUrls[item.id])));
+  return registry;
+};
+
+export const createItemRegistry = (mod?: ActivePetMod | null, imageUrls: Partial<Record<string, string>> = {}): ItemRegistry => {
+  const registry = createBuiltinItemRegistry(imageUrls);
+  const manifestItemOverrides = mod?.manifest.schemaVersion === 2 ? mod.manifest.items?.overrides ?? {} : {};
+  const overrides = { ...mod?.manifest.texts?.items, ...manifestItemOverrides };
+
+  Object.entries(overrides).forEach(([id, override]) => {
+    const current = registry.get(id);
+    if (!current) return;
+    registry.set(id, applyItemOverride(current, override, mod?.itemImageUrls[id] ?? imageUrls[id]));
+  });
+
+  if (mod?.manifest.schemaVersion === 2) {
+    mod.manifest.items?.custom?.forEach((item) => {
+      registry.set(item.id, toCustomItemDefinition(item, mod.itemImageUrls[item.id] ?? imageUrls[item.id]));
+    });
+  }
+
+  return registry;
+};
+
+export const getItemDefinition = (registry: ItemRegistry, id: ItemId | string) => registry.get(id);
+
+export const createUnknownItemDefinition = (id: string): InventoryItemDefinition => ({
+  id: id as ItemId,
+  name: t('pet.item.unknown.name'),
+  displayName: t('pet.item.unknown.name'),
+  kind: 'item',
+  price: 0,
+  effect: {},
+  summary: t('pet.item.unknown.summary', { id }),
+  displaySummary: t('pet.item.unknown.summary', { id }),
+  source: 'unknown',
+  shop: false,
+  tags: [],
+  usable: false,
+});
+
+export const getInventoryDefinitions = (registry: ItemRegistry, inventory: Inventory): readonly InventoryItemDefinition[] => {
+  const knownItems = inventoryItems
+    .map((item) => registry.get(item.id))
+    .filter((item): item is ItemDefinition => Boolean(item) && item !== undefined && (inventory[item.id] ?? 0) > 0);
+  const knownIds = new Set(knownItems.map((item) => item.id));
+  const modAndUnknownItems = Object.entries(inventory)
+    .filter(([id, amount]) => amount > 0 && !knownIds.has(id as ItemId) && !isBuiltinItemId(id))
+    .map(([id]) => registry.get(id) ?? createUnknownItemDefinition(id));
+
+  return [...knownItems, ...modAndUnknownItems].map((item) => ({
+    ...item,
+    displayName: item.name,
+    displaySummary: item.summary,
+  }));
+};
+
+export const getShopDefinitions = (registry: ItemRegistry): readonly InventoryItemDefinition[] =>
+  Array.from(registry.values())
+    .filter((item) => item.shop)
+    .map((item) => ({ ...item, displayName: item.name, displaySummary: item.summary }));
+
+export const isKnownUsableItem = (registry: ItemRegistry, id: ItemId | string) => Boolean(registry.get(id)?.usable);
+
+export const getInventoryCount = (inventory: Inventory, id: ItemId | string) => inventory[id] ?? 0;
+
+export const addInventoryItem = (inventory: Inventory, id: ItemId | string, amount: number): Inventory => ({
   ...inventory,
   [id]: Math.max(0, getInventoryCount(inventory, id) + amount),
 });
 
-export const removeInventoryItem = (inventory: Inventory, id: ItemId): Inventory => {
+export const removeInventoryItem = (inventory: Inventory, id: ItemId | string): Inventory => {
   const count = getInventoryCount(inventory, id);
   if (count <= 1) {
     const next = { ...inventory };

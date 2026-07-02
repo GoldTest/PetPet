@@ -1,4 +1,5 @@
 import { pick, t } from '../i18n';
+import { recordEarnedCoins, recordEarnedHearts } from './achievements';
 import { addInventoryItem } from './items';
 import { clampCoins, clampCount, clampPetHealth, clampPetStat } from './petStats';
 import type { ItemEffect, ItemId, PetState, WeatherType } from './petTypes';
@@ -123,8 +124,7 @@ export const getRandomDreamEvent = (name: string): TimedEvent =>
 
 export const applyTimedEvent = (pet: PetState, event: TimedEvent, now: number, prefix: string): PetState => {
   const effect = event.effect ?? {};
-
-  return {
+  const withEvent: PetState = {
     ...pet,
     hunger: clampPetStat(pet, pet.hunger + (effect.hunger ?? 0)),
     mood: clampPetStat(pet, pet.mood + (effect.mood ?? 0)),
@@ -138,6 +138,7 @@ export const applyTimedEvent = (pet: PetState, event: TimedEvent, now: number, p
     lastDailyRewardAt: prefix === t('pet.prefix.dailyEncounter') ? now : pet.lastDailyRewardAt,
     lastDailyEncounterAt: prefix === t('pet.prefix.dailyEncounter') ? now : pet.lastDailyEncounterAt,
   };
+  return recordEarnedHearts(recordEarnedCoins(withEvent, event.coins ?? 0), event.hearts ?? 0);
 };
 
 const addEffects = (left?: ItemEffect, right?: ItemEffect): ItemEffect | undefined => {

@@ -1,9 +1,10 @@
 import { useEffect, useMemo, useRef, useState, type ChangeEvent } from 'react';
-import { Heart, Settings, Volume2, VolumeX } from 'lucide-react';
+import { Heart, Settings, Trophy, Volume2, VolumeX } from 'lucide-react';
 import {
   advancePet,
   applyPetAction,
   claimAvailableDateRewards,
+  claimAchievementReward,
   claimReturnWelcomeReward,
   buyItem,
   canStartPomodoro,
@@ -13,10 +14,16 @@ import {
   defaultPetBirthday,
   defaultPetName,
   dismissYearReview,
+  evaluateAchievementUnlocks,
+  getAchievementSummary,
   getDailyWishView,
   getEnergyRecoveryInfo,
   getNextUpgradeHeartCost,
   getInventoryItem,
+  getInventoryDefinitions,
+  getItemDefinition,
+  getShopDefinitions,
+  createItemRegistry,
   heartExchangeCooldownMs,
   helpStarterGiftCoins,
   helpStarterGiftRewardId,
@@ -25,21 +32,25 @@ import {
   interactWithPet,
   isPetCriticallyHungry,
   isPetLowEnergy,
+  markAchievementReviewSeen,
   pausePomodoro,
   resetPomodoro,
   pomodoroMinHealthThreshold,
   recordPetInteraction,
+  recordEarnedCoins,
   updatePetProfile,
-  inventoryItems,
   shopCategories,
-  shopItems,
   startPomodoro,
   updatePomodoroSettings,
   upgradePet,
   useInventoryItem,
   withBackfilledBirthday,
   withPetIdentityBirthday,
+  type AchievementCategory,
+  type AchievementId,
+  type AchievementView,
   type ClaimedDateReward,
+  type InventoryItemDefinition,
   type ItemId,
   type PetAction,
   type PetBirthday,
@@ -47,7 +58,7 @@ import {
   type PetStatus,
   type PomodoroDurations,
 } from '../core/pet';
-import { currencyIcon, giftBoxIcon, resolveItemIcons, resolvePetActivityImages, resolvePetStatusImages } from '../assets';
+import { currencyIcon, giftBoxIcon, itemIcons, resolveItemIcons, resolvePetActivityImages, resolvePetStatusImages } from '../assets';
 import {
   getAudioEnabled,
   playSfx,
@@ -61,16 +72,15 @@ import {
 import { clearPet, loadPet, savePet } from '../core/storage';
 import {
   formatFavoriteFoodText,
-  getDisplayItems,
   getModFavoriteFoodIds,
   getModStatusText,
   parsePetModZip,
   type ActivePetMod,
-  type ItemDisplay,
 } from '../core/mod';
 import { clearActivePetMod, loadActivePetMod, saveActivePetMod } from '../core/modStorage';
 import { createSaveFileText, parseSaveFileText } from '../core/saveCodec';
 import { ActionDock } from './ActionDock';
+import { AchievementsPage } from './AchievementsPage';
 import { ConfirmDialog } from './ConfirmDialog';
 import { FeatureRow } from './FeatureRow';
 import { InventoryPanel } from './InventoryPanel';
@@ -124,13 +134,20 @@ type FloatingRewardConfig = { id: string; coins: number; eventKey: string };
 type RewardPopup = ClaimedDateReward;
 type RewardDisplayItem = { key: string; icon?: string; label: string; title?: string };
 type WishQuickAction = PetState['dailyWish']['action'] | NonNullable<PetState['returnWelcome']>['action'];
+type ActivePage = 'home' | 'achievements';
+type AchievementToast = { kind: 'single'; achievement: AchievementView } | { kind: 'review' };
+const achievementToastLabels = {
+  single: t('ui.achievements.toast.single'),
+  review: t('ui.achievements.toast.review'),
+  reviewTitle: t('ui.achievements.toast.reviewTitle'),
+};
 
 const floatingRewardConfigs: readonly FloatingRewardConfig[] = [
   { id: helpStarterGiftRewardId, coins: helpStarterGiftCoins, eventKey: 'pet.reward.helpStarterGift' },
 ];
 
 const getInventoryCount = (pet: PetState, itemId: ItemId) => pet.inventory[itemId] ?? 0;
-const getDisplayItem = (items: readonly ItemDisplay[], itemId: ItemId) => items.find((item) => item.id === itemId);
+const getDisplayItem = (items: readonly InventoryItemDefinition[], itemId: ItemId) => items.find((item) => item.id === itemId);
 const getActionSfx = (action: PetAction): SfxId => {
   if (action === 'clean') return 'action_bath';
   if (action === 'play' || action === 'work') return 'action_work_play_medicine';
@@ -139,9 +156,9 @@ const getActionSfx = (action: PetAction): SfxId => {
 const getWishActionButtonLabel = (action: WishQuickAction) => t(`ui.wishes.actions.${action}`);
 
 
-const getItemSfx = (itemId: ItemId): SfxId => {
-  const item = getInventoryItem(itemId);
-  if (item?.kind === 'food') return 'action_eat';
+const getItemSfx = (itemId: ItemId, item?: { kind: 'food' | 'item' | 'care' }): SfxId => {
+  const resolvedItem = item ?? getInventoryItem(itemId);
+  if (resolvedItem?.kind === 'food') return 'action_eat';
   if (itemId === 'shampoo' || itemId === 'wet_wipes') return 'action_bath';
   if (itemId === 'blanket' || itemId === 'soft_cloud_doll' || itemId === 'picture_book') return 'action_blanket';
   if (itemId === 'medicine' || itemId === 'vitamin_tablet' || itemId === 'energy_drink') return 'action_work_play_medicine';
@@ -191,11 +208,16 @@ export const App = () => {
   const [rewardQueue, setRewardQueue] = useState<RewardPopup[]>([]);
   const [isResetConfirmOpen, setResetConfirmOpen] = useState(false);
   const [featureInfoMessage, setFeatureInfoMessage] = useState<{ message: string; recentEvent: string } | null>(null);
+  const [activePage, setActivePage] = useState<ActivePage>('home');
+  const activePageRef = useRef<ActivePage>('home');
+  const [activeAchievementCategory, setActiveAchievementCategory] = useState<'all' | AchievementCategory>('all');
+  const [achievementToast, setAchievementToast] = useState<AchievementToast | null>(null);
   const petRef = useRef(pet);
   const completedFocusCountRef = useRef(pet.pomodoro.completedFocusCount);
   const lastHeartExchangeAtRef = useRef(0);
   const [isHeartExchangeCoolingDown, setHeartExchangeCoolingDown] = useState(false);
   const hasLoadedModRef = useRef(false);
+  activePageRef.current = activePage;
 
   useEffect(() => {
     petRef.current = pet;
@@ -210,7 +232,18 @@ export const App = () => {
     void loadActivePetMod()
       .then((mod) => {
         setActiveMod(mod);
-        setPet((current) => (mod ? withPetIdentityBirthday(current, mod.manifest.birthday) : withBackfilledBirthday(current, defaultPetBirthday)));
+        setPet((current) => {
+          if (!mod) return withBackfilledBirthday(current, defaultPetBirthday);
+          const next = withPetIdentityBirthday(current, mod.manifest.birthday);
+          return {
+            ...next,
+            name: current.name === defaultPetName ? mod.manifest.defaultPetName : next.name,
+          };
+        });
+        if (mod) {
+          setDraftName((current) => (current === defaultPetName ? mod.manifest.defaultPetName : current));
+          setDraftBirthday(mod.manifest.birthday);
+        }
         hasLoadedModRef.current = true;
         if (mod) setModMessage(t('ui.settings.mod.active', { name: mod.manifest.name, version: mod.manifest.version }));
       })
@@ -223,7 +256,7 @@ export const App = () => {
 
   useEffect(() => {
     const timer = window.setInterval(() => {
-      setPet((current) => advancePet(current));
+      setPet((current) => commitPet(advancePet(current)));
     }, 1000);
 
     return () => window.clearInterval(timer);
@@ -234,7 +267,7 @@ export const App = () => {
       const isVisible = document.visibilityState === 'visible';
       setAudioTemporarilyMuted(!isVisible);
       if (isVisible) {
-        setPet((current) => advancePet(current));
+        setPet((current) => commitPet(advancePet(current)));
       }
     };
 
@@ -243,10 +276,11 @@ export const App = () => {
     return () => document.removeEventListener('visibilitychange', handleVisibilityChange);
   }, []);
   const itemIconMap = useMemo(() => resolveItemIcons(activeMod), [activeMod]);
+  const itemRegistry = useMemo(() => createItemRegistry(activeMod, itemIconMap), [activeMod, itemIconMap]);
   const petStatusImageMap = useMemo(() => resolvePetStatusImages(activeMod), [activeMod]);
   const petActivityImageMap = useMemo(() => resolvePetActivityImages(activeMod), [activeMod]);
-  const displayInventoryItems = useMemo(() => getDisplayItems(inventoryItems, activeMod), [activeMod]);
-  const displayShopItems = useMemo(() => getDisplayItems(shopItems, activeMod), [activeMod]);
+  const displayInventoryItems = useMemo(() => getInventoryDefinitions(itemRegistry, pet.inventory), [itemRegistry, pet.inventory]);
+  const displayShopItems = useMemo(() => getShopDefinitions(itemRegistry), [itemRegistry]);
   const getStatusLabel = (status: PetStatus) => getModStatusText(activeMod, status) ?? t(`pet.status.${status}`);
   const statCap = getPetStatCap(pet);
   const energyRecoveryInfo = getEnergyRecoveryInfo(pet);
@@ -262,10 +296,7 @@ export const App = () => {
     [energyRecoveryText, pet, statCap],
   );
 
-  const ownedItems = useMemo(
-    () => displayInventoryItems.filter((item) => (pet.inventory[item.id] ?? 0) > 0),
-    [displayInventoryItems, pet.inventory],
-  );
+  const ownedItems = displayInventoryItems;
   const visibleShopItems = useMemo(
     () => displayShopItems.filter((item) => item.kind === activeShopCategory),
     [activeShopCategory, displayShopItems],
@@ -288,6 +319,8 @@ export const App = () => {
         : undefined;
   const isPomodoroActionDisabled = !pet.pomodoro.isRunning && !canRunPomodoro;
   const currentBgmMode: BgmMode = isShopOpen ? 'shop' : pet.isSleeping ? 'sleep' : 'room';
+  const achievementSummary = getAchievementSummary(pet);
+  const hasAchievementNotice = achievementSummary.pendingReviewNotice || achievementSummary.claimable > 0;
   const dailyWishView = getDailyWishView(pet);
   const returnWelcomeView = getReturnWelcomeView(pet);
   const dailyWishButtonLabel = dailyWishView.canClaim || dailyWishView.claimed
@@ -315,8 +348,24 @@ export const App = () => {
     completedFocusCountRef.current = pet.pomodoro.completedFocusCount;
   }, [pet.pomodoro.completedFocusCount]);
 
+  useEffect(() => {
+    if (activePage === 'home' && pet.achievements.pendingReviewNotice && !achievementToast) {
+      setAchievementToast({ kind: 'review' });
+    }
+  }, [activePage, achievementToast, pet.achievements.pendingReviewNotice]);
+
   const playAfterUnlock = (id: SfxId) => {
     void unlockAudio().then(() => playSfx(id));
+  };
+
+  const commitPet = (next: PetState, options: { silent?: boolean } = {}) => {
+    const result = evaluateAchievementUnlocks(next);
+    const shouldShowAchievementToast = !options.silent && activePageRef.current === 'home';
+    if (shouldShowAchievementToast && result.unlocked.length > 0) {
+      setAchievementToast(result.unlocked.length === 1 && !result.pet.achievements.pendingReviewNotice ? { kind: 'single', achievement: result.unlocked[0] } : { kind: 'review' });
+      playSfx('notification');
+    }
+    return result.pet;
   };
 
   const claimDateRewards = () => {
@@ -330,7 +379,7 @@ export const App = () => {
         ]);
         playSfx('notification');
       }
-      return result.pet;
+      return commitPet(result.pet);
     });
   };
 
@@ -352,7 +401,7 @@ export const App = () => {
       const next = applyPetAction(current, action);
       const actionSucceeded = next.recentEvent !== current.recentEvent || next.recentActivity !== current.recentActivity;
       playSfx(actionSucceeded ? getActionSfx(action) : 'error');
-      return next;
+      return commitPet(next);
     });
   };
 
@@ -361,11 +410,12 @@ export const App = () => {
     setPet((current) => {
       const beforeCount = getInventoryCount(current, itemId);
       const beforeCoins = current.coins;
-      const next = buyItem(current, itemId);
+      const item = getItemDefinition(itemRegistry, itemId);
+      const next = buyItem(current, itemId, Date.now(), { item });
       const didGainItem = getInventoryCount(next, itemId) > beforeCount;
       const didSpendCoins = next.coins < beforeCoins;
       playSfx(didGainItem ? (didSpendCoins ? 'purchase' : 'coin') : 'error');
-      return next;
+      return commitPet(next);
     });
   };
 
@@ -387,7 +437,7 @@ export const App = () => {
       const next = exchangeHeartForCoins(current, now);
       const didExchange = next.coins > beforeCoins && next.hearts < beforeHearts;
       playSfx(didExchange ? 'coin' : 'error');
-      return next;
+      return commitPet(next);
     });
   };
 
@@ -396,19 +446,21 @@ export const App = () => {
     setPet((current) => {
       const beforeCount = getInventoryCount(current, itemId);
       const displayItem = getDisplayItem(displayInventoryItems, itemId);
+      const item = getItemDefinition(itemRegistry, itemId);
       const next = useInventoryItem(current, itemId, Date.now(), {
         favoriteFoodIds: getModFavoriteFoodIds(activeMod),
         favoriteText: (amount) => formatFavoriteFoodText(activeMod, amount),
         itemName: displayItem?.displayName,
+        item,
       });
-      playSfx(getInventoryCount(next, itemId) < beforeCount ? getItemSfx(itemId) : 'error');
-      return next;
+      playSfx(getInventoryCount(next, itemId) < beforeCount ? getItemSfx(itemId, item) : 'error');
+      return commitPet(next);
     });
   };
   const handleInteract = () => {
     const outcome = getPetInteractionOutcome(petRef.current);
     playAfterUnlock(outcome === 'heart' ? 'pet_heart' : outcome === 'low_state' ? 'pet_low_state' : 'pet_touch');
-    setPet((current) => interactWithPet(current));
+    setPet((current) => commitPet(interactWithPet(current)));
   };
 
   const handleOpenShop = () => {
@@ -425,6 +477,24 @@ export const App = () => {
   const handleShowFeatureInfo = (message: string) => {
     setFeatureInfoMessage({ message, recentEvent: petRef.current.recentEvent });
   };
+  const handleOpenAchievements = () => {
+    playAfterUnlock('open');
+    setAchievementToast(null);
+    setActivePage('achievements');
+  };
+
+  const handleCloseAchievements = () => {
+    playAfterUnlock('close');
+    setAchievementToast(null);
+    setPet((current) => markAchievementReviewSeen(current));
+    setActivePage('home');
+  };
+
+  const handleClaimAchievementReward = (id: AchievementId) => {
+    playAfterUnlock('coin');
+    setPet((current) => commitPet(claimAchievementReward(current, id)));
+  };
+
 
   const handleOpenPomodoro = () => {
     const willOpen = !isPomodoroOpen;
@@ -440,18 +510,18 @@ export const App = () => {
     }
     playAfterUnlock(petRef.current.pomodoro.isRunning ? 'tap' : 'pet_read');
     setPomodoroOpen(true);
-    setPet((current) => (current.pomodoro.isRunning ? pausePomodoro(current) : startPomodoro(current)));
+    setPet((current) => commitPet(current.pomodoro.isRunning ? pausePomodoro(current) : startPomodoro(current)));
   };
 
   const handleResetPomodoro = () => {
     playAfterUnlock('notification');
     setPomodoroOpen(true);
-    setPet((current) => resetPomodoro(current));
+    setPet((current) => commitPet(resetPomodoro(current)));
   };
 
   const handleUpgrade = () => {
     playAfterUnlock(canUpgrade ? 'pet_heart' : 'error');
-    setPet((current) => upgradePet(current));
+    setPet((current) => commitPet(upgradePet(current)));
   };
 
   const handlePomodoroSettingChange = (key: PomodoroSettingKey, value: number) => {
@@ -474,12 +544,12 @@ export const App = () => {
     setPet((current) => {
       if (current.claimedRewardIds.includes(reward.id)) return current;
 
-      return {
+      return recordEarnedCoins({
         ...current,
         coins: current.coins + reward.coins,
         claimedRewardIds: [...current.claimedRewardIds, reward.id],
         recentEvent: t(reward.eventKey, { coins: reward.coins }),
-      };
+      }, reward.coins);
     });
   };
 
@@ -490,7 +560,7 @@ export const App = () => {
       const next = claimDailyWishReward(current);
       const didClaim = next.dailyWish.claimedAt !== beforeClaimedAt;
       playSfx(didClaim ? 'coin' : 'error');
-      return next;
+      return commitPet(next);
     });
   };
 
@@ -508,13 +578,15 @@ export const App = () => {
     setPet((current) => {
       const beforeCount = getInventoryCount(current, foodItem.id);
       const displayItem = getDisplayItem(displayInventoryItems, foodItem.id);
+      const item = getItemDefinition(itemRegistry, foodItem.id);
       const next = useInventoryItem(current, foodItem.id, Date.now(), {
         favoriteFoodIds: getModFavoriteFoodIds(activeMod),
         favoriteText: (amount) => formatFavoriteFoodText(activeMod, amount),
         itemName: displayItem?.displayName,
+        item,
       });
-      playSfx(getInventoryCount(next, foodItem.id) < beforeCount ? getItemSfx(foodItem.id) : 'error');
-      return next;
+      playSfx(getInventoryCount(next, foodItem.id) < beforeCount ? getItemSfx(foodItem.id, item) : 'error');
+      return commitPet(next);
     });
   };
 
@@ -555,7 +627,7 @@ export const App = () => {
       const next = claimReturnWelcomeReward(current);
       const didClaim = next.returnWelcome?.claimedAt !== beforeClaimedAt;
       playSfx(didClaim ? 'coin' : 'error');
-      return next;
+      return commitPet(next);
     });
   };
 
@@ -636,6 +708,7 @@ export const App = () => {
       });
       setDraftName((current) => (current === defaultPetName || current === oldDefaultName ? parsed.manifest.defaultPetName : current));
       setDraftBirthday(parsed.manifest.birthday);
+      setSaveText('');
     } catch (error) {
       setModMessage(error instanceof Error ? error.message : t('ui.settings.mod.importFailed'));
       playSfx('error');
@@ -644,10 +717,19 @@ export const App = () => {
 
   const handleClearMod = async () => {
     try {
+      const oldDefaultName = activeMod?.manifest.defaultPetName;
       await clearActivePetMod();
       setActiveMod(null);
-      setPet((current) => withPetIdentityBirthday(current, defaultPetBirthday));
+      setPet((current) => {
+        const shouldRestoreDefaultName = Boolean(oldDefaultName) && current.name === oldDefaultName;
+        return {
+          ...withPetIdentityBirthday(current, defaultPetBirthday),
+          name: shouldRestoreDefaultName ? defaultPetName : current.name,
+        };
+      });
+      setDraftName((current) => (oldDefaultName && current === oldDefaultName ? defaultPetName : current));
       setDraftBirthday(defaultPetBirthday);
+      setSaveText('');
       setModMessage(t('ui.settings.mod.restored'));
     } catch (error) {
       setModMessage(error instanceof Error ? error.message : t('ui.settings.mod.restoreFailed'));
@@ -661,7 +743,7 @@ export const App = () => {
   };
 
   const handleDownloadSave = () => {
-    const text = saveText || createSaveFileText(petRef.current, activeMod?.manifest);
+    const text = createSaveFileText(petRef.current, activeMod?.manifest);
     setSaveText(text);
     downloadTextFile(`pocpet-save-${new Date().toISOString().slice(0, 10)}.pocpet`, text);
   };
@@ -785,6 +867,15 @@ export const App = () => {
           </div>
           <button
             type="button"
+            className={`icon-button achievement-entry${hasAchievementNotice ? ' achievement-entry--notice' : ''}`}
+            aria-label={t('ui.top.openAchievements')}
+            title={t('ui.achievements.title')}
+            onClick={handleOpenAchievements}
+          >
+            <Trophy size={22} aria-hidden="true" />
+          </button>
+          <button
+            type="button"
             className="icon-button audio-button"
             aria-label={isAudioEnabled ? t('ui.top.audioOn') : t('ui.top.audioOff')}
             title={isAudioEnabled ? t('ui.top.audioOn') : t('ui.top.audioOff')}
@@ -810,85 +901,98 @@ export const App = () => {
         </div>
       </header>
 
-      <div className="content-grid">
-        <PetDisplay
+      {activePage === 'achievements' ? (
+        <AchievementsPage
           pet={pet}
-          onInteract={handleInteract}
-          overlay={pomodoroOverlay}
-          petStatusImages={petStatusImageMap}
-          petActivityImages={petActivityImageMap}
-          getStatusLabel={getStatusLabel}
+          activeCategory={activeAchievementCategory}
+          itemIconMap={itemIconMap}
+          onBack={handleCloseAchievements}
+          onCategoryChange={setActiveAchievementCategory}
+          onClaimReward={handleClaimAchievementReward}
         />
+      ) : (
+        <>
+          <div className="content-grid">
+            <PetDisplay
+              pet={pet}
+              onInteract={handleInteract}
+              overlay={pomodoroOverlay}
+              petStatusImages={petStatusImageMap}
+              petActivityImages={petActivityImageMap}
+              getStatusLabel={getStatusLabel}
+            />
 
-        <section className="dashboard" aria-label={t('ui.dashboard.aria')}>
-          <div className="event-panel">
-            <span>{t('ui.dashboard.event')}</span>
-            <p>{dashboardEventText}</p>
+            <section className="dashboard" aria-label={t('ui.dashboard.aria')}>
+              <div className="event-panel">
+                <span>{t('ui.dashboard.event')}</span>
+                <p>{dashboardEventText}</p>
+              </div>
+
+              <div className="wish-stack">
+                {returnWelcomeView && (
+                  <section className="wish-panel wish-panel--return" aria-label={t('ui.returnWelcome.aria')}>
+                    <div className="wish-panel__copy">
+                      <span>{t('ui.returnWelcome.kicker')}</span>
+                      <h2>{returnWelcomeView.title}</h2>
+                      <p>{returnWelcomeView.description}</p>
+                      <small>{returnWelcomeView.progressText} · {returnWelcomeView.rewardText}</small>
+                    </div>
+                    <button type="button" className="primary-button wish-panel__button" onClick={handleReturnWelcomeButton}>
+                      {returnWelcomeButtonLabel}
+                    </button>
+                  </section>
+                )}
+                {!dailyWishView.claimed && (
+                  <section className="wish-panel" aria-label={t('ui.dailyWish.aria')}>
+                    <div className="wish-panel__copy">
+                      <span>{t('ui.dailyWish.kicker')}</span>
+                      <h2>{dailyWishView.title}</h2>
+                      <p>{dailyWishView.description}</p>
+                      <small>{dailyWishView.progressText} · {dailyWishView.rewardText}</small>
+                    </div>
+                    <button type="button" className="primary-button wish-panel__button" disabled={dailyWishView.claimed} onClick={handleDailyWishButton}>
+                      {dailyWishButtonLabel}
+                    </button>
+                  </section>
+                )}
+              </div>
+
+              <div className="stat-grid">
+                {stats.map((stat) => (
+                  <StatusBar key={stat.label} {...stat} />
+                ))}
+              </div>
+
+              <FeatureRow
+                pet={pet}
+                canUpgrade={canUpgrade}
+                nextUpgradeCost={nextUpgradeCost}
+                isPomodoroOpen={isPomodoroOpen}
+                pomodoroRemainingMs={pomodoroRemainingMs}
+                pomodoroStartTitle={pomodoroStartTitle}
+                onUpgrade={handleUpgrade}
+                onOpenPomodoro={handleOpenPomodoro}
+                onShowInfo={handleShowFeatureInfo}
+              />
+
+              <div className="meta-row" aria-label={t('ui.dashboard.metaAria')}>
+                <span>{t('ui.dashboard.sharedTime', { time: formatSharedTime(pet.ageSeconds) })}</span>
+                <span>{pet.isSleeping ? t('ui.dashboard.resting') : t('ui.dashboard.active')}</span>
+              </div>
+
+              <InventoryPanel
+                ownedItems={ownedItems}
+                inventory={pet.inventory}
+                itemIconMap={itemIconMap}
+                onOpenShop={handleOpenShop}
+                onUseItem={handleUseItem}
+              />
+            </section>
           </div>
 
-          <div className="wish-stack">
-            {returnWelcomeView && (
-              <section className="wish-panel wish-panel--return" aria-label={t('ui.returnWelcome.aria')}>
-                <div className="wish-panel__copy">
-                  <span>{t('ui.returnWelcome.kicker')}</span>
-                  <h2>{returnWelcomeView.title}</h2>
-                  <p>{returnWelcomeView.description}</p>
-                  <small>{returnWelcomeView.progressText} · {returnWelcomeView.rewardText}</small>
-                </div>
-                <button type="button" className="primary-button wish-panel__button" onClick={handleReturnWelcomeButton}>
-                  {returnWelcomeButtonLabel}
-                </button>
-              </section>
-            )}
-            {!dailyWishView.claimed && (
-              <section className="wish-panel" aria-label={t('ui.dailyWish.aria')}>
-                <div className="wish-panel__copy">
-                  <span>{t('ui.dailyWish.kicker')}</span>
-                  <h2>{dailyWishView.title}</h2>
-                  <p>{dailyWishView.description}</p>
-                  <small>{dailyWishView.progressText} · {dailyWishView.rewardText}</small>
-                </div>
-                <button type="button" className="primary-button wish-panel__button" disabled={dailyWishView.claimed} onClick={handleDailyWishButton}>
-                  {dailyWishButtonLabel}
-                </button>
-              </section>
-            )}
-          </div>
-
-          <div className="stat-grid">
-            {stats.map((stat) => (
-              <StatusBar key={stat.label} {...stat} />
-            ))}
-          </div>
-
-          <FeatureRow
-            pet={pet}
-            canUpgrade={canUpgrade}
-            nextUpgradeCost={nextUpgradeCost}
-            isPomodoroOpen={isPomodoroOpen}
-            pomodoroRemainingMs={pomodoroRemainingMs}
-            pomodoroStartTitle={pomodoroStartTitle}
-            onUpgrade={handleUpgrade}
-            onOpenPomodoro={handleOpenPomodoro}
-            onShowInfo={handleShowFeatureInfo}
-          />
-
-          <div className="meta-row" aria-label={t('ui.dashboard.metaAria')}>
-            <span>{t('ui.dashboard.sharedTime', { time: formatSharedTime(pet.ageSeconds) })}</span>
-            <span>{pet.isSleeping ? t('ui.dashboard.resting') : t('ui.dashboard.active')}</span>
-          </div>
-
-          <InventoryPanel
-            ownedItems={ownedItems}
-            inventory={pet.inventory}
-            itemIconMap={itemIconMap}
-            onOpenShop={handleOpenShop}
-            onUseItem={handleUseItem}
-          />
-        </section>
-      </div>
-
-      <ActionDock isSleeping={pet.isSleeping} isLowEnergy={isLowEnergy} isCriticallyHungry={isCriticallyHungry} onAction={handleAction} onOpenShop={handleOpenShop} />
+          <ActionDock isSleeping={pet.isSleeping} isLowEnergy={isLowEnergy} isCriticallyHungry={isCriticallyHungry} onAction={handleAction} onOpenShop={handleOpenShop} />
+        </>
+      )}
 
       {availableFloatingReward && (
         <button
@@ -902,6 +1006,15 @@ export const App = () => {
         </button>
       )}
 
+      {achievementToast && activePage === 'home' && (
+        <button type="button" className="achievement-toast" onClick={handleOpenAchievements}>
+          <span className="achievement-toast__icon" aria-hidden="true"><Trophy size={22} /></span>
+          <span className="achievement-toast__copy">
+            <span>{achievementToast.kind === 'single' ? achievementToastLabels.single : achievementToastLabels.review}</span>
+            <strong>{achievementToast.kind === 'single' ? achievementToast.achievement.title : achievementToastLabels.reviewTitle}</strong>
+          </span>
+        </button>
+      )}
       {activeRewardPopup && (
         <div className="modal-backdrop" role="presentation">
           <section className="reward-modal" role="dialog" aria-modal="true" aria-labelledby="reward-title">
@@ -983,10 +1096,4 @@ export const App = () => {
     </main>
   );
 };
-
-
-
-
-
-
 

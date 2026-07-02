@@ -1,24 +1,24 @@
 import { Heart } from 'lucide-react';
-import type { ItemDisplay } from '../core/mod';
 import {
   getDailyBiscuitClaimInfo,
   getDailyHeartExchangeInfo,
   getDailyShopDiscountInfo,
   shopCategories,
+  type InventoryItemDefinition,
   type ItemId,
   type PetState,
   type ShopCategory,
 } from '../core/pet';
-import { currencyIcon } from '../assets';
+import { currencyIcon, unknownItemIcon } from '../assets';
 import { t } from '../i18n';
 import { getItemEffectBadges } from './itemEffectBadges';
 import { formatCompactNumber } from './numberFormat';
 
 interface ShopModalProps {
   pet: PetState;
-  visibleItems: readonly ItemDisplay[];
+  visibleItems: readonly InventoryItemDefinition[];
   activeCategory: ShopCategory;
-  itemIconMap: Record<ItemId, string>;
+  itemIconMap: Partial<Record<string, string>>;
   onClose: () => void;
   onSelectCategory: (category: ShopCategory) => void;
   onBuyItem: (itemId: ItemId) => void;
@@ -102,6 +102,7 @@ export const ShopModal = ({
             const isDiscountItem = discountInfo?.itemId === item.id;
             const isDiscountAvailable = Boolean(isDiscountItem && !discountInfo?.used);
             const effectBadges = getItemEffectBadges(item.effect);
+            const icon = itemIconMap[item.id] ?? item.imageUrl ?? unknownItemIcon;
             const displayPrice = isDiscountAvailable ? discountInfo?.price ?? item.price : item.price;
             const displayPriceText = formatCompactNumber(displayPrice);
             const priceTitle = t('ui.shop.price', { price: displayPrice });
@@ -120,7 +121,7 @@ export const ShopModal = ({
 
             return (
               <article className="shop-item" key={item.id} data-item-id={item.id}>
-                <img className="shop-item__icon" src={itemIconMap[item.id]} alt="" aria-hidden="true" />
+                <img className="shop-item__icon" src={icon} alt="" aria-hidden="true" />
                 <div>
                   <div className="shop-item__title-row">
                     <strong>

@@ -25,7 +25,8 @@
       "audioOn": "Turn sound off",
       "audioOff": "Turn sound on",
       "settings": "Settings",
-      "openSettings": "Open settings"
+      "openSettings": "Open settings",
+      "openAchievements": "Open achievements"
     },
     "dashboard": {
       "aria": "Pet stats",
@@ -307,6 +308,48 @@
           "description": "You were away for {days} days. Let your pet sleep and recover energy slowly."
         }
       }
+    },
+    "achievements": {
+      "aria": "Achievements",
+      "back": "Back",
+      "kicker": "Achievement",
+      "title": "Achievements",
+      "unlocked": "Unlocked",
+      "unlockedProgress": "Unlocked {unlocked}/{total}",
+      "claimable": "Claimable",
+      "dailyStipend": "Daily achievement stipend",
+      "dailyStipendAmount": "+{coins} coins",
+      "claim": "Claim",
+      "dailyStipendClaimed": "Claimed today",
+      "reviewNotice": "Older save data or multiple achievements have been organized. Review them here.",
+      "tabsAria": "Achievement categories",
+      "locked": "Incomplete",
+      "claimed": "Claimed",
+      "active": "Active",
+      "progress": "{progress}/{target}",
+      "rarity": {
+        "rare": "Rare",
+        "hidden": "Hidden",
+        "normal": "Normal"
+      },
+      "categories": {
+        "all": "All",
+        "care": "Care",
+        "daily": "Daily",
+        "shop": "Shop",
+        "inventory": "Inventory",
+        "pomodoro": "Pomodoro",
+        "growth": "Growth",
+        "date": "Dates",
+        "ending": "Endings",
+        "hidden": "Hidden"
+      },
+      "toast": {
+        "single": "Achievement unlocked",
+        "review": "Achievements updated",
+        "reviewTitle": "Open achievements"
+      },
+      "dailyStipendAuto": "Paid automatically with daily login rewards"
     }
   },
   "pet": {
@@ -331,6 +374,10 @@
         "banana": {
           "name": "Banana",
           "summary": "A sweet fruit that keeps hunger away."
+        },
+        "watermelon": {
+          "name": "Watermelon",
+          "summary": "A juicy summer fruit."
         },
         "nutri_meal": {
           "name": "Light salad",
@@ -612,10 +659,13 @@
         "care": "{name} used {item}.",
         "careWoke": "{name} woke up and used {item}.",
         "favorite": "This is Furo's favorite flavor, mood +{amount} extra.",
-        "stickerHeart": "The sticker sparkled, heart +1.",
-        "stickerSaved": "The sticker was carefully saved.",
+        "giftHeart": "The gift brought a heart.",
         "birthdayCake": "{name} enjoyed {item}. All stats are full.",
         "birthdayCakeWoke": "{name} woke up and enjoyed {item}. All stats are full."
+      },
+      "unknown": {
+        "name": "Unknown mod item",
+        "summary": "This item belongs to a mod that is not loaded: {id}. Re-import the matching mod to restore it."
       }
     },
     "rename": {
@@ -650,7 +700,10 @@
       "dailyCoins": "Daily login gift: coins +{coins}.",
       "dailyItem": "Daily login gift: a surprise item was added to the bag.",
       "anniversary": "Today is the day you met {name}. Anniversary reward: coins +{coins}, hearts +{hearts}, Shiny Sticker +1.",
-      "monthlyGift": "A fresh month begins. Gift: coins +{coins} and a fruit snack."
+      "monthlyGift": "A fresh month begins. Gift: coins +{coins} and a fruit snack.",
+      "dailyWithStipend": "Daily login gift: coins +{coins} (includes achievement stipend +{stipend}).",
+      "dailyWithBonusItems": "Daily login gift delivered, achievement bonus items +{count}.",
+      "dailyWithStipendAndBonusItems": "Daily login gift: coins +{coins} (includes achievement stipend +{stipend}), achievement bonus items +{count}."
     },
     "exchange": {
       "success": "Exchanged 1 heart, coins +{coins}.",
@@ -705,6 +758,319 @@
       "claimed": "Return supplies claimed, coins +{coins}, and care items were added to the bag.",
       "notReady": "Finish the return recovery task before claiming supplies.",
       "alreadyClaimed": "Return supplies were already claimed."
+    },
+    "achievements": {
+      "events": {
+        "rewardClaimed": "Achievement \"{title}\" reward claimed.",
+        "unlocked": "Achievement \"{title}\" unlocked.",
+        "dailyStipendClaimed": "Daily achievement stipend claimed: {coins} coins."
+      },
+      "rewards": {
+        "coins": "Coins +{coins}",
+        "item": "{item} x{count}",
+        "workCoinBonus": "Work coins +{amount}",
+        "pomodoroCoinBonus": "Pomodoro coins +{amount}",
+        "cleanCooldown": "Clean cooldown {seconds}s",
+        "extraHeartChance": "Extra heart chance +{percent}%",
+        "globalFlatBonus": "Global yield +{amount}",
+        "dailyStipend": "Daily achievement stipend +{coins} coins",
+        "careStatBonus": "Feed and clean recovery +{amount}",
+        "cg": "Unlock memorial content",
+        "badge": "Commemorative badge",
+        "hearts": "Hearts +{hearts}",
+        "dailyLoginItemBonus": "Daily login items +{amount}",
+        "hiddenReveal": "Reveal all hidden achievement conditions"
+      },
+      "extraYear": {
+        "title": "Year {year} Good Ending",
+        "description": "Another gentle, steady year of companionship was recorded."
+      },
+      "definitions": {
+        "first_feed": {
+          "title": "First Bite",
+          "description": "Feed your pet or use a food item for the first time."
+        },
+        "first_clean": {
+          "title": "Fresh and Fluffy",
+          "description": "Clean your pet or use a cleaning item for the first time."
+        },
+        "first_play": {
+          "title": "Let's Play",
+          "description": "Play with your pet for the first time."
+        },
+        "first_touch": {
+          "title": "Head Pats",
+          "description": "Pat your pet for the first time."
+        },
+        "first_work": {
+          "title": "Tiny Worker",
+          "description": "Complete work for the first time."
+        },
+        "first_sleep": {
+          "title": "Rest Well",
+          "description": "Let your pet enter sleep for the first time."
+        },
+        "first_gift": {
+          "title": "Gift Time",
+          "description": "Use a gift item for the first time."
+        },
+        "care_25": {
+          "title": "A Familiar Rhythm",
+          "description": "Perform any care action 25 times in total."
+        },
+        "care_100": {
+          "title": "Closer Every Day",
+          "description": "Perform any care action 100 times in total."
+        },
+        "feed_30": {
+          "title": "Well Fed",
+          "description": "Feed 30 times in total."
+        },
+        "clean_30": {
+          "title": "Fresh Care",
+          "description": "Clean 30 times in total."
+        },
+        "play_30": {
+          "title": "Happy Energy",
+          "description": "Play 30 times in total."
+        },
+        "touch_30": {
+          "title": "Trusted Hands",
+          "description": "Pat 30 times in total."
+        },
+        "work_10": {
+          "title": "Pocket Money Starter",
+          "description": "Work 10 times in total."
+        },
+        "work_50": {
+          "title": "Skilled Worker",
+          "description": "Work 50 times in total."
+        },
+        "work_100": {
+          "title": "Steady Income",
+          "description": "Work 100 times in total."
+        },
+        "daily_wish_1": {
+          "title": "Today's Little Wish",
+          "description": "Claim 1 daily wish reward."
+        },
+        "daily_wish_7": {
+          "title": "An Unrushed Habit",
+          "description": "Claim 7 daily wish rewards in total."
+        },
+        "daily_wish_30": {
+          "title": "Wishes Add Up",
+          "description": "Claim 30 daily wish rewards in total."
+        },
+        "daily_wish_100": {
+          "title": "A Daily Promise",
+          "description": "Claim 100 daily wish rewards in total."
+        },
+        "return_welcome_1": {
+          "title": "Welcome Back",
+          "description": "Claim 1 return welcome reward."
+        },
+        "daily_login_7": {
+          "title": "Just Passing By",
+          "description": "Claim daily login rewards 7 times. They do not need to be consecutive."
+        },
+        "first_purchase": {
+          "title": "First Purchase",
+          "description": "Buy a non-free item for the first time."
+        },
+        "purchase_20": {
+          "title": "Restocking the Little Pantry",
+          "description": "Buy or claim items 20 times in total."
+        },
+        "item_use_20": {
+          "title": "The Bag Gets Used",
+          "description": "Use items 20 times in total."
+        },
+        "fruit_taster": {
+          "title": "Fruit Taster",
+          "description": "Use orange, apple, banana, and watermelon once each."
+        },
+        "watermelon_first": {
+          "title": "A Bite of Summer",
+          "description": "Use watermelon for the first time."
+        },
+        "care_kit": {
+          "title": "Care Kit",
+          "description": "Use wet wipes, shampoo, and vitamin tablet once each."
+        },
+        "pomodoro_1": {
+          "title": "First Tomato",
+          "description": "Complete 1 focus phase."
+        },
+        "pomodoro_10": {
+          "title": "Focus Takes Root",
+          "description": "Complete 10 focus phases in total."
+        },
+        "pomodoro_50": {
+          "title": "Desk Companion",
+          "description": "Complete 50 focus phases in total."
+        },
+        "pomodoro_100": {
+          "title": "Deep Focus",
+          "description": "Complete 100 focus phases in total."
+        },
+        "pomodoro_day_4": {
+          "title": "Focused Today",
+          "description": "Complete 4 focus phases in the same day."
+        },
+        "level_2": {
+          "title": "A Little Bigger",
+          "description": "Raise your pet to level 2."
+        },
+        "level_5": {
+          "title": "Reliable Companion",
+          "description": "Raise your pet to level 5."
+        },
+        "heart_10": {
+          "title": "Heart Collection Box",
+          "description": "Earn 10 hearts in total."
+        },
+        "coin_500": {
+          "title": "Little Treasury",
+          "description": "Earn 500 coins in total."
+        },
+        "coin_2000": {
+          "title": "Steady Saver",
+          "description": "Earn 2000 coins in total."
+        },
+        "heart_50": {
+          "title": "Full of Feeling",
+          "description": "Earn 50 hearts in total."
+        },
+        "birthday_first": {
+          "title": "Happy Birthday",
+          "description": "Claim 1 birthday reward."
+        },
+        "monthly_gift_3": {
+          "title": "First-Day Gifts",
+          "description": "Claim 3 monthly gifts."
+        },
+        "festival_1": {
+          "title": "Festival Letter",
+          "description": "Claim 1 festival reward."
+        },
+        "anniversary_first": {
+          "title": "Meeting Anniversary",
+          "description": "Claim 1 anniversary reward."
+        },
+        "sleep_30": {
+          "title": "Settled Sleep",
+          "description": "Start sleep 30 times in total."
+        },
+        "manual_wake_10": {
+          "title": "Wake-Up Service",
+          "description": "Wake your pet manually 10 times."
+        },
+        "natural_wake_10": {
+          "title": "Woke Naturally",
+          "description": "Let your pet wake naturally 10 times."
+        },
+        "sleep_rhythm_30": {
+          "title": "Regular Rhythm",
+          "description": "Start sleep and wake naturally 30 times each."
+        },
+        "rare_trusted_companion": {
+          "title": "Trusted Companion",
+          "description": "Stay together for 30 days and be active for 10 days in total."
+        },
+        "rare_fruit_collector": {
+          "title": "Fruit Collector",
+          "description": "Use orange, apple, banana, and watermelon 3 times each."
+        },
+        "rare_gentle_caretaker": {
+          "title": "Gentle Caretaker",
+          "description": "Feed, clean, play, and pat 50 times each."
+        },
+        "rare_level_10": {
+          "title": "Shining Companion",
+          "description": "Raise your pet to level 10."
+        },
+        "hidden_good_ending_year_1": {
+          "title": "Good Ending",
+          "description": "The first year leaves a gentle, steady record of companionship."
+        },
+        "work_master": {
+          "title": "Work Master",
+          "description": "Work 300 times in total."
+        },
+        "work_play_balance": {
+          "title": "Work and Play Balance",
+          "description": "Work and play 50 times each."
+        },
+        "companion_100": {
+          "title": "Hundred-Day Partner",
+          "description": "Stay together for 100 days and be active for 60 days in total."
+        },
+        "shop_item_collector": {
+          "title": "Little Collector",
+          "description": "Use every shop item."
+        },
+        "fruit_master": {
+          "title": "Fruit Master",
+          "description": "Use orange, apple, banana, and watermelon 20 times each."
+        },
+        "omnivore": {
+          "title": "Not a Picky Eater",
+          "description": "Use every shop food item."
+        },
+        "heart_100": {
+          "title": "Full of Heart",
+          "description": "Earn 100 hearts in total."
+        },
+        "heart_200": {
+          "title": "Shining Hearts",
+          "description": "Earn 200 hearts in total."
+        },
+        "max_coin_500": {
+          "title": "A Small Pouch",
+          "description": "Reach 500 coins held at once."
+        },
+        "max_coin_2000": {
+          "title": "Careful Saver",
+          "description": "Reach 2000 coins held at once."
+        },
+        "heart_500": {
+          "title": "River of Hearts",
+          "description": "Earn 500 hearts in total."
+        },
+        "hidden_never_give_you_up": {
+          "title": "never give you up",
+          "description": "Claim 3 return rewards."
+        },
+        "hidden_never_let_you_down": {
+          "title": "never let you down",
+          "description": "Claim 10 return rewards."
+        },
+        "hidden_quiet_companion": {
+          "title": "Quiet Companion",
+          "description": "Be active for 100 days in total."
+        },
+        "hidden_prepared_bag": {
+          "title": "Prepared Bag",
+          "description": "Keep more than 10 items in the bag."
+        },
+        "hidden_hoarder": {
+          "title": "Hoarder",
+          "description": "Keep more than 50 items in the bag."
+        },
+        "hidden_regular_life": {
+          "title": "Regular Life",
+          "description": "Start sleep 100 times in total."
+        },
+        "hidden_big_watermelon": {
+          "title": "Merge Big Watermelon",
+          "description": "Use orange, apple, and banana 20 times each."
+        },
+        "hidden_full_catalogue": {
+          "title": "Full Catalogue",
+          "description": "Complete every normal achievement."
+        }
+      }
     }
   }
 }

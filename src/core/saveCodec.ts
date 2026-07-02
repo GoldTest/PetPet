@@ -1,5 +1,5 @@
-﻿import { advancePet, createDefaultPet, normalizePet, type PetState } from './pet';
-import type { PetModManifestV1 } from './mod';
+import { advancePet, createDefaultPet, normalizePet, type PetState } from './pet';
+import type { PetModManifest } from './mod';
 
 export const saveFileSchemaVersion = 1;
 const appId = 'PocPet';
@@ -116,7 +116,7 @@ const unprotectSaveFileText = (text: string) => {
   return plainText;
 };
 
-export const createSaveFileText = (pet: PetState, activeMod?: PetModManifestV1 | null, now = Date.now()) => {
+export const createSaveFileText = (pet: PetState, activeMod?: PetModManifest | null, now = Date.now()) => {
   const file: PocPetSaveFileV1 = {
     schemaVersion: saveFileSchemaVersion,
     app: appId,

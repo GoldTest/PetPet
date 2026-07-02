@@ -1,14 +1,13 @@
 import {
-  itemImageKeys,
+  itemImageKeys as builtinItemImageKeys,
   petActivityImageKeys,
   petStatusImageKeys,
   validatePetModManifest,
   type ActivePetMod,
   type ParsedPetMod,
   type PetImageKey,
-  type PetModManifestV1,
+  type PetModManifest,
 } from './mod';
-import type { ItemId } from './pet';
 
 const activeManifestStorageKey = 'pocpet.mod.active.v1';
 const databaseName = 'pocpet-mods';
@@ -65,7 +64,7 @@ const putRecord = (record: StoredImageRecord) => withStore('readwrite', (store) 
 const getRecord = (key: string) => withStore<StoredImageRecord | undefined>('readonly', (store) => store.get(key));
 const clearStore = () => withStore('readwrite', (store) => store.clear());
 
-export const getStoredPetModManifest = (): PetModManifestV1 | null => {
+export const getStoredPetModManifest = (): PetModManifest | null => {
   try {
     const raw = window.localStorage.getItem(activeManifestStorageKey);
     if (!raw) return null;
@@ -123,12 +122,19 @@ export const loadActivePetMod = async (): Promise<ActivePetMod | null> => {
     petImageUrls[key as PetImageKey] = url;
   }
 
-  for (const key of itemImageKeys) {
+  const storedItemImageKeys = manifest.schemaVersion === 2
+    ? [
+        ...Object.keys(manifest.items?.overrides ?? {}),
+        ...(manifest.items?.custom ?? []).map((item: { id: string }) => item.id),
+      ]
+    : [...builtinItemImageKeys];
+
+  for (const key of storedItemImageKeys) {
     const record = await getRecord(getImageRecordKey(manifest.id, 'item', key));
     if (!record?.blob) continue;
     const url = URL.createObjectURL(record.blob);
     objectUrls.add(url);
-    itemImageUrls[key as ItemId] = url;
+    itemImageUrls[key] = url;
   }
 
   return { manifest, petImageUrls, itemImageUrls };

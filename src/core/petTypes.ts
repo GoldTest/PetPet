@@ -1,11 +1,12 @@
 export type PetStatus = 'content' | 'hungry' | 'sad' | 'dirty' | 'tired' | 'sick' | 'sleeping';
 
-export type ItemId =
+export type BuiltinItemId =
   | 'emergency_biscuit'
   | 'bento'
   | 'orange'
   | 'apple'
   | 'banana'
+  | 'watermelon'
   | 'nutri_meal'
   | 'pig_trotter'
   | 'strawberry_cake'
@@ -25,7 +26,11 @@ export type ItemId =
   | 'blanket'
   | 'energy_drink';
 
-export type Inventory = Partial<Record<ItemId, number>>;
+export type ModItemId = `${string}:${string}`;
+
+export type ItemId = BuiltinItemId | ModItemId;
+
+export type Inventory = Record<string, number>;
 
 export type ShopCategory = 'food' | 'item' | 'care';
 
@@ -141,6 +146,37 @@ export interface ReturnWelcomeState {
   completedAt?: number;
   claimedAt?: number;
 }
+export type AchievementId = string;
+
+export interface AchievementCounters {
+  careActionCounts: Record<YearlyCareActionKey, number>;
+  pomodoroFocusCount: number;
+  bestDailyPomodoroFocusCount: number;
+  itemUseCountsById: Partial<Record<string, number>>;
+  totalItemUseCount: number;
+  purchaseCount: number;
+  paidPurchaseCount: number;
+  sleepStartCount: number;
+  dailyWishClaimCount: number;
+  returnWelcomeClaimCount: number;
+  dateRewardClaimCountsByKind: Partial<Record<string, number>>;
+  heartEarnedTotal: number;
+  coinEarnedTotal: number;
+  maxCoinsHeld: number;
+  manualWakeCount: number;
+  naturalWakeCount: number;
+  companionYearActiveDateKeysByYear: Record<string, string[]>;
+}
+
+export interface AchievementState {
+  unlockedAtById: Partial<Record<AchievementId, number>>;
+  claimedOneTimeRewardIds: AchievementId[];
+  dailyStipendClaimDateKey: string;
+  completedGoodEndingYears: number[];
+  unlockedCgIds: string[];
+  pendingReviewNotice: boolean;
+  counters: AchievementCounters;
+}
 export interface PetState {
   name: string;
   level: number;
@@ -193,6 +229,8 @@ export interface PetState {
   lastYearReviewYear?: number;
   dailyWish: DailyWishState;
   returnWelcome?: ReturnWelcomeState;
+  achievements: AchievementState;
+  lastCleanActionAt: number;
 }
 
 export type PetAction = 'play' | 'clean' | 'sleep' | 'work';
@@ -206,7 +244,7 @@ export interface ItemEffect {
 }
 
 export interface ShopItem {
-  id: ItemId;
+  id: BuiltinItemId;
   name: string;
   kind: ShopCategory;
   price: number;
@@ -214,10 +252,36 @@ export interface ShopItem {
   summary: string;
 }
 
+export interface ItemDefinition {
+  id: ItemId;
+  name: string;
+  kind: ShopCategory;
+  price: number;
+  effect: ItemEffect;
+  summary: string;
+  imageUrl?: string;
+  source: 'builtin' | 'mod' | 'unknown';
+  shop: boolean;
+  tags: string[];
+  usable: boolean;
+}
+
+export type ItemRegistry = ReadonlyMap<string, ItemDefinition>;
+
+export type InventoryItemDefinition = ItemDefinition & {
+  displayName: string;
+  displaySummary: string;
+};
+
 export interface UseInventoryItemOptions {
   favoriteFoodIds?: readonly ItemId[];
   favoriteText?: (amount: number) => string | undefined;
   itemName?: string;
+  item?: ItemDefinition;
+}
+
+export interface BuyItemOptions {
+  item?: ItemDefinition;
 }
 
 

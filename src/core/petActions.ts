@@ -1,13 +1,14 @@
-﻿import { t } from '../i18n';
+import { t } from '../i18n';
 import { addInventoryItem, dailyBiscuitClaimLimit, favoriteFoodIdSet, getDailyHeartExchangeInfo, getDailyShopDiscountInfo, getInventoryCount, getInventoryItem, getShopItem, giftItemIdSet, heartExchangeCoins, removeInventoryItem } from './items';
 import { applyActionStreak, getRandomHealthIncident, getRandomPetInteractionCost, lowSleepMoodWarningThreshold, markInteraction, petInteractionCooldownMs, petInteractionOveruseCooldownMs, withActivity } from './petCommon';
 import { normalizePetBirthday } from './dateRewards';
+import { applyHeartGain, getAchievementEffects, incrementAchievementCareAction, incrementAchievementItemUse, incrementAchievementPurchase, incrementAchievementSleepStart, incrementManualWake, recordCoinBalance, recordEarnedCoins, recordEarnedHearts } from './achievements';
 import { recordWishProgress } from './dailyWishes';
 import { advancePet, getDailyBiscuitClaimInfo, isPetCriticallyHungry, isPetLowEnergy, pausePomodoroForReason } from './petLifecycle';
 import { getCleanActionSeasonBonus, getWorkSeasonCoinBonus } from './season';
 import { recordYearlyCareAction, recordYearlyItemUse } from './yearlyStats';
 import { clampCoins, clampCount, clampPetHealth, clampPetStat, getPetStatCap, getUpgradeHeartCost, lowCleanlinessSleepConfirmClicks, lowCleanlinessSleepMoodPenalty, lowCleanlinessSleepWarningThreshold, maxPetLevel, statCapPerLevel } from './petStats';
-import type { CareActionKey, ItemId, PetAction, PetBirthday, PetState, PomodoroDurations, RecentActivity, UseInventoryItemOptions } from './petTypes';
+import type { BuyItemOptions, CareActionKey, ItemId, PetAction, PetBirthday, PetState, PomodoroDurations, RecentActivity, UseInventoryItemOptions } from './petTypes';
 import { defaultPomodoroState, getDefaultPomodoroRemainingMs, getPomodoroPhaseDurationMs, normalizePomodoroSettings, pickPomodoroActivity, pomodoroMinHealthThreshold, pomodoroPhaseLabels, pomodoroResetEventMinFocusMs } from './pomodoro';
 import { settleSleep, startSleepSnapshot } from './petEvents';
 import { getLocalDateKey, randomInt } from './utils';
@@ -23,6 +24,7 @@ export const getWorkReward = (pet: PetState, now = Date.now()) => {
   const statCap = getPetStatCap(pet);
   const moodRatio = statCap > 0 ? Math.max(0, Math.min(1, pet.mood / statCap)) : 0;
   const bonusChance = 0.05 + moodRatio * 0.4;
+  const achievementBonusCoins = getAchievementEffects(pet).workCoinBonus;
   const bonusCoins =
     Math.random() < bonusChance
       ? Math.max(1, Math.floor(baseCoins * (randomInt(5, 15) / 100)))
@@ -31,7 +33,7 @@ export const getWorkReward = (pet: PetState, now = Date.now()) => {
   return {
     baseCoins,
     bonusCoins,
-    totalCoins: baseCoins + bonusCoins,
+    totalCoins: baseCoins + bonusCoins + achievementBonusCoins,
   };
 };
 
@@ -80,14 +82,14 @@ export const exchangeHeartForCoins = (pet: PetState, now = Date.now()): PetState
     return { ...current, recentEvent: t('pet.exchange.limitReached') };
   }
 
-  return {
+  return recordCoinBalance({
     ...current,
     hearts: clampCount(current.hearts - 1),
     coins: clampCoins(current.coins + heartExchangeCoins),
     dailyHeartExchangeDate: exchangeInfo.dateKey,
     dailyHeartExchangeCount: exchangeInfo.count + 1,
     recentEvent: t('pet.exchange.success', { coins: heartExchangeCoins }),
-  };
+  });
 };
 
 export const applyPetAction = (pet: PetState, action: PetAction, now = Date.now()): PetState => {
@@ -95,13 +97,13 @@ export const applyPetAction = (pet: PetState, action: PetAction, now = Date.now(
   const current = action === 'sleep' ? advanced : clearLowCleanlinessSleepConfirm(advanced);
 
   if (action !== 'sleep' && current.isSleeping) {
-    return {
+    return incrementManualWake({
       ...current,
       isSleeping: false,
       mood: clampPetStat(current, current.mood - 4),
       lowCleanlinessSleepConfirmCount: 0,
       recentEvent: t('pet.action.woke', { name: current.name }),
-    };
+    });
   }
 
   if (action !== 'sleep' && isPetCriticallyHungry(current)) {
@@ -124,29 +126,30 @@ export const applyPetAction = (pet: PetState, action: PetAction, now = Date.now(
         const healthDrop = incident?.amount ?? 0;
         const incidentText = incident ? ` ${incident.text}` : '';
 
-        return recordWishProgress(recordYearlyCareAction({
+        return incrementAchievementCareAction(recordWishProgress(recordYearlyCareAction({
           ...withActivity(base, 'happy', now),
           mood: clampPetStat(base, base.mood + 18 + (base.weather === 'sunny' ? 2 : 0)),
           energy: clampPetStat(base, base.energy - 3),
           hunger: clampPetStat(base, base.hunger - 4),
           health: clampPetHealth(base, base.health - healthDrop),
           recentEvent: `${t('pet.action.play', { name: base.name })}${base.weather === 'sunny' ? t('pet.weather.effect.sunnyPlay') : ''}${incidentText}${overuse.text}`,
-        }, 'play', now), 'play', now);
+        }, 'play', now), 'play', now), 'play');
       }
     case 'clean':
       {
         const overuse = applyActionStreak(current, 'clean', now);
         const base = overuse.pet;
         const seasonCleanBonus = getCleanActionSeasonBonus(now);
-        return recordWishProgress(recordYearlyCareAction({
+        const achievementCareBonus = getAchievementEffects(base).careStatBonus;
+        return incrementAchievementCareAction(recordWishProgress(recordYearlyCareAction({
           ...withActivity(base, 'bath', now),
-          cleanliness: clampPetStat(base, base.cleanliness + 30 + (base.weather === 'rainy' ? 5 : 0) + seasonCleanBonus),
+          cleanliness: clampPetStat(base, base.cleanliness + 30 + (base.weather === 'rainy' ? 5 : 0) + seasonCleanBonus + achievementCareBonus),
           energy: clampPetStat(base, base.energy - 3),
           hunger: clampPetStat(base, base.hunger - 3),
           mood: clampPetStat(base, base.mood + 1),
-          health: clampPetHealth(base, base.health + 4),
+          health: clampPetHealth(base, base.health + 4 + achievementCareBonus),
           recentEvent: `${t('pet.action.clean', { name: base.name })}${base.weather === 'rainy' ? t('pet.weather.effect.rainyClean') : ''}${seasonCleanBonus > 0 ? t('pet.season.effect.summerClean') : ''}${overuse.text}`,
-        }, 'clean', now), 'clean', now);
+        }, 'clean', now), 'clean', now), 'clean');
       }
     case 'work':
       if (isPetLowEnergy(current)) {
@@ -162,7 +165,7 @@ export const applyPetAction = (pet: PetState, action: PetAction, now = Date.now(
         const bonusText = reward.bonusCoins > 0 ? t('pet.action.workBonus', { coins: reward.bonusCoins }) : '';
         const seasonWorkText = getWorkSeasonCoinBonus(now) > 0 ? t('pet.season.effect.autumnWork') : '';
 
-        return recordWishProgress(recordYearlyCareAction({
+        return recordEarnedCoins(incrementAchievementCareAction(recordWishProgress(recordYearlyCareAction({
           ...withActivity(base, Math.floor(base.ageSeconds / 60) % 2 === 0 ? 'work_food' : 'work_plants', now, 2200),
           coins: base.coins + reward.totalCoins,
           energy: clampPetStat(base, base.energy - (base.weather === 'breezy' ? 10 : 12)),
@@ -170,11 +173,11 @@ export const applyPetAction = (pet: PetState, action: PetAction, now = Date.now(
           hunger: clampPetStat(base, base.hunger - 6),
           health: clampPetHealth(base, base.health - healthDrop),
           recentEvent: `${t('pet.action.work', { name: base.name, coins: reward.totalCoins })}${bonusText}${base.weather === 'rainy' ? t('pet.weather.effect.rainyWork') : ''}${base.weather === 'breezy' ? t('pet.weather.effect.breezyWork') : ''}${seasonWorkText}${incidentText}${overuse.text}`,
-        }, 'work', now), 'work', now);
+        }, 'work', now), 'work', now), 'work'), reward.totalCoins);
       }
     case 'sleep':
       if (current.isSleeping) {
-        return settleSleep(
+        return incrementManualWake(settleSleep(
           {
             ...current,
             isSleeping: false,
@@ -182,7 +185,7 @@ export const applyPetAction = (pet: PetState, action: PetAction, now = Date.now(
             mood: clampPetStat(current, current.mood - 2),
           },
           now,
-        );
+        ));
       }
 
       {
@@ -203,7 +206,7 @@ export const applyPetAction = (pet: PetState, action: PetAction, now = Date.now(
         }
 
         const cleanlinessMoodPenalty = needsCleanlinessConfirm ? lowCleanlinessSleepMoodPenalty : 0;
-        return recordWishProgress(
+        return incrementAchievementSleepStart(recordWishProgress(
           startSleepSnapshot(
             {
               ...current,
@@ -222,14 +225,16 @@ export const applyPetAction = (pet: PetState, action: PetAction, now = Date.now(
           ),
           'sleep',
           now,
-        );
+        ));
       }
   }
 };
-export const buyItem = (pet: PetState, itemId: ItemId, now = Date.now()): PetState => {
+export const buyItem = (pet: PetState, itemId: ItemId, now = Date.now(), options: BuyItemOptions = {}): PetState => {
   const current = clearLowCleanlinessSleepConfirm(markInteraction(advancePet(pet, now), now));
-  const item = getShopItem(itemId);
+  const item = options.item ?? getShopItem(itemId);
   if (!item) return { ...current, recentEvent: t('pet.buy.missing') };
+  const isShopAvailable = 'shop' in item ? item.shop : true;
+  if (!isShopAvailable) return { ...current, recentEvent: t('pet.buy.missing') };
 
   if (itemId === 'emergency_biscuit') {
     const claimInfo = getDailyBiscuitClaimInfo(current, now);
@@ -237,7 +242,7 @@ export const buyItem = (pet: PetState, itemId: ItemId, now = Date.now()): PetSta
       return { ...current, recentEvent: t('pet.buy.biscuitClaimedOut') };
     }
 
-    return {
+    return incrementAchievementPurchase({
       ...current,
       inventory: addInventoryItem(current.inventory, itemId, 1),
       dailyBiscuitClaimDate: getLocalDateKey(now),
@@ -247,7 +252,7 @@ export const buyItem = (pet: PetState, itemId: ItemId, now = Date.now()): PetSta
         claimed: claimInfo.claimed + 1,
         limit: dailyBiscuitClaimLimit,
       }),
-    };
+    }, false);
   }
 
   const discountInfo = getDailyShopDiscountInfo(current, now);
@@ -258,7 +263,7 @@ export const buyItem = (pet: PetState, itemId: ItemId, now = Date.now()): PetSta
     return { ...current, recentEvent: t('pet.buy.notEnoughCoins', { item: item.name, price }) };
   }
 
-  return {
+  return incrementAchievementPurchase({
     ...current,
     coins: current.coins - price,
     inventory: addInventoryItem(current.inventory, itemId, 1),
@@ -269,7 +274,7 @@ export const buyItem = (pet: PetState, itemId: ItemId, now = Date.now()): PetSta
       : item.price === 0
         ? t('pet.buy.free', { item: item.name })
         : t('pet.buy.paid', { item: item.name }),
-  };
+  }, price > 0);
 };
 
 export const useInventoryItem = (
@@ -279,8 +284,10 @@ export const useInventoryItem = (
   options: UseInventoryItemOptions = {},
 ): PetState => {
   const current = clearLowCleanlinessSleepConfirm(markInteraction(advancePet(pet, now), now));
-  const item = getInventoryItem(itemId);
+  const item = options.item ?? getInventoryItem(itemId);
   if (!item) return { ...current, recentEvent: t('pet.item.missing') };
+  const isUsable = 'usable' in item ? item.usable : true;
+  if (!isUsable) return { ...current, recentEvent: t('pet.item.missing') };
   const displayItemName = options.itemName ?? item.name;
 
   const count = getInventoryCount(current.inventory, itemId);
@@ -292,7 +299,7 @@ export const useInventoryItem = (
 
   if (itemId === 'birthday_cake') {
     const statCap = getPetStatCap(current);
-    return recordWishProgress(recordYearlyItemUse({
+    return (wokePet ? incrementManualWake : (nextPet: PetState) => nextPet)(incrementAchievementItemUse(incrementAchievementCareAction(recordWishProgress(recordYearlyItemUse({
       ...withActivity(current, 'eat_cookie', now),
       isSleeping: false,
       hunger: statCap,
@@ -305,22 +312,24 @@ export const useInventoryItem = (
         name: current.name,
         item: displayItemName,
       }),
-    }, now), 'feed', now);
+    }, now), 'feed', now), 'feed'), itemId));
   }
 
   const effect = item.effect;
   const runtimeFavoriteFoodIdSet = options.favoriteFoodIds ? new Set<ItemId>(options.favoriteFoodIds) : favoriteFoodIdSet;
   const favoriteMoodBonus = runtimeFavoriteFoodIdSet.has(itemId) ? 4 : 0;
-  const stickerHeartBonus = itemId === 'shiny_sticker' && Math.random() < 0.25 ? 1 : 0;
+  const giftHeartBonus = giftItemIdSet.has(itemId) && Math.random() < 0.2 ? 1 : 0;
   const overuseKey: CareActionKey = item.kind === 'food' ? 'feed' : giftItemIdSet.has(itemId) ? 'gift' : 'touch';
   const overuse = applyActionStreak(current, overuseKey, now);
   const base = overuse.pet;
-  const itemActivity: Record<ItemId, RecentActivity> = {
+  const defaultItemActivity: RecentActivity = item.kind === 'food' ? 'eat_cookie' : item.kind === 'care' ? 'bath' : 'happy';
+  const itemActivity: Partial<Record<ItemId, RecentActivity>> = {
     emergency_biscuit: 'eat_cookie',
     bento: 'eat_noodles',
     orange: 'eat_cookie',
     apple: 'eat_cookie',
     banana: 'eat_cookie',
+    watermelon: 'eat_cookie',
     nutri_meal: 'eat_meat',
     pig_trotter: 'eat_meat',
     strawberry_cake: 'eat_cookie',
@@ -350,31 +359,30 @@ export const useInventoryItem = (
     favoriteMoodBonus > 0
       ? options.favoriteText?.(favoriteMoodBonus) ?? t('pet.item.use.favorite', { amount: favoriteMoodBonus })
       : '';
-  const stickerText =
-    itemId === 'shiny_sticker'
-      ? stickerHeartBonus > 0
-        ? t('pet.item.use.stickerHeart')
-        : t('pet.item.use.stickerSaved')
-      : '';
+  const giftHeartText = giftHeartBonus > 0 ? t('pet.item.use.giftHeart') : '';
 
+  const giftHeartGain = applyHeartGain(base, giftHeartBonus);
   const usedItemPet = recordYearlyItemUse(
     recordYearlyCareAction({
-      ...withActivity(base, itemActivity[itemId], now),
+      ...withActivity(base, itemActivity[itemId] ?? defaultItemActivity, now),
       isSleeping: false,
-      hunger: clampPetStat(base, base.hunger + (effect.hunger ?? 0)),
+      hunger: clampPetStat(base, base.hunger + (effect.hunger ?? 0) + (item.kind === 'food' ? getAchievementEffects(base).careStatBonus : 0)),
       mood: clampPetStat(base, base.mood + (effect.mood ?? 0) + favoriteMoodBonus - (wokePet ? 2 : 0)),
       cleanliness: clampPetStat(base, base.cleanliness + (effect.cleanliness ?? 0)),
       energy: clampPetStat(base, base.energy + (effect.energy ?? 0)),
       health: clampPetHealth(base, base.health + (effect.health ?? 0)),
-      hearts: clampCount(base.hearts + stickerHeartBonus),
+      hearts: giftHeartBonus > 0 ? giftHeartGain.hearts : base.hearts,
       inventory: removeInventoryItem(base.inventory, itemId),
-      recentEvent: `${baseEvent}${favoriteText}${stickerText}${overuse.text}`,
+      recentEvent: `${baseEvent}${favoriteText}${giftHeartText}${overuse.text}`,
     }, overuseKey, now),
     now,
   );
 
+  const withAchievementUse = incrementAchievementItemUse(incrementAchievementCareAction(usedItemPet, overuseKey), itemId);
+  const withWakeRecord = wokePet ? incrementManualWake(withAchievementUse) : withAchievementUse;
+  const withHeartRecord = giftHeartBonus > 0 ? recordEarnedHearts(withWakeRecord, giftHeartGain.amount) : withWakeRecord;
   const wishAction = item.kind === 'food' ? 'feed' : itemId === 'shampoo' || itemId === 'wet_wipes' ? 'clean' : undefined;
-  return wishAction ? recordWishProgress(usedItemPet, wishAction, now) : usedItemPet;
+  return wishAction ? recordWishProgress(withHeartRecord, wishAction, now) : withHeartRecord;
 };
 
 export const interactWithPet = (pet: PetState, now = Date.now()): PetState => {
@@ -415,9 +423,10 @@ export const interactWithPet = (pet: PetState, now = Date.now()): PetState => {
   const base = overuse.pet;
 
   if (base.mood >= 75 && base.health >= 40) {
-    return recordWishProgress(recordYearlyCareAction({
+    const heartGain = applyHeartGain(base, 1);
+    const touched = recordWishProgress(recordYearlyCareAction({
       ...withActivity(base, 'give_heart', now, 3600),
-      hearts: base.hearts + 1,
+      hearts: heartGain.hearts,
       mood: clampPetStat(base, base.mood - 12),
       hunger: clampPetStat(base, base.hunger - interactionCost.hunger),
       cleanliness: clampPetStat(base, base.cleanliness - interactionCost.cleanliness),
@@ -427,9 +436,10 @@ export const interactWithPet = (pet: PetState, now = Date.now()): PetState => {
         ? `${t('pet.interaction.heart', { name: base.name })}${interactionCost.text}${overuse.text} ${t('pet.interaction.overuseCooldown', { name: base.name })}`
         : `${t('pet.interaction.heart', { name: base.name })}${interactionCost.text}${overuse.text}`,
     }, 'touch', now), 'touch', now);
+    return recordEarnedHearts(incrementAchievementCareAction(touched, 'touch'), heartGain.amount);
   }
 
-  return recordWishProgress(recordYearlyCareAction({
+  const touched = recordWishProgress(recordYearlyCareAction({
     ...withActivity(base, 'happy', now, 3200),
     mood: clampPetStat(base, base.mood + 5),
     hunger: clampPetStat(base, base.hunger - interactionCost.hunger),
@@ -440,8 +450,8 @@ export const interactWithPet = (pet: PetState, now = Date.now()): PetState => {
       ? `${t('pet.interaction.touch', { name: base.name })}${interactionCost.text}${overuse.text} ${t('pet.interaction.overuseCooldown', { name: base.name })}`
       : `${t('pet.interaction.touch', { name: base.name })}${interactionCost.text}${overuse.text}`,
   }, 'touch', now), 'touch', now);
+  return incrementAchievementCareAction(touched, 'touch');
 };
-
 export const startPomodoro = (pet: PetState, now = Date.now()): PetState => {
   const current = clearLowCleanlinessSleepConfirm(advancePet(pet, now));
   if (current.pomodoro.isRunning) return current;
@@ -502,11 +512,11 @@ export const resetPomodoro = (pet: PetState, now = Date.now()): PetState => {
   const resetEventText = shouldTriggerResetEvent
     ? t('pet.pomodoro.resetSessionEvent', { name: current.name, coins: resetEventCoins, mood: resetEventMood })
     : '';
-  const resetBase = {
+  const resetBase = recordEarnedCoins({
     ...current,
     coins: clampCoins(current.coins + resetEventCoins),
     mood: clampPetStat(current, current.mood + resetEventMood),
-  };
+  }, resetEventCoins);
 
   return {
     ...resetBase,

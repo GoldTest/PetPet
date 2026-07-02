@@ -1,5 +1,6 @@
 import { t } from '../i18n';
 import { getSixAmResetDateKey } from './dateRewards';
+import { incrementDailyWishClaim, incrementReturnWelcomeClaim, recordEarnedCoins } from './achievements';
 import { addInventoryItem, allItemIds } from './items';
 import { clampCoins, clampCount } from './petStats';
 import type {
@@ -154,7 +155,7 @@ export const normalizeReturnWelcomeState = (value: unknown): ReturnWelcomeState 
       : undefined;
   const claimedAt = isNumber(raw.claimedAt) && completedAt ? Math.floor(raw.claimedAt) : undefined;
   const rawItemIds = Array.isArray(raw.rewardItemIds) ? raw.rewardItemIds : [];
-  const rewardItemIds = rawItemIds.filter((itemId): itemId is ItemId => typeof itemId === 'string' && allItemIds.has(itemId as ItemId));
+  const rewardItemIds = rawItemIds.filter((itemId): itemId is ItemId => typeof itemId === 'string' && allItemIds.has(itemId));
 
   return {
     startedAt,
@@ -239,12 +240,12 @@ export const claimDailyWishReward = (pet: PetState, now = Date.now()): PetState 
   if (wish.claimedAt) return { ...current, recentEvent: t('pet.dailyWish.alreadyClaimed') };
   if (!wish.completedAt) return { ...current, recentEvent: t('pet.dailyWish.notReady') };
 
-  return {
+  return recordEarnedCoins(incrementDailyWishClaim({
     ...current,
     coins: clampCoins(current.coins + wish.rewardCoins),
     dailyWish: { ...wish, claimedAt: now },
     recentEvent: t('pet.dailyWish.claimed', { coins: wish.rewardCoins }),
-  };
+  }), wish.rewardCoins);
 };
 
 export const claimReturnWelcomeReward = (pet: PetState, now = Date.now()): PetState => {
@@ -254,13 +255,13 @@ export const claimReturnWelcomeReward = (pet: PetState, now = Date.now()): PetSt
   if (!welcome.completedAt) return { ...pet, returnWelcome: welcome, recentEvent: t('pet.returnWelcome.notReady') };
 
   const inventory = welcome.rewardItemIds.reduce((next, itemId) => addInventoryItem(next, itemId, 1), pet.inventory);
-  return {
+  return recordEarnedCoins(incrementReturnWelcomeClaim({
     ...pet,
     coins: clampCoins(pet.coins + welcome.rewardCoins),
     inventory,
     returnWelcome: { ...welcome, claimedAt: now },
     recentEvent: t('pet.returnWelcome.claimed', { coins: welcome.rewardCoins }),
-  };
+  }), welcome.rewardCoins);
 };
 
 const getButtonLabel = (canClaim: boolean, claimed: boolean) => {

@@ -1,6 +1,6 @@
 # PocPet Mod Guide
 
-PocPet v1 mods are imported as zip files. Version 1 can replace pet images, item images, display text, the default pet name, favorite foods, and the pet's default birthday. It does not add new item IDs, change shop behavior, or extend date/festival reward pools.
+PocPet mods are imported as zip files. `schemaVersion: 1` can replace pet images, built-in item images, display text, the default pet name, favorite foods, and the pet's default birthday. `schemaVersion: 2` keeps those capabilities and can also override built-in item names, summaries, and images, plus register safe custom items for the shop and inventory.
 
 ## Zip Layout
 
@@ -32,7 +32,7 @@ Put `manifest.json`, `pet/`, and `items/` directly at the zip root. Do not wrap 
 
 Supported pet image files are the status images `content.png`, `hungry.png`, `sad.png`, `dirty.png`, `tired.png`, `sick.png`, `sleeping.png`, plus activity images `happy.png`, `bath.png`, `eat_cookie.png`, `eat_noodles.png`, `eat_meat.png`, `give_heart.png`, `level_up.png`, `reading_books.png`, `workout.png`, `work_food.png`, and `work_plants.png`.
 
-Supported item image files are `emergency_biscuit.png`, `bento.png`, `orange.png`, `apple.png`, `banana.png`, `nutri_meal.png`, `pig_trotter.png`, `strawberry_cake.png`, `ad_milk.png`, `strawberry_milk.png`, `small_bouquet.png`, `shiny_sticker.png`, `soft_cloud_doll.png`, `ribbon_bell.png`, `toy_ball.png`, `picture_book.png`, `shampoo.png`, `wet_wipes.png`, `medicine.png`, `vitamin_tablet.png`, `blanket.png`, and `energy_drink.png`. The built-in special item `birthday_cake` is birthday-only and is not mod-customizable in v1.
+Supported item image files are `emergency_biscuit.png`, `bento.png`, `orange.png`, `apple.png`, `banana.png`, `watermelon.png`, `nutri_meal.png`, `pig_trotter.png`, `strawberry_cake.png`, `ad_milk.png`, `strawberry_milk.png`, `small_bouquet.png`, `shiny_sticker.png`, `soft_cloud_doll.png`, `ribbon_bell.png`, `toy_ball.png`, `picture_book.png`, `shampoo.png`, `wet_wipes.png`, `medicine.png`, `vitamin_tablet.png`, `blanket.png`, and `energy_drink.png`. The built-in special item `birthday_cake` is birthday-only and is not mod-customizable in v1.
 
 Missing images are allowed and fall back to built-in assets. Unknown files are rejected.
 
@@ -73,7 +73,7 @@ Missing images are allowed and fall back to built-in assets. Unknown files are r
 
 ## Manifest Fields
 
-- `schemaVersion`: required, must be `1`.
+- `schemaVersion`: required, `1` or `2`. v1 uses `texts.items` and fixed `items/{itemId}.png`; v2 should use `items.overrides` and `items.custom`.
 - `id`: required, 2-64 chars, lowercase letters, numbers, dots, dashes, or underscores.
 - `name`: required display name, max 48 chars.
 - `author`: optional author name, max 48 chars.
@@ -88,6 +88,51 @@ Missing images are allowed and fall back to built-in assets. Unknown files are r
 - `texts.items`: optional item names and summaries for existing item IDs. Names are max 28 chars; summaries are max 96 chars.
 
 A Mod birthday is the pet's default birthday. Users can edit the current pet birthday in Settings, and that edit is kept until the next app startup with an active Mod, save import with a matching active Mod, restore, reset, or Mod switch reapplies the active Mod manifest birthday. If a Mod has no `birthday`, that Mod does not provide a birthday default.
+
+## Manifest v2 Item Example
+
+`schemaVersion: 2` supports built-in item display overrides through `items.overrides` and custom items through `items.custom`. Custom item IDs must use the current mod ID as their namespace, such as `creator.farm:melon_seed`.
+
+```json
+{
+  "schemaVersion": 2,
+  "id": "creator.farm",
+  "name": "Farm Pack",
+  "author": "Creator",
+  "version": "1.0.0",
+  "defaultPetName": "Momo",
+  "items": {
+    "overrides": {
+      "watermelon": {
+        "name": "Pixel Watermelon",
+        "summary": "A crisp summer fruit.",
+        "image": "items/watermelon.png"
+      }
+    },
+    "custom": [
+      {
+        "id": "creator.farm:melon_seed",
+        "name": "Melon Seed",
+        "summary": "Reserved for the future garden system.",
+        "kind": "item",
+        "price": 30,
+        "effect": { "mood": 2 },
+        "image": "items/creator.farm_melon_seed.png",
+        "shop": true,
+        "tags": ["planting", "seed", "watermelon"]
+      }
+    ]
+  }
+}
+```
+
+Custom item limits:
+
+- `kind` must be `food`, `item`, or `care`.
+- `effect` may only contain `hunger`, `mood`, `cleanliness`, `energy`, and `health`, each from `-100..100`.
+- `price` must be an integer from `0..9999`.
+- If `image` is set, it must point to `items/*.png` at the zip root. Missing referenced images import with a placeholder; unreferenced custom image files are rejected.
+- Custom items do not count toward fixed built-in collection achievements, but total purchase/use counters can still increase.
 
 ## Image Guidelines
 
@@ -105,7 +150,8 @@ A Mod birthday is the pet's default birthday. Users can edit the current pet bir
 
 ## Compatibility
 
-- v1 mods cannot add or remove item IDs.
+- v1 mods cannot add or remove item IDs; v2 mods can add namespaced custom items through `items.custom`.
 - v1 mods cannot change item prices, item effects, shop categories, coins, hearts, levels, Pomodoro rules, daily wish rules, return welcome rules, save rules, or offline rules.
 - v1 mods cannot add festival-exclusive items, customize the built-in `birthday_cake`, or define birthday, festival, daily login, daily wish, return welcome, anniversary, monthly gift, seasonal effect, or year review content yet.
 - Save export includes current data and a Mod summary, but does not include Mod images. Re-import the zip on another device before or after importing the save.
+- Inventory keeps custom item counts when their mod is not loaded. They appear as “Unknown mod item” and cannot be used or bought until the matching mod is re-imported.

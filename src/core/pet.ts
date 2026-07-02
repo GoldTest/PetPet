@@ -1,12 +1,19 @@
 export type {
+  AchievementCounters,
+  AchievementId,
+  BuiltinItemId,
+  AchievementState,
   ActionStreak,
   CareActionKey,
   DailyWishActionKey,
   DailyWishId,
   DailyWishState,
   Inventory,
+  InventoryItemDefinition,
+  ItemDefinition,
   ItemEffect,
   ItemId,
+  ItemRegistry,
   PetAction,
   PetBirthday,
   PetState,
@@ -28,12 +35,17 @@ export type {
   YearlyStats,
 } from './petTypes';
 export {
+  createBuiltinItemRegistry,
+  createItemRegistry,
   dailyBiscuitClaimLimit,
   dailyHeartExchangeLimit,
   favoriteFoodIds,
   getDailyHeartExchangeInfo,
   getDailyShopDiscountInfo,
+  getInventoryDefinitions,
   getInventoryItem,
+  getItemDefinition,
+  getShopDefinitions,
   heartExchangeCoins,
   heartExchangeCooldownMs,
   inventoryItems,
@@ -130,3 +142,17 @@ export {
   withBackfilledBirthday,
   withPetIdentityBirthday,
 } from './dateRewards';
+
+export type { AchievementCategory, AchievementEvaluationResult, AchievementRarity, AchievementReward, AchievementSummary, AchievementView } from './achievements';
+export {
+  achievementDefinitions,
+  claimAchievementDailyStipend,
+  claimAchievementReward,
+  evaluateAchievementUnlocks,
+  evaluateAchievements,
+  getAchievementEffects,
+  getAchievementSummary,
+  getAchievementViews,
+  markAchievementReviewSeen,
+  recordEarnedCoins,
+} from './achievements';

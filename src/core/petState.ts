@@ -1,9 +1,10 @@
 import { t } from '../i18n';
+import { defaultAchievementState, normalizeAchievementState } from './achievements';
 import { defaultPetBirthday, normalizePetBirthday } from './dateRewards';
 import { createDailyWish, normalizeDailyWishState, normalizeReturnWelcomeState } from './dailyWishes';
-import { allItemIds, dailyBiscuitClaimLimit, dailyHeartExchangeLimit } from './items';
+import { dailyBiscuitClaimLimit, dailyHeartExchangeLimit } from './items';
 import { clampCoins, clampCount, clampHealth, clampLevel, clampStat, defaultPetName, getPetStatCap, lowCleanlinessSleepConfirmClicks } from './petStats';
-import type { ActionStreak, Inventory, ItemId, PetState, PetStatus, RecentActivity, WeatherType } from './petTypes';
+import type { ActionStreak, Inventory, PetState, PetStatus, RecentActivity, WeatherType } from './petTypes';
 import { defaultPomodoroState, normalizePomodoroState } from './pomodoro';
 import { getWeatherForDate, weatherTypeSet } from './weather';
 import { getLocalDateKey, isNumber } from './utils';
@@ -81,6 +82,8 @@ export const createDefaultPet = (now = Date.now()): PetState => ({
   birthday: defaultPetBirthday,
   claimedFestivalRewardKeys: [],
   yearlyStats: defaultYearlyStats(now),
+  achievements: defaultAchievementState(now, now, false, 30),
+  lastCleanActionAt: 0,
   dailyWish: createDailyWish({
     createdAt: now,
     name: defaultPetName,
@@ -148,9 +151,10 @@ export const normalizePet = (value: unknown, now = Date.now()): PetState => {
       ? (rawActionStreak.key as ActionStreak['key'])
       : 'none';
 
-  for (const [key, amount] of Object.entries(rawInventory)) {
-    if (allItemIds.has(key as ItemId) && isNumber(amount) && amount > 0) {
-      inventory[key as ItemId] = Math.floor(amount);
+  for (const [rawKey, amount] of Object.entries(rawInventory)) {
+    const key = rawKey.trim().slice(0, 128);
+    if (key && isNumber(amount) && amount > 0) {
+      inventory[key] = Math.min(9999, Math.floor(amount));
     }
   }
 
@@ -162,6 +166,7 @@ export const normalizePet = (value: unknown, now = Date.now()): PetState => {
       ? Math.max(0, now - ageSeconds * 1000)
       : now;
   const pendingYearReview = normalizeYearReview(raw.pendingYearReview);
+  const yearlyStats = normalizeYearlyStats(raw.yearlyStats, now);
   const normalizedName = typeof raw.name === 'string' && raw.name.trim() ? raw.name.trim().slice(0, 32) : fallback.name;
   const normalizedEnergy = clampStat(isNumber(raw.energy) ? raw.energy : fallback.energy, statCap);
   const normalizedHealth = clampHealth(isNumber(raw.health) ? raw.health : fallback.health, statCap);
@@ -173,6 +178,15 @@ export const normalizePet = (value: unknown, now = Date.now()): PetState => {
     health: normalizedHealth,
     isSleeping: normalizedIsSleeping,
   }, now);
+  const hasAchievementState = Boolean(raw.achievements && typeof raw.achievements === 'object' && !Array.isArray(raw.achievements));
+  const achievements = normalizeAchievementState(
+    raw.achievements,
+    now,
+    createdAt,
+    yearlyStats,
+    !hasAchievementState,
+    clampCoins(isNumber(raw.coins) ? raw.coins : fallback.coins),
+  );
 
   return {
     name: normalizedName,
@@ -241,11 +255,13 @@ export const normalizePet = (value: unknown, now = Date.now()): PetState => {
     dailyLoginRewardDateKey: typeof raw.dailyLoginRewardDateKey === 'string' ? raw.dailyLoginRewardDateKey.trim().slice(0, 16) : undefined,
     monthlyGiftDateKey: typeof raw.monthlyGiftDateKey === 'string' ? raw.monthlyGiftDateKey.trim().slice(0, 16) : undefined,
     claimedFestivalRewardKeys,
-    yearlyStats: normalizeYearlyStats(raw.yearlyStats, now),
+    yearlyStats,
     pendingYearReview,
     lastYearReviewYear: isNumber(raw.lastYearReviewYear) ? Math.floor(raw.lastYearReviewYear) : undefined,
     dailyWish,
     returnWelcome: normalizeReturnWelcomeState(raw.returnWelcome),
+    achievements,
+    lastCleanActionAt: isNumber(raw.lastCleanActionAt) ? Math.max(0, Math.floor(raw.lastCleanActionAt)) : 0,
   };
 };
 
