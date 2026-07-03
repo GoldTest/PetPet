@@ -2,6 +2,14 @@
 
 PocPet mods are imported as zip files. `schemaVersion: 1` can replace pet images, built-in item images, display text, the default pet name, favorite foods, and the pet's default birthday. `schemaVersion: 2` keeps those capabilities and can also override built-in item names, summaries, and images, plus register safe custom items for the shop and inventory.
 
+## Open Source and Asset Licensing
+
+PocPet built-in image assets are AI-generated or AI-assisted, then selected and integrated by FrostForge Studio. They are distributed with the main project under GPL-3.0-or-later unless a specific file or later notice says otherwise. You can fork the project for your own pet app, or distribute a standalone Mod zip.
+
+When publishing a Mod, only include images, text, audio, fonts, or other assets that you are allowed to distribute under your chosen license. Do not include unauthorized third-party characters, trademarks, game screenshots, film screenshots, music, fonts, sound effects, or other restricted material.
+
+If your Mod uses AI-generated images, say so in the Mod notes or release page, and keep enough information about the model, platform, prompts, edits, or source material to confirm that public distribution is allowed.
+
 ## Zip Layout
 
 ```text
@@ -140,6 +148,8 @@ Custom item limits:
 ## Image Guidelines
 
 - Use PNG images; transparent backgrounds work best.
+- Avoid content that infringes copyright, trademarks, personality rights, or platform terms.
+- For AI-generated images, keep prompts, generation platform notes, edit history, or similar provenance records so later licensing questions can be resolved.
 - Pet images should use a square canvas, ideally 512x512 or larger, with the subject centered.
 - Item icons should be 256x256 or 128x128.
 - Good ending CG uses `cg/good_ending_year_1.png`; a landscape PNG close to 4:3 or 16:9 is recommended.
@@ -151,6 +161,12 @@ Custom item limits:
 2. Zip those files directly; do not wrap them in an extra folder.
 3. Open PocPet settings and choose Import Pet Mod.
 4. If the app reports missing images, those slots use built-in assets.
+
+## Forking Guidance
+
+If your changes need new gameplay rules, save schema changes, large built-in asset replacements, or a different item economy, fork PocPet and maintain your own source branch instead of forcing those rules into a Mod. Mods are best for appearance, text, character packs, and safe item extensions.
+
+For public forks, update the project name, app icon, package identifier, license notes, and asset statement so users do not confuse your version with the upstream PocPet project.
 
 ## Compatibility
 
