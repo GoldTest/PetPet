@@ -98,12 +98,34 @@ npm run package:desktop
 
 macOS 目标产物以 `.dmg` / `.app` 为主。Linux 目标产物以 `.AppImage` / `.deb` 为主，优先面向 Ubuntu 兼容环境；国产 Linux 发行版通常可优先测试 AppImage，Debian/Ubuntu 系发行版可测试 deb 包。
 
-## Gitee 自动构建与发行版
+## GitHub Actions 自动构建与发行版
 
-仓库包含 `.gitee/workflows/release.yml` 作为自动构建模板。设计目标是每次推送或打 tag 时构建：
+仓库包含 `.github/workflows/release.yml`。默认行为：
 
-- Windows：`PocPet-<version>.exe`
-- Android：`PocPet-<version>.apk`
+- pull request 和普通分支推送：只运行 `npm run build` 做前端与 TypeScript 构建检查。
+- 推送 `v*` tag 或手动运行 workflow：构建日常测试包。
+- 当前版本号为 semver 的 `x.y.0`，或手动运行时勾选 `full_build`：额外构建 Web、macOS、Linux 产物。
+- 推送 `v*` tag：构建完成后自动创建 GitHub Release 并上传产物。
+
+日常测试包：
+
+- Windows x64：`pocket<version>.exe`
+- Android arm64 debug-signed APK：`pocket<version>.apk`
+
+全量构建会额外产出：
+
+- Web 部署包：`pocket<version>-web.zip`
+- macOS：`pocket<version>-mac.dmg`
+- Ubuntu/Linux：`pocket<version>-ubuntu.AppImage`，如 runner 生成 deb，也会保留 `pocket<version>-ubuntu.deb`
+
+Android 包默认使用 CI runner 上临时生成的 debug keystore 签名，只适合测试分发；正式商店签名需要另行配置签名密钥和发布流程。
+
+## Gitee 自动构建模板
+
+仓库同时保留 `.gitee/workflows/release.yml` 作为 Gitee 自动构建模板。设计目标是推送或打 tag 时构建：
+
+- Windows：exe
+- Android：APK
 - macOS：dmg/app
 - Linux：AppImage/deb，优先 Ubuntu 兼容，也便于国产 Linux 发行版测试
 
@@ -116,7 +138,6 @@ macOS 目标产物以 `.dmg` / `.app` 为主。Linux 目标产物以 `.AppImage`
 macOS 构建需要 macOS runner。Gitee 如果没有提供对应托管 runner，需要使用自托管 runner。Linux 构建建议使用 Ubuntu 22.04 或更新版本。Android 构建需要 runner 预装 Android SDK/NDK，或在流水线中补齐安装步骤。
 
 Gitee 的流水线能力、runner 标签和 Release API 可能因账号/企业版配置不同而不同；如果平台语法或 runner 标签与当前模板不一致，请按 Gitee 当前流水线界面生成的 YAML 调整 `.gitee/workflows/release.yml`。
-
 
 ## Mod 制作
 
