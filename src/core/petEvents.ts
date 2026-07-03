@@ -1,5 +1,5 @@
 import { pick, t } from '../i18n';
-import { recordEarnedCoins, recordEarnedHearts } from './achievements';
+import { applyHeartGain, recordEarnedCoins, recordEarnedHearts } from './achievements';
 import { addInventoryItem } from './items';
 import { clampCoins, clampCount, clampPetHealth, clampPetStat } from './petStats';
 import type { ItemEffect, ItemId, PetState, WeatherType } from './petTypes';
@@ -124,6 +124,7 @@ export const getRandomDreamEvent = (name: string): TimedEvent =>
 
 export const applyTimedEvent = (pet: PetState, event: TimedEvent, now: number, prefix: string): PetState => {
   const effect = event.effect ?? {};
+  const heartGain = applyHeartGain(pet, event.hearts ?? 0);
   const withEvent: PetState = {
     ...pet,
     hunger: clampPetStat(pet, pet.hunger + (effect.hunger ?? 0)),
@@ -132,13 +133,14 @@ export const applyTimedEvent = (pet: PetState, event: TimedEvent, now: number, p
     energy: clampPetStat(pet, pet.energy + (effect.energy ?? 0)),
     health: clampPetHealth(pet, pet.health + (effect.health ?? 0)),
     coins: clampCoins(pet.coins + (event.coins ?? 0)),
-    hearts: clampCount(pet.hearts + (event.hearts ?? 0)),
+    hearts: heartGain.hearts,
+    boostCards: heartGain.boostCards,
     inventory: event.itemId ? addInventoryItem(pet.inventory, event.itemId, event.itemAmount ?? 1) : pet.inventory,
     recentEvent: `${prefix}${event.text}`,
     lastDailyRewardAt: prefix === t('pet.prefix.dailyEncounter') ? now : pet.lastDailyRewardAt,
     lastDailyEncounterAt: prefix === t('pet.prefix.dailyEncounter') ? now : pet.lastDailyEncounterAt,
   };
-  return recordEarnedHearts(recordEarnedCoins(withEvent, event.coins ?? 0), event.hearts ?? 0);
+  return recordEarnedHearts(recordEarnedCoins(withEvent, event.coins ?? 0), heartGain.amount);
 };
 
 const addEffects = (left?: ItemEffect, right?: ItemEffect): ItemEffect | undefined => {

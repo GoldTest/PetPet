@@ -24,7 +24,16 @@ export type BuiltinItemId =
   | 'medicine'
   | 'vitamin_tablet'
   | 'blanket'
-  | 'energy_drink';
+  | 'energy_drink'
+  | 'golden_apple'
+  | 'fruit_tree_sapling'
+  | 'care_tree_sapling'
+  | 'gift_tree_sapling'
+  | 'money_tree_sapling'
+  | 'golden_apple_tree_sapling'
+  | 'normal_fertilizer'
+  | 'heart_fertilizer'
+  | 'harvest_nutrient';
 
 export type ModItemId = `${string}:${string}`;
 
@@ -32,7 +41,73 @@ export type ItemId = BuiltinItemId | ModItemId;
 
 export type Inventory = Record<string, number>;
 
-export type ShopCategory = 'food' | 'item' | 'care';
+export type GardenTreeId = 'fruit_tree' | 'care_tree' | 'gift_tree' | 'money_tree' | 'golden_apple_tree';
+
+export type GardenFertilizerId = 'normal' | 'heart';
+
+export type GardenToolId = 'watering_can' | 'shovel' | 'fertilizer_box';
+
+export type GardenSlotState = 'empty' | 'growing' | 'ready' | 'withered';
+
+export interface GardenDrop {
+  kind?: 'item' | 'coins';
+  itemId?: ItemId;
+  amount: number;
+}
+
+export interface GardenSlot {
+  slotIndex: number;
+  unlocked: boolean;
+  treeId?: GardenTreeId;
+  plantedAt: number;
+  lastWateredAt: number;
+  lastFertilizedAt: number;
+  lastBoostedAt: number;
+  nextReadyAt: number;
+  harvestsUsed: number;
+  maxHarvests: number;
+  fertilizerType?: GardenFertilizerId;
+  hasNutrientBoost: boolean;
+  dailyHarvestDateKey: string;
+  dailyHarvestCount: number;
+  pendingDrops: GardenDrop[];
+  state: GardenSlotState;
+}
+
+export interface GardenTools {
+  wateringCanLevel: number;
+  shovelLevel: number;
+  fertilizerBoxLevel: number;
+}
+
+export interface GardenState {
+  schemaVersion: 1;
+  activeSlotIndex: number;
+  slots: GardenSlot[];
+  dailyCareDateKey: string;
+  dailyWaterCount: number;
+  dailyFertilizeCount: number;
+  dailyHarvestDateKey: string;
+  dailyHarvestCount: number;
+  tools: GardenTools;
+  lifetimeHarvestCount: number;
+}
+
+export type BoostCardId = 'friend_pass' | 'best_friend_pass';
+
+export interface BoostCardState {
+  schemaVersion: 1;
+  friendPassExpiresAt: number;
+  bestFriendPassExpiresAt: number;
+  bestFriendPassPurchasedDays: number;
+  dailyDateKey: string;
+  dailyCoinsClaimedCardId?: BoostCardId;
+  dailyWorkBonusCoinsUsed: number;
+  dailyExtraHeartCount: number;
+  dailyGardenExtraDrops: number;
+}
+
+export type ShopCategory = 'food' | 'item' | 'care' | 'garden';
 
 export type WeatherType = 'sunny' | 'cloudy' | 'rainy' | 'breezy';
 
@@ -200,6 +275,8 @@ export interface PetState {
   dailyBiscuitClaimDate: string;
   dailyBiscuitClaims: number;
   dailyDiscountDate: string;
+  dailyDiscountItemIds: BuiltinItemId[];
+  dailyDiscountUsedItemIds: BuiltinItemId[];
   dailyDiscountUsed: boolean;
   dailyHeartExchangeDate: string;
   dailyHeartExchangeCount: number;
@@ -231,6 +308,8 @@ export interface PetState {
   returnWelcome?: ReturnWelcomeState;
   achievements: AchievementState;
   lastCleanActionAt: number;
+  garden: GardenState;
+  boostCards: BoostCardState;
 }
 
 export type PetAction = 'play' | 'clean' | 'sleep' | 'work';
@@ -250,6 +329,8 @@ export interface ShopItem {
   price: number;
   effect: ItemEffect;
   summary: string;
+  tags?: string[];
+  usable?: boolean;
 }
 
 export interface ItemDefinition {

@@ -27,6 +27,7 @@ src-tauri/gen/android/app/proguard-tauri.pro
 # Editors / local workspace
 .vscode/
 .idea/
+.codex/
 *.swp
 *.swo
 # Private development notes

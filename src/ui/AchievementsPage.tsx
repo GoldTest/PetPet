@@ -59,6 +59,7 @@ export interface AchievementsPageProps {
   onBack: () => void;
   onCategoryChange: (category: 'all' | AchievementCategory) => void;
   onClaimReward: (id: AchievementId) => void;
+  onOpenCg?: (achievement: AchievementView) => void;
 }
 
 export const AchievementsPage = ({
@@ -68,6 +69,7 @@ export const AchievementsPage = ({
   onBack,
   onCategoryChange,
   onClaimReward,
+  onOpenCg,
 }: AchievementsPageProps) => {
   const summary = getAchievementSummary(pet);
   const allAchievements = getAchievementViews(pet);
@@ -86,9 +88,26 @@ export const AchievementsPage = ({
   const renderAchievementCard = (achievement: AchievementView) => {
     const percent = achievement.target > 0 ? Math.min(100, (achievement.progressValue / achievement.target) * 100) : 0;
     const rewardIcon = getPrimaryRewardIcon(achievement, itemIconMap);
+    const canOpenCg = achievement.unlocked && Boolean(achievement.reward.cgId) && Boolean(onOpenCg);
+    const openCg = () => {
+      if (!canOpenCg || !onOpenCg) return;
+      onOpenCg(achievement);
+    };
 
     return (
-      <article className={`achievement-card${achievement.unlocked ? '' : ' achievement-card--locked'}`} key={achievement.id}>
+      <article
+        className={`achievement-card${achievement.unlocked ? '' : ' achievement-card--locked'}${canOpenCg ? ' achievement-card--interactive' : ''}`}
+        key={achievement.id}
+        role={canOpenCg ? 'button' : undefined}
+        tabIndex={canOpenCg ? 0 : undefined}
+        aria-label={canOpenCg ? t('ui.achievements.cg.open', { title: achievement.title }) : undefined}
+        onClick={canOpenCg ? openCg : undefined}
+        onKeyDown={canOpenCg ? (event) => {
+          if (event.key !== 'Enter' && event.key !== ' ') return;
+          event.preventDefault();
+          openCg();
+        } : undefined}
+      >
         <div className="achievement-card__icon" aria-hidden="true">
           {achievement.unlocked ? <Trophy size={24} /> : <Lock size={22} />}
         </div>
@@ -110,7 +129,16 @@ export const AchievementsPage = ({
         <div className="achievement-card__state">
           {achievement.unlockedAt && <span>{formatDateTime(achievement.unlockedAt)}</span>}
           {achievement.claimable ? (
-            <button type="button" className="primary-button" onClick={() => onClaimReward(achievement.id)}>{labels.claim}</button>
+            <button
+              type="button"
+              className="primary-button"
+              onClick={(event) => {
+                event.stopPropagation();
+                onClaimReward(achievement.id);
+              }}
+            >
+              {labels.claim}
+            </button>
           ) : achievement.unlocked ? (
             <span className="achievement-card__done"><CheckCircle2 size={16} aria-hidden="true" />{achievement.effectActive ? labels.active : labels.claimed}</span>
           ) : (

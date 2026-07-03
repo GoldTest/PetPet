@@ -1,5 +1,6 @@
 import {
   itemImageKeys as builtinItemImageKeys,
+  modCgImageKeys,
   petActivityImageKeys,
   petStatusImageKeys,
   validatePetModManifest,
@@ -14,7 +15,7 @@ const databaseName = 'pocpet-mods';
 const imageStoreName = 'images';
 const databaseVersion = 1;
 
-type ImageScope = 'pet' | 'item';
+type ImageScope = 'pet' | 'item' | 'cg';
 
 interface StoredImageRecord {
   key: string;
@@ -97,6 +98,16 @@ export const saveActivePetMod = async (mod: ParsedPetMod) => {
       blob,
     });
   }
+  for (const [imageKey, blob] of Object.entries(mod.cgImages)) {
+    if (!blob) continue;
+    await putRecord({
+      key: getImageRecordKey(mod.manifest.id, 'cg', imageKey),
+      modId: mod.manifest.id,
+      scope: 'cg',
+      imageKey,
+      blob,
+    });
+  }
   window.localStorage.setItem(activeManifestStorageKey, JSON.stringify(mod.manifest));
 };
 
@@ -113,6 +124,7 @@ export const loadActivePetMod = async (): Promise<ActivePetMod | null> => {
 
   const petImageUrls: ActivePetMod['petImageUrls'] = {};
   const itemImageUrls: ActivePetMod['itemImageUrls'] = {};
+  const cgImageUrls: ActivePetMod['cgImageUrls'] = {};
 
   for (const key of [...petStatusImageKeys, ...petActivityImageKeys]) {
     const record = await getRecord(getImageRecordKey(manifest.id, 'pet', key));
@@ -137,5 +149,13 @@ export const loadActivePetMod = async (): Promise<ActivePetMod | null> => {
     itemImageUrls[key] = url;
   }
 
-  return { manifest, petImageUrls, itemImageUrls };
+  for (const key of modCgImageKeys) {
+    const record = await getRecord(getImageRecordKey(manifest.id, 'cg', key));
+    if (!record?.blob) continue;
+    const url = URL.createObjectURL(record.blob);
+    objectUrls.add(url);
+    cgImageUrls[key] = url;
+  }
+
+  return { manifest, petImageUrls, itemImageUrls, cgImageUrls };
 };

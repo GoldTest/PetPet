@@ -1,10 +1,13 @@
 import { t } from '../i18n';
+import { defaultBoostCardState, normalizeBoostCardState } from './boostCards';
 import { defaultAchievementState, normalizeAchievementState } from './achievements';
 import { defaultPetBirthday, normalizePetBirthday } from './dateRewards';
 import { createDailyWish, normalizeDailyWishState, normalizeReturnWelcomeState } from './dailyWishes';
-import { dailyBiscuitClaimLimit, dailyHeartExchangeLimit } from './items';
+import { defaultGardenState, normalizeGardenState } from './garden';
+import { addInventoryItem } from './items';
+import { dailyBiscuitClaimLimit, dailyHeartExchangeLimit, isBuiltinItemId } from './items';
 import { clampCoins, clampCount, clampHealth, clampLevel, clampStat, defaultPetName, getPetStatCap, lowCleanlinessSleepConfirmClicks } from './petStats';
-import type { ActionStreak, Inventory, PetState, PetStatus, RecentActivity, WeatherType } from './petTypes';
+import type { ActionStreak, BuiltinItemId, Inventory, PetState, PetStatus, RecentActivity, WeatherType } from './petTypes';
 import { defaultPomodoroState, normalizePomodoroState } from './pomodoro';
 import { getWeatherForDate, weatherTypeSet } from './weather';
 import { getLocalDateKey, isNumber } from './utils';
@@ -12,6 +15,8 @@ import { defaultYearlyStats, normalizeYearReview, normalizeYearlyStats } from '.
 
 export const helpStarterGiftRewardId = 'starter_help_gift_v1';
 export const helpStarterGiftCoins = 180;
+const goldenAppleBackfillRewardId = 'golden_apple_achievement_backfill_v1';
+const goldenAppleBackfillAchievementIds = ['rare_fruit_collector', 'anniversary_first', 'hidden_never_give_you_up', 'companion_100'] as const;
 
 export const defaultActionStreak = (now: number): ActionStreak => ({
   key: 'none',
@@ -55,12 +60,14 @@ export const createDefaultPet = (now = Date.now()): PetState => ({
   recentActivityUntil: 0,
   coins: 30,
   hearts: 0,
-  inventory: { emergency_biscuit: 1 },
+  inventory: { emergency_biscuit: 1, golden_apple: 1 },
   lastDailyRewardAt: now,
   lastDailyEncounterAt: now,
   dailyBiscuitClaimDate: getLocalDateKey(now),
   dailyBiscuitClaims: 0,
   dailyDiscountDate: getLocalDateKey(now),
+  dailyDiscountItemIds: [],
+  dailyDiscountUsedItemIds: [],
   dailyDiscountUsed: false,
   dailyHeartExchangeDate: getLocalDateKey(now),
   dailyHeartExchangeCount: 0,
@@ -84,6 +91,8 @@ export const createDefaultPet = (now = Date.now()): PetState => ({
   yearlyStats: defaultYearlyStats(now),
   achievements: defaultAchievementState(now, now, false, 30),
   lastCleanActionAt: 0,
+  garden: defaultGardenState(now),
+  boostCards: defaultBoostCardState(now),
   dailyWish: createDailyWish({
     createdAt: now,
     name: defaultPetName,
@@ -116,6 +125,17 @@ export const getStatusText = (status: PetStatus) => {
   return labels[status];
 };
 
+const normalizeBuiltinItemIdList = (value: unknown, maxLength: number): BuiltinItemId[] => {
+  if (!Array.isArray(value)) return [];
+  const ids: BuiltinItemId[] = [];
+  value.forEach((rawId) => {
+    if (typeof rawId !== 'string') return;
+    const id = rawId.trim();
+    if (isBuiltinItemId(id) && !ids.includes(id)) ids.push(id);
+  });
+  return ids.slice(0, maxLength);
+};
+
 export const normalizePet = (value: unknown, now = Date.now()): PetState => {
   const fallback = createDefaultPet(now);
   if (!value || typeof value !== 'object') return fallback;
@@ -126,6 +146,9 @@ export const normalizePet = (value: unknown, now = Date.now()): PetState => {
   const inventory: Inventory = {};
   const dailyDiscountDate =
     typeof raw.dailyDiscountDate === 'string' ? raw.dailyDiscountDate : fallback.dailyDiscountDate;
+  const isDailyDiscountCurrent = dailyDiscountDate === getLocalDateKey(now);
+  const dailyDiscountItemIds = isDailyDiscountCurrent ? normalizeBuiltinItemIdList(raw.dailyDiscountItemIds, 3) : [];
+  const dailyDiscountUsedItemIds = isDailyDiscountCurrent ? normalizeBuiltinItemIdList(raw.dailyDiscountUsedItemIds, 3) : [];
   const dailyHeartExchangeDate =
     typeof raw.dailyHeartExchangeDate === 'string' ? raw.dailyHeartExchangeDate : fallback.dailyHeartExchangeDate;
   const weatherDate = typeof raw.weatherDate === 'string' ? raw.weatherDate : fallback.weatherDate;
@@ -187,6 +210,22 @@ export const normalizePet = (value: unknown, now = Date.now()): PetState => {
     !hasAchievementState,
     clampCoins(isNumber(raw.coins) ? raw.coins : fallback.coins),
   );
+  const shouldBackfillGoldenApples = !claimedRewardIds.includes(goldenAppleBackfillRewardId);
+  const goldenAppleBackfillIds = shouldBackfillGoldenApples
+    ? goldenAppleBackfillAchievementIds.filter((id) => achievements.unlockedAtById[id] && (achievements.claimedOneTimeRewardIds.includes(id) || id === 'rare_fruit_collector' || id === 'companion_100'))
+    : [];
+  const normalizedInventory = goldenAppleBackfillIds.length > 0
+    ? addInventoryItem(inventory, 'golden_apple', goldenAppleBackfillIds.length)
+    : inventory;
+  if (shouldBackfillGoldenApples) {
+    claimedRewardIds.push(goldenAppleBackfillRewardId);
+  }
+  const claimedOneTimeRewardIds = goldenAppleBackfillIds.length > 0
+    ? Array.from(new Set([...achievements.claimedOneTimeRewardIds, ...goldenAppleBackfillIds]))
+    : achievements.claimedOneTimeRewardIds;
+  const normalizedAchievements = claimedOneTimeRewardIds === achievements.claimedOneTimeRewardIds
+    ? achievements
+    : { ...achievements, claimedOneTimeRewardIds };
 
   return {
     name: normalizedName,
@@ -205,7 +244,7 @@ export const normalizePet = (value: unknown, now = Date.now()): PetState => {
     recentActivityUntil: isNumber(raw.recentActivityUntil) ? raw.recentActivityUntil : 0,
     coins: clampCoins(isNumber(raw.coins) ? raw.coins : fallback.coins),
     hearts: clampCount(isNumber(raw.hearts) ? raw.hearts : fallback.hearts),
-    inventory,
+    inventory: normalizedInventory,
     lastDailyRewardAt: isNumber(raw.lastDailyRewardAt) ? raw.lastDailyRewardAt : now,
     lastDailyEncounterAt: isNumber(raw.lastDailyEncounterAt)
       ? raw.lastDailyEncounterAt
@@ -219,7 +258,9 @@ export const normalizePet = (value: unknown, now = Date.now()): PetState => {
       clampCount(isNumber(raw.dailyBiscuitClaims) ? raw.dailyBiscuitClaims : fallback.dailyBiscuitClaims),
     ),
     dailyDiscountDate,
-    dailyDiscountUsed: dailyDiscountDate === getLocalDateKey(now) ? Boolean(raw.dailyDiscountUsed) : false,
+    dailyDiscountItemIds,
+    dailyDiscountUsedItemIds,
+    dailyDiscountUsed: isDailyDiscountCurrent ? Boolean(raw.dailyDiscountUsed) || dailyDiscountUsedItemIds.length > 0 : false,
     dailyHeartExchangeDate,
     dailyHeartExchangeCount:
       dailyHeartExchangeDate === getLocalDateKey(now)
@@ -260,8 +301,10 @@ export const normalizePet = (value: unknown, now = Date.now()): PetState => {
     lastYearReviewYear: isNumber(raw.lastYearReviewYear) ? Math.floor(raw.lastYearReviewYear) : undefined,
     dailyWish,
     returnWelcome: normalizeReturnWelcomeState(raw.returnWelcome),
-    achievements,
+    achievements: normalizedAchievements,
     lastCleanActionAt: isNumber(raw.lastCleanActionAt) ? Math.max(0, Math.floor(raw.lastCleanActionAt)) : 0,
+    garden: normalizeGardenState(raw.garden, now),
+    boostCards: normalizeBoostCardState(raw.boostCards, now),
   };
 };
 

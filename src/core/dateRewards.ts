@@ -198,6 +198,7 @@ const applyReward = (pet: PetState, reward: ClaimedDateReward): { pet: PetState;
       ...pet,
       coins: clampCoins(pet.coins + (actualReward.coins ?? 0)),
       hearts: actualReward.hearts ? heartGain.hearts : pet.hearts,
+      boostCards: actualReward.hearts ? heartGain.boostCards : pet.boostCards,
       inventory: addRewardItems(pet.inventory, actualReward.items),
       recentEvent: actualReward.message,
     },

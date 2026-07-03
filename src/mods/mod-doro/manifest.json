@@ -1,0 +1,30 @@
+{
+  "schemaVersion": 2,
+  "id": "official.doro",
+  "name": "Doro",
+  "author": "FrostForge Studio",
+  "version": "1.0.0",
+  "defaultPetName": "Doro",
+  "description": "Doro pet pack.",
+  "favoriteFoodIds": [
+    "orange",
+    "watermelon"
+  ],
+  "birthday": {
+    "month": 7,
+    "day": 16
+  },
+  "texts": {
+    "recentEvent": "Doro 来到你身边了。",
+    "favoriteFood": "这是 Doro 喜欢的食物，心情额外 +{amount}。",
+    "status": {
+      "content": "状态不错",
+      "hungry": "饿了",
+      "sad": "有点低落",
+      "dirty": "需要清洁",
+      "tired": "累了",
+      "sick": "不舒服",
+      "sleeping": "睡觉中"
+    }
+  }
+}

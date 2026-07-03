@@ -1,0 +1,65 @@
+import { Heart, Sparkles, X } from 'lucide-react';
+import { boostCardDefinitions, boostCardIds, getActiveBoostCard, getBoostCardEffects, type BoostCardId, type PetState } from '../core/pet';
+import { t } from '../i18n';
+
+interface BoostCardModalProps {
+  pet: PetState;
+  onClose: () => void;
+  onBuyCard: (cardId: BoostCardId) => void;
+  onClaimDailyCoins: () => void;
+}
+
+const remainingDays = (expiresAt: number) => expiresAt <= Date.now() ? 0 : Math.ceil((expiresAt - Date.now()) / (24 * 60 * 60 * 1000));
+
+export const BoostCardModal = ({ pet, onClose, onBuyCard, onClaimDailyCoins }: BoostCardModalProps) => {
+  const activeCardId = getActiveBoostCard(pet);
+  const effects = getBoostCardEffects(pet);
+  const claimed = activeCardId ? pet.boostCards.dailyCoinsClaimedCardId === activeCardId : false;
+  const bestFriendActive = activeCardId === 'best_friend_pass';
+
+  return (
+    <div className="modal-backdrop" role="presentation">
+      <section className="boost-card-modal" role="dialog" aria-modal="true" aria-labelledby="boost-card-title">
+        <header className="boost-card-modal__header">
+          <div>
+            <span>{t('ui.boostCards.kicker')}</span>
+            <h2 id="boost-card-title">{t('ui.boostCards.title')}</h2>
+          </div>
+          <button type="button" className="icon-button" onClick={onClose} aria-label={t('ui.boostCards.close')} title={t('ui.boostCards.close')}>
+            <X size={20} aria-hidden="true" />
+          </button>
+        </header>
+        <div className="boost-card-summary">
+          <strong>{activeCardId ? t('ui.boostCards.activeCard', { card: t(`ui.boostCards.cards.${activeCardId}.name`) }) : t('ui.boostCards.noActive')}</strong>
+          <span>{t('ui.boostCards.todayWork', { coins: pet.boostCards.dailyWorkBonusCoinsUsed, limit: effects.workBonusDailyLimit })}</span>
+          <span>{t('ui.boostCards.extraHeartChance', { percent: effects.extraHeartChancePercent })}</span>
+          <span>{t('ui.boostCards.todayGarden', { count: pet.boostCards.dailyGardenExtraDrops, limit: effects.gardenExtraDropDailyLimit })}</span>
+          <button type="button" className="primary-button" disabled={!activeCardId || claimed} onClick={onClaimDailyCoins}>
+            {claimed ? t('ui.boostCards.claimed') : t('ui.boostCards.claimCoins', { coins: effects.dailyCoins })}
+          </button>
+        </div>
+        <div className="boost-card-list">
+          {boostCardIds.map((cardId) => {
+            const definition = boostCardDefinitions[cardId];
+            const expiresAt = cardId === 'friend_pass' ? pet.boostCards.friendPassExpiresAt : pet.boostCards.bestFriendPassExpiresAt;
+            const blockedByBestFriend = cardId === 'friend_pass' && bestFriendActive;
+            const disabled = blockedByBestFriend || pet.hearts < definition.priceHearts;
+            return (
+              <article className={activeCardId === cardId ? 'boost-card boost-card--active' : 'boost-card'} key={cardId}>
+                <div className="boost-card__icon"><Sparkles size={24} aria-hidden="true" /></div>
+                <div className="boost-card__copy">
+                  <h3>{t(`ui.boostCards.cards.${cardId}.name`)}</h3>
+                  <p>{t(`ui.boostCards.cards.${cardId}.summary`)}</p>
+                  <small>{t('ui.boostCards.remaining', { days: remainingDays(expiresAt) })}</small>
+                </div>
+                <button type="button" className="primary-button" disabled={disabled} title={blockedByBestFriend ? t('ui.boostCards.bestFriendBlocksFriend') : undefined} onClick={() => onBuyCard(cardId)}>
+                  <Heart size={16} aria-hidden="true" /> {blockedByBestFriend ? t('ui.boostCards.blockedByBestFriend') : t('ui.boostCards.buy', { hearts: definition.priceHearts })}
+                </button>
+              </article>
+            );
+          })}
+        </div>
+      </section>
+    </div>
+  );
+};

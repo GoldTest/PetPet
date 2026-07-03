@@ -1,4 +1,3 @@
-import JSZip from 'jszip';
 import { normalizePetBirthday } from './dateRewards';
 import type {
   BuiltinItemId,
@@ -62,12 +61,23 @@ export const itemImageKeys = [
   'vitamin_tablet',
   'blanket',
   'energy_drink',
+  'golden_apple',
+  'fruit_tree_sapling',
+  'care_tree_sapling',
+  'gift_tree_sapling',
+  'money_tree_sapling',
+  'golden_apple_tree_sapling',
+  'normal_fertilizer',
+  'heart_fertilizer',
+  'harvest_nutrient',
 ] as const satisfies readonly BuiltinItemId[];
 
 export type PetStatusImageKey = (typeof petStatusImageKeys)[number];
 export type PetActivityImageKey = (typeof petActivityImageKeys)[number];
 export type ItemImageKey = (typeof itemImageKeys)[number];
 export type PetImageKey = PetStatusImageKey | PetActivityImageKey;
+export const modCgImageKeys = ['good_ending_year_1'] as const;
+export type ModCgImageKey = (typeof modCgImageKeys)[number];
 
 export interface PetModTexts {
   recentEvent?: string;
@@ -126,6 +136,7 @@ export interface ParsedPetMod {
   manifest: PetModManifest;
   petImages: Partial<Record<PetImageKey, Blob>>;
   itemImages: Partial<Record<string, Blob>>;
+  cgImages: Partial<Record<ModCgImageKey, Blob>>;
   warnings: string[];
 }
 
@@ -133,6 +144,7 @@ export interface ActivePetMod {
   manifest: PetModManifest;
   petImageUrls: Partial<Record<PetImageKey, string>>;
   itemImageUrls: Partial<Record<string, string>>;
+  cgImageUrls: Partial<Record<ModCgImageKey, string>>;
 }
 
 export type ItemDisplay = ShopItem & {
@@ -156,6 +168,7 @@ const allowedPetPaths = new Map<string, PetImageKey>([
   ...petActivityImageKeys.map((key) => ['pet/' + key + '.png', key] as const),
 ]);
 const allowedItemPaths = new Map<string, ItemImageKey>(itemImageKeys.map((key) => ['items/' + key + '.png', key] as const));
+const allowedCgPaths = new Map<string, ModCgImageKey>(modCgImageKeys.map((key) => ['cg/' + key + '.png', key] as const));
 const itemIdSet = new Set<ItemImageKey>(itemImageKeys);
 const builtinItemIdSet = new Set<BuiltinItemId>([...itemImageKeys, 'birthday_cake']);
 const statusSet = new Set<PetStatus>(petStatusImageKeys);
@@ -262,14 +275,14 @@ const readItemEffect = (value: unknown, field: string): ItemEffect => {
 };
 
 const readShopCategory = (value: unknown, field: string): ShopCategory => {
-  if (value === 'food' || value === 'item' || value === 'care') return value;
-  throw new Error(field + ' must be food, item, or care.');
+  if (value === 'food' || value === 'item' || value === 'care' || value === 'garden') return value;
+  throw new Error(field + ' must be food, item, care, or garden.');
 };
 
 const readPrice = (value: unknown, field: string) => {
   if (typeof value !== 'number' || !Number.isFinite(value)) throw new Error(field + ' must be a number.');
   const price = Math.trunc(value);
-  if (price < 0 || price > 9999) throw new Error(field + ' must be between 0 and 9999.');
+  if (price < 0 || price > 99999) throw new Error(field + ' must be between 0 and 99999.');
   return price;
 };
 
@@ -427,6 +440,7 @@ export const parsePetModZip = async (file: File): Promise<ParsedPetMod> => {
     throw new Error('Mod zip is larger than 25MB. Please compress the images.');
   }
 
+  const { default: JSZip } = await import('jszip');
   const zip = await JSZip.loadAsync(file);
   const manifestEntry = zip.file('manifest.json');
   if (!manifestEntry) throw new Error('Mod zip must contain manifest.json at the root.');
@@ -441,8 +455,9 @@ export const parsePetModZip = async (file: File): Promise<ParsedPetMod> => {
   const warnings: string[] = [];
   const petImages: ParsedPetMod['petImages'] = {};
   const itemImages: ParsedPetMod['itemImages'] = {};
+  const cgImages: ParsedPetMod['cgImages'] = {};
   const referencedItemImagePaths = getReferencedItemImagePaths(manifest);
-  const allowedPaths = new Set(['manifest.json', ...allowedPetPaths.keys(), ...referencedItemImagePaths.keys()]);
+  const allowedPaths = new Set(['manifest.json', ...allowedPetPaths.keys(), ...referencedItemImagePaths.keys(), ...allowedCgPaths.keys()]);
 
   for (const entry of Object.values(zip.files)) {
     const path = normalizePath(entry.name);
@@ -479,7 +494,16 @@ export const parsePetModZip = async (file: File): Promise<ParsedPetMod> => {
     });
   }
 
-  return { manifest, petImages, itemImages, warnings };
+  for (const [path, key] of allowedCgPaths) {
+    const entry = zip.file(path);
+    if (!entry) continue;
+    const blob = await entry.async('blob');
+    if (blob.size > maxImageBytes) throw new Error(path + ' is larger than 3MB.');
+    if (!(await isPngBlob(blob))) throw new Error(path + ' must be a PNG image.');
+    cgImages[key] = blob.slice(0, blob.size, 'image/png');
+  }
+
+  return { manifest, petImages, itemImages, cgImages, warnings };
 };
 
 export const getModFavoriteFoodIds = (mod?: ActivePetMod | null) => mod?.manifest.favoriteFoodIds;

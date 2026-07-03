@@ -1,6 +1,7 @@
 import { t } from '../i18n';
 import { ensureDailyWishForDate, maybeCreateReturnWelcome, returnWelcomeMinAwayMs } from './dailyWishes';
 import { getAchievementEffects, incrementAchievementPomodoroFocus, incrementNaturalWake, recordEarnedCoins } from './achievements';
+import { advanceGarden } from './garden';
 import { dailyBiscuitClaimLimit } from './items';
 import { applyTimedEvent, getRandomDailyEncounter, getRandomOfflineDiary, getRandomOfflineEvent, maybeApplyDreamTalk, settleSleep, startSleepSnapshot } from './petEvents';
 import { clampCoins, clampCount, clampPetHealth, clampPetStat, criticalHungerActionThreshold, getEnergyRecoveryIntervalMs, getPetStatCap, lowEnergyThreshold } from './petStats';
@@ -269,7 +270,7 @@ const applyDailyEncounter = (pet: PetState, now: number): PetState => {
 };
 
 export const advancePet = (pet: PetState, now = Date.now()): PetState => {
-  const current = ensureDailyWishForDate(ensureYearlyStatsForDate(normalizePet(pet, now), now), now);
+  const current = advanceGarden(ensureDailyWishForDate(ensureYearlyStatsForDate(normalizePet(pet, now), now), now), now);
   const deltaMs = Math.max(0, now - current.lastUpdatedAt);
   const elapsedSeconds = deltaMs / 1000;
   const weather = getWeatherForDate(now);

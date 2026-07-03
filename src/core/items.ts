@@ -204,6 +204,86 @@ export const shopItems: readonly ShopItem[] = [
     effect: { energy: 30, mood: -1 },
     summary: t('pet.shop.items.energy_drink.summary'),
   },
+  {
+    id: 'fruit_tree_sapling',
+    name: t('pet.shop.items.fruit_tree_sapling.name'),
+    kind: 'garden',
+    price: 360,
+    effect: {},
+    summary: t('pet.shop.items.fruit_tree_sapling.summary'),
+    tags: ['garden', 'sapling'],
+    usable: false,
+  },
+  {
+    id: 'care_tree_sapling',
+    name: t('pet.shop.items.care_tree_sapling.name'),
+    kind: 'garden',
+    price: 520,
+    effect: {},
+    summary: t('pet.shop.items.care_tree_sapling.summary'),
+    tags: ['garden', 'sapling'],
+    usable: false,
+  },
+  {
+    id: 'gift_tree_sapling',
+    name: t('pet.shop.items.gift_tree_sapling.name'),
+    kind: 'garden',
+    price: 800,
+    effect: {},
+    summary: t('pet.shop.items.gift_tree_sapling.summary'),
+    tags: ['garden', 'sapling'],
+    usable: false,
+  },
+  {
+    id: 'money_tree_sapling',
+    name: t('pet.shop.items.money_tree_sapling.name'),
+    kind: 'garden',
+    price: 3000,
+    effect: {},
+    summary: t('pet.shop.items.money_tree_sapling.summary'),
+    tags: ['garden', 'sapling'],
+    usable: false,
+  },
+  {
+    id: 'golden_apple_tree_sapling',
+    name: t('pet.shop.items.golden_apple_tree_sapling.name'),
+    kind: 'garden',
+    price: 18000,
+    effect: {},
+    summary: t('pet.shop.items.golden_apple_tree_sapling.summary'),
+    tags: ['garden', 'sapling'],
+    usable: false,
+  },
+  {
+    id: 'normal_fertilizer',
+    name: t('pet.shop.items.normal_fertilizer.name'),
+    kind: 'garden',
+    price: 300,
+    effect: {},
+    summary: t('pet.shop.items.normal_fertilizer.summary'),
+    tags: ['garden', 'fertilizer'],
+    usable: false,
+  },
+  {
+    id: 'heart_fertilizer',
+    name: t('pet.shop.items.heart_fertilizer.name'),
+    kind: 'garden',
+    price: 900,
+    effect: {},
+    summary: t('pet.shop.items.heart_fertilizer.summary'),
+    tags: ['garden', 'fertilizer'],
+    usable: false,
+  },
+  {
+    id: 'harvest_nutrient',
+    name: t('pet.shop.items.harvest_nutrient.name'),
+    kind: 'garden',
+    price: 1200,
+    effect: {},
+    summary: t('pet.shop.items.harvest_nutrient.summary'),
+    tags: ['garden', 'nutrient'],
+    usable: false,
+  },
 ] as const;
 
 export const specialItems: readonly ShopItem[] = [
@@ -215,6 +295,14 @@ export const specialItems: readonly ShopItem[] = [
     effect: {},
     summary: t('pet.shop.items.birthday_cake.summary'),
   },
+  {
+    id: 'golden_apple',
+    name: t('pet.shop.items.golden_apple.name'),
+    kind: 'food',
+    price: 0,
+    effect: { hunger: 30, mood: 30, cleanliness: 30, energy: 30, health: 30 },
+    summary: t('pet.shop.items.golden_apple.summary'),
+  },
 ] as const;
 
 export const inventoryItems: readonly ShopItem[] = [...shopItems, ...specialItems];
@@ -223,6 +311,7 @@ export const shopCategories: readonly { id: ShopCategory; label: string }[] = [
   { id: 'food', label: t('pet.shop.categories.food') },
   { id: 'item', label: t('pet.shop.categories.item') },
   { id: 'care', label: t('pet.shop.categories.care') },
+  { id: 'garden', label: t('pet.shop.categories.garden') },
 ];
 
 export const allItemIds = new Set<string>(inventoryItems.map((item) => item.id));
@@ -240,8 +329,8 @@ const toItemDefinition = (item: ShopItem, imageUrl?: string): ItemDefinition => 
   imageUrl,
   source: 'builtin',
   shop: shopItems.some((shopItem) => shopItem.id === item.id),
-  tags: [],
-  usable: true,
+  tags: item.tags ?? [],
+  usable: item.usable ?? true,
 });
 
 const applyItemOverride = (item: ItemDefinition, override: PetModItemOverride | undefined, imageUrl?: string): ItemDefinition => ({
@@ -350,12 +439,33 @@ export const removeInventoryItem = (inventory: Inventory, id: ItemId | string): 
 
 const getDailyDiscountPrice = (price: number) => Math.max(1, Math.ceil(price * 0.7));
 
-const getDailyDiscountItem = (now: number) => {
-  const eligibleItems = shopItems.filter((item) => item.price > 0 && item.id !== 'emergency_biscuit');
-  if (eligibleItems.length === 0) return undefined;
+export const dailyShopDiscountCount = 3;
+
+const getEligibleDailyDiscountItems = () => shopItems.filter((item) => item.price > 0 && item.id !== 'emergency_biscuit');
+
+const getGeneratedDailyDiscountItems = (now: number) => {
+  const pool = [...getEligibleDailyDiscountItems()];
+  if (pool.length === 0) return [];
 
   const dateKey = getLocalDateKey(now);
-  return eligibleItems[hashString(dateKey) % eligibleItems.length];
+  const picks: ShopItem[] = [];
+  for (let index = 0; index < dailyShopDiscountCount && pool.length > 0; index += 1) {
+    const hashKey = index === 0 ? dateKey : dateKey + ':' + index;
+    const pickIndex = hashString(hashKey) % pool.length;
+    const [item] = pool.splice(pickIndex, 1);
+    if (item) picks.push(item);
+  }
+  return picks;
+};
+
+const getStoredDailyDiscountItems = (pet: PetState, now: number) => {
+  const dateKey = getLocalDateKey(now);
+  const eligibleItems = getEligibleDailyDiscountItems();
+  const eligibleById = new Map(eligibleItems.map((item) => [item.id, item]));
+  const stored = pet.dailyDiscountDate === dateKey
+    ? (pet.dailyDiscountItemIds ?? []).map((id) => eligibleById.get(id)).filter((item): item is ShopItem => Boolean(item))
+    : [];
+  return stored.length === Math.min(dailyShopDiscountCount, eligibleItems.length) ? stored : getGeneratedDailyDiscountItems(now);
 };
 
 export const getDailyHeartExchangeInfo = (pet: PetState, now = Date.now()) => {
@@ -375,18 +485,23 @@ export const getDailyHeartExchangeInfo = (pet: PetState, now = Date.now()) => {
 };
 
 export const getDailyShopDiscountInfo = (pet: PetState, now = Date.now()) => {
-  const item = getDailyDiscountItem(now);
   const dateKey = getLocalDateKey(now);
-  if (!item) return undefined;
+  const items = getStoredDailyDiscountItems(pet, now);
+  if (items.length === 0) return undefined;
 
-  const used = pet.dailyDiscountDate === dateKey && pet.dailyDiscountUsed;
+  const usedIds = new Set(pet.dailyDiscountDate === dateKey ? pet.dailyDiscountUsedItemIds ?? [] : []);
+  if (pet.dailyDiscountDate === dateKey && pet.dailyDiscountUsed && usedIds.size === 0 && items[0]) {
+    usedIds.add(items[0].id);
+  }
 
   return {
     dateKey,
-    itemId: item.id,
     label: t('pet.shop.discount.label'),
-    originalPrice: item.price,
-    price: getDailyDiscountPrice(item.price),
-    used,
+    items: items.map((item) => ({
+      itemId: item.id,
+      originalPrice: item.price,
+      price: getDailyDiscountPrice(item.price),
+      used: usedIds.has(item.id),
+    })),
   };
 };

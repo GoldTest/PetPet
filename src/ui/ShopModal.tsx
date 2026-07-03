@@ -58,11 +58,11 @@ export const ShopModal = ({
             <div className="shop-resource-row">
               <span className="shop-resource-pill shop-resource-pill--coins" aria-label={fullCoinText} title={fullCoinText}>
                 <img src={currencyIcon} alt="" aria-hidden="true" />
-                <strong>{formatCompactNumber(pet.coins)}</strong>
+                <strong>{pet.coins}</strong>
               </span>
               <span className="shop-resource-pill shop-resource-pill--hearts" aria-label={fullHeartText} title={fullHeartText}>
                 <Heart size={15} aria-hidden="true" />
-                <strong>{formatCompactNumber(pet.hearts)}</strong>
+                <strong>{pet.hearts}</strong>
               </span>
             </div>
           </div>
@@ -99,17 +99,18 @@ export const ShopModal = ({
 
         <div className="shop-grid">
           {visibleItems.map((item) => {
-            const isDiscountItem = discountInfo?.itemId === item.id;
-            const isDiscountAvailable = Boolean(isDiscountItem && !discountInfo?.used);
+            const discountEntry = discountInfo?.items.find((discountItem) => discountItem.itemId === item.id);
+            const isDiscountItem = Boolean(discountEntry);
+            const isDiscountAvailable = Boolean(discountEntry && !discountEntry.used);
             const effectBadges = getItemEffectBadges(item.effect);
             const icon = itemIconMap[item.id] ?? item.imageUrl ?? unknownItemIcon;
-            const displayPrice = isDiscountAvailable ? discountInfo?.price ?? item.price : item.price;
+            const displayPrice = isDiscountAvailable ? discountEntry?.price ?? item.price : item.price;
             const displayPriceText = formatCompactNumber(displayPrice);
             const priceTitle = t('ui.shop.price', { price: displayPrice });
-            const originalPriceText = discountInfo?.originalPrice === undefined ? '' : formatCompactNumber(discountInfo.originalPrice);
-            const originalPriceTitle = discountInfo?.originalPrice === undefined
+            const originalPriceText = discountEntry?.originalPrice === undefined ? '' : formatCompactNumber(discountEntry.originalPrice);
+            const originalPriceTitle = discountEntry?.originalPrice === undefined
               ? ''
-              : t('ui.shop.priceNote', { originalPrice: discountInfo.originalPrice, label: discountInfo.label });
+              : t('ui.shop.priceNote', { originalPrice: discountEntry.originalPrice, label: discountInfo?.label });
             const canAfford = pet.coins >= displayPrice;
             const biscuitClaimInfo = item.id === 'emergency_biscuit' ? getDailyBiscuitClaimInfo(pet) : undefined;
             const isClaimedOut = biscuitClaimInfo ? !biscuitClaimInfo.canClaim : false;

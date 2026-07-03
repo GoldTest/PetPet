@@ -1,4 +1,5 @@
 import { t } from '../i18n';
+import { applyBoostCardHeartBonus } from './boostCards';
 import { addInventoryItem, getInventoryItem, shopItems } from './items';
 import { clampCoins, clampCount } from './petStats';
 import type { AchievementCounters, AchievementId, AchievementState, CareActionKey, ItemId, PetState, YearlyCareActionKey, YearlyStats } from './petTypes';
@@ -87,8 +88,9 @@ const nonWatermelonFruitIds: readonly ItemId[] = ['orange', 'apple', 'banana'];
 const careKitIds: readonly ItemId[] = ['wet_wipes', 'shampoo', 'vitamin_tablet'];
 const gentleCareKeys: readonly YearlyCareActionKey[] = ['feed', 'clean', 'play', 'touch'];
 const workPlayKeys: readonly YearlyCareActionKey[] = ['work', 'play'];
-const shopItemIds: readonly ItemId[] = shopItems.map((item) => item.id);
-const shopFoodItemIds: readonly ItemId[] = shopItems.filter((item) => item.kind === 'food').map((item) => item.id);
+const usableShopItems = shopItems.filter((item) => item.usable !== false);
+const shopItemIds: readonly ItemId[] = usableShopItems.map((item) => item.id);
+const shopFoodItemIds: readonly ItemId[] = usableShopItems.filter((item) => item.kind === 'food').map((item) => item.id);
 const manualUnlockAchievementIds = new Set<AchievementId>(['hidden_good_ending_year_1']);
 const getAchievementTitle = (id: AchievementId) => t(`pet.achievements.definitions.${id}.title`);
 const getAchievementDescription = (id: AchievementId) => t(`pet.achievements.definitions.${id}.description`);
@@ -302,7 +304,7 @@ const baseAchievementDefinitionConfigs: readonly Omit<AchievementDefinition, 'ti
   { id: 'daily_wish_100', category: 'daily', rarity: 'rare', target: 100, progress: (pet) => pet.achievements.counters.dailyWishClaimCount, reward: { dailyStipendCoins: 2 } },
   { id: 'return_welcome_1', category: 'daily', rarity: 'normal', target: 1, progress: (pet) => pet.achievements.counters.returnWelcomeClaimCount, reward: { coins: 24 } },
   { id: 'daily_login_7', category: 'daily', rarity: 'normal', target: 7, progress: (pet) => getDateRewardCount(pet, 'daily_login'), reward: { coins: 45 } },
-  { id: 'companion_100', category: 'daily', rarity: 'rare', target: 60, progress: getActiveDaysTotal, isComplete: (pet: PetState) => getCompanionDays(pet) >= 100 && getActiveDaysTotal(pet) >= 60, reward: { dailyStipendCoins: 3 } },
+  { id: 'companion_100', category: 'daily', rarity: 'rare', target: 60, progress: getActiveDaysTotal, isComplete: (pet: PetState) => getCompanionDays(pet) >= 100 && getActiveDaysTotal(pet) >= 60, reward: { dailyStipendCoins: 3, items: [{ itemId: 'golden_apple', amount: 1 }] } },
   { id: 'first_purchase', category: 'shop', rarity: 'normal', target: 1, progress: (pet) => pet.achievements.counters.paidPurchaseCount, reward: { coins: 20 } },
   { id: 'purchase_20', category: 'shop', rarity: 'normal', target: 20, progress: (pet) => pet.achievements.counters.purchaseCount, reward: { coins: 55 } },
   { id: 'shop_item_collector', category: 'shop', rarity: 'rare', target: shopItemIds.length, progress: (pet) => usedItemKinds(pet, shopItemIds), reward: { extraHeartChancePercent: 10 } },
@@ -331,23 +333,24 @@ const baseAchievementDefinitionConfigs: readonly Omit<AchievementDefinition, 'ti
   { id: 'birthday_first', category: 'date', rarity: 'normal', target: 1, progress: (pet) => getDateRewardCount(pet, 'birthday'), reward: { coins: 30 } },
   { id: 'monthly_gift_3', category: 'date', rarity: 'normal', target: 3, progress: (pet) => getDateRewardCount(pet, 'monthly_gift'), reward: { coins: 55 } },
   { id: 'festival_1', category: 'date', rarity: 'normal', target: 1, progress: (pet) => getDateRewardCount(pet, 'festival'), reward: { coins: 24 } },
-  { id: 'anniversary_first', category: 'date', rarity: 'normal', target: 1, progress: (pet) => getDateRewardCount(pet, 'anniversary'), reward: { coins: 40 } },
+  { id: 'anniversary_first', category: 'date', rarity: 'normal', target: 1, progress: (pet) => getDateRewardCount(pet, 'anniversary'), reward: { coins: 40, items: [{ itemId: 'golden_apple', amount: 1 }] } },
   { id: 'sleep_30', category: 'care', rarity: 'normal', target: 30, progress: (pet) => pet.achievements.counters.sleepStartCount, reward: { coins: 60 } },
   { id: 'manual_wake_10', category: 'care', rarity: 'normal', target: 10, progress: (pet) => pet.achievements.counters.manualWakeCount, reward: { coins: 45 } },
   { id: 'natural_wake_10', category: 'care', rarity: 'normal', target: 10, progress: (pet) => pet.achievements.counters.naturalWakeCount, reward: { coins: 45 } },
   { id: 'sleep_rhythm_30', category: 'care', rarity: 'rare', target: 30, progress: (pet) => Math.min(pet.achievements.counters.sleepStartCount, pet.achievements.counters.naturalWakeCount), reward: { careStatBonus: 1 } },
   { id: 'rare_trusted_companion', category: 'daily', rarity: 'rare', target: 10, progress: getActiveDaysTotal, isComplete: (pet: PetState) => getCompanionDays(pet) >= 30 && getActiveDaysTotal(pet) >= 10, reward: { dailyStipendCoins: 4 } },
-  { id: 'rare_fruit_collector', category: 'inventory', rarity: 'rare', target: 3, progress: (pet) => minItemUses(pet, fruitIds), reward: { dailyStipendCoins: 3 } },
+  { id: 'rare_fruit_collector', category: 'inventory', rarity: 'rare', target: 3, progress: (pet) => minItemUses(pet, fruitIds), reward: { dailyStipendCoins: 3, items: [{ itemId: 'golden_apple', amount: 1 }] } },
   { id: 'rare_gentle_caretaker', category: 'care', rarity: 'rare', target: 50, progress: (pet) => minCareUses(pet, gentleCareKeys), reward: { careStatBonus: 1 } },
   { id: 'rare_level_10', category: 'growth', rarity: 'rare', target: 10, progress: (pet) => pet.level, reward: { dailyStipendCoins: 5 } },
   { id: 'hidden_good_ending_year_1', category: 'hidden', rarity: 'hidden', target: 1, progress: (pet) => pet.achievements.completedGoodEndingYears.includes(1) ? 1 : 0, reward: { globalCoinFlatBonus: 1, globalHeartFlatBonus: 1, cgId: goodEndingCgId }, hiddenUntilUnlocked: true },
-  { id: 'hidden_never_give_you_up', category: 'hidden', rarity: 'hidden', target: 3, progress: (pet) => pet.achievements.counters.returnWelcomeClaimCount, reward: { coins: 100 }, hiddenUntilUnlocked: true },
+  { id: 'hidden_never_give_you_up', category: 'hidden', rarity: 'hidden', target: 3, progress: (pet) => pet.achievements.counters.returnWelcomeClaimCount, reward: { coins: 100, items: [{ itemId: 'golden_apple', amount: 1 }] }, hiddenUntilUnlocked: true },
   { id: 'hidden_never_let_you_down', category: 'hidden', rarity: 'hidden', target: 10, progress: (pet) => pet.achievements.counters.returnWelcomeClaimCount, reward: { coins: 100, hearts: 10 }, hiddenUntilUnlocked: true },
   { id: 'hidden_quiet_companion', category: 'hidden', rarity: 'hidden', target: 100, progress: getActiveDaysTotal, reward: { dailyStipendCoins: 2 }, hiddenUntilUnlocked: true },
   { id: 'hidden_prepared_bag', category: 'hidden', rarity: 'hidden', target: 11, progress: getInventoryItemTotal, reward: { coins: 100 }, hiddenUntilUnlocked: true },
   { id: 'hidden_hoarder', category: 'hidden', rarity: 'hidden', target: 51, progress: getInventoryItemTotal, reward: { dailyLoginItemBonus: 1 }, hiddenUntilUnlocked: true },
   { id: 'hidden_regular_life', category: 'hidden', rarity: 'hidden', target: 100, progress: (pet) => pet.achievements.counters.sleepStartCount, reward: { dailyStipendCoins: 1 }, hiddenUntilUnlocked: true },
   { id: 'hidden_big_watermelon', category: 'hidden', rarity: 'hidden', target: 20, progress: (pet) => minItemUses(pet, nonWatermelonFruitIds), reward: { extraHeartChancePercent: 10 }, hiddenUntilUnlocked: true },
+  { id: 'hidden_good_friend', category: 'hidden', rarity: 'hidden', target: 90, progress: (pet) => pet.boostCards.bestFriendPassPurchasedDays, reward: { extraHeartChancePercent: 20 }, hiddenUntilUnlocked: true },
 ] as const;
 
 const normalAchievementIds = baseAchievementDefinitionConfigs
@@ -362,7 +365,7 @@ const achievementDefinitionConfigs: readonly Omit<AchievementDefinition, 'title'
     id: 'hidden_full_catalogue',
     category: 'hidden',
     rarity: 'hidden',
-    target: normalAchievementIds.length,
+    target: 36,
     progress: getUnlockedNormalAchievementCount,
     reward: { revealsHiddenAchievements: true },
     hiddenUntilUnlocked: true,
@@ -424,13 +427,15 @@ export const applyCoinGain = (pet: PetState, coins: number): { coins: number; am
   return { coins: clampCoins(pet.coins + amount), amount };
 };
 
-export const applyHeartGain = (pet: PetState, hearts: number): { hearts: number; amount: number } => {
+export const applyHeartGain = (pet: PetState, hearts: number): { hearts: number; amount: number; boostCards: PetState['boostCards'] } => {
   const base = Math.max(0, Math.floor(hearts));
   const effects = getAchievementEffects(pet);
   const chance = effects.extraHeartChancePercent % 100;
   const extraHearts = base > 0 ? effects.guaranteedExtraHearts + (chance > 0 && Math.random() * 100 < chance ? 1 : 0) : 0;
-  const amount = base > 0 ? base + effects.globalHeartFlatBonus + extraHearts : 0;
-  return { hearts: clampCount(pet.hearts + amount), amount };
+  const achievementAmount = base > 0 ? base + effects.globalHeartFlatBonus + extraHearts : 0;
+  const boost = applyBoostCardHeartBonus(pet, achievementAmount);
+  const amount = achievementAmount + boost.extraHearts;
+  return { hearts: clampCount(pet.hearts + amount), amount, boostCards: boost.boostCards };
 };
 
 export const rollExtraHearts = (pet: PetState) => {

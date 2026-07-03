@@ -26,7 +26,8 @@
       "audioOff": "打开声音",
       "settings": "设置",
       "openSettings": "打开设置",
-      "openAchievements": "打开成就"
+      "openAchievements": "打开成就",
+      "openBoostCards": "打开增益卡"
     },
     "dashboard": {
       "aria": "宠物数值",
@@ -209,7 +210,14 @@
       "cost": "{cost} 心心",
       "maxLevel": "已满级",
       "pomodoro": "番茄钟",
-      "weatherAria": "今日天气：{weather}"
+      "boostCards": "增益卡",
+      "boostCardsHint": "每日收益加成",
+      "boostCardsActive": "{card}生效中",
+      "weatherAria": "今日天气：{weather}",
+      "garden": "花园",
+      "gardenHint": "种下与收获",
+      "gardenReady": "有树可收获",
+      "gardenWithered": "有枯树待清理"
     },
     "rewards": {
       "claim": "领取奖励",
@@ -349,7 +357,110 @@
         "review": "成就已更新",
         "reviewTitle": "去成就页查看"
       },
-      "dailyStipendAuto": "随每日登录奖励自动发放"
+      "dailyStipendAuto": "随每日登录奖励自动发放",
+      "cg": {
+        "open": "查看{title}纪念图片",
+        "kicker": "纪念图片",
+        "save": "保存图片",
+        "close": "关闭"
+      }
+    },
+    "garden": {
+      "aria": "种植页面",
+      "back": "返回",
+      "kicker": "Garden",
+      "title": "种植园",
+      "prevSlot": "上一个栏位",
+      "nextSlot": "下一个栏位",
+      "slotsAria": "栏位",
+      "slotTitle": "第 {slot} 栏",
+      "treeLife": "{tree} · 收获 {used}/{max}",
+      "remaining": "剩余 {time}",
+      "unlockSlot": "解锁栏位 · {coins} 金币",
+      "plantCost": "{coins} 金币",
+      "costCoins": "{coins} 金币",
+      "costHearts": "{hearts} 心心",
+      "dropTitle": "收获 {count} 件",
+      "dailyLimit": "今日达到上限",
+      "toolsAria": "种植工具",
+      "toolUpgrade": "升到 Lv.{level} · {coins} 金币",
+      "maxTool": "已满级",
+      "states": {
+        "locked": "未解锁",
+        "empty": "空栏",
+        "growing": "成长中",
+        "ready": "可收获",
+        "withered": "枯萎"
+      },
+      "trees": {
+        "fruit_tree": {
+          "name": "神奇果树"
+        },
+        "care_tree": {
+          "name": "护理之树"
+        },
+        "gift_tree": {
+          "name": "神奇礼物树"
+        },
+        "money_tree": {
+          "name": "摇钱树"
+        },
+        "golden_apple_tree": {
+          "name": "金苹果树"
+        }
+      },
+      "actions": {
+        "water": "浇水",
+        "normalFertilizer": "普通肥料",
+        "heartFertilizer": "爱心肥料",
+        "nutrient": "丰收营养剂",
+        "harvest": "收获",
+        "clear": "清理枯树 · {coins} 金币",
+        "remove": "移除树 · {coins} 金币"
+      },
+      "tools": {
+        "watering_can": {
+          "name": "水壶"
+        },
+        "shovel": {
+          "name": "铲子"
+        },
+        "fertilizer_box": {
+          "name": "肥料箱"
+        }
+      },
+      "lifetimeHarvest": "累计收获 {count} 次",
+      "saplingOwned": "树苗 x{count}",
+      "needSapling": "商店购买 · {coins} 金币",
+      "itemOwned": "背包 x{count}",
+      "waterFree": "免费 · 缩短 {percent}%",
+      "coinDropTitle": "收获 {coins} 金币"
+    },
+    "boostCards": {
+      "kicker": "Boost Card",
+      "title": "增益卡",
+      "close": "关闭",
+      "activeCard": "当前生效：{card}",
+      "noActive": "当前没有生效增益卡",
+      "todayWork": "今日打工加成 {coins}/{limit}",
+      "extraHeartChance": "额外小心心概率 {percent}% · 无上限",
+      "todayGarden": "今日种植额外产物 {count}/{limit}",
+      "claimed": "今日已领取",
+      "claimCoins": "领取 {coins} 金币",
+      "remaining": "剩余 {days} 天",
+      "buy": "{hearts} 心心续期 30 天",
+      "blockedByBestFriend": "挚友证生效中",
+      "bestFriendBlocksFriend": "挚友证生效时不能购买好友证",
+      "cards": {
+        "friend_pass": {
+          "name": "好友证",
+          "summary": "每日金币、打工金币和小心心小幅加成。"
+        },
+        "best_friend_pass": {
+          "name": "挚友证",
+          "summary": "更高每日收益，并提供种植成长与额外产物加成。"
+        }
+      }
     }
   },
   "pet": {
@@ -450,12 +561,49 @@
         "birthday_cake": {
           "name": "生日蛋糕",
           "summary": "生日限定道具，使用后全属性回满"
+        },
+        "golden_apple": {
+          "name": "金苹果",
+          "summary": "种植获得的特殊苹果，全属性恢复并带来小心心"
+        },
+        "fruit_tree_sapling": {
+          "name": "神奇果树树苗",
+          "summary": "可在种植栏位种下，成熟后产出食物"
+        },
+        "care_tree_sapling": {
+          "name": "护理之树树苗",
+          "summary": "可在种植栏位种下，成熟后产出护理道具"
+        },
+        "gift_tree_sapling": {
+          "name": "神奇礼物树树苗",
+          "summary": "可在种植栏位种下，成熟后产出礼物道具"
+        },
+        "money_tree_sapling": {
+          "name": "摇钱树树苗",
+          "summary": "高价树苗，成熟后直接收获金币"
+        },
+        "golden_apple_tree_sapling": {
+          "name": "金苹果树树苗",
+          "summary": "稀有树苗，成熟后有机会产出金苹果"
+        },
+        "normal_fertilizer": {
+          "name": "普通肥料",
+          "summary": "种植页使用，本轮剩余时间减少 20%"
+        },
+        "heart_fertilizer": {
+          "name": "爱心肥料",
+          "summary": "种植页使用，本轮剩余时间减少 35%"
+        },
+        "harvest_nutrient": {
+          "name": "丰收营养剂",
+          "summary": "种植页使用，下次收获获得额外产物"
         }
       },
       "categories": {
         "food": "食物",
         "item": "商品",
-        "care": "护理"
+        "care": "护理",
+        "garden": "种植"
       },
       "discount": {
         "label": "7 折"
@@ -661,7 +809,9 @@
         "favorite": "这是 Furo 喜欢的味道，心情额外 +{amount}。",
         "giftHeart": "礼物带来了一个小心心。",
         "birthdayCake": "{name} 吃下了{item}，全属性回满。",
-        "birthdayCakeWoke": "{name} 醒来吃下了{item}，全属性回满。"
+        "birthdayCakeWoke": "{name} 醒来吃下了{item}，全属性回满。",
+        "goldenApple": "{name} 吃下了{item}，全属性恢复 30，并获得 {hearts} 个小心心。",
+        "goldenAppleWoke": "{name} 醒来吃下了{item}，全属性恢复 30，并获得 {hearts} 个小心心。"
       },
       "unknown": {
         "name": "未知 Mod 道具",
@@ -992,7 +1142,7 @@
         },
         "hidden_good_ending_year_1": {
           "title": "好结局",
-          "description": "第一年留下了温柔又稳定的陪伴记录。"
+          "description": "陪你走到最后"
         },
         "work_master": {
           "title": "打工大师",
@@ -1066,11 +1216,57 @@
           "title": "合成大西瓜",
           "description": "橙子、苹果、香蕉各累计使用 20 次。"
         },
+        "hidden_good_friend": {
+          "title": "好朋友",
+          "description": "挚友证累计购买 90 天。"
+        },
         "hidden_full_catalogue": {
-          "title": "全图鉴",
-          "description": "达成所有普通成就。"
+          "title": "任务达人",
+          "description": "完成 36 个普通任务即可解锁。"
         }
       }
+    },
+    "garden": {
+      "invalidSlot": "这个栏位不存在。",
+      "slotAlreadyUnlocked": "这个栏位已经解锁了。",
+      "unlockInOrder": "需要按顺序解锁栏位。",
+      "notEnoughCoins": "金币不足，需要 {coins} 金币。",
+      "slotLocked": "这个栏位还没有解锁。",
+      "slotNotEmpty": "这个栏位已经有树了。",
+      "unlockSlotSuccess": "解锁了第 {slot} 个栏位，花费 {coins} 金币。",
+      "plantSuccess": "种下了{tree}，消耗 {item}。",
+      "cannotWater": "这棵树现在不能浇水。",
+      "wateredToday": "这个栏位今天已经浇过水了。",
+      "waterSuccess": "免费浇水完成，本轮剩余时间缩短 {percent}%。",
+      "cannotFertilize": "这棵树现在不能施肥。",
+      "fertilizedToday": "这个栏位今天已经施肥了。",
+      "cannotBoost": "这棵树现在不能使用营养剂。",
+      "boostedToday": "这个栏位今天已经使用过营养剂了。",
+      "nutrientSuccess": "使用了{item}，下次收获会有额外产物。",
+      "cannotHarvest": "这里还没有可以收获的产物。",
+      "harvestSuccess": "收获了 {count} 件道具。",
+      "harvestWithered": "收获了 {count} 件道具，这棵树寿命耗尽枯萎了。",
+      "cannotClear": "这里没有需要清理的枯树。",
+      "clearSuccess": "清理了枯树，花费 {coins} 金币。",
+      "removeSuccess": "移除了这棵树，花费 {coins} 金币。",
+      "toolMaxLevel": "这个工具已经满级。",
+      "toolUpgradeSuccess": "{tool} 升到 Lv.{level}，花费 {coins} 金币。",
+      "missingGardenItem": "背包里没有{item}。",
+      "fertilizeSuccess": "使用了{item}，本轮成长加快 {percent}%。",
+      "harvestCoinsSuccess": "收获金币 +{coins}。",
+      "harvestMixedSuccess": "收获了 {count} 件道具，金币 +{coins}。",
+      "harvestCoinsWithered": "收获金币 +{coins}，这棵树寿命耗尽枯萎了。",
+      "harvestMixedWithered": "收获了 {count} 件道具，金币 +{coins}，这棵树寿命耗尽枯萎了。"
+    },
+    "boostCards": {
+      "maxDuration": "这张增益卡最多只能累计 90 天。",
+      "notEnoughHearts": "小心心不足，需要 {hearts} 个。",
+      "bestFriendBlocksFriend": "挚友证生效时，不能购买好友证。",
+      "buySuccess": "{card}已生效或续期。",
+      "noActiveCard": "当前没有生效增益卡。",
+      "dailyCoinsClaimed": "今天已经领取过增益卡金币了。",
+      "claimDailyCoins": "领取了增益卡每日 {coins} 金币。",
+      "workBonus": " 增益卡 +{coins} 金币。"
     }
   }
 }

@@ -2,6 +2,18 @@ import { useEffect, useMemo, useRef, useState, type ChangeEvent } from 'react';
 import { Heart, Settings, Trophy, Volume2, VolumeX } from 'lucide-react';
 import {
   advancePet,
+  buyBoostCard,
+  claimBoostCardDailyCoins,
+  clearWitheredTree,
+  fertilizeTree,
+  getGardenReminder,
+  harvestTree,
+  plantTree,
+  selectGardenSlot,
+  unlockGardenSlot,
+  upgradeGardenTool,
+  useGardenNutrient,
+  waterTree,
   applyPetAction,
   claimAvailableDateRewards,
   claimAchievementReward,
@@ -49,6 +61,10 @@ import {
   type AchievementCategory,
   type AchievementId,
   type AchievementView,
+  type BoostCardId,
+  type GardenFertilizerId,
+  type GardenToolId,
+  type GardenTreeId,
   type ClaimedDateReward,
   type InventoryItemDefinition,
   type ItemId,
@@ -58,7 +74,7 @@ import {
   type PetStatus,
   type PomodoroDurations,
 } from '../core/pet';
-import { currencyIcon, giftBoxIcon, itemIcons, resolveItemIcons, resolvePetActivityImages, resolvePetStatusImages } from '../assets';
+import { currencyIcon, giftBoxIcon, goodEndingImage, itemIcons, resolveItemIcons, resolvePetActivityImages, resolvePetStatusImages } from '../assets';
 import {
   getAudioEnabled,
   playSfx,
@@ -81,8 +97,10 @@ import { clearActivePetMod, loadActivePetMod, saveActivePetMod } from '../core/m
 import { createSaveFileText, parseSaveFileText } from '../core/saveCodec';
 import { ActionDock } from './ActionDock';
 import { AchievementsPage } from './AchievementsPage';
+import { BoostCardModal } from './BoostCardModal';
 import { ConfirmDialog } from './ConfirmDialog';
 import { FeatureRow } from './FeatureRow';
+import { GardenPage } from './GardenPage';
 import { InventoryPanel } from './InventoryPanel';
 import { PetDisplay } from './PetDisplay';
 import { PomodoroOverlay } from './PomodoroOverlay';
@@ -134,12 +152,16 @@ type FloatingRewardConfig = { id: string; coins: number; eventKey: string };
 type RewardPopup = ClaimedDateReward;
 type RewardDisplayItem = { key: string; icon?: string; label: string; title?: string };
 type WishQuickAction = PetState['dailyWish']['action'] | NonNullable<PetState['returnWelcome']>['action'];
-type ActivePage = 'home' | 'achievements';
+type ActivePage = 'home' | 'achievements' | 'garden';
 type AchievementToast = { kind: 'single'; achievement: AchievementView } | { kind: 'review' };
+type AchievementCgPopup = { title: string; description: string; image: string; fileName: string };
 const achievementToastLabels = {
   single: t('ui.achievements.toast.single'),
   review: t('ui.achievements.toast.review'),
   reviewTitle: t('ui.achievements.toast.reviewTitle'),
+};
+const achievementCgImages: Record<string, string> = {
+  good_ending_year_1: goodEndingImage,
 };
 
 const floatingRewardConfigs: readonly FloatingRewardConfig[] = [
@@ -156,7 +178,7 @@ const getActionSfx = (action: PetAction): SfxId => {
 const getWishActionButtonLabel = (action: WishQuickAction) => t(`ui.wishes.actions.${action}`);
 
 
-const getItemSfx = (itemId: ItemId, item?: { kind: 'food' | 'item' | 'care' }): SfxId => {
+const getItemSfx = (itemId: ItemId, item?: { kind: 'food' | 'item' | 'care' | 'garden' }): SfxId => {
   const resolvedItem = item ?? getInventoryItem(itemId);
   if (resolvedItem?.kind === 'food') return 'action_eat';
   if (itemId === 'shampoo' || itemId === 'wet_wipes') return 'action_bath';
@@ -174,6 +196,15 @@ const downloadTextFile = (fileName: string, text: string) => {
   link.click();
   link.remove();
   URL.revokeObjectURL(url);
+};
+
+const downloadImageFile = (fileName: string, imageUrl: string) => {
+  const link = document.createElement('a');
+  link.href = imageUrl;
+  link.download = fileName;
+  document.body.appendChild(link);
+  link.click();
+  link.remove();
 };
 
 const readFileText = (file: File) =>
@@ -196,6 +227,7 @@ export const App = () => {
   const [isSettingsOpen, setSettingsOpen] = useState(false);
   const [isShopOpen, setShopOpen] = useState(false);
   const [isPomodoroOpen, setPomodoroOpen] = useState(false);
+  const [isBoostCardOpen, setBoostCardOpen] = useState(false);
   const [isAudioEnabled, setAudioEnabledState] = useState(() => getAudioEnabled());
   const [language, setLanguageState] = useState<LanguageCode>(() => getLanguage());
   const [activeShopCategory, setActiveShopCategory] = useState(shopCategories[0].id);
@@ -212,6 +244,7 @@ export const App = () => {
   const activePageRef = useRef<ActivePage>('home');
   const [activeAchievementCategory, setActiveAchievementCategory] = useState<'all' | AchievementCategory>('all');
   const [achievementToast, setAchievementToast] = useState<AchievementToast | null>(null);
+  const [achievementCgPopup, setAchievementCgPopup] = useState<AchievementCgPopup | null>(null);
   const petRef = useRef(pet);
   const completedFocusCountRef = useRef(pet.pomodoro.completedFocusCount);
   const lastHeartExchangeAtRef = useRef(0);
@@ -321,6 +354,7 @@ export const App = () => {
   const currentBgmMode: BgmMode = isShopOpen ? 'shop' : pet.isSleeping ? 'sleep' : 'room';
   const achievementSummary = getAchievementSummary(pet);
   const hasAchievementNotice = achievementSummary.pendingReviewNotice || achievementSummary.claimable > 0;
+  const gardenReminder = getGardenReminder(pet);
   const dailyWishView = getDailyWishView(pet);
   const returnWelcomeView = getReturnWelcomeView(pet);
   const dailyWishButtonLabel = dailyWishView.canClaim || dailyWishView.claimed
@@ -477,6 +511,63 @@ export const App = () => {
   const handleShowFeatureInfo = (message: string) => {
     setFeatureInfoMessage({ message, recentEvent: petRef.current.recentEvent });
   };
+  const handleOpenGarden = () => {
+    playAfterUnlock('open');
+    setActivePage('garden');
+    setPet((current) => recordPetInteraction(current));
+  };
+
+  const handleCloseGarden = () => {
+    playAfterUnlock('close');
+    setActivePage('home');
+  };
+
+  const commitGardenAction = (action: (current: PetState) => PetState, successSfx: SfxId = 'coin') => {
+    playAfterUnlock('tap');
+    setPet((current) => {
+      const before = current.recentEvent;
+      const next = action(current);
+      playSfx(next.recentEvent === before ? 'error' : successSfx);
+      return commitPet(next);
+    });
+  };
+
+  const handleSelectGardenSlot = (slotIndex: number) => {
+    playAfterUnlock('tap');
+    setPet((current) => selectGardenSlot(current, slotIndex));
+  };
+  const handleUnlockGardenSlot = (slotIndex: number) => commitGardenAction((current) => unlockGardenSlot(current, slotIndex), 'purchase');
+  const handlePlantTree = (slotIndex: number, treeId: GardenTreeId) => commitGardenAction((current) => plantTree(current, slotIndex, treeId), 'purchase');
+  const handleWaterTree = (slotIndex: number) => commitGardenAction((current) => waterTree(current, slotIndex), 'tap');
+  const handleFertilizeTree = (slotIndex: number, fertilizerId: GardenFertilizerId) => commitGardenAction((current) => fertilizeTree(current, slotIndex, fertilizerId), fertilizerId === 'heart' ? 'pet_heart' : 'purchase');
+  const handleGardenNutrient = (slotIndex: number) => commitGardenAction((current) => useGardenNutrient(current, slotIndex), 'purchase');
+  const handleHarvestTree = (slotIndex: number) => commitGardenAction((current) => harvestTree(current, slotIndex), 'coin');
+  const handleClearGardenSlot = (slotIndex: number) => commitGardenAction((current) => clearWitheredTree(current, slotIndex), 'purchase');
+  const handleUpgradeGardenTool = (toolId: GardenToolId) => commitGardenAction((current) => upgradeGardenTool(current, toolId), 'purchase');
+
+  const handleOpenBoostCards = () => {
+    playAfterUnlock('open');
+    setBoostCardOpen(true);
+  };
+
+  const handleCloseBoostCards = () => {
+    playAfterUnlock('close');
+    setBoostCardOpen(false);
+  };
+
+  const handleBuyBoostCard = (cardId: BoostCardId) => {
+    commitGardenAction((current) => buyBoostCard(current, cardId), 'purchase');
+  };
+
+  const handleClaimBoostCardCoins = () => {
+    playAfterUnlock('tap');
+    setPet((current) => {
+      const result = claimBoostCardDailyCoins(current);
+      playSfx(result.coins > 0 ? 'coin' : 'error');
+      return commitPet(result.pet);
+    });
+  };
+
   const handleOpenAchievements = () => {
     playAfterUnlock('open');
     setAchievementToast(null);
@@ -493,6 +584,28 @@ export const App = () => {
   const handleClaimAchievementReward = (id: AchievementId) => {
     playAfterUnlock('coin');
     setPet((current) => commitPet(claimAchievementReward(current, id)));
+  };
+
+  const handleOpenAchievementCg = (achievement: AchievementView) => {
+    const cgId = achievement.reward.cgId;
+    const image = cgId ? activeMod?.cgImageUrls[cgId as keyof typeof activeMod.cgImageUrls] ?? achievementCgImages[cgId] : undefined;
+    if (!achievement.unlocked || !image) {
+      playAfterUnlock('error');
+      return;
+    }
+    playAfterUnlock('open');
+    setAchievementCgPopup({ title: achievement.title, description: achievement.description, image, fileName: `${achievement.id}.png` });
+  };
+
+  const handleSaveAchievementCg = () => {
+    if (!achievementCgPopup) return;
+    playAfterUnlock('tap');
+    downloadImageFile(achievementCgPopup.fileName, achievementCgPopup.image);
+  };
+
+  const handleCloseAchievementCg = () => {
+    playAfterUnlock('close');
+    setAchievementCgPopup(null);
   };
 
 
@@ -787,7 +900,7 @@ export const App = () => {
 
   const availableFloatingReward = floatingRewardConfigs.find((reward) => !pet.claimedRewardIds.includes(reward.id));
   const activeRewardPopup = rewardQueue[0];
-  const activeYearReview = !activeRewardPopup && !isShopOpen && !isSettingsOpen && !isResetConfirmOpen ? pet.pendingYearReview : undefined;
+  const activeYearReview = !activeRewardPopup && !achievementCgPopup && !isShopOpen && !isSettingsOpen && !isResetConfirmOpen ? pet.pendingYearReview : undefined;
 
   const handleCloseYearReview = () => {
     playAfterUnlock('tap');
@@ -815,11 +928,11 @@ export const App = () => {
     }
 
     reward.items.forEach((item, index) => {
-      const displayItem = getDisplayItem(displayInventoryItems, item.itemId);
+      const displayItem = getItemDefinition(itemRegistry, item.itemId);
       rewardItems.push({
         key: `${item.itemId}:${index}`,
         icon: itemIconMap[item.itemId],
-        label: t('ui.rewards.item', { item: displayItem?.displayName ?? item.itemId, count: item.amount }),
+        label: t('ui.rewards.item', { item: displayItem?.name ?? item.itemId, count: item.amount }),
       });
     });
 
@@ -859,11 +972,11 @@ export const App = () => {
             title={t('ui.shop.wallet', { coins: pet.coins })}
           >
             <img src={currencyIcon} alt="" aria-hidden="true" />
-            <strong>{formatCompactNumber(pet.coins)}</strong>
+            <strong>{pet.coins}</strong>
           </button>
           <div className="heart-pill" aria-label={t('ui.top.heartsAria', { hearts: pet.hearts })} title={t('ui.top.heartsAria', { hearts: pet.hearts })}>
             <Heart size={20} aria-hidden="true" />
-            <strong>{formatCompactNumber(pet.hearts)}</strong>
+            <strong>{pet.hearts}</strong>
           </div>
           <button
             type="button"
@@ -909,6 +1022,22 @@ export const App = () => {
           onBack={handleCloseAchievements}
           onCategoryChange={setActiveAchievementCategory}
           onClaimReward={handleClaimAchievementReward}
+          onOpenCg={handleOpenAchievementCg}
+        />
+      ) : activePage === 'garden' ? (
+        <GardenPage
+          pet={pet}
+          itemIconMap={itemIconMap}
+          onBack={handleCloseGarden}
+          onSelectSlot={handleSelectGardenSlot}
+          onUnlockSlot={handleUnlockGardenSlot}
+          onPlantTree={handlePlantTree}
+          onWater={handleWaterTree}
+          onFertilize={handleFertilizeTree}
+          onNutrient={handleGardenNutrient}
+          onHarvest={handleHarvestTree}
+          onClear={handleClearGardenSlot}
+          onUpgradeTool={handleUpgradeGardenTool}
         />
       ) : (
         <>
@@ -970,8 +1099,11 @@ export const App = () => {
                 isPomodoroOpen={isPomodoroOpen}
                 pomodoroRemainingMs={pomodoroRemainingMs}
                 pomodoroStartTitle={pomodoroStartTitle}
+                gardenReminder={gardenReminder}
                 onUpgrade={handleUpgrade}
                 onOpenPomodoro={handleOpenPomodoro}
+                onOpenGarden={handleOpenGarden}
+                onOpenBoostCards={handleOpenBoostCards}
                 onShowInfo={handleShowFeatureInfo}
               />
 
@@ -1039,6 +1171,27 @@ export const App = () => {
         </div>
       )}
 
+      {achievementCgPopup && (
+        <div className="modal-backdrop" role="presentation">
+          <section className="achievement-cg-modal" role="dialog" aria-modal="true" aria-labelledby="achievement-cg-title">
+            <img className="achievement-cg-modal__image" src={achievementCgPopup.image} alt={achievementCgPopup.title} />
+            <div className="achievement-cg-modal__copy">
+              <span>{t('ui.achievements.cg.kicker')}</span>
+              <h2 id="achievement-cg-title">{achievementCgPopup.title}</h2>
+              <p>{achievementCgPopup.description}</p>
+            </div>
+            <div className="achievement-cg-modal__actions">
+              <button type="button" className="primary-button" onClick={handleSaveAchievementCg}>
+                {t('ui.achievements.cg.save')}
+              </button>
+              <button type="button" className="text-button" onClick={handleCloseAchievementCg}>
+                {t('ui.achievements.cg.close')}
+              </button>
+            </div>
+          </section>
+        </div>
+      )}
+
       {activeYearReview && <YearReviewModal review={activeYearReview} onClose={handleCloseYearReview} />}
 
       {isShopOpen && (
@@ -1052,6 +1205,14 @@ export const App = () => {
           onBuyItem={handleBuyItem}
           onExchangeHeart={handleExchangeHeart}
           isHeartExchangeCoolingDown={isHeartExchangeCoolingDown}
+        />
+      )}
+      {isBoostCardOpen && (
+        <BoostCardModal
+          pet={pet}
+          onClose={handleCloseBoostCards}
+          onBuyCard={handleBuyBoostCard}
+          onClaimDailyCoins={handleClaimBoostCardCoins}
         />
       )}
       {isSettingsOpen && (

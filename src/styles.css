@@ -99,8 +99,8 @@ h1 {
 
 .coin-pill {
   display: inline-flex;
-  min-width: 72px;
-  max-width: 112px;
+  min-width: 88px;
+  max-width: none;
   align-items: center;
   justify-content: center;
   gap: 7px;
@@ -114,8 +114,8 @@ h1 {
 
 .heart-pill {
   display: inline-flex;
-  min-width: 64px;
-  max-width: 104px;
+  min-width: 78px;
+  max-width: none;
   align-items: center;
   justify-content: center;
   gap: 7px;
@@ -135,10 +135,9 @@ h1 {
 .coin-pill strong,
 .heart-pill strong {
   min-width: 0;
-  overflow: hidden;
-  font-size: 1rem;
+  overflow: visible;
+  font-size: clamp(0.78rem, 1.6vw, 1rem);
   font-variant-numeric: tabular-nums;
-  text-overflow: ellipsis;
   white-space: nowrap;
 }
 
@@ -561,6 +560,10 @@ h1 {
   background: #eaf2ff;
 }
 
+.feature-button--boost-card {
+  background: #f0e5ff;
+}
+
 .feature-button--weather {
   background: #eef9f5;
 }
@@ -884,11 +887,13 @@ h1 {
 }
 
 .inventory-item {
-  display: flex;
+  display: grid;
+  grid-template-columns: 48px minmax(0, 1fr) auto;
   align-items: center;
   justify-content: space-between;
   gap: 12px;
   width: 100%;
+  min-width: 0;
   min-height: 58px;
   padding: 10px 12px;
   border: 1px solid rgba(42, 58, 78, 0.1);
@@ -933,14 +938,22 @@ h1 {
 
 .inventory-item__name {
   min-width: 0;
+  max-width: 100%;
   color: #1c283c;
   overflow-wrap: anywhere;
+  word-break: break-word;
+  line-height: 1.2;
 }
 
 .inventory-item small {
+  min-width: 0;
+  max-width: 100%;
   color: #66758f;
   font-size: 0.78rem;
   font-weight: 700;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+  line-height: 1.3;
 }
 
 .inventory-item strong {
@@ -1610,7 +1623,7 @@ h1 {
 
   .coin-pill strong,
   .heart-pill strong {
-    font-size: 0.88rem;
+    font-size: 0.72rem;
   }
 
   .icon-button {
@@ -2334,6 +2347,63 @@ h1 {
   width: 100%;
 }
 
+.achievement-cg-modal {
+  width: min(100%, 520px);
+  max-height: calc(100dvh - var(--safe-top) - var(--safe-bottom) - 36px);
+  display: grid;
+  gap: 14px;
+  padding: 18px;
+  border-radius: 8px;
+  background: #fff;
+  box-shadow: 0 24px 60px rgba(9, 17, 30, 0.28);
+  overflow: auto;
+  text-align: center;
+}
+
+.achievement-cg-modal__image {
+  width: 100%;
+  max-height: min(56dvh, 430px);
+  border-radius: 8px;
+  object-fit: contain;
+  background: #fff7d8;
+  image-rendering: pixelated;
+}
+
+.achievement-cg-modal__copy {
+  display: grid;
+  gap: 6px;
+}
+
+.achievement-cg-modal__copy span {
+  color: #8a4a06;
+  font-size: 0.78rem;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.achievement-cg-modal__copy h2 {
+  color: #172034;
+  font-size: 1.32rem;
+  line-height: 1.15;
+}
+
+.achievement-cg-modal__copy p {
+  color: #596880;
+  font-size: 0.94rem;
+  font-weight: 700;
+  line-height: 1.45;
+}
+
+.achievement-cg-modal__actions {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.achievement-cg-modal__actions > button {
+  width: 100%;
+}
+
 .modal-backdrop--confirm {
   z-index: 30;
 }
@@ -2415,6 +2485,16 @@ h1 {
   }
 
   .reward-modal__copy h2 {
+    font-size: 1.18rem;
+  }
+
+  .achievement-cg-modal {
+    width: calc(100% - 24px);
+    gap: 12px;
+    padding: 16px;
+  }
+
+  .achievement-cg-modal__copy h2 {
     font-size: 1.18rem;
   }
 
@@ -2766,6 +2846,20 @@ h1 {
   background: rgba(255, 255, 255, 0.86);
 }
 
+.achievement-card--interactive {
+  cursor: pointer;
+}
+
+.achievement-card--interactive:hover {
+  border-color: rgba(31, 157, 116, 0.42);
+  box-shadow: 0 10px 28px rgba(31, 157, 116, 0.12);
+}
+
+.achievement-card--interactive:focus-visible {
+  outline: 3px solid rgba(31, 157, 116, 0.28);
+  outline-offset: 3px;
+}
+
 .achievement-card--locked {
   color: #6f7785;
   background: #edf1f5;
@@ -2973,5 +3067,429 @@ h1 {
     left: 12px;
     bottom: calc(98px + var(--safe-bottom));
     max-width: none;
+  }
+}
+
+.feature-button--garden {
+  background: #e8f7d9;
+}
+
+.garden-page {
+  display: grid;
+  gap: 18px;
+  width: min(1120px, 100%);
+  margin: 0 auto;
+  padding: 8px 0 96px;
+}
+
+.garden-page__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+}
+
+.garden-page__header > div:nth-child(2) {
+  min-width: 0;
+}
+
+.garden-page__header span,
+.boost-card-modal__header span {
+  color: #647151;
+  font-size: 0.78rem;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.garden-page__header h2,
+.boost-card-modal__header h2 {
+  margin: 2px 0 0;
+  color: #2f351f;
+  font-size: 1.8rem;
+}
+
+.garden-page__wallet {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 8px;
+  color: #3b4328;
+  font-weight: 900;
+}
+
+.garden-page__wallet span {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  border: 1px solid rgba(82, 108, 48, 0.16);
+  border-radius: 8px;
+  padding: 8px 10px;
+  background: rgba(255, 255, 255, 0.72);
+}
+
+.garden-page__wallet img {
+  width: 18px;
+  height: 18px;
+}
+
+.garden-layout {
+  display: grid;
+  grid-template-columns: 52px minmax(0, 1fr) 52px;
+  align-items: center;
+  gap: 12px;
+}
+
+.garden-arrow {
+  display: grid;
+  width: 52px;
+  height: 72px;
+  place-items: center;
+  border: 0;
+  border-radius: 8px;
+  color: #3d5527;
+  background: #dcefcf;
+  cursor: pointer;
+}
+
+.garden-arrow:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+
+.garden-stage-panel {
+  display: grid;
+  gap: 12px;
+  min-width: 0;
+}
+
+.garden-slot-tabs {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+}
+
+.garden-slot-tab {
+  position: relative;
+  display: grid;
+  width: 42px;
+  height: 42px;
+  place-items: center;
+  border: 1px solid rgba(70, 98, 48, 0.2);
+  border-radius: 8px;
+  color: #41512f;
+  background: rgba(255, 255, 255, 0.76);
+  font-weight: 900;
+}
+
+.garden-slot-tab--active {
+  color: #fff;
+  background: #527234;
+}
+
+.garden-dot {
+  position: absolute;
+  top: 5px;
+  right: 5px;
+  width: 8px;
+  height: 8px;
+  border-radius: 999px;
+}
+
+.garden-dot--ready { background: #f0a620; }
+.garden-dot--withered { background: #7d6f58; }
+
+.garden-tree-stage {
+  position: relative;
+  display: grid;
+  min-height: 360px;
+  place-items: center;
+  overflow: hidden;
+  isolation: isolate;
+  border: 1px solid rgba(57, 99, 128, 0.14);
+  border-radius: 8px;
+  background:
+    radial-gradient(circle at 18% 16%, rgba(255, 218, 96, 0.82), transparent 15%),
+    linear-gradient(180deg, #9fddff 0%, #f2fbff 58%, #d8f0ce 58%, #c3dfad 100%);
+  box-shadow: 0 18px 42px rgba(49, 78, 48, 0.12);
+}
+
+.garden-tree-stage::before,
+.garden-tree-stage::after {
+  content: "";
+  position: absolute;
+  pointer-events: none;
+  z-index: -1;
+}
+
+.garden-tree-stage::before {
+  inset: 0;
+  background:
+    radial-gradient(ellipse at 22% 27%, rgba(255, 255, 255, 0.74) 0 7%, transparent 8%),
+    radial-gradient(ellipse at 70% 18%, rgba(255, 255, 255, 0.58) 0 6%, transparent 7%),
+    radial-gradient(ellipse at 83% 30%, rgba(255, 255, 255, 0.5) 0 5%, transparent 6%);
+}
+
+.garden-tree-stage::after {
+  inset: auto 0 0;
+  height: 28%;
+  background:
+    linear-gradient(90deg, rgba(255, 255, 255, 0.24) 25%, transparent 25%) 0 0 / 26px 26px,
+    #b9dc9d;
+}
+
+.garden-tree-stage > img {
+  position: relative;
+  z-index: 1;
+  width: min(360px, 72vw);
+  max-height: 330px;
+  object-fit: contain;
+}
+
+.garden-tree-stage > svg {
+  position: relative;
+  z-index: 1;
+  color: #4f7a35;
+}
+
+.garden-tree-stage--withered > img {
+  filter: grayscale(0.9) saturate(0.35) brightness(0.85);
+}
+
+.garden-drops {
+  position: absolute;
+  top: 22%;
+  left: 50%;
+  display: flex;
+  gap: 20px;
+  transform: translateX(-50%);
+  z-index: 2;
+}
+
+.garden-drop {
+  position: relative;
+  display: grid;
+  width: 54px;
+  height: 54px;
+  place-items: center;
+}
+
+.garden-drop img {
+  width: 42px;
+  height: 42px;
+  object-fit: contain;
+}
+
+.garden-drop strong {
+  position: absolute;
+  right: -5px;
+  bottom: -5px;
+  border-radius: 999px;
+  padding: 2px 6px;
+  color: #fff;
+  background: #527234;
+  font-size: 0.72rem;
+}
+
+.garden-progress-card,
+.garden-action-grid,
+.garden-tools,
+.boost-card-summary,
+.boost-card {
+  border: 1px solid rgba(91, 103, 69, 0.15);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.78);
+  box-shadow: 0 16px 42px rgba(59, 70, 45, 0.08);
+}
+
+.garden-progress-card {
+  display: grid;
+  gap: 6px;
+  padding: 14px;
+  color: #3b4328;
+  text-align: center;
+}
+
+.garden-progress-card strong {
+  font-size: 1.08rem;
+}
+
+.garden-progress-card small,
+.garden-choice small,
+.garden-tool small,
+.boost-card small {
+  color: #697258;
+  font-weight: 800;
+}
+
+.garden-progress {
+  height: 8px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: #d9e6ce;
+}
+
+.garden-progress i {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: #6b9343;
+}
+
+.garden-action-grid,
+.garden-tools {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+  padding: 12px;
+}
+
+.garden-choice,
+.garden-tool {
+  display: flex;
+  min-height: 64px;
+  align-items: center;
+  gap: 10px;
+  border: 1px solid rgba(82, 108, 48, 0.15);
+  border-radius: 8px;
+  padding: 10px 12px;
+  color: #31401f;
+  background: #f8fbf3;
+  text-align: left;
+  cursor: pointer;
+}
+
+.garden-choice span,
+.garden-tool span {
+  display: grid;
+  min-width: 0;
+  gap: 2px;
+}
+
+.garden-choice:disabled,
+.garden-tool:disabled {
+  opacity: 0.48;
+  cursor: not-allowed;
+}
+
+.garden-harvest-button {
+  grid-column: 1 / -1;
+}
+
+.boost-card-modal {
+  display: grid;
+  width: min(720px, calc(100vw - 28px));
+  max-height: calc(100vh - 48px);
+  gap: 14px;
+  overflow: auto;
+  border-radius: 8px;
+  padding: 18px;
+  background: #fffaf0;
+  box-shadow: 0 24px 70px rgba(40, 31, 18, 0.28);
+}
+
+.boost-card-modal__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.boost-card-summary {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+  padding: 12px;
+  color: #3c3525;
+}
+
+.boost-card-summary strong,
+.boost-card-summary .primary-button {
+  grid-column: 1 / -1;
+}
+
+.boost-card-list {
+  display: grid;
+  gap: 10px;
+}
+
+.boost-card {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 12px;
+  padding: 12px;
+}
+
+.boost-card--active {
+  border-color: rgba(149, 106, 29, 0.38);
+  background: #fff4d8;
+}
+
+.boost-card__icon {
+  display: grid;
+  width: 44px;
+  height: 44px;
+  place-items: center;
+  border-radius: 8px;
+  color: #7a5b12;
+  background: #ffe7a8;
+}
+
+.boost-card__copy {
+  display: grid;
+  min-width: 0;
+  gap: 3px;
+}
+
+.boost-card__copy h3,
+.boost-card__copy p {
+  margin: 0;
+}
+
+.boost-card__copy p {
+  color: #6b5d3f;
+  line-height: 1.35;
+}
+
+.boost-card .primary-button {
+  white-space: nowrap;
+}
+
+@media (max-width: 720px) {
+  .garden-page__header {
+    align-items: flex-start;
+  }
+
+  .garden-layout {
+    grid-template-columns: 40px minmax(0, 1fr) 40px;
+    gap: 8px;
+  }
+
+  .garden-arrow {
+    width: 40px;
+    height: 58px;
+  }
+
+  .garden-tree-stage {
+    min-height: 300px;
+  }
+
+  .garden-tree-stage > img {
+    width: min(280px, 72vw);
+  }
+
+  .garden-action-grid,
+  .garden-tools,
+  .boost-card-summary {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .boost-card {
+    grid-template-columns: auto minmax(0, 1fr);
+  }
+
+  .boost-card .primary-button {
+    grid-column: 1 / -1;
+    width: 100%;
   }
 }

@@ -26,7 +26,8 @@
       "audioOff": "Turn sound on",
       "settings": "Settings",
       "openSettings": "Open settings",
-      "openAchievements": "Open achievements"
+      "openAchievements": "Open achievements",
+      "openBoostCards": "Open boost cards"
     },
     "dashboard": {
       "aria": "Pet stats",
@@ -209,7 +210,14 @@
       "cost": "{cost} hearts",
       "maxLevel": "Max level",
       "pomodoro": "Pomodoro",
-      "weatherAria": "Today's weather: {weather}"
+      "boostCards": "Boost cards",
+      "boostCardsHint": "Daily bonus perks",
+      "boostCardsActive": "{card} active",
+      "weatherAria": "Today's weather: {weather}",
+      "garden": "Garden",
+      "gardenHint": "Grow trees",
+      "gardenReady": "Ready to harvest",
+      "gardenWithered": "Withered tree"
     },
     "rewards": {
       "claim": "Claim reward",
@@ -349,7 +357,110 @@
         "review": "Achievements updated",
         "reviewTitle": "Open achievements"
       },
-      "dailyStipendAuto": "Paid automatically with daily login rewards"
+      "dailyStipendAuto": "Paid automatically with daily login rewards",
+      "cg": {
+        "open": "View {title} memorial image",
+        "kicker": "Memorial image",
+        "save": "Save image",
+        "close": "Close"
+      }
+    },
+    "garden": {
+      "aria": "Garden page",
+      "back": "Back",
+      "kicker": "Garden",
+      "title": "Garden",
+      "prevSlot": "Previous slot",
+      "nextSlot": "Next slot",
+      "slotsAria": "Tree slots",
+      "slotTitle": "Slot {slot}",
+      "treeLife": "{tree} · harvest {used}/{max}",
+      "remaining": "{time} left",
+      "unlockSlot": "Unlock slot · {coins} coins",
+      "plantCost": "{coins} coins",
+      "costCoins": "{coins} coins",
+      "costHearts": "{hearts} hearts",
+      "dropTitle": "{count} item(s)",
+      "dailyLimit": "Daily limit reached",
+      "toolsAria": "Garden tools",
+      "toolUpgrade": "Upgrade to Lv.{level} · {coins} coins",
+      "maxTool": "Max level",
+      "states": {
+        "locked": "Locked",
+        "empty": "Empty",
+        "growing": "Growing",
+        "ready": "Ready",
+        "withered": "Withered"
+      },
+      "trees": {
+        "fruit_tree": {
+          "name": "Fruit tree"
+        },
+        "care_tree": {
+          "name": "Care tree"
+        },
+        "gift_tree": {
+          "name": "Gift tree"
+        },
+        "money_tree": {
+          "name": "Money tree"
+        },
+        "golden_apple_tree": {
+          "name": "Golden apple tree"
+        }
+      },
+      "actions": {
+        "water": "Water",
+        "normalFertilizer": "Fertilizer",
+        "heartFertilizer": "Heart fertilizer",
+        "nutrient": "Harvest nutrient",
+        "harvest": "Harvest",
+        "clear": "Clear · {coins} coins",
+        "remove": "Remove tree · {coins} coins"
+      },
+      "tools": {
+        "watering_can": {
+          "name": "Watering can"
+        },
+        "shovel": {
+          "name": "Shovel"
+        },
+        "fertilizer_box": {
+          "name": "Fertilizer box"
+        }
+      },
+      "lifetimeHarvest": "Lifetime harvests {count}",
+      "saplingOwned": "Sapling x{count}",
+      "needSapling": "Buy in shop · {coins} coins",
+      "itemOwned": "Bag x{count}",
+      "waterFree": "Free · -{percent}%",
+      "coinDropTitle": "Harvest {coins} coins"
+    },
+    "boostCards": {
+      "kicker": "Boost Card",
+      "title": "Boost Cards",
+      "close": "Close",
+      "activeCard": "Active: {card}",
+      "noActive": "No active card",
+      "todayWork": "Work bonus {coins}/{limit}",
+      "extraHeartChance": "Extra heart chance {percent}% · unlimited",
+      "todayGarden": "Garden drops {count}/{limit}",
+      "claimed": "Claimed today",
+      "claimCoins": "Claim {coins} coins",
+      "remaining": "{days} days left",
+      "buy": "{hearts} hearts · 30 days",
+      "blockedByBestFriend": "Best Friend active",
+      "bestFriendBlocksFriend": "You cannot buy Friend Pass while Best Friend Pass is active",
+      "cards": {
+        "friend_pass": {
+          "name": "Friend Pass",
+          "summary": "Daily coins, work coins, and a small heart bonus."
+        },
+        "best_friend_pass": {
+          "name": "Best Friend Pass",
+          "summary": "Higher daily rewards plus garden growth and drop bonuses."
+        }
+      }
     }
   },
   "pet": {
@@ -450,12 +561,49 @@
         "birthday_cake": {
           "name": "Birthday Cake",
           "summary": "Birthday-only item. Use it to refill all stats."
+        },
+        "golden_apple": {
+          "name": "Golden apple",
+          "summary": "A special apple from gardening. Restores all stats and grants hearts."
+        },
+        "fruit_tree_sapling": {
+          "name": "Fruit tree sapling",
+          "summary": "Plant in a garden slot to grow food items."
+        },
+        "care_tree_sapling": {
+          "name": "Care tree sapling",
+          "summary": "Plant in a garden slot to grow care items."
+        },
+        "gift_tree_sapling": {
+          "name": "Gift tree sapling",
+          "summary": "Plant in a garden slot to grow gift items."
+        },
+        "money_tree_sapling": {
+          "name": "Money tree sapling",
+          "summary": "A premium sapling that yields coins directly."
+        },
+        "golden_apple_tree_sapling": {
+          "name": "Golden apple tree sapling",
+          "summary": "A rare sapling with a chance to grow golden apples."
+        },
+        "normal_fertilizer": {
+          "name": "Fertilizer",
+          "summary": "Use in the garden to cut the current timer by 20%."
+        },
+        "heart_fertilizer": {
+          "name": "Heart fertilizer",
+          "summary": "Use in the garden to cut the current timer by 35%."
+        },
+        "harvest_nutrient": {
+          "name": "Harvest nutrient",
+          "summary": "Use in the garden to add an extra drop to the next harvest."
         }
       },
       "categories": {
         "food": "Food",
         "item": "Items",
-        "care": "Care"
+        "care": "Care",
+        "garden": "Garden"
       },
       "discount": {
         "label": "30% off"
@@ -661,7 +809,9 @@
         "favorite": "This is Furo's favorite flavor, mood +{amount} extra.",
         "giftHeart": "The gift brought a heart.",
         "birthdayCake": "{name} enjoyed {item}. All stats are full.",
-        "birthdayCakeWoke": "{name} woke up and enjoyed {item}. All stats are full."
+        "birthdayCakeWoke": "{name} woke up and enjoyed {item}. All stats are full.",
+        "goldenApple": "{name} enjoyed {item}. All stats +30, hearts +{hearts}.",
+        "goldenAppleWoke": "{name} woke up and enjoyed {item}. All stats +30, hearts +{hearts}."
       },
       "unknown": {
         "name": "Unknown mod item",
@@ -992,7 +1142,7 @@
         },
         "hidden_good_ending_year_1": {
           "title": "Good Ending",
-          "description": "The first year leaves a gentle, steady record of companionship."
+          "description": "To the end with you"
         },
         "work_master": {
           "title": "Work Master",
@@ -1066,11 +1216,57 @@
           "title": "Merge Big Watermelon",
           "description": "Use orange, apple, and banana 20 times each."
         },
+        "hidden_good_friend": {
+          "title": "Good Friend",
+          "description": "Buy 90 total days of Best Friend Pass."
+        },
         "hidden_full_catalogue": {
-          "title": "Full Catalogue",
-          "description": "Complete every normal achievement."
+          "title": "Task Master",
+          "description": "Complete 36 normal tasks to unlock."
         }
       }
+    },
+    "garden": {
+      "invalidSlot": "That slot does not exist.",
+      "slotAlreadyUnlocked": "That slot is already unlocked.",
+      "unlockInOrder": "Unlock slots in order.",
+      "notEnoughCoins": "Not enough coins. Need {coins}.",
+      "slotLocked": "This slot is locked.",
+      "slotNotEmpty": "This slot already has a tree.",
+      "unlockSlotSuccess": "Unlocked slot {slot} for {coins} coins.",
+      "plantSuccess": "Planted {tree} and used {item}.",
+      "cannotWater": "This tree cannot be watered now.",
+      "wateredToday": "This slot was already watered today.",
+      "waterSuccess": "Watered for free. Current timer shortened by {percent}%.",
+      "cannotFertilize": "This tree cannot be fertilized now.",
+      "fertilizedToday": "This slot was already fertilized today.",
+      "cannotBoost": "This tree cannot use nutrient now.",
+      "boostedToday": "This slot already used nutrient today.",
+      "nutrientSuccess": "Used {item}. The next harvest will have an extra drop.",
+      "cannotHarvest": "Nothing is ready to harvest.",
+      "harvestSuccess": "Harvested {count} item(s).",
+      "harvestWithered": "Harvested {count} item(s). The tree has withered.",
+      "cannotClear": "There is no withered tree to clear.",
+      "clearSuccess": "Cleared the withered tree for {coins} coins.",
+      "removeSuccess": "Removed the tree for {coins} coins.",
+      "toolMaxLevel": "This tool is already max level.",
+      "toolUpgradeSuccess": "{tool} upgraded to Lv.{level} for {coins} coins.",
+      "missingGardenItem": "No {item} in the bag.",
+      "fertilizeSuccess": "Used {item}. Current growth sped up by {percent}%.",
+      "harvestCoinsSuccess": "Harvested +{coins} coins.",
+      "harvestMixedSuccess": "Harvested {count} item(s) and +{coins} coins.",
+      "harvestCoinsWithered": "Harvested +{coins} coins. The tree has withered.",
+      "harvestMixedWithered": "Harvested {count} item(s) and +{coins} coins. The tree has withered."
+    },
+    "boostCards": {
+      "maxDuration": "This card can only stack up to 90 days.",
+      "notEnoughHearts": "Not enough hearts. Need {hearts}.",
+      "bestFriendBlocksFriend": "Friend Pass cannot be purchased while Best Friend Pass is active.",
+      "buySuccess": "{card} is active or extended.",
+      "noActiveCard": "No active boost card.",
+      "dailyCoinsClaimed": "Boost card coins were already claimed today.",
+      "claimDailyCoins": "Claimed {coins} daily boost-card coins.",
+      "workBonus": " Boost card +{coins} coins."
     }
   }
 }

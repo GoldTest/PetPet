@@ -1,10 +1,10 @@
 # PocPet Mod 制作指南
 
-PocPet Mod 是一个 zip 包，根目录必须直接包含 `manifest.json`，可选包含 `pet/` 和 `items/`。不要在 zip 里再套一层外部文件夹。
+PocPet Mod 是一个 zip 包，根目录必须直接包含 `manifest.json`，可选包含 `pet/`、`items/` 和 `cg/`。不要在 zip 里再套一层外部文件夹。
 
 当前支持两种 manifest：
 
-- `schemaVersion: 1`：替换宠物图片、内置道具图片、文本、默认宠物名、喜欢食物和默认生日。
+- `schemaVersion: 1`：替换宠物图片、内置道具图片、好结局 CG、文本、默认宠物名、喜欢食物和默认生日。
 - `schemaVersion: 2`：兼容 v1，并支持覆盖内置道具显示，以及新增可购买、可使用的自定义道具。
 
 ## 目录结构
@@ -14,7 +14,8 @@ my-mod.zip
 |- manifest.json
 |- pet/content.png
 |- pet/hungry.png
-`- items/*.png
+|- items/*.png
+`- cg/good_ending_year_1.png
 ```
 
 支持的宠物图片完整路径：
@@ -23,11 +24,15 @@ my-mod.zip
 
 支持覆盖的内置道具图片完整路径：
 
-`items/emergency_biscuit.png`、`items/bento.png`、`items/orange.png`、`items/apple.png`、`items/banana.png`、`items/watermelon.png`、`items/nutri_meal.png`、`items/pig_trotter.png`、`items/strawberry_cake.png`、`items/ad_milk.png`、`items/strawberry_milk.png`、`items/small_bouquet.png`、`items/shiny_sticker.png`、`items/soft_cloud_doll.png`、`items/ribbon_bell.png`、`items/toy_ball.png`、`items/picture_book.png`、`items/shampoo.png`、`items/wet_wipes.png`、`items/medicine.png`、`items/vitamin_tablet.png`、`items/blanket.png`、`items/energy_drink.png`。
+`items/emergency_biscuit.png`、`items/bento.png`、`items/orange.png`、`items/apple.png`、`items/banana.png`、`items/watermelon.png`、`items/nutri_meal.png`、`items/pig_trotter.png`、`items/strawberry_cake.png`、`items/ad_milk.png`、`items/strawberry_milk.png`、`items/small_bouquet.png`、`items/shiny_sticker.png`、`items/soft_cloud_doll.png`、`items/ribbon_bell.png`、`items/toy_ball.png`、`items/picture_book.png`、`items/shampoo.png`、`items/wet_wipes.png`、`items/medicine.png`、`items/vitamin_tablet.png`、`items/blanket.png`、`items/energy_drink.png`、`items/golden_apple.png`、`items/fruit_tree_sapling.png`、`items/care_tree_sapling.png`、`items/gift_tree_sapling.png`、`items/money_tree_sapling.png`、`items/golden_apple_tree_sapling.png`、`items/normal_fertilizer.png`、`items/heart_fertilizer.png`、`items/harvest_nutrient.png`。
 
 对应的内置道具 ID 就是文件名去掉 `items/` 和 `.png` 后的部分，例如 `items/watermelon.png` 对应 `watermelon`。
 
 `birthday_cake` 是生日特殊道具，不能由 Mod 覆盖。
+
+支持覆盖的 CG 图片完整路径：
+
+`cg/good_ending_year_1.png`。这个文件会替换隐藏成就“好结局”弹窗里的纪念图；缺少时继续使用内置好结局 CG，不会导入失败。
 
 ## v2 示例
 
@@ -95,8 +100,8 @@ my-mod.zip
 
 - `id` 必须以当前 Mod ID 开头，例如 `creator.farm:melon_seed`。
 - 冒号后的本地 ID 只能使用小写字母、数字、短横线、下划线。
-- `kind` 只能是 `food`、`item`、`care`。
-- `price` 必须是 `0..9999`。
+- `kind` 只能是 `food`、`item`、`care`、`garden`。
+- `price` 必须是 `0..99999`。
 - `effect` 只能包含 `hunger`、`mood`、`cleanliness`、`energy`、`health`，每个数值必须在 `-100..100`。
 - `image` 必须是 `items/*.png`；缺图会用占位图，但 zip 中不能出现未被 manifest 引用的自定义图片。
 - `shop: true` 表示进入商店；`false` 表示只在获得后出现在背包。
@@ -108,6 +113,7 @@ my-mod.zip
 
 - 图片必须是 PNG。
 - 单张图片不超过 3MB。
+- 好结局 CG 使用 `cg/good_ending_year_1.png`，推荐横向构图，接近 4:3 或 16:9，PNG 格式。
 - 整个 zip 不超过 25MB。
 - 缺少 manifest 引用的图片不会导入失败，会回退内置图或占位图。
 - zip 中出现未知文件、未允许路径或路径套壳会导入失败。
