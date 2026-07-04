@@ -1,5 +1,6 @@
 ﻿import { ArrowLeft, CircleHelp, Download, FileText, RotateCcw, Upload } from 'lucide-react';
-import { useRef, useState, type ChangeEvent } from 'react';
+import { useRef, useState, type ChangeEvent, type MouseEvent } from 'react';
+import { openUrl } from '@tauri-apps/plugin-opener';
 import { defaultPetBirthday, getPetBirthdayMaxDay, type PetBirthday } from '../core/pet';
 import type { ActivePetMod } from '../core/mod';
 import { languages, list, t, type LanguageCode } from '../i18n';
@@ -32,6 +33,7 @@ interface SettingsModalProps {
 type SettingsPage = 'main' | 'mod' | 'save';
 
 const birthdayMonths = Array.from({ length: 12 }, (_, index) => index + 1);
+const authorUrl = 'https://space.bilibili.com/37393114';
 
 export const SettingsModal = ({
   activeMod,
@@ -88,6 +90,12 @@ export const SettingsModal = ({
   const handleOpenHelp = () => {
     onOpenHelp();
     setHelpOpen(true);
+  };
+
+  const handleAuthorLinkClick = (event: MouseEvent<HTMLAnchorElement>) => {
+    if (!('__TAURI_INTERNALS__' in window)) return;
+    event.preventDefault();
+    void openUrl(authorUrl);
   };
 
   return (
@@ -265,7 +273,7 @@ export const SettingsModal = ({
             </button>
           </header>
           <p className="help-author-link">
-            <a href="https://space.bilibili.com/37393114" target="_blank" rel="noreferrer">
+            <a href={authorUrl} target="_blank" rel="noopener noreferrer" onClick={handleAuthorLinkClick}>
               {t('ui.settings.help.authorLink')}
             </a>
           </p>

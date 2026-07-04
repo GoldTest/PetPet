@@ -600,11 +600,34 @@ h1 {
 .meta-row {
   display: flex;
   flex-wrap: wrap;
+  align-items: center;
   justify-content: space-between;
   gap: 8px;
+  padding: 9px 10px;
+  border: 1px solid rgba(45, 111, 211, 0.14);
+  border-radius: 8px;
   color: #5b6a82;
+  background: linear-gradient(135deg, #f3f8ff 0%, #fff8ec 100%);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.8);
   font-size: 0.92rem;
   font-weight: 750;
+}
+
+.meta-row__shared-time {
+  color: #1f4f91;
+  font-weight: 900;
+}
+
+.meta-row__state {
+  display: inline-flex;
+  min-height: 24px;
+  align-items: center;
+  padding: 0 8px;
+  border-radius: 999px;
+  color: #6d4b15;
+  background: rgba(255, 215, 141, 0.42);
+  font-size: 0.78rem;
+  font-weight: 900;
 }
 
 .pomodoro-overlay {
@@ -877,8 +900,17 @@ h1 {
 .text-button--accent {
   display: inline-flex;
   align-items: center;
-  gap: 5px;
-  color: #2d6fd3;
+  gap: 6px;
+  min-height: 34px;
+  padding: 0 10px;
+  border-radius: 999px;
+  color: #fff;
+  background: linear-gradient(135deg, #2d6fd3 0%, #f28b32 100%);
+  box-shadow: 0 8px 18px rgba(45, 111, 211, 0.2);
+}
+
+.text-button--accent svg {
+  filter: drop-shadow(0 1px 2px rgba(18, 42, 78, 0.25));
 }
 
 .inventory-list {
@@ -1065,7 +1097,14 @@ h1 {
 }
 
 .action-button--shop {
-  background: #fff1e8;
+  color: #683c08;
+  background: linear-gradient(135deg, #ffe2a8 0%, #ffb36d 100%);
+  box-shadow: inset 0 0 0 1px rgba(192, 101, 22, 0.12), 0 10px 20px rgba(192, 101, 22, 0.16);
+}
+
+.action-button--shop svg {
+  color: #b65b11;
+  filter: drop-shadow(0 1px 1px rgba(255, 255, 255, 0.75));
 }
 .action-button__dot {
   position: absolute;
@@ -3572,5 +3611,137 @@ h1 {
   .boost-card .primary-button {
     grid-column: 1 / -1;
     width: 100%;
+  }
+}
+.app-shell--role-picker {
+  display: grid;
+  min-height: 100vh;
+  place-items: center;
+  padding-bottom: calc(22px + var(--safe-bottom));
+}
+
+.role-picker {
+  position: relative;
+  width: min(760px, 100%);
+  padding: 28px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.9);
+  box-shadow: var(--shadow);
+}
+
+.role-picker__header {
+  max-width: 620px;
+  margin-bottom: 22px;
+}
+
+.role-picker__header h1 {
+  margin-bottom: 10px;
+  white-space: normal;
+}
+
+.role-picker__header p {
+  color: #5f6e84;
+  line-height: 1.6;
+}
+
+.role-picker__grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+  gap: 12px;
+}
+
+.role-card {
+  display: flex;
+  min-height: 154px;
+  align-items: center;
+  gap: 14px;
+  padding: 16px;
+  border: 1px solid rgba(71, 92, 122, 0.16);
+  border-radius: 8px;
+  color: #1e2c42;
+  background: rgba(248, 252, 255, 0.92);
+  text-align: left;
+  box-shadow: 0 12px 26px rgba(45, 69, 102, 0.1);
+}
+
+.role-card:hover,
+.role-card:focus-visible {
+  border-color: rgba(70, 127, 201, 0.45);
+  background: #ffffff;
+  outline: none;
+}
+
+.role-card img,
+.role-card svg {
+  width: 72px;
+  height: 72px;
+  flex: 0 0 auto;
+  object-fit: contain;
+  image-rendering: pixelated;
+}
+
+.role-card svg {
+  padding: 17px;
+  border-radius: 8px;
+  color: #2f6f93;
+  background: rgba(220, 244, 241, 0.9);
+}
+
+.role-card span {
+  display: grid;
+  min-width: 0;
+  gap: 6px;
+}
+
+.role-card strong {
+  font-size: 1rem;
+  line-height: 1.2;
+}
+
+.role-card small {
+  color: #66758f;
+  line-height: 1.45;
+}
+
+.role-card--import {
+  cursor: pointer;
+}
+
+.role-card--import input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.role-picker__message {
+  margin-top: 14px;
+  color: #53657e;
+  font-size: 0.9rem;
+  line-height: 1.5;
+}
+
+.role-picker__audio {
+  position: absolute;
+  top: 18px;
+  right: 18px;
+}
+
+@media (max-width: 640px) {
+  .role-picker {
+    padding: 22px 16px;
+  }
+
+  .role-card {
+    min-height: 128px;
+  }
+
+  .role-card img,
+  .role-card svg {
+    width: 58px;
+    height: 58px;
   }
 }

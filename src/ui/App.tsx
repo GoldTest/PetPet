@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState, type ChangeEvent } from 'react';
-import { Heart, Settings, Trophy, Volume2, VolumeX } from 'lucide-react';
+import { Heart, Settings, Trophy, Upload, Volume2, VolumeX } from 'lucide-react';
 import {
   advancePet,
   buyBoostCard,
@@ -85,7 +85,7 @@ import {
   type BgmMode,
   type SfxId,
 } from '../core/audio';
-import { clearPet, loadPet, savePet } from '../core/storage';
+import { clearPet, loadPetOrNull, savePet } from '../core/storage';
 import {
   formatFavoriteFoodText,
   getModFavoriteFoodIds,
@@ -112,11 +112,15 @@ import { formatCompactNumber } from './numberFormat';
 import { getLanguage, setLanguage, t, type LanguageCode } from '../i18n';
 
 const formatSharedTime = (seconds: number) => {
-  const totalMinutes = Math.floor(seconds / 60);
-  if (totalMinutes < 1) return t('ui.time.lessThanMinute');
-  const hours = Math.floor(totalMinutes / 60);
-  const minutes = totalMinutes % 60;
-  return hours > 0 ? t('ui.time.hoursMinutes', { hours, minutes }) : t('ui.time.minutes', { minutes });
+  const totalDays = Math.max(1, Math.floor(seconds / 86400) + 1);
+  const years = Math.floor(totalDays / 365);
+  const daysAfterYears = totalDays % 365;
+  const months = Math.floor(daysAfterYears / 30);
+  const days = daysAfterYears % 30;
+
+  if (years > 0) return t('ui.time.yearsMonthsDays', { years, months, days });
+  if (months > 0) return t('ui.time.monthsDays', { months, days });
+  return t('ui.time.days', { days: totalDays });
 };
 
 const formatCountdownTime = (milliseconds: number) => {
@@ -155,6 +159,17 @@ type WishQuickAction = PetState['dailyWish']['action'] | NonNullable<PetState['r
 type ActivePage = 'home' | 'achievements' | 'garden';
 type AchievementToast = { kind: 'single'; achievement: AchievementView } | { kind: 'review' };
 type AchievementCgPopup = { title: string; description: string; image: string; fileName: string };
+type PetAppProps = { initialPet: PetState; initialActiveMod: ActivePetMod | null; onResetToPicker: (storedMod: ActivePetMod | null) => void };
+type RolePickerProps = {
+  installedMod: ActivePetMod | null;
+  modMessage: string;
+  isAudioEnabled: boolean;
+  isLoading?: boolean;
+  onUseBuiltin: () => void;
+  onUseInstalledMod: () => void;
+  onImportMod: (event: ChangeEvent<HTMLInputElement>) => void;
+  onAudioToggle: () => void;
+};
 const achievementToastLabels = {
   single: t('ui.achievements.toast.single'),
   review: t('ui.achievements.toast.review'),
@@ -163,6 +178,8 @@ const achievementToastLabels = {
 const achievementCgImages: Record<string, string> = {
   good_ending_year_1: goodEndingImage,
 };
+
+const defaultRolePetImage = resolvePetStatusImages(null).content;
 
 const floatingRewardConfigs: readonly FloatingRewardConfig[] = [
   { id: helpStarterGiftRewardId, coins: helpStarterGiftCoins, eventKey: 'pet.reward.helpStarterGift' },
@@ -222,8 +239,62 @@ const getPetInteractionOutcome = (pet: PetState): SoundOutcome => {
   return pet.mood >= 75 && pet.health >= 40 ? 'heart' : 'success';
 };
 
-export const App = () => {
-  const [pet, setPet] = useState<PetState>(() => loadPet());
+const createPetForMod = (mod: ActivePetMod | null) => {
+  const fresh = createDefaultPet();
+  if (!mod) return withPetIdentityBirthday(fresh, defaultPetBirthday);
+  return {
+    ...withPetIdentityBirthday(fresh, mod.manifest.birthday),
+    name: mod.manifest.defaultPetName,
+    recentEvent: mod.manifest.texts?.recentEvent ?? fresh.recentEvent,
+  };
+};
+
+const RolePicker = ({ installedMod, modMessage, isAudioEnabled, isLoading = false, onUseBuiltin, onUseInstalledMod, onImportMod, onAudioToggle }: RolePickerProps) => (
+  <main className="app-shell app-shell--role-picker">
+    <section className="role-picker" aria-label={t('ui.rolePicker.aria')}>
+      <div className="role-picker__header">
+        <p className="eyebrow">{t('ui.brand.eyebrow')}</p>
+        <h1>{t('ui.rolePicker.title')}</h1>
+        <p>{isLoading ? t('ui.rolePicker.loading') : t('ui.rolePicker.description')}</p>
+      </div>
+      {!isLoading && (
+        <div className="role-picker__grid">
+          <button type="button" className="role-card" onClick={onUseBuiltin}>
+            <img src={defaultRolePetImage} alt="" aria-hidden="true" />
+            <span>
+              <strong>{t('ui.rolePicker.builtinTitle')}</strong>
+              <small>{t('ui.rolePicker.builtinSummary')}</small>
+            </span>
+          </button>
+          {installedMod && (
+            <button type="button" className="role-card" onClick={onUseInstalledMod}>
+              <img src={installedMod.petImageUrls.content ?? defaultRolePetImage} alt="" aria-hidden="true" />
+              <span>
+                <strong>{t('ui.rolePicker.installedTitle', { name: installedMod.manifest.name })}</strong>
+                <small>{t('ui.rolePicker.installedSummary', { pet: installedMod.manifest.defaultPetName })}</small>
+              </span>
+            </button>
+          )}
+          <label className="role-card role-card--import">
+            <Upload size={34} aria-hidden="true" />
+            <span>
+              <strong>{t('ui.rolePicker.importTitle')}</strong>
+              <small>{t('ui.rolePicker.importSummary')}</small>
+            </span>
+            <input type="file" accept=".zip,application/zip" onChange={onImportMod} />
+          </label>
+        </div>
+      )}
+      {modMessage && <p className="role-picker__message">{modMessage}</p>}
+      <button type="button" className="icon-button audio-button role-picker__audio" aria-label={isAudioEnabled ? t('ui.top.audioOn') : t('ui.top.audioOff')} aria-pressed={isAudioEnabled} onClick={onAudioToggle}>
+        {isAudioEnabled ? <Volume2 size={21} aria-hidden="true" /> : <VolumeX size={21} aria-hidden="true" />}
+      </button>
+    </section>
+  </main>
+);
+
+const PetApp = ({ initialPet, initialActiveMod, onResetToPicker }: PetAppProps) => {
+  const [pet, setPet] = useState<PetState>(initialPet);
   const [isSettingsOpen, setSettingsOpen] = useState(false);
   const [isShopOpen, setShopOpen] = useState(false);
   const [isPomodoroOpen, setPomodoroOpen] = useState(false);
@@ -231,9 +302,9 @@ export const App = () => {
   const [isAudioEnabled, setAudioEnabledState] = useState(() => getAudioEnabled());
   const [language, setLanguageState] = useState<LanguageCode>(() => getLanguage());
   const [activeShopCategory, setActiveShopCategory] = useState(shopCategories[0].id);
-  const [draftName, setDraftName] = useState(pet.name);
-  const [draftBirthday, setDraftBirthday] = useState<PetBirthday | undefined>(pet.birthday);
-  const [activeMod, setActiveMod] = useState<ActivePetMod | null>(null);
+  const [draftName, setDraftName] = useState(initialPet.name);
+  const [draftBirthday, setDraftBirthday] = useState<PetBirthday | undefined>(initialPet.birthday);
+  const [activeMod, setActiveMod] = useState<ActivePetMod | null>(initialActiveMod);
   const [modMessage, setModMessage] = useState('');
   const [saveText, setSaveText] = useState('');
   const [importSaveText, setImportSaveText] = useState('');
@@ -262,30 +333,24 @@ export const App = () => {
   }, [pet.recentEvent]);
 
   useEffect(() => {
-    void loadActivePetMod()
-      .then((mod) => {
-        setActiveMod(mod);
-        setPet((current) => {
-          if (!mod) return withBackfilledBirthday(current, defaultPetBirthday);
-          const next = withPetIdentityBirthday(current, mod.manifest.birthday);
-          return {
-            ...next,
-            name: current.name === defaultPetName ? mod.manifest.defaultPetName : next.name,
-          };
-        });
-        if (mod) {
-          setDraftName((current) => (current === defaultPetName ? mod.manifest.defaultPetName : current));
-          setDraftBirthday(mod.manifest.birthday);
-        }
-        hasLoadedModRef.current = true;
-        if (mod) setModMessage(t('ui.settings.mod.active', { name: mod.manifest.name, version: mod.manifest.version }));
-      })
-      .catch((error) => {
-        hasLoadedModRef.current = true;
-        setPet((current) => withBackfilledBirthday(current, defaultPetBirthday));
-        setModMessage(error instanceof Error ? error.message : t('ui.settings.mod.loadFailed'));
-      });
-  }, []);
+    setActiveMod(initialActiveMod);
+    setPet((current) => {
+      if (!initialActiveMod) return withBackfilledBirthday(current, defaultPetBirthday);
+      const next = withPetIdentityBirthday(current, initialActiveMod.manifest.birthday);
+      return {
+        ...next,
+        name: current.name === defaultPetName ? initialActiveMod.manifest.defaultPetName : next.name,
+      };
+    });
+    if (initialActiveMod) {
+      setDraftName((current) => (current === defaultPetName ? initialActiveMod.manifest.defaultPetName : current));
+      setDraftBirthday(initialActiveMod.manifest.birthday);
+      setModMessage(t('ui.settings.mod.active', { name: initialActiveMod.manifest.name, version: initialActiveMod.manifest.version }));
+    } else {
+      setDraftBirthday(defaultPetBirthday);
+    }
+    hasLoadedModRef.current = true;
+  }, [initialActiveMod]);
 
   useEffect(() => {
     const timer = window.setInterval(() => {
@@ -778,17 +843,9 @@ export const App = () => {
   const handleConfirmReset = () => {
     playAfterUnlock('tap');
     clearPet();
-    const fresh = createDefaultPet();
-    const moddedFresh = activeMod
-      ? {
-          ...withPetIdentityBirthday(fresh, activeMod.manifest.birthday),
-          name: activeMod.manifest.defaultPetName,
-          recentEvent: activeMod.manifest.texts?.recentEvent ?? fresh.recentEvent,
-        }
-      : withPetIdentityBirthday(fresh, defaultPetBirthday);
-    setPet(moddedFresh);
-    setDraftName(moddedFresh.name);
-    setDraftBirthday(moddedFresh.birthday);
+    onResetToPicker(activeMod);
+    setDraftName(defaultPetName);
+    setDraftBirthday(defaultPetBirthday);
     setPomodoroOpen(false);
     setSettingsOpen(false);
     setResetConfirmOpen(false);
@@ -1108,8 +1165,8 @@ export const App = () => {
               />
 
               <div className="meta-row" aria-label={t('ui.dashboard.metaAria')}>
-                <span>{t('ui.dashboard.sharedTime', { time: formatSharedTime(pet.ageSeconds) })}</span>
-                <span>{pet.isSleeping ? t('ui.dashboard.resting') : t('ui.dashboard.active')}</span>
+                <span className="meta-row__shared-time">{t('ui.dashboard.sharedTime', { time: formatSharedTime(pet.ageSeconds) })}</span>
+                <span className="meta-row__state">{pet.isSleeping ? t('ui.dashboard.resting') : t('ui.dashboard.active')}</span>
               </div>
 
               <InventoryPanel
@@ -1258,3 +1315,104 @@ export const App = () => {
   );
 };
 
+
+export const App = () => {
+  const [initialPet, setInitialPet] = useState<PetState | null>(() => loadPetOrNull());
+  const [installedMod, setInstalledMod] = useState<ActivePetMod | null>(null);
+  const [hasLoadedInitialMod, setHasLoadedInitialMod] = useState(false);
+  const [modMessage, setModMessage] = useState('');
+  const [isAudioEnabled, setAudioEnabledState] = useState(() => getAudioEnabled());
+
+  useEffect(() => {
+    void loadActivePetMod()
+      .then((mod) => setInstalledMod(mod))
+      .catch((error) => setModMessage(error instanceof Error ? error.message : t('ui.settings.mod.loadFailed')))
+      .finally(() => setHasLoadedInitialMod(true));
+  }, []);
+
+  const handleAudioToggle = () => {
+    const nextEnabled = !isAudioEnabled;
+    setAudioEnabled(nextEnabled);
+    setAudioEnabledState(nextEnabled);
+    if (nextEnabled) {
+      void unlockAudio().then(() => {
+        syncBgm('room');
+        playSfx('tap');
+      });
+    }
+  };
+
+  const startWithMod = (mod: ActivePetMod | null) => {
+    const nextPet = createPetForMod(mod);
+    setInstalledMod(mod);
+    setInitialPet(nextPet);
+    setModMessage(mod ? t('ui.settings.mod.active', { name: mod.manifest.name, version: mod.manifest.version }) : '');
+  };
+
+  const handleUseBuiltin = async () => {
+    try {
+      await clearActivePetMod();
+      startWithMod(null);
+    } catch (error) {
+      setModMessage(error instanceof Error ? error.message : t('ui.settings.mod.restoreFailed'));
+    }
+  };
+
+  const handleImportMod = async (event: ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    event.target.value = '';
+    if (!file) return;
+    try {
+      const parsed = await parsePetModZip(file);
+      await saveActivePetMod(parsed);
+      const loaded = await loadActivePetMod();
+      if (!loaded) throw new Error(t('ui.settings.mod.loadFailed'));
+      startWithMod(loaded);
+      setModMessage(parsed.warnings.length > 0 ? t('ui.settings.mod.importedWithFallback', { name: parsed.manifest.name, count: parsed.warnings.length }) : t('ui.settings.mod.imported', { name: parsed.manifest.name }));
+    } catch (error) {
+      setModMessage(error instanceof Error ? error.message : t('ui.settings.mod.importFailed'));
+      playSfx('error');
+    }
+  };
+
+  if (!hasLoadedInitialMod) {
+    return (
+      <RolePicker
+        installedMod={null}
+        modMessage={modMessage}
+        isAudioEnabled={isAudioEnabled}
+        isLoading
+        onUseBuiltin={handleUseBuiltin}
+        onUseInstalledMod={() => undefined}
+        onImportMod={handleImportMod}
+        onAudioToggle={handleAudioToggle}
+      />
+    );
+  }
+
+  if (!initialPet) {
+    return (
+      <RolePicker
+        installedMod={installedMod}
+        modMessage={modMessage}
+        isAudioEnabled={isAudioEnabled}
+        onUseBuiltin={handleUseBuiltin}
+        onUseInstalledMod={() => installedMod && startWithMod(installedMod)}
+        onImportMod={handleImportMod}
+        onAudioToggle={handleAudioToggle}
+      />
+    );
+  }
+
+  return (
+    <PetApp
+      key={initialPet.createdAt + ':' + (installedMod?.manifest.id ?? 'builtin')}
+      initialPet={initialPet}
+      initialActiveMod={installedMod}
+      onResetToPicker={(storedMod) => {
+        setInstalledMod(storedMod);
+        setInitialPet(null);
+      }}
+    />
+  );
+};

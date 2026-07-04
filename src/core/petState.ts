@@ -14,7 +14,7 @@ import { getLocalDateKey, isNumber } from './utils';
 import { defaultYearlyStats, normalizeYearReview, normalizeYearlyStats } from './yearlyStats';
 
 export const helpStarterGiftRewardId = 'starter_help_gift_v1';
-export const helpStarterGiftCoins = 180;
+export const helpStarterGiftCoins = 800;
 const goldenAppleStarterBackfillRewardId = 'golden_apple_starter_backfill_v1';
 const legacySave13BonusRewardId = 'legacy_save_1_3_bonus_v1';
 const legacySave13BonusCoins = 3000;

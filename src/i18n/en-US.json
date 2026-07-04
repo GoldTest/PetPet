@@ -9,7 +9,10 @@
     "time": {
       "lessThanMinute": "less than 1 minute",
       "hoursMinutes": "{hours}h {minutes}m",
-      "minutes": "{minutes} minutes"
+      "minutes": "{minutes} minutes",
+      "days": "{days} day(s)",
+      "monthsDays": "{months} month(s) {days} day(s)",
+      "yearsMonthsDays": "{years} year(s) {months} month(s) {days} day(s)"
     },
     "stats": {
       "hunger": "Hunger",
@@ -131,22 +134,27 @@
         "actionsTitle": "Actions",
         "otherTitle": "Other systems",
         "stats": [
-          "Hunger affects the hungry state. Feed your pet when it gets too low.",
-          "Mood affects sleep quality and interaction rewards. A good mood can earn hearts.",
-          "Low cleanliness adds stress, so use cleaning actions or care items to recover it.",
-          "Energy limits play, work, and interaction. Sleep or items can restore energy.",
-          "Low health blocks Pomodoro. Use care actions or medicine before focusing."
+          "Very low hunger makes your pet hungry. Use food items to recover it.",
+          "Mood affects sleep and interaction rewards. A good mood can earn hearts.",
+          "Low cleanliness adds stress. Use cleaning actions or care items to recover it.",
+          "Energy limits play, work, and focus. Sleep or some items can restore it.",
+          "Low health blocks Pomodoro and some actions. Use care actions or medicine to recover."
         ],
         "actions": [
-          "Play raises mood, but spends energy and hunger.",
-          "Clean raises cleanliness and a little health, while spending a little hunger and energy.",
-          "Work earns coins, but spends energy and may affect mood or health.",
-          "Sleep restores energy faster and may settle sleep or dream events after waking."
+          "Play raises mood, but spends energy and hunger. Weather and repeated interaction can change the result.",
+          "Clean raises cleanliness and a little health, with extra changes from weather, seasons, and achievements.",
+          "Work earns coins. Rewards can be affected by level, weather, seasons, boost cards, and achievements.",
+          "Sleep restores energy faster and may settle sleep, dreams, or natural-wake rewards.",
+          "Inventory items can feed, gift, care for your pet, or plant and boost things in the garden."
         ],
         "other": [
-          "The shop sells food, gifts, and care items. Free soda biscuits have a daily limit.",
-          "Pomodoro is an idle focus timer. When awake, your pet keeps you company; while sleeping, it keeps resting. Completed focus phases grant coins and a little mood.",
-          "Frequent interaction triggers a short cooldown to prevent too much stat loss at once."
+          "The shop sells food, gifts, care, and garden items. You can claim free soda biscuits daily and exchange coins for hearts.",
+          "Daily wishes and return tasks grant rewards after completion. Offline time may also leave diaries or events.",
+          "Pomodoro cycles focus and breaks. Completed focus grants coins and mood, while poor status pauses the timer.",
+          "The garden lets you unlock slots, plant trees, water, fertilize, and harvest. Clear withered trees to plant again.",
+          "Achievements track care, shop, inventory, garden, and Pomodoro progress, rewarding coins, items, boosts, or CGs.",
+          "Birthdays, anniversaries, festivals, and yearly reviews can grant special rewards; weather and seasons lightly affect daily actions.",
+          "Settings include save management, language, audio, and mods. Mods can replace visuals/text and add safe custom items."
         ],
         "authorLink": "Author page and feedback"
       },
@@ -461,6 +469,18 @@
           "summary": "Higher daily rewards plus garden growth and drop bonuses."
         }
       }
+    },
+    "rolePicker": {
+      "aria": "Choose pet character",
+      "title": "Choose your companion",
+      "description": "Use built-in Furo, continue with the installed mod, or import a new mod. No save is created until you choose.",
+      "loading": "Loading local mod...",
+      "builtinTitle": "Built-in Furo",
+      "builtinSummary": "Create the default companion without a mod.",
+      "installedTitle": "Use {name}",
+      "installedSummary": "Create the mod companion named {pet}.",
+      "importTitle": "Import mod",
+      "importSummary": "Pick a zip file and create a companion from it."
     }
   },
   "pet": {
