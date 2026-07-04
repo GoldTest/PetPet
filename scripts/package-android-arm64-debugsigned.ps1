@@ -1,4 +1,7 @@
-﻿param(
+param(
+  [ValidateSet('aarch64', 'armv7')]
+  [Alias('Target')]
+  [string]$AndroidTarget = 'aarch64',
   [switch]$RebuildRust
 )
 
@@ -16,14 +19,43 @@ if ([string]::IsNullOrWhiteSpace($version)) {
   throw 'Project version not found in package.json.'
 }
 
+$targetConfigs = @{
+  aarch64 = @{
+    Label = 'arm64'
+    TauriTarget = 'aarch64'
+    RustTarget = 'aarch64-linux-android'
+    Abi = 'arm64-v8a'
+    GradleVariant = 'Arm64'
+    ApkDirName = 'arm64'
+    OutputSuffix = ''
+  }
+  armv7 = @{
+    Label = 'ARMv7'
+    TauriTarget = 'armv7'
+    RustTarget = 'armv7-linux-androideabi'
+    Abi = 'armeabi-v7a'
+    GradleVariant = 'Arm'
+    ApkDirName = 'arm'
+    OutputSuffix = '-32bit'
+  }
+}
+$config = $targetConfigs[$AndroidTarget]
+$label = [string]$config['Label']
+$tauriTarget = [string]$config['TauriTarget']
+$rustTarget = [string]$config['RustTarget']
+$abi = [string]$config['Abi']
+$gradleVariant = [string]$config['GradleVariant']
+$apkDirName = [string]$config['ApkDirName']
+$outputSuffix = [string]$config['OutputSuffix']
+
 $androidDir = Join-Path $root 'src-tauri\gen\android'
 $appDir = Join-Path $androidDir 'app'
-$sourceSo = Join-Path $root 'src-tauri\target\aarch64-linux-android\release\libapp_lib.so'
-$jniDir = Join-Path $appDir 'src\main\jniLibs\arm64-v8a'
+$sourceSo = Join-Path $root "src-tauri\target\$rustTarget\release\libapp_lib.so"
+$jniDir = Join-Path $appDir "src\main\jniLibs\$abi"
 $jniSo = Join-Path $jniDir 'libapp_lib.so'
 $releaseDir = Join-Path $root 'release'
-$alignedApk = Join-Path $releaseDir "pocket$version-aligned.apk"
-$finalApk = Join-Path $releaseDir "pocket$version.apk"
+$alignedApk = Join-Path $releaseDir "pocket$version$outputSuffix-aligned.apk"
+$finalApk = Join-Path $releaseDir "pocket$version$outputSuffix.apk"
 
 function Convert-VersionNameToCode([string]$versionName) {
   $core = ($versionName -split '[-+]')[0]
@@ -99,19 +131,20 @@ function Ensure-DebugKeystore([string]$keytool) {
   return $keystore
 }
 
-function Get-Arm64ReleaseApk {
+function Get-AndroidReleaseApk([string]$apkDirectoryName, [string]$apkLabel) {
   $apkRoot = Join-Path $appDir 'build\outputs\apk'
   if (-not (Test-Path -LiteralPath $apkRoot)) {
     throw "Gradle APK output directory not found: $apkRoot"
   }
 
+  $escapedApkDirName = [regex]::Escape($apkDirectoryName)
   $apk = Get-ChildItem -Recurse -File -LiteralPath $apkRoot -Filter '*.apk' |
-    Where-Object { $_.FullName -match '\\arm64\\release\\' -or $_.Name -match 'arm64.*release' } |
+    Where-Object { $_.FullName -match "\\$escapedApkDirName\\release\\" -or $_.Name -match "-$escapedApkDirName-release" } |
     Sort-Object LastWriteTime -Descending |
     Select-Object -First 1
 
   if (-not $apk) {
-    throw "Arm64 release APK not found under: $apkRoot"
+    throw "$apkLabel release APK not found under: $apkRoot"
   }
 
   return $apk.FullName
@@ -125,16 +158,16 @@ $debugKeystore = Ensure-DebugKeystore $keytool
 
 if ($RebuildRust -or -not (Test-Path -LiteralPath $sourceSo)) {
   $previousSourceSoWriteTime = if (Test-Path -LiteralPath $sourceSo) { (Get-Item -LiteralPath $sourceSo).LastWriteTimeUtc } else { $null }
-  Write-Host 'Rebuilding arm64 Rust library and Tauri Android assets...'
+  Write-Host "Rebuilding $label Rust library and Tauri Android assets..."
   Push-Location $root
   try {
-    & npm.cmd run tauri -- android build --target aarch64 --apk --ci
+    & npm.cmd run tauri -- android build --target $tauriTarget --apk --ci
     if ($LASTEXITCODE -ne 0) {
       $rebuiltSourceSo = Test-Path -LiteralPath $sourceSo
       $currentSourceSoWriteTime = if ($rebuiltSourceSo) { (Get-Item -LiteralPath $sourceSo).LastWriteTimeUtc } else { $null }
       $sourceSoUpdated = $rebuiltSourceSo -and ($null -eq $previousSourceSoWriteTime -or $currentSourceSoWriteTime -gt $previousSourceSoWriteTime)
-      if (-not $sourceSoUpdated) { throw 'Tauri Android rebuild failed before refreshing the arm64 Rust library.' }
-      Write-Host 'Tauri Android build returned a non-zero exit code after refreshing the arm64 Rust library; continuing with manual APK assembly.'
+      if (-not $sourceSoUpdated) { throw "Tauri Android rebuild failed before refreshing the $label Rust library." }
+      Write-Host "Tauri Android build returned a non-zero exit code after refreshing the $label Rust library; continuing with manual APK assembly."
     }
   } finally {
     Pop-Location
@@ -142,9 +175,9 @@ if ($RebuildRust -or -not (Test-Path -LiteralPath $sourceSo)) {
 }
 
 if (-not (Test-Path -LiteralPath $sourceSo)) {
-  throw "Rust arm64 library not found: $sourceSo"
+  throw "Rust $label library not found: $sourceSo"
 }
-Write-Host "Using arm64 Rust library:"
+Write-Host "Using $label Rust library:"
 Write-Host $sourceSo
 Write-Host ("Rust library timestamp: " + (Get-Item -LiteralPath $sourceSo).LastWriteTime.ToString('yyyy-MM-dd HH:mm:ss'))
 
@@ -159,17 +192,19 @@ Write-Host "Android versionCode: $androidVersionCode"
 
 New-Item -ItemType Directory -Force -Path $jniDir | Out-Null
 Copy-Item -LiteralPath $sourceSo -Destination $jniSo -Force
-Write-Host "Copied arm64 library: $jniSo"
+Write-Host "Copied $label library: $jniSo"
 
+$assembleTask = "assemble${gradleVariant}Release"
+$rustBuildTask = "rustBuild${gradleVariant}Release"
 Push-Location $androidDir
 try {
-  & .\gradlew.bat assembleArm64Release -x rustBuildArm64Release
-  if ($LASTEXITCODE -ne 0) { throw 'Gradle assembleArm64Release failed.' }
+  & .\gradlew.bat $assembleTask -x $rustBuildTask
+  if ($LASTEXITCODE -ne 0) { throw "Gradle $assembleTask failed." }
 } finally {
   Pop-Location
 }
 
-$unsignedApk = Get-Arm64ReleaseApk
+$unsignedApk = Get-AndroidReleaseApk $apkDirName $label
 New-Item -ItemType Directory -Force -Path $releaseDir | Out-Null
 if (Test-Path -LiteralPath $alignedApk) { Remove-Item -LiteralPath $alignedApk -Force }
 if (Test-Path -LiteralPath $finalApk) { Remove-Item -LiteralPath $finalApk -Force }
@@ -186,5 +221,5 @@ if ($LASTEXITCODE -ne 0) { throw 'apksigner verify failed.' }
 
 Remove-Item -LiteralPath $alignedApk -Force
 if (Test-Path -LiteralPath "$finalApk.idsig") { Remove-Item -LiteralPath "$finalApk.idsig" -Force }
-Write-Host 'Android arm64 debug-signed APK:'
+Write-Host "Android $label debug-signed APK:"
 Write-Host $finalApk
