@@ -137,6 +137,12 @@ export const getBoostCardEffects = (pet: PetState, now = Date.now()): BoostCardE
   return activeCardId ? { ...boostCardDefinitions[activeCardId], activeCardId } : emptyBoostCardEffects;
 };
 
+export const canClaimBoostCardDailyCoins = (pet: PetState, now = Date.now()) => {
+  const boostCards = normalizeBoostCardState(pet.boostCards, now);
+  const activeCardId = getActiveBoostCard({ ...pet, boostCards }, now);
+  return Boolean(activeCardId && boostCards.dailyCoinsClaimedCardId !== activeCardId);
+};
+
 const passExpiresAtKey = (cardId: BoostCardId) =>
   cardId === 'friend_pass' ? 'friendPassExpiresAt' : 'bestFriendPassExpiresAt';
 

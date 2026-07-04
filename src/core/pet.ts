@@ -117,6 +117,7 @@ export {
   boostCardMaxDurationMs,
   boostCardSchemaVersion,
   buyBoostCard,
+  canClaimBoostCardDailyCoins,
   claimBoostCardDailyCoins,
   defaultBoostCardState,
   getActiveBoostCard,

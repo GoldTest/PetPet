@@ -58,7 +58,7 @@ export const getRandomDailyEncounter = (name: string): DailyEncounter =>
     },
     {
       hearts: 1,
-      text: t('pet.dailyEncounter.heart', { name }),
+      text: t('pet.dailyEncounter.heart', { name, hearts: '{hearts}' }),
     },
   ]);
 
@@ -77,7 +77,7 @@ export const getRandomOfflineEvent = (name: string, weather: WeatherType): Timed
     },
     {
       hearts: 1,
-      text: t('pet.offlineEvent.heart', { name }),
+      text: t('pet.offlineEvent.heart', { name, hearts: '{hearts}' }),
     },
     {
       effect: { mood: 6, cleanliness: -2 },
@@ -109,7 +109,7 @@ export const getRandomDreamEvent = (name: string): TimedEvent =>
     },
     {
       hearts: 1,
-      text: t('pet.dreamEvent.sticker', { name }),
+      text: t('pet.dreamEvent.sticker', { name, hearts: '{hearts}' }),
     },
     {
       itemId: 'emergency_biscuit',
@@ -136,7 +136,7 @@ export const applyTimedEvent = (pet: PetState, event: TimedEvent, now: number, p
     hearts: heartGain.hearts,
     boostCards: heartGain.boostCards,
     inventory: event.itemId ? addInventoryItem(pet.inventory, event.itemId, event.itemAmount ?? 1) : pet.inventory,
-    recentEvent: `${prefix}${event.text}`,
+    recentEvent: `${prefix}${event.text.replace(/\{hearts\}/g, String(heartGain.amount))}`,
     lastDailyRewardAt: prefix === t('pet.prefix.dailyEncounter') ? now : pet.lastDailyRewardAt,
     lastDailyEncounterAt: prefix === t('pet.prefix.dailyEncounter') ? now : pet.lastDailyEncounterAt,
   };

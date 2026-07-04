@@ -32,7 +32,10 @@ export const InventoryPanel = ({ ownedItems, inventory, itemIconMap, onOpenShop,
           const icon = itemIconMap[item.id] ?? item.imageUrl ?? unknownItemIcon;
           return (
             <button type="button" key={item.id} className="inventory-item" disabled={!item.usable} onClick={() => onUseItem(item.id)} title={getItemEffectTitle(item.displaySummary, item.effect)}>
-              <img src={icon} alt="" aria-hidden="true" />
+              <span className="inventory-item__icon-wrap">
+                <img src={icon} alt="" aria-hidden="true" />
+                <strong className="inventory-item__count">x{inventory[item.id]}</strong>
+              </span>
               <div className="inventory-item__copy">
                 <div className="inventory-item__title-row">
                   <span className="inventory-item__name">{item.displayName}</span>
@@ -46,9 +49,8 @@ export const InventoryPanel = ({ ownedItems, inventory, itemIconMap, onOpenShop,
                     </span>
                   )}
                 </div>
-                <small>{item.displaySummary}</small>
+                <small className="inventory-item__summary">{item.displaySummary}</small>
               </div>
-              <strong>x{inventory[item.id]}</strong>
             </button>
           );
         })}

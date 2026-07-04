@@ -7,7 +7,7 @@ import { defaultGardenState, normalizeGardenState } from './garden';
 import { addInventoryItem } from './items';
 import { dailyBiscuitClaimLimit, dailyHeartExchangeLimit, isBuiltinItemId } from './items';
 import { clampCoins, clampCount, clampHealth, clampLevel, clampStat, defaultPetName, getPetStatCap, lowCleanlinessSleepConfirmClicks } from './petStats';
-import type { ActionStreak, BuiltinItemId, Inventory, PetState, PetStatus, RecentActivity, WeatherType } from './petTypes';
+import type { AchievementState, ActionStreak, BuiltinItemId, Inventory, PetState, PetStatus, RecentActivity, WeatherType } from './petTypes';
 import { defaultPomodoroState, normalizePomodoroState } from './pomodoro';
 import { getWeatherForDate, weatherTypeSet } from './weather';
 import { getLocalDateKey, isNumber } from './utils';
@@ -15,8 +15,47 @@ import { defaultYearlyStats, normalizeYearReview, normalizeYearlyStats } from '.
 
 export const helpStarterGiftRewardId = 'starter_help_gift_v1';
 export const helpStarterGiftCoins = 180;
+const goldenAppleStarterBackfillRewardId = 'golden_apple_starter_backfill_v1';
+const legacySave13BonusRewardId = 'legacy_save_1_3_bonus_v1';
+const legacySave13BonusCoins = 3000;
 const goldenAppleBackfillRewardId = 'golden_apple_achievement_backfill_v1';
+const goldenAppleBackfillV2RewardId = 'golden_apple_achievement_backfill_v2';
 const goldenAppleBackfillAchievementIds = ['rare_fruit_collector', 'anniversary_first', 'hidden_never_give_you_up', 'companion_100'] as const;
+type GoldenAppleBackfillAchievementId = typeof goldenAppleBackfillAchievementIds[number];
+const goldenAppleBackfillFruitIds = ['orange', 'apple', 'banana', 'watermelon'] as const;
+const goldenAppleBackfillCoinRewards: Partial<Record<GoldenAppleBackfillAchievementId, number>> = {
+  anniversary_first: 40,
+  hidden_never_give_you_up: 100,
+};
+const dayMs = 24 * 60 * 60 * 1000;
+
+const getLegacyCompanionDays = (createdAt: number, now: number) => Math.max(1, Math.floor(Math.max(0, now - createdAt) / dayMs) + 1);
+
+const getLegacyActiveDaysTotal = (achievements: AchievementState) => {
+  const keys = new Set<string>();
+  Object.values(achievements.counters.companionYearActiveDateKeysByYear).forEach((items) => {
+    items.forEach((key) => keys.add(key));
+  });
+  return keys.size;
+};
+
+const getLegacyMinFruitUses = (achievements: AchievementState) =>
+  Math.min(...goldenAppleBackfillFruitIds.map((id) => achievements.counters.itemUseCountsById[id] ?? 0));
+
+const isGoldenAppleAchievementAutoClaimable = (id: GoldenAppleBackfillAchievementId) =>
+  id === 'rare_fruit_collector' || id === 'companion_100';
+
+const isGoldenAppleAchievementCompleteByHistory = (
+  id: GoldenAppleBackfillAchievementId,
+  achievements: AchievementState,
+  createdAt: number,
+  now: number,
+) => {
+  if (id === 'rare_fruit_collector') return getLegacyMinFruitUses(achievements) >= 3;
+  if (id === 'anniversary_first') return (achievements.counters.dateRewardClaimCountsByKind.anniversary ?? 0) >= 1;
+  if (id === 'hidden_never_give_you_up') return achievements.counters.returnWelcomeClaimCount >= 3;
+  return getLegacyCompanionDays(createdAt, now) >= 100 && getLegacyActiveDaysTotal(achievements) >= 60;
+};
 
 export const defaultActionStreak = (now: number): ActionStreak => ({
   key: 'none',
@@ -85,7 +124,7 @@ export const createDefaultPet = (now = Date.now()): PetState => ({
   lastPetInteractionAt: 0,
   pomodoro: defaultPomodoroState(now),
   hasOpenedHelp: false,
-  claimedRewardIds: [],
+  claimedRewardIds: [goldenAppleStarterBackfillRewardId, legacySave13BonusRewardId],
   birthday: defaultPetBirthday,
   claimedFestivalRewardKeys: [],
   yearlyStats: defaultYearlyStats(now),
@@ -202,30 +241,67 @@ export const normalizePet = (value: unknown, now = Date.now()): PetState => {
     isSleeping: normalizedIsSleeping,
   }, now);
   const hasAchievementState = Boolean(raw.achievements && typeof raw.achievements === 'object' && !Array.isArray(raw.achievements));
+  const baseCoins = clampCoins(isNumber(raw.coins) ? raw.coins : fallback.coins);
   const achievements = normalizeAchievementState(
     raw.achievements,
     now,
     createdAt,
     yearlyStats,
     !hasAchievementState,
-    clampCoins(isNumber(raw.coins) ? raw.coins : fallback.coins),
+    baseCoins,
   );
-  const shouldBackfillGoldenApples = !claimedRewardIds.includes(goldenAppleBackfillRewardId);
-  const goldenAppleBackfillIds = shouldBackfillGoldenApples
-    ? goldenAppleBackfillAchievementIds.filter((id) => achievements.unlockedAtById[id] && (achievements.claimedOneTimeRewardIds.includes(id) || id === 'rare_fruit_collector' || id === 'companion_100'))
-    : [];
-  const normalizedInventory = goldenAppleBackfillIds.length > 0
-    ? addInventoryItem(inventory, 'golden_apple', goldenAppleBackfillIds.length)
+  const shouldBackfillLegacySave13Bonus = !claimedRewardIds.includes(legacySave13BonusRewardId);
+  if (shouldBackfillLegacySave13Bonus) {
+    claimedRewardIds.push(legacySave13BonusRewardId);
+  }
+  const shouldBackfillStarterGoldenApple = !claimedRewardIds.includes(goldenAppleStarterBackfillRewardId);
+  const inventoryWithStarterGoldenApple = shouldBackfillStarterGoldenApple
+    ? addInventoryItem(inventory, 'golden_apple', 1)
     : inventory;
+  if (shouldBackfillStarterGoldenApple) {
+    claimedRewardIds.push(goldenAppleStarterBackfillRewardId);
+  }
+  const shouldBackfillGoldenApples = !claimedRewardIds.includes(goldenAppleBackfillRewardId);
+  const v1GoldenAppleBackfillIds = shouldBackfillGoldenApples
+    ? goldenAppleBackfillAchievementIds.filter((id) => achievements.unlockedAtById[id] && (achievements.claimedOneTimeRewardIds.includes(id) || isGoldenAppleAchievementAutoClaimable(id)))
+    : [];
   if (shouldBackfillGoldenApples) {
     claimedRewardIds.push(goldenAppleBackfillRewardId);
   }
+  const shouldBackfillGoldenApplesV2 = !claimedRewardIds.includes(goldenAppleBackfillV2RewardId);
+  const v2GoldenAppleBackfillIds = shouldBackfillGoldenApplesV2
+    ? goldenAppleBackfillAchievementIds.filter((id) => {
+      if (v1GoldenAppleBackfillIds.includes(id)) return false;
+      return achievements.claimedOneTimeRewardIds.includes(id) || Boolean(achievements.unlockedAtById[id]) || isGoldenAppleAchievementCompleteByHistory(id, achievements, createdAt, now);
+    })
+    : [];
+  if (shouldBackfillGoldenApplesV2) {
+    claimedRewardIds.push(goldenAppleBackfillV2RewardId);
+  }
+  const goldenAppleBackfillIds = Array.from(new Set([...v1GoldenAppleBackfillIds, ...v2GoldenAppleBackfillIds]));
+  const goldenAppleBackfillCoins = goldenAppleBackfillIds.reduce((sum, id) => sum + (goldenAppleBackfillCoinRewards[id] ?? 0), 0);
+  const legacySave13AwardCoins = shouldBackfillLegacySave13Bonus ? legacySave13BonusCoins : 0;
+  const migrationBonusCoins = goldenAppleBackfillCoins + legacySave13AwardCoins;
+  const normalizedInventory = goldenAppleBackfillIds.length > 0
+    ? addInventoryItem(inventoryWithStarterGoldenApple, 'golden_apple', goldenAppleBackfillIds.length)
+    : inventoryWithStarterGoldenApple;
   const claimedOneTimeRewardIds = goldenAppleBackfillIds.length > 0
     ? Array.from(new Set([...achievements.claimedOneTimeRewardIds, ...goldenAppleBackfillIds]))
     : achievements.claimedOneTimeRewardIds;
-  const normalizedAchievements = claimedOneTimeRewardIds === achievements.claimedOneTimeRewardIds
+  const unlockedAtById = v2GoldenAppleBackfillIds.length > 0
+    ? v2GoldenAppleBackfillIds.reduce<AchievementState['unlockedAtById']>((items, id) => ({ ...items, [id]: items[id] ?? now }), achievements.unlockedAtById)
+    : achievements.unlockedAtById;
+  const normalizedCoins = clampCoins(baseCoins + migrationBonusCoins);
+  const counters = migrationBonusCoins > 0
+    ? {
+      ...achievements.counters,
+      coinEarnedTotal: clampCount(achievements.counters.coinEarnedTotal + migrationBonusCoins),
+      maxCoinsHeld: Math.max(achievements.counters.maxCoinsHeld, normalizedCoins),
+    }
+    : achievements.counters;
+  const normalizedAchievements = claimedOneTimeRewardIds === achievements.claimedOneTimeRewardIds && unlockedAtById === achievements.unlockedAtById && counters === achievements.counters
     ? achievements
-    : { ...achievements, claimedOneTimeRewardIds };
+    : { ...achievements, unlockedAtById, claimedOneTimeRewardIds, counters };
 
   return {
     name: normalizedName,
@@ -242,7 +318,7 @@ export const normalizePet = (value: unknown, now = Date.now()): PetState => {
     recentEvent: typeof raw.recentEvent === 'string' ? raw.recentEvent : t('pet.default.welcomeBack'),
     recentActivity: isRecentActivity(raw.recentActivity) ? raw.recentActivity : 'idle',
     recentActivityUntil: isNumber(raw.recentActivityUntil) ? raw.recentActivityUntil : 0,
-    coins: clampCoins(isNumber(raw.coins) ? raw.coins : fallback.coins),
+    coins: normalizedCoins,
     hearts: clampCount(isNumber(raw.hearts) ? raw.hearts : fallback.hearts),
     inventory: normalizedInventory,
     lastDailyRewardAt: isNumber(raw.lastDailyRewardAt) ? raw.lastDailyRewardAt : now,

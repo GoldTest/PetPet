@@ -354,7 +354,7 @@ export const useInventoryItem = (
       recentEvent: t(wokePet ? 'pet.item.use.goldenAppleWoke' : 'pet.item.use.goldenApple', {
         name: current.name,
         item: displayItemName,
-        hearts: heartAmount,
+        hearts: heartGain.amount,
       }),
     }, 'feed', now), now);
     const withAchievementUse = incrementAchievementItemUse(incrementAchievementCareAction(usedGoldenApple, 'feed'), itemId);
@@ -406,9 +406,8 @@ export const useInventoryItem = (
     favoriteMoodBonus > 0
       ? options.favoriteText?.(favoriteMoodBonus) ?? t('pet.item.use.favorite', { amount: favoriteMoodBonus })
       : '';
-  const giftHeartText = giftHeartBonus > 0 ? t('pet.item.use.giftHeart') : '';
-
   const giftHeartGain = applyHeartGain(base, giftHeartBonus);
+  const giftHeartText = giftHeartBonus > 0 ? t('pet.item.use.giftHeart', { hearts: giftHeartGain.amount }) : '';
   const usedItemPet = recordYearlyItemUse(
     recordYearlyCareAction({
       ...withActivity(base, itemActivity[itemId] ?? defaultItemActivity, now),
@@ -482,8 +481,8 @@ export const interactWithPet = (pet: PetState, now = Date.now()): PetState => {
       energy: clampPetStat(base, base.energy - interactionCost.energy),
       lastPetInteractionAt: overuse.triggered ? now + petInteractionOveruseCooldownMs : now,
       recentEvent: overuse.triggered
-        ? `${t('pet.interaction.heart', { name: base.name })}${interactionCost.text}${overuse.text} ${t('pet.interaction.overuseCooldown', { name: base.name })}`
-        : `${t('pet.interaction.heart', { name: base.name })}${interactionCost.text}${overuse.text}`,
+        ? `${t('pet.interaction.heart', { name: base.name, hearts: heartGain.amount })}${interactionCost.text}${overuse.text} ${t('pet.interaction.overuseCooldown', { name: base.name })}`
+        : `${t('pet.interaction.heart', { name: base.name, hearts: heartGain.amount })}${interactionCost.text}${overuse.text}`,
     }, 'touch', now), 'touch', now);
     return recordEarnedHearts(incrementAchievementCareAction(touched, 'touch'), heartGain.amount);
   }

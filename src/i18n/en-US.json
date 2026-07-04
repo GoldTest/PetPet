@@ -698,7 +698,7 @@
       "sleeping": "{name} is sleeping soundly. Better not wake it.",
       "lowEnergy": "{name}'s energy is too low. Rest before interacting.",
       "lowHunger": "{name} is too hungry to interact. Feed your pet first.",
-      "heart": "{name} is in a great mood and gives you a heart.",
+      "heart": "{name} is in a great mood and gives you {hearts} heart(s).",
       "touch": "You pet {name}, and it relaxes a little."
     },
     "incident": {
@@ -720,7 +720,7 @@
       "rest": "{name} woke up refreshed, energy +10.",
       "snack": "{name} secretly found a snack, hunger +10, cleanliness -3.",
       "nightmare": "{name} had a tiny bad dream, mood -5.",
-      "heart": "{name} received a small sticker, heart +1."
+      "heart": "{name} received a small sticker, hearts +{hearts}."
     },
     "offlineDiary": {
       "sunny": [
@@ -743,7 +743,7 @@
     "offlineEvent": {
       "coins": "{name} found a coin that rolled beside the mat, coins +12.",
       "biscuit": "A neighbor passed by and left a soda biscuit, inventory +1.",
-      "heart": "{name} hid a small sticker for your return, heart +1.",
+      "heart": "{name} hid a small sticker for your return, hearts +{hearts}.",
       "sunnyPlay": "{name} secretly basked in the sun, mood +6, cleanliness -2.",
       "play": "{name} played alone for a while, mood +6, cleanliness -2.",
       "hungryHappy": "{name} got a little hungry waiting, but was happy to see you, hunger -4, mood +4.",
@@ -807,7 +807,7 @@
         "care": "{name} used {item}.",
         "careWoke": "{name} woke up and used {item}.",
         "favorite": "This is Furo's favorite flavor, mood +{amount} extra.",
-        "giftHeart": "The gift brought a heart.",
+        "giftHeart": "The gift brought {hearts} heart(s).",
         "birthdayCake": "{name} enjoyed {item}. All stats are full.",
         "birthdayCakeWoke": "{name} woke up and enjoyed {item}. All stats are full.",
         "goldenApple": "{name} enjoyed {item}. All stats +30, hearts +{hearts}.",
@@ -839,7 +839,7 @@
     "dreamEvent": {
       "cloudNap": "{name} dreamed of lying on soft clouds, mood +3 after waking.",
       "coinPath": "{name} dreamed of collecting coins on a star path, coins +10.",
-      "sticker": "{name} dreamed of receiving a glowing sticker, heart +1.",
+      "sticker": "{name} dreamed of receiving a glowing sticker, hearts +{hearts}.",
       "biscuit": "The dream snack basket left a soda biscuit, inventory +1.",
       "puddleRun": "{name} dreamed of running through puddles, energy +4, cleanliness -1."
     },

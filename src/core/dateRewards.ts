@@ -192,7 +192,7 @@ const addRewardItems = (inventory: PetState['inventory'], items: readonly DateRe
 
 const applyReward = (pet: PetState, reward: ClaimedDateReward): { pet: PetState; reward: ClaimedDateReward } => {
   const heartGain = applyHeartGain(pet, reward.hearts ?? 0);
-  const actualReward = reward.hearts && heartGain.amount !== reward.hearts ? { ...reward, hearts: heartGain.amount } : reward;
+  const actualReward = reward.hearts ? { ...reward, hearts: heartGain.amount, message: reward.message.replace(/\{hearts\}/g, String(heartGain.amount)) } : reward;
   return {
     pet: {
       ...pet,
@@ -240,7 +240,7 @@ const claimBirthdayReward = (pet: PetState, now: number): { pet: PetState; rewar
     id: `birthday:${year}`,
     kind: 'birthday',
     title: t('ui.rewards.birthdayTitle', { name: pet.name }),
-    message: t('pet.reward.birthday', { name: pet.name, coins: birthdayRewardCoins, hearts: birthdayRewardHearts }),
+    message: t('pet.reward.birthday', { name: pet.name, coins: birthdayRewardCoins, hearts: '{hearts}' }),
     coins: birthdayRewardCoins,
     hearts: birthdayRewardHearts,
     items: [{ itemId: 'birthday_cake', amount: 1 }],
@@ -264,7 +264,7 @@ const claimAnniversaryReward = (pet: PetState, now: number): { pet: PetState; re
     id: `anniversary:${year}`,
     kind: 'anniversary',
     title: t('ui.rewards.anniversaryTitle', { name: pet.name }),
-    message: t('pet.reward.anniversary', { name: pet.name, coins: anniversaryRewardCoins, hearts: anniversaryRewardHearts }),
+    message: t('pet.reward.anniversary', { name: pet.name, coins: anniversaryRewardCoins, hearts: '{hearts}' }),
     coins: anniversaryRewardCoins,
     hearts: anniversaryRewardHearts,
     items: [{ itemId: 'shiny_sticker', amount: 1 }],

@@ -1,5 +1,5 @@
 import { BadgeCheck, CalendarDays, Cloud, CloudRain, Sparkles, Sprout, Sun, Timer, Wind, type LucideIcon } from 'lucide-react';
-import { getActiveBoostCard, getSeasonInfo, weatherInfo, type PetState, type WeatherType } from '../core/pet';
+import { canClaimBoostCardDailyCoins, getActiveBoostCard, getSeasonInfo, weatherInfo, type PetState, type WeatherType } from '../core/pet';
 import { t } from '../i18n';
 import { formatCompactNumber } from './numberFormat';
 import { formatPomodoroTime } from './time';
@@ -44,6 +44,7 @@ export const FeatureRow = ({
   const currentWeather = weatherInfo[pet.weather];
   const seasonInfo = getSeasonInfo(pet.lastUpdatedAt);
   const activeBoostCardId = getActiveBoostCard(pet);
+  const canClaimBoostCoins = canClaimBoostCardDailyCoins(pet);
   const upgradeCostText = nextUpgradeCost > 0 ? formatCompactNumber(nextUpgradeCost) : '';
   const boostCardHint = activeBoostCardId
     ? t('ui.features.boostCardsActive', { card: t(`ui.boostCards.cards.${activeBoostCardId}.name`) })
@@ -86,7 +87,7 @@ export const FeatureRow = ({
 
       <button
         type="button"
-        className={activeBoostCardId ? 'feature-button feature-button--boost-card feature-button--active' : 'feature-button feature-button--boost-card'}
+        className={canClaimBoostCoins ? 'feature-button feature-button--boost-card feature-button--active' : 'feature-button feature-button--boost-card'}
         onClick={onOpenBoostCards}
         title={t('ui.top.openBoostCards')}
       >
@@ -95,7 +96,7 @@ export const FeatureRow = ({
           {t('ui.features.boostCards')}
           <small>{boostCardHint}</small>
         </span>
-        {activeBoostCardId && <i aria-hidden="true" />}
+        {canClaimBoostCoins && <i aria-hidden="true" />}
       </button>
 
       <button

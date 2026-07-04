@@ -19,7 +19,7 @@ export const gardenSlotUnlockCosts = [100, 1000, 5000, 10000, 30000] as const;
 export const gardenWaterCost = 0;
 export const gardenNormalFertilizerCost = 300;
 export const gardenHeartFertilizerCost = 900;
-export const gardenNutrientCost = 1200;
+export const gardenNutrientCost = 300;
 export const gardenClearBaseCost = 80;
 
 export const gardenTreeSaplingItemIds: Record<GardenTreeId, BuiltinItemId> = {
@@ -56,7 +56,7 @@ export const gardenTreeDefinitions: Record<GardenTreeId, GardenTreeDefinition> =
   care_tree: { id: 'care_tree', price: 520, growDurationMs: 10 * hourMs, harvestCooldownMs: 10 * hourMs, maxHarvests: 7, dropPool: [{ itemId: 'wet_wipes', weight: 26 }, { itemId: 'vitamin_tablet', weight: 20 }, { itemId: 'shampoo', weight: 14 }, { itemId: 'energy_drink', weight: 14 }, { itemId: 'blanket', weight: 10 }, { itemId: 'medicine', weight: 6, rare: true }, { itemId: 'apple', weight: 6 }, { itemId: 'watermelon', weight: 4, rare: true }] },
   gift_tree: { id: 'gift_tree', price: 800, growDurationMs: 12 * hourMs, harvestCooldownMs: 12 * hourMs, maxHarvests: 6, dropPool: [{ itemId: 'small_bouquet', weight: 24 }, { itemId: 'shiny_sticker', weight: 22 }, { itemId: 'ribbon_bell', weight: 18 }, { itemId: 'toy_ball', weight: 14 }, { itemId: 'picture_book', weight: 8, rare: true }, { itemId: 'soft_cloud_doll', weight: 5, rare: true }, { itemId: 'strawberry_cake', weight: 5, rare: true }, { itemId: 'strawberry_milk', weight: 4, rare: true }] },
   money_tree: { id: 'money_tree', price: 3000, growDurationMs: 3 * dayMs, harvestCooldownMs: 36 * hourMs, maxHarvests: 8, dropPool: [] },
-  golden_apple_tree: { id: 'golden_apple_tree', price: 18000, growDurationMs: 5 * dayMs, harvestCooldownMs: 48 * hourMs, maxHarvests: 5, dropPool: [] },
+  golden_apple_tree: { id: 'golden_apple_tree', price: 8888, growDurationMs: 5 * dayMs, harvestCooldownMs: 48 * hourMs, maxHarvests: 7, dropPool: [] },
 };
 
 export const gardenTreeMaxHarvests: Record<GardenTreeId, number> = Object.fromEntries(gardenTreeIds.map((treeId) => [treeId, gardenTreeDefinitions[treeId].maxHarvests])) as Record<GardenTreeId, number>;
@@ -171,7 +171,7 @@ const pickWeightedDrop = (pool: readonly DropPoolEntry[], seed: string, rareWeig
   return weightedPool[weightedPool.length - 1]?.itemId ?? 'orange';
 };
 const getExtraDropItem = (treeId: GardenTreeId, seed: string) => {
-  if (treeId === 'golden_apple_tree') return hashString(seed + ':golden-extra') % 100 < 10 ? 'golden_apple' : 'apple';
+  if (treeId === 'golden_apple_tree') return hashString(seed + ':golden-extra') % 100 < 25 ? 'golden_apple' : 'apple';
   const commonPool = gardenTreeDefinitions[treeId].dropPool.filter((entry) => !entry.rare);
   return pickWeightedDrop(commonPool.length > 0 ? commonPool : gardenTreeDefinitions[treeId].dropPool, seed, 0);
 };
@@ -184,7 +184,16 @@ const getExtraDropChance = (slot: GardenSlot, garden: GardenState) => {
 };
 const pickInRange = (seed: string, min: number, max: number) => min + (hashString(seed) % (max - min + 1));
 const pickMoneyTreeCoins = (seed: string) => { const roll = hashString(seed + ':money-roll') % 100; if (roll < 70) return pickInRange(seed + ':money-common', 600, 1200); if (roll < 95) return pickInRange(seed + ':money-good', 1200, 2200); return pickInRange(seed + ':money-jackpot', 4000, 6000); };
-const pickGoldenAppleTreeItem = (slot: GardenSlot, seed: string): ItemId => { const harvestNumber = slot.harvestsUsed + 1; if (harvestNumber <= 1 || harvestNumber >= slot.maxHarvests) return 'golden_apple'; return hashString(seed + ':golden-main') % 100 < 40 ? 'golden_apple' : 'apple'; };
+const pickGoldenAppleTreeAppleSlot = (seed: string): ItemId => hashString(seed) % 100 < 25 ? 'golden_apple' : 'apple';
+const pickGoldenAppleTreeDrops = (slot: GardenSlot, seed: string): GardenDrop[] => {
+  const harvestNumber = slot.harvestsUsed + 1;
+  const appleSlots = harvestNumber >= slot.maxHarvests - 1 ? 2 : 1;
+  const drops: GardenDrop[] = [{ itemId: 'golden_apple', amount: 1 }];
+  for (let index = 0; index < appleSlots; index += 1) {
+    drops.push({ itemId: pickGoldenAppleTreeAppleSlot(seed + ':apple-slot:' + index), amount: 1 });
+  }
+  return drops;
+};
 const resolveExtraDrop = (pet: PetState, slot: GardenSlot, seed: string, now: number) => {
   const baseChance = getExtraDropChance(slot, pet.garden);
   let hasExtraDrop = baseChance >= 100 || (baseChance > 0 && (hashString(seed + ':extra') % 100) < baseChance);
@@ -202,7 +211,7 @@ const generateGardenDrops = (pet: PetState, slot: GardenSlot, now: number): { dr
   const seed = [slot.slotIndex, slot.treeId, slot.plantedAt, slot.nextReadyAt, slot.harvestsUsed].join(':');
   const extra = resolveExtraDrop(pet, slot, seed, now);
   if (slot.treeId === 'money_tree') { const baseCoins = pickMoneyTreeCoins(seed); const coins = extra.hasExtraDrop ? Math.floor(baseCoins * 1.25) : baseCoins; return { drops: [{ kind: 'coins', amount: coins }], boostCards: extra.boostCards }; }
-  if (slot.treeId === 'golden_apple_tree') { const drops: GardenDrop[] = [{ itemId: pickGoldenAppleTreeItem(slot, seed), amount: 1 }]; if (extra.hasExtraDrop) drops.push({ itemId: getExtraDropItem(slot.treeId, seed + ':common'), amount: 1 }); return { drops: mergeDrops(drops).slice(0, 2), boostCards: extra.boostCards }; }
+  if (slot.treeId === 'golden_apple_tree') { const drops: GardenDrop[] = pickGoldenAppleTreeDrops(slot, seed); if (extra.hasExtraDrop) drops.push({ itemId: getExtraDropItem(slot.treeId, seed + ':common'), amount: 1 }); return { drops: mergeDrops(drops).slice(0, 4), boostCards: extra.boostCards }; }
   const rareWeightBonusPercent = slot.fertilizerType === 'heart' ? getHeartRareWeightBonusPercent(pet.garden.tools) : 0;
   const drops: GardenDrop[] = [{ itemId: pickWeightedDrop(gardenTreeDefinitions[slot.treeId].dropPool, seed, rareWeightBonusPercent), amount: 1 }];
   if (extra.hasExtraDrop) drops.push({ itemId: getExtraDropItem(slot.treeId, seed + ':common'), amount: 1 });

@@ -139,7 +139,7 @@ export const ShopModal = ({
                       </div>
                     )}
                   </div>
-                  <span>{item.displaySummary}</span>
+                  <span className="shop-item__summary">{item.displaySummary}</span>
                   {isDiscountAvailable && <small className="shop-price-note" title={originalPriceTitle}>{t('ui.shop.priceNote', { originalPrice: originalPriceText, label: discountInfo?.label })}</small>}
                 </div>
                 <button type="button" data-buy-item={item.id} disabled={isClaimedOut || !canAfford} title={biscuitClaimInfo ? undefined : priceTitle} onClick={() => onBuyItem(item.id)}>{buttonLabel}</button>

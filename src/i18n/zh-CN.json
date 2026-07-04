@@ -698,7 +698,7 @@
       "sleeping": "{name} 睡得很香，先不要吵醒它。",
       "lowEnergy": "{name} 体力太低了，先休息一下再互动吧。",
       "lowHunger": "{name} 饿得不想互动，先喂点东西吧。",
-      "heart": "{name} 心情很好，送给你一颗小心心。",
+      "heart": "{name} 心情很好，送给你 {hearts} 个小心心。",
       "touch": "你摸了摸 {name}，它放松了一点。"
     },
     "incident": {
@@ -720,7 +720,7 @@
       "rest": "{name} 睡醒后精神很好，体力 +10。",
       "snack": "{name} 偷偷翻了点零食，饱腹 +10，清洁 -3。",
       "nightmare": "{name} 做了个小噩梦，心情 -5。",
-      "heart": "{name} 收到一张小贴纸，小心心 +1。"
+      "heart": "{name} 收到一张小贴纸，小心心 +{hearts}。"
     },
     "offlineDiary": {
       "sunny": [
@@ -743,7 +743,7 @@
     "offlineEvent": {
       "coins": "{name} 在垫子旁边发现一枚滚过去的小硬币，金币 +12。",
       "biscuit": "邻居路过时留下一块苏打饼干，背包 +1。",
-      "heart": "{name} 把一张小贴纸藏好等你回来，小心心 +1。",
+      "heart": "{name} 把一张小贴纸藏好等你回来，小心心 +{hearts}。",
       "sunnyPlay": "{name} 偷偷晒了会儿太阳，心情 +6，清洁 -2。",
       "play": "{name} 自己玩了一会儿，心情 +6，清洁 -2。",
       "hungryHappy": "{name} 等你等得有点饿，但看到你回来很开心，饱腹 -4，心情 +4。",
@@ -807,7 +807,7 @@
         "care": "{name} 使用了{item}。",
         "careWoke": "{name} 醒来使用了{item}。",
         "favorite": "这是 Furo 喜欢的味道，心情额外 +{amount}。",
-        "giftHeart": "礼物带来了一个小心心。",
+        "giftHeart": "礼物带来了 {hearts} 个小心心。",
         "birthdayCake": "{name} 吃下了{item}，全属性回满。",
         "birthdayCakeWoke": "{name} 醒来吃下了{item}，全属性回满。",
         "goldenApple": "{name} 吃下了{item}，全属性恢复 30，并获得 {hearts} 个小心心。",
@@ -839,7 +839,7 @@
     "dreamEvent": {
       "cloudNap": "{name} 梦见躺在软云上，醒来心情 +3。",
       "coinPath": "{name} 梦见沿着星星小路捡硬币，金币 +10。",
-      "sticker": "{name} 梦见收到一张会发光的贴纸，小心心 +1。",
+      "sticker": "{name} 梦见收到一张会发光的贴纸，小心心 +{hearts}。",
       "biscuit": "梦里的点心篮留下了一块苏打饼干，背包 +1。",
       "puddleRun": "{name} 梦见踩着水洼跑步，体力 +4，清洁 -1。"
     },
