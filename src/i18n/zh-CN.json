@@ -442,7 +442,9 @@
       "needSapling": "商店购买 · {coins} 金币",
       "itemOwned": "背包 x{count}",
       "waterFree": "免费 · 缩短 {percent}%",
-      "coinDropTitle": "收获 {coins} 金币"
+      "coinDropTitle": "收获 {coins} 金币",
+      "compensationGiftLabel": "领取种植园补偿 {coins} 金币",
+      "compensationGiftCoins": "+{coins}"
     },
     "boostCards": {
       "kicker": "Boost Card",
@@ -870,6 +872,7 @@
       "dailyCoins": "每日登录礼物：金币 +{coins}。",
       "dailyItem": "每日登录礼物：背包里多了一件惊喜道具。",
       "helpPageGift": "已领取玩法说明赠礼，金币 +{coins}。",
+      "gardenCompensation": "已领取种植园补偿，金币 +{coins}。",
       "anniversary": "今天是和 {name} 相遇的日子，纪念日奖励：金币 +{coins}，小心心 +{hearts}，闪亮贴纸 +1。",
       "monthlyGift": "新的月份开始了，月初礼物：金币 +{coins}，还有一份水果。",
       "dailyWithStipend": "每日登录礼物：金币 +{coins}（含成就津贴 +{stipend}）。",

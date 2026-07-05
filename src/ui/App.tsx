@@ -30,6 +30,8 @@ import {
   getAchievementSummary,
   getDailyWishView,
   getEnergyRecoveryInfo,
+  gardenCompensationCoins,
+  gardenCompensationRewardId,
   getNextUpgradeHeartCost,
   getInventoryItem,
   getInventoryDefinitions,
@@ -41,6 +43,7 @@ import {
   helpPageGiftRewardId,
   helpStarterGiftCoins,
   helpStarterGiftRewardId,
+  clampCoins,
   getPetStatCap,
   getReturnWelcomeView,
   interactWithPet,
@@ -745,6 +748,20 @@ const PetApp = ({ initialPet, initialActiveMod, onResetToPicker }: PetAppProps) 
     });
   };
 
+  const handleClaimGardenCompensation = () => {
+    playAfterUnlock('coin');
+    setPet((current) => {
+      if (current.claimedRewardIds.includes(gardenCompensationRewardId)) return current;
+
+      return recordEarnedCoins({
+        ...current,
+        coins: clampCoins(current.coins + gardenCompensationCoins),
+        claimedRewardIds: [...current.claimedRewardIds, gardenCompensationRewardId],
+        recentEvent: t('pet.reward.gardenCompensation', { coins: gardenCompensationCoins }),
+      }, gardenCompensationCoins);
+    });
+  };
+
   const handleClaimDailyWish = () => {
     playAfterUnlock('tap');
     setPet((current) => {
@@ -971,6 +988,7 @@ const PetApp = ({ initialPet, initialActiveMod, onResetToPicker }: PetAppProps) 
 
   const availableFloatingReward = floatingRewardConfigs.find((reward) => !pet.claimedRewardIds.includes(reward.id));
   const hasClaimedHelpPageGift = pet.claimedRewardIds.includes(helpPageGiftRewardId);
+  const hasClaimedGardenCompensation = pet.claimedRewardIds.includes(gardenCompensationRewardId);
   const activeRewardPopup = rewardQueue[0];
   const activeYearReview = !activeRewardPopup && !achievementCgPopup && !isShopOpen && !isSettingsOpen && !isResetConfirmOpen ? pet.pendingYearReview : undefined;
 
@@ -1110,6 +1128,8 @@ const PetApp = ({ initialPet, initialActiveMod, onResetToPicker }: PetAppProps) 
           onHarvest={handleHarvestTree}
           onClear={handleClearGardenSlot}
           onUpgradeTool={handleUpgradeGardenTool}
+          compensationCoins={gardenCompensationCoins}
+          onClaimCompensation={hasClaimedGardenCompensation ? undefined : handleClaimGardenCompensation}
         />
       ) : (
         <>

@@ -3437,6 +3437,41 @@ h1 {
   color: #4f7a35;
 }
 
+.garden-gift-bubble {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  z-index: 3;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 42px;
+  border: 0;
+  border-radius: 999px;
+  padding: 6px 10px 6px 8px;
+  color: #70420f;
+  background: linear-gradient(135deg, #fff2b8, #ffd278);
+  box-shadow: 0 12px 24px rgba(132, 79, 18, 0.24);
+  font-weight: 950;
+  cursor: pointer;
+}
+
+.garden-gift-bubble img {
+  width: 30px;
+  height: 30px;
+  object-fit: contain;
+  image-rendering: pixelated;
+}
+
+.garden-gift-bubble span {
+  line-height: 1;
+  white-space: nowrap;
+}
+
+.garden-gift-bubble:active {
+  transform: translateY(1px);
+}
+
 .garden-tree-stage--withered > img {
   filter: grayscale(0.9) saturate(0.35) brightness(0.85);
 }
@@ -3674,6 +3709,19 @@ h1 {
 
   .garden-tree-stage > img {
     width: min(280px, 72vw);
+  }
+
+  .garden-gift-bubble {
+    top: 10px;
+    right: 10px;
+    min-height: 38px;
+    padding: 5px 9px 5px 7px;
+    font-size: 0.86rem;
+  }
+
+  .garden-gift-bubble img {
+    width: 26px;
+    height: 26px;
   }
 
   .garden-action-grid,

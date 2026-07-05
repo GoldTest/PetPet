@@ -1,5 +1,5 @@
 import { ArrowLeft, ChevronLeft, ChevronRight, Droplets, Flower2, Leaf, Pickaxe, Sparkles, Sprout } from 'lucide-react';
-import { currencyIcon, treeStageImages } from '../assets';
+import { currencyIcon, giftBoxIcon, treeStageImages } from '../assets';
 import {
   gardenFertilizerItemIds,
   gardenNutrientItemId,
@@ -35,6 +35,8 @@ interface GardenPageProps {
   onHarvest: (slotIndex: number) => void;
   onClear: (slotIndex: number) => void;
   onUpgradeTool: (toolId: GardenToolId) => void;
+  compensationCoins?: number;
+  onClaimCompensation?: () => void;
 }
 
 const toolLevel = (pet: PetState, toolId: GardenToolId) => {
@@ -52,7 +54,7 @@ const formatGardenCountdown = (milliseconds: number) => {
 
 const sameGardenDate = (time: number) => time > 0 && getSixAmResetDateKey(time) === getSixAmResetDateKey(Date.now());
 
-export const GardenPage = ({ pet, itemIconMap, onBack, onSelectSlot, onUnlockSlot, onPlantTree, onWater, onFertilize, onNutrient, onHarvest, onClear, onUpgradeTool }: GardenPageProps) => {
+export const GardenPage = ({ pet, itemIconMap, onBack, onSelectSlot, onUnlockSlot, onPlantTree, onWater, onFertilize, onNutrient, onHarvest, onClear, onUpgradeTool, compensationCoins = 0, onClaimCompensation }: GardenPageProps) => {
   const view = getGardenView(pet);
   const slot = view.activeSlot;
   const slotView = view.slotViews[slot.slotIndex];
@@ -92,6 +94,12 @@ export const GardenPage = ({ pet, itemIconMap, onBack, onSelectSlot, onUnlockSlo
             ))}
           </div>
           <div className={slot.state === 'withered' ? 'garden-tree-stage garden-tree-stage--withered' : 'garden-tree-stage'}>
+            {onClaimCompensation && compensationCoins > 0 && (
+              <button type="button" className="garden-gift-bubble" onClick={onClaimCompensation} aria-label={t('ui.garden.compensationGiftLabel', { coins: compensationCoins })} title={t('ui.garden.compensationGiftLabel', { coins: compensationCoins })}>
+                <img src={giftBoxIcon} alt="" aria-hidden="true" />
+                <span>{t('ui.garden.compensationGiftCoins', { coins: compensationCoins })}</span>
+              </button>
+            )}
             {slot.state === 'empty' || !slot.treeId ? <Sprout size={92} aria-hidden="true" /> : <img src={treeImage} alt="" aria-hidden="true" />}
             {slot.state === 'ready' && (
               <div className="garden-drops">

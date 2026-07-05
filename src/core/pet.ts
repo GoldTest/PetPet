@@ -165,6 +165,8 @@ export {
 } from './pomodoro';
 export {
   createDefaultPet,
+  gardenCompensationCoins,
+  gardenCompensationRewardId,
   getPrimaryStatus,
   getStatusText,
   helpPageGiftCoins,
