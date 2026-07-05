@@ -1,4 +1,4 @@
-import { Bath, Bed, BriefcaseBusiness, Gamepad2, Sparkles } from 'lucide-react';
+import { Bath, Bed, BriefcaseBusiness, Gamepad2 } from 'lucide-react';
 import type { PetAction } from '../core/pet';
 import { t } from '../i18n';
 
@@ -7,7 +7,6 @@ interface ActionDockProps {
   isLowEnergy: boolean;
   isCriticallyHungry: boolean;
   onAction: (action: PetAction) => void;
-  onOpenShop: () => void;
 }
 
 export const ActionDock = ({
@@ -15,7 +14,6 @@ export const ActionDock = ({
   isLowEnergy,
   isCriticallyHungry,
   onAction,
-  onOpenShop,
 }: ActionDockProps) => {
   const lowEnergyTitle = isLowEnergy ? t('ui.actionDock.lowEnergy') : undefined;
   const lowHungerTitle = isCriticallyHungry ? t('ui.actionDock.lowHunger') : undefined;
@@ -49,10 +47,6 @@ export const ActionDock = ({
       <button type="button" className="action-button action-button--sleep" onClick={() => onAction('sleep')}>
         <Bed size={20} aria-hidden="true" />
         <span>{isSleeping ? t('ui.actionDock.wake') : t('ui.actionDock.sleep')}</span>
-      </button>
-      <button type="button" className="action-button action-button--shop" onClick={onOpenShop}>
-        <Sparkles size={20} aria-hidden="true" />
-        <span>{t('ui.actionDock.shop')}</span>
       </button>
     </div>
   );

@@ -37,6 +37,8 @@ import {
   getShopDefinitions,
   createItemRegistry,
   heartExchangeCooldownMs,
+  helpPageGiftCoins,
+  helpPageGiftRewardId,
   helpStarterGiftCoins,
   helpStarterGiftRewardId,
   getPetStatCap,
@@ -412,9 +414,7 @@ const PetApp = ({ initialPet, initialActiveMod, onResetToPicker }: PetAppProps) 
     ? t('ui.pomodoro.lowEnergyTitle')
     : pet.health <= pomodoroMinHealthThreshold
       ? t('ui.pomodoro.lowHealthTitle')
-      : pet.isSleeping
-        ? t('ui.pomodoro.sleepingTitle')
-        : undefined;
+      : undefined;
   const isPomodoroActionDisabled = !pet.pomodoro.isRunning && !canRunPomodoro;
   const currentBgmMode: BgmMode = isShopOpen ? 'shop' : pet.isSleeping ? 'sleep' : 'room';
   const achievementSummary = getAchievementSummary(pet);
@@ -731,6 +731,20 @@ const PetApp = ({ initialPet, initialActiveMod, onResetToPicker }: PetAppProps) 
     });
   };
 
+  const handleClaimHelpPageGift = () => {
+    playAfterUnlock('coin');
+    setPet((current) => {
+      if (current.claimedRewardIds.includes(helpPageGiftRewardId)) return current;
+
+      return recordEarnedCoins({
+        ...current,
+        coins: current.coins + helpPageGiftCoins,
+        claimedRewardIds: [...current.claimedRewardIds, helpPageGiftRewardId],
+        recentEvent: t('pet.reward.helpPageGift', { coins: helpPageGiftCoins }),
+      }, helpPageGiftCoins);
+    });
+  };
+
   const handleClaimDailyWish = () => {
     playAfterUnlock('tap');
     setPet((current) => {
@@ -956,6 +970,7 @@ const PetApp = ({ initialPet, initialActiveMod, onResetToPicker }: PetAppProps) 
   };
 
   const availableFloatingReward = floatingRewardConfigs.find((reward) => !pet.claimedRewardIds.includes(reward.id));
+  const hasClaimedHelpPageGift = pet.claimedRewardIds.includes(helpPageGiftRewardId);
   const activeRewardPopup = rewardQueue[0];
   const activeYearReview = !activeRewardPopup && !achievementCgPopup && !isShopOpen && !isSettingsOpen && !isResetConfirmOpen ? pet.pendingYearReview : undefined;
 
@@ -1179,7 +1194,7 @@ const PetApp = ({ initialPet, initialActiveMod, onResetToPicker }: PetAppProps) 
             </section>
           </div>
 
-          <ActionDock isSleeping={pet.isSleeping} isLowEnergy={isLowEnergy} isCriticallyHungry={isCriticallyHungry} onAction={handleAction} onOpenShop={handleOpenShop} />
+          <ActionDock isSleeping={pet.isSleeping} isLowEnergy={isLowEnergy} isCriticallyHungry={isCriticallyHungry} onAction={handleAction} />
         </>
       )}
 
@@ -1282,11 +1297,13 @@ const PetApp = ({ initialPet, initialActiveMod, onResetToPicker }: PetAppProps) 
           saveText={saveText}
           importSaveText={importSaveText}
           hasOpenedHelp={pet.hasOpenedHelp}
+          hasClaimedHelpPageGift={hasClaimedHelpPageGift}
           onDraftNameChange={setDraftName}
           onDraftBirthdayChange={setDraftBirthday}
           onLanguageChange={handleLanguageChange}
           onImportSaveTextChange={setImportSaveText}
           onOpenHelp={handleOpenHelp}
+          onClaimHelpPageGift={handleClaimHelpPageGift}
           onClose={() => {
             playAfterUnlock('close');
             setSettingsOpen(false);

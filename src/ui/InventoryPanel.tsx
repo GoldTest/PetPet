@@ -19,7 +19,7 @@ export const InventoryPanel = ({ ownedItems, inventory, itemIconMap, onOpenShop,
         <span className="panel-kicker">{t('ui.inventory.kicker')}</span>
         <h2>{t('ui.inventory.title')}</h2>
       </div>
-      <button type="button" className="text-button text-button--accent" onClick={onOpenShop}>
+      <button type="button" className="text-button text-button--accent inventory-shop-button" onClick={onOpenShop}>
         <ShoppingBag size={17} aria-hidden="true" />
         {t('ui.inventory.shop')}
       </button>

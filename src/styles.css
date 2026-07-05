@@ -913,6 +913,18 @@ h1 {
   filter: drop-shadow(0 1px 2px rgba(18, 42, 78, 0.25));
 }
 
+.inventory-shop-button {
+  min-height: 40px;
+  color: #683c08;
+  background: linear-gradient(135deg, #ffe2a8 0%, #ffb36d 100%);
+  box-shadow: inset 0 0 0 1px rgba(192, 101, 22, 0.12), 0 10px 20px rgba(192, 101, 22, 0.16);
+}
+
+.inventory-shop-button svg {
+  color: #b65b11;
+  filter: drop-shadow(0 1px 1px rgba(255, 255, 255, 0.75));
+}
+
 .inventory-list {
   display: grid;
   gap: 8px;
@@ -1044,7 +1056,7 @@ h1 {
   bottom: calc(14px + var(--safe-bottom));
   z-index: 10;
   display: grid;
-  grid-template-columns: repeat(5, minmax(54px, 1fr));
+  grid-template-columns: repeat(4, minmax(54px, 1fr));
   gap: 8px;
   width: min(calc(100% - 24px), 720px);
   padding: 8px;
@@ -1096,16 +1108,6 @@ h1 {
   background: #eaf2ff;
 }
 
-.action-button--shop {
-  color: #683c08;
-  background: linear-gradient(135deg, #ffe2a8 0%, #ffb36d 100%);
-  box-shadow: inset 0 0 0 1px rgba(192, 101, 22, 0.12), 0 10px 20px rgba(192, 101, 22, 0.16);
-}
-
-.action-button--shop svg {
-  color: #b65b11;
-  filter: drop-shadow(0 1px 1px rgba(255, 255, 255, 0.75));
-}
 .action-button__dot {
   position: absolute;
   top: 8px;
@@ -1134,6 +1136,8 @@ h1 {
   display: grid;
   place-items: center;
   padding: calc(18px + var(--safe-top)) 18px calc(18px + var(--safe-bottom));
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
   background: rgba(17, 25, 38, 0.42);
 }
 
@@ -1163,8 +1167,15 @@ h1 {
 
 .shop-modal {
   width: min(100%, 560px);
-  max-height: min(720px, calc(100dvh - var(--safe-top) - var(--safe-bottom) - 36px));
+  max-height: min(720px, calc(100vh - var(--safe-top) - var(--safe-bottom) - 36px));
   overflow: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+@supports (height: 100dvh) {
+  .shop-modal {
+    max-height: min(720px, calc(100dvh - var(--safe-top) - var(--safe-bottom) - 36px));
+  }
 }
 
 .shop-title-row {
@@ -1189,7 +1200,7 @@ h1 {
   gap: 6px;
 }
 
-.shop-resource-pill {
+.shop-resource-pill:not(.coin-pill) {
   display: inline-flex;
   min-width: 0;
   max-width: 88px;
@@ -1203,14 +1214,14 @@ h1 {
   font-variant-numeric: tabular-nums;
 }
 
-.shop-resource-pill strong {
+.shop-resource-pill:not(.coin-pill) strong {
   min-width: 0;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
-.shop-resource-pill img {
+.shop-resource-pill:not(.coin-pill) img {
   width: 20px;
   height: 20px;
   flex: 0 0 auto;
@@ -1218,13 +1229,8 @@ h1 {
   image-rendering: pixelated;
 }
 
-.shop-resource-pill svg {
+.shop-resource-pill:not(.coin-pill) svg {
   flex: 0 0 auto;
-}
-
-.shop-resource-pill--coins {
-  color: #4d3510;
-  background: #ffe59b;
 }
 
 .shop-resource-pill--hearts {
@@ -1729,7 +1735,7 @@ h1 {
   }
 
   .action-dock {
-    grid-template-columns: repeat(5, minmax(0, 1fr));
+    grid-template-columns: repeat(4, minmax(0, 1fr));
     gap: 5px;
     width: calc(100% - 16px);
     padding: 5px;
@@ -2023,6 +2029,31 @@ h1 {
   transform: translate(-50%, -50%);
 }
 
+.help-gift-button {
+  position: absolute;
+  right: 16px;
+  bottom: 16px;
+  display: inline-grid;
+  width: 52px;
+  height: 52px;
+  place-items: center;
+  border: 0;
+  border-radius: 999px;
+  background: #fff5cc;
+  box-shadow: 0 14px 28px rgba(131, 87, 19, 0.2), inset 0 0 0 1px rgba(192, 101, 22, 0.12);
+}
+
+.help-gift-button img {
+  width: 38px;
+  height: 38px;
+  object-fit: contain;
+  image-rendering: pixelated;
+}
+
+.help-gift-button:active {
+  transform: translateY(1px);
+}
+
 .help-modal header {
   display: flex;
   align-items: center;
@@ -2037,6 +2068,10 @@ h1 {
 .help-content {
   display: grid;
   gap: 12px;
+}
+
+.help-modal--gift .help-content {
+  padding-bottom: 52px;
 }
 
 .help-section {
@@ -2194,8 +2229,14 @@ h1 {
 
 .shop-modal {
   grid-template-rows: auto auto auto minmax(0, 1fr);
-  height: min(720px, calc(100dvh - var(--safe-top) - var(--safe-bottom) - 36px));
+  height: min(720px, calc(100vh - var(--safe-top) - var(--safe-bottom) - 36px));
   overflow: hidden;
+}
+
+@supports (height: 100dvh) {
+  .shop-modal {
+    height: min(720px, calc(100dvh - var(--safe-top) - var(--safe-bottom) - 36px));
+  }
 }
 
 .shop-grid {
@@ -2203,6 +2244,7 @@ h1 {
   overflow: auto;
   padding-right: 2px;
   overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
 }
 
 .inventory-panel {
@@ -2219,22 +2261,34 @@ h1 {
 
 @media (max-width: 420px) {
   .modal-backdrop {
+    align-items: start;
     padding: calc(12px + var(--safe-top)) 12px calc(12px + var(--safe-bottom));
   }
 
   .settings-modal,
   .shop-modal {
-    max-height: calc(100dvh - var(--safe-top) - var(--safe-bottom) - 24px);
+    max-height: calc(100vh - var(--safe-top) - var(--safe-bottom) - 24px);
     gap: 14px;
     padding: 14px;
   }
 
   .shop-modal {
-    height: calc(100dvh - var(--safe-top) - var(--safe-bottom) - 24px);
+    height: auto;
+    overflow: auto;
   }
 
   .shop-modal header {
     align-items: flex-start;
+    position: sticky;
+    top: 0;
+    z-index: 2;
+    margin: -14px -14px 0;
+    padding: 14px 14px 10px;
+    background: #fff;
+  }
+
+  .shop-grid {
+    overflow: visible;
   }
 
   .shop-title-row {
@@ -2247,7 +2301,7 @@ h1 {
     justify-content: flex-start;
   }
 
-  .shop-resource-pill {
+  .shop-resource-pill:not(.coin-pill) {
     max-width: 82px;
     height: 30px;
   }
@@ -2322,6 +2376,18 @@ h1 {
 
   .help-author-link {
     font-size: 0.76rem;
+  }
+
+  .help-gift-button {
+    right: 12px;
+    bottom: 12px;
+    width: 48px;
+    height: 48px;
+  }
+
+  .help-gift-button img {
+    width: 34px;
+    height: 34px;
   }
 }
 
@@ -3493,6 +3559,18 @@ h1 {
 
 .garden-harvest-button {
   grid-column: 1 / -1;
+}
+
+.garden-clear-button {
+  grid-column: 1 / -1;
+  color: #8e2d2d;
+  background: #ffe7e7;
+  box-shadow: inset 0 0 0 1px rgba(169, 48, 48, 0.14);
+}
+
+.garden-clear-button:disabled {
+  color: #9a7c7c;
+  background: #f0e2e2;
 }
 
 .boost-card-modal {

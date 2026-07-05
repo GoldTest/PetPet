@@ -3,6 +3,7 @@ import { useRef, useState, type ChangeEvent, type MouseEvent } from 'react';
 import { openUrl } from '@tauri-apps/plugin-opener';
 import { defaultPetBirthday, getPetBirthdayMaxDay, type PetBirthday } from '../core/pet';
 import type { ActivePetMod } from '../core/mod';
+import { giftBoxIcon } from '../assets';
 import { languages, list, t, type LanguageCode } from '../i18n';
 
 interface SettingsModalProps {
@@ -14,11 +15,13 @@ interface SettingsModalProps {
   saveText: string;
   importSaveText: string;
   hasOpenedHelp: boolean;
+  hasClaimedHelpPageGift: boolean;
   onDraftNameChange: (value: string) => void;
   onDraftBirthdayChange: (value: PetBirthday) => void;
   onLanguageChange: (value: LanguageCode) => void;
   onImportSaveTextChange: (value: string) => void;
   onOpenHelp: () => void;
+  onClaimHelpPageGift: () => void;
   onClose: () => void;
   onSaveProfile: () => void;
   onReset: () => void;
@@ -44,11 +47,13 @@ export const SettingsModal = ({
   saveText,
   importSaveText,
   hasOpenedHelp,
+  hasClaimedHelpPageGift,
   onDraftNameChange,
   onDraftBirthdayChange,
   onLanguageChange,
   onImportSaveTextChange,
   onOpenHelp,
+  onClaimHelpPageGift,
   onClose,
   onSaveProfile,
   onReset,
@@ -265,7 +270,7 @@ export const SettingsModal = ({
         )}
       </section>
       {isHelpOpen && (
-        <section className="help-modal" role="dialog" aria-modal="true" aria-labelledby="settings-help-title">
+        <section className={hasClaimedHelpPageGift ? 'help-modal' : 'help-modal help-modal--gift'} role="dialog" aria-modal="true" aria-labelledby="settings-help-title">
           <header>
             <h2 id="settings-help-title">{t('ui.settings.help.title')}</h2>
             <button type="button" className="text-button" onClick={() => setHelpOpen(false)}>
@@ -289,6 +294,17 @@ export const SettingsModal = ({
               </section>
             ))}
           </div>
+          {!hasClaimedHelpPageGift && (
+            <button
+              type="button"
+              className="help-gift-button"
+              aria-label={t('ui.rewards.claim')}
+              title={t('ui.rewards.claim')}
+              onClick={onClaimHelpPageGift}
+            >
+              <img src={giftBoxIcon} alt="" aria-hidden="true" />
+            </button>
+          )}
         </section>
       )}
     </div>

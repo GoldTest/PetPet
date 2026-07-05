@@ -869,6 +869,7 @@
       "festival": "{festival} 礼物送到，背包里多了一份节日道具。",
       "dailyCoins": "每日登录礼物：金币 +{coins}。",
       "dailyItem": "每日登录礼物：背包里多了一件惊喜道具。",
+      "helpPageGift": "已领取玩法说明赠礼，金币 +{coins}。",
       "anniversary": "今天是和 {name} 相遇的日子，纪念日奖励：金币 +{coins}，小心心 +{hearts}，闪亮贴纸 +1。",
       "monthlyGift": "新的月份开始了，月初礼物：金币 +{coins}，还有一份水果。",
       "dailyWithStipend": "每日登录礼物：金币 +{coins}（含成就津贴 +{stipend}）。",

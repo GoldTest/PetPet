@@ -869,6 +869,7 @@
       "festival": "{festival} gift arrived. A seasonal item was added to the bag.",
       "dailyCoins": "Daily login gift: coins +{coins}.",
       "dailyItem": "Daily login gift: a surprise item was added to the bag.",
+      "helpPageGift": "Gameplay help gift claimed, coins +{coins}.",
       "anniversary": "Today is the day you met {name}. Anniversary reward: coins +{coins}, hearts +{hearts}, Shiny Sticker +1.",
       "monthlyGift": "A fresh month begins. Gift: coins +{coins} and a fruit snack.",
       "dailyWithStipend": "Daily login gift: coins +{coins} (includes achievement stipend +{stipend}).",

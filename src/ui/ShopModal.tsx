@@ -56,7 +56,7 @@ export const ShopModal = ({
               <h2 id="shop-title">{t('ui.shop.title')}</h2>
             </div>
             <div className="shop-resource-row">
-              <span className="shop-resource-pill shop-resource-pill--coins" aria-label={fullCoinText} title={fullCoinText}>
+              <span className="coin-pill shop-resource-pill shop-resource-pill--coins" aria-label={fullCoinText} title={fullCoinText}>
                 <img src={currencyIcon} alt="" aria-hidden="true" />
                 <strong>{pet.coins}</strong>
               </span>

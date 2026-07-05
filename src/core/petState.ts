@@ -15,6 +15,8 @@ import { defaultYearlyStats, normalizeYearReview, normalizeYearlyStats } from '.
 
 export const helpStarterGiftRewardId = 'starter_help_gift_v1';
 export const helpStarterGiftCoins = 800;
+export const helpPageGiftRewardId = 'help_page_gift_v1';
+export const helpPageGiftCoins = 600;
 const goldenAppleStarterBackfillRewardId = 'golden_apple_starter_backfill_v1';
 const legacySave13BonusRewardId = 'legacy_save_1_3_bonus_v1';
 const legacySave13BonusCoins = 3000;
