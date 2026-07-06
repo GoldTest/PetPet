@@ -426,6 +426,15 @@
         "clear": "清理枯树 · {coins} 金币",
         "remove": "移除树 · {coins} 金币"
       },
+      "confirm": {
+        "clearTitle": "清理枯树？",
+        "clearMessage": "确定要清理第 {slot} 块地的{tree}吗？这会花费 {coins} 金币，清理后可重新种植。",
+        "clearConfirm": "确认清理",
+        "removeTitle": "移除树？",
+        "removeMessage": "确定要移除第 {slot} 块地的{tree}吗？这会花费 {coins} 金币，当前生长进度和待收获内容都会失去。",
+        "removeConfirm": "确认移除",
+        "cancel": "取消"
+      },
       "tools": {
         "watering_can": {
           "name": "水壶"

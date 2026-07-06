@@ -6,6 +6,7 @@ import {
   claimBoostCardDailyCoins,
   clearWitheredTree,
   fertilizeTree,
+  getGardenClearCost,
   getGardenReminder,
   harvestTree,
   plantTree,
@@ -164,6 +165,7 @@ type WishQuickAction = PetState['dailyWish']['action'] | NonNullable<PetState['r
 type ActivePage = 'home' | 'achievements' | 'garden';
 type AchievementToast = { kind: 'single'; achievement: AchievementView } | { kind: 'review' };
 type AchievementCgPopup = { title: string; description: string; image: string; fileName: string };
+type GardenClearConfirm = { slotIndex: number; kind: 'clear' | 'remove'; treeId: GardenTreeId; coins: number };
 type PetAppProps = { initialPet: PetState; initialActiveMod: ActivePetMod | null; onResetToPicker: (storedMod: ActivePetMod | null) => void };
 type RolePickerProps = {
   installedMod: ActivePetMod | null;
@@ -315,6 +317,7 @@ const PetApp = ({ initialPet, initialActiveMod, onResetToPicker }: PetAppProps) 
   const [importSaveText, setImportSaveText] = useState('');
   const [rewardQueue, setRewardQueue] = useState<RewardPopup[]>([]);
   const [isResetConfirmOpen, setResetConfirmOpen] = useState(false);
+  const [gardenClearConfirm, setGardenClearConfirm] = useState<GardenClearConfirm | null>(null);
   const [featureInfoMessage, setFeatureInfoMessage] = useState<{ message: string; recentEvent: string } | null>(null);
   const [activePage, setActivePage] = useState<ActivePage>('home');
   const activePageRef = useRef<ActivePage>('home');
@@ -587,6 +590,7 @@ const PetApp = ({ initialPet, initialActiveMod, onResetToPicker }: PetAppProps) 
 
   const handleCloseGarden = () => {
     playAfterUnlock('close');
+    setGardenClearConfirm(null);
     setActivePage('home');
   };
 
@@ -611,6 +615,32 @@ const PetApp = ({ initialPet, initialActiveMod, onResetToPicker }: PetAppProps) 
   const handleGardenNutrient = (slotIndex: number) => commitGardenAction((current) => useGardenNutrient(current, slotIndex), 'purchase');
   const handleHarvestTree = (slotIndex: number) => commitGardenAction((current) => harvestTree(current, slotIndex), 'coin');
   const handleClearGardenSlot = (slotIndex: number) => commitGardenAction((current) => clearWitheredTree(current, slotIndex), 'purchase');
+  const handleRequestClearGardenSlot = (slotIndex: number) => {
+    const current = petRef.current;
+    const slot = current.garden.slots[slotIndex];
+    if (!slot || !slot.treeId || slot.state === 'empty') {
+      handleClearGardenSlot(slotIndex);
+      return;
+    }
+
+    playAfterUnlock('tap');
+    setGardenClearConfirm({
+      slotIndex,
+      kind: slot.state === 'withered' ? 'clear' : 'remove',
+      treeId: slot.treeId,
+      coins: getGardenClearCost(current.garden.tools),
+    });
+  };
+  const handleCancelGardenClear = () => {
+    playAfterUnlock('close');
+    setGardenClearConfirm(null);
+  };
+  const handleConfirmGardenClear = () => {
+    const pending = gardenClearConfirm;
+    if (!pending) return;
+    setGardenClearConfirm(null);
+    handleClearGardenSlot(pending.slotIndex);
+  };
   const handleUpgradeGardenTool = (toolId: GardenToolId) => commitGardenAction((current) => upgradeGardenTool(current, toolId), 'purchase');
 
   const handleOpenBoostCards = () => {
@@ -990,7 +1020,7 @@ const PetApp = ({ initialPet, initialActiveMod, onResetToPicker }: PetAppProps) 
   const hasClaimedHelpPageGift = pet.claimedRewardIds.includes(helpPageGiftRewardId);
   const hasClaimedGardenCompensation = pet.claimedRewardIds.includes(gardenCompensationRewardId);
   const activeRewardPopup = rewardQueue[0];
-  const activeYearReview = !activeRewardPopup && !achievementCgPopup && !isShopOpen && !isSettingsOpen && !isResetConfirmOpen ? pet.pendingYearReview : undefined;
+  const activeYearReview = !activeRewardPopup && !achievementCgPopup && !isShopOpen && !isSettingsOpen && !isResetConfirmOpen && !gardenClearConfirm ? pet.pendingYearReview : undefined;
 
   const handleCloseYearReview = () => {
     playAfterUnlock('tap');
@@ -1126,7 +1156,7 @@ const PetApp = ({ initialPet, initialActiveMod, onResetToPicker }: PetAppProps) 
           onFertilize={handleFertilizeTree}
           onNutrient={handleGardenNutrient}
           onHarvest={handleHarvestTree}
-          onClear={handleClearGardenSlot}
+          onClear={handleRequestClearGardenSlot}
           onUpgradeTool={handleUpgradeGardenTool}
           compensationCoins={gardenCompensationCoins}
           onClaimCompensation={hasClaimedGardenCompensation ? undefined : handleClaimGardenCompensation}
@@ -1346,6 +1376,20 @@ const PetApp = ({ initialPet, initialActiveMod, onResetToPicker }: PetAppProps) 
           confirmLabel={t('ui.settings.resetDialog.confirm')}
           onCancel={handleCancelReset}
           onConfirm={handleConfirmReset}
+        />
+      )}
+      {gardenClearConfirm && (
+        <ConfirmDialog
+          title={t(`ui.garden.confirm.${gardenClearConfirm.kind}Title`)}
+          message={t(`ui.garden.confirm.${gardenClearConfirm.kind}Message`, {
+            tree: t(`ui.garden.trees.${gardenClearConfirm.treeId}.name`),
+            slot: gardenClearConfirm.slotIndex + 1,
+            coins: gardenClearConfirm.coins,
+          })}
+          cancelLabel={t('ui.garden.confirm.cancel')}
+          confirmLabel={t(`ui.garden.confirm.${gardenClearConfirm.kind}Confirm`)}
+          onCancel={handleCancelGardenClear}
+          onConfirm={handleConfirmGardenClear}
         />
       )}
     </main>

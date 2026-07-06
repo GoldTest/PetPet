@@ -426,6 +426,15 @@
         "clear": "Clear · {coins} coins",
         "remove": "Remove tree · {coins} coins"
       },
+      "confirm": {
+        "clearTitle": "Clear withered tree?",
+        "clearMessage": "Clear the {tree} in slot {slot}? This costs {coins} coins and lets you plant again.",
+        "clearConfirm": "Clear tree",
+        "removeTitle": "Remove tree?",
+        "removeMessage": "Remove the {tree} in slot {slot}? This costs {coins} coins, and the current growth progress and pending harvest will be lost.",
+        "removeConfirm": "Remove tree",
+        "cancel": "Cancel"
+      },
       "tools": {
         "watering_can": {
           "name": "Watering can"
