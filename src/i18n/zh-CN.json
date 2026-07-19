@@ -46,6 +46,15 @@
       "aria": "背包",
       "kicker": "背包",
       "title": "食物和道具",
+      "modalTitle": "背包",
+      "ownedKinds": "持有 {count} 类道具",
+      "tabsAria": "背包分类",
+      "close": "关闭背包",
+      "use": "使用",
+      "unavailable": "不可使用",
+      "goGarden": "前往种植园",
+      "emptyCategory": "这一分类暂时没有道具。",
+      "openCategoryShop": "去商店看看",
       "shop": "商店",
       "empty": "背包是空的，商店里每天可以领取免费饼干。"
     },
@@ -112,12 +121,16 @@
         "title": "存档",
         "summary": "可以导出当前宠物存档；导入包含 Mod 信息的存档时仍需要单独安装对应 Mod。",
         "exportText": "导出文本",
-        "download": "下载存档",
+        "download": "保存到文件",
         "importFile": "导入文件",
         "exportedAria": "导出的存档文本",
         "pasteText": "粘贴存档文本",
         "importPasted": "导入粘贴内容",
         "generated": "存档文本已生成。",
+        "saved": "存档已保存到所选文件。",
+        "downloadStarted": "存档下载已开始。",
+        "saveCancelled": "已取消保存存档。",
+        "saveFailed": "保存存档文件失败。",
         "imported": "存档已导入。",
         "importedMissingMod": "存档已导入，但它引用了 {name} v{version}。如需外观一致，请导入对应 Mod zip。",
         "importFailed": "导入存档失败。",
@@ -190,7 +203,13 @@
       "activityAlt": "{name} 的动作",
       "statusAlt": "{name} {status}",
       "sceneAria": "宠物状态",
-      "interactAria": "和宠物互动"
+      "interactAria": "和宠物互动",
+      "expandWeather": "展开天气详情",
+      "collapseWeather": "收起天气详情",
+      "expandSeason": "展开季节详情",
+      "collapseSeason": "收起季节详情",
+      "expandStatus": "展开状态栏",
+      "collapseStatus": "收起状态栏"
     },
     "actionDock": {
       "dock": "照顾操作",
@@ -217,6 +236,8 @@
       "level": "Lv.{level}",
       "cost": "{cost} 心心",
       "maxLevel": "已满级",
+      "inventory": "背包",
+      "inventoryKinds": "持有 {count} 类",
       "pomodoro": "番茄钟",
       "boostCards": "增益卡",
       "boostCardsHint": "每日收益加成",
@@ -330,12 +351,15 @@
       "back": "返回",
       "kicker": "Achievement",
       "title": "成就",
-      "unlocked": "已解锁",
-      "unlockedProgress": "已解锁 {unlocked}/{total}",
+      "unlocked": "已完成",
+      "unlockedProgress": "已完成 {unlocked}/{total}",
       "claimable": "可领取",
       "dailyStipend": "每日成就津贴",
       "dailyStipendAmount": "+{coins} 金币",
       "claim": "领取",
+      "claimAll": "领取全部（{count}）",
+      "gardenExtraDrop": "额外产物",
+      "gardenExtraDropAmount": "+{percent}%",
       "dailyStipendClaimed": "今日已领取",
       "reviewNotice": "旧存档或多项成就已整理完毕，可以在这里查看。",
       "tabsAria": "成就分类",
@@ -352,6 +376,7 @@
         "all": "全部",
         "care": "照顾",
         "daily": "日常",
+        "garden": "种植园",
         "shop": "商店",
         "inventory": "背包",
         "pomodoro": "番茄钟",
@@ -368,6 +393,7 @@
       "dailyStipendAuto": "随每日登录奖励自动发放",
       "cg": {
         "open": "查看{title}纪念图片",
+        "view": "查看纪念图",
         "kicker": "纪念图片",
         "save": "保存图片",
         "close": "关闭"
@@ -391,6 +417,32 @@
       "dropTitle": "收获 {count} 件",
       "dailyLimit": "今日达到上限",
       "toolsAria": "种植工具",
+      "openTools": "打开工具升级",
+      "toolsButton": "种植工具",
+      "environmentAria": "种植环境与加成",
+      "weatherLabel": "天气 · {weather}",
+      "seasonLabel": "季节 · {season}",
+      "weatherEffects": {
+        "sunny": "新一轮生长时间 -5%",
+        "cloudy": "额外收获概率 +5%",
+        "rainy": "浇水缩短时间额外 +5%",
+        "breezy": "新一轮生长时间 -3%"
+      },
+      "seasonEffects": {
+        "spring": "新一轮生长时间 -10%",
+        "summer": "浇水缩短时间额外 +3%",
+        "autumn": "额外收获概率 +10%",
+        "winter": "新种树木可收获次数 +1"
+      },
+      "chooseSapling": "选择树苗",
+      "plantDialogTitle": "选择树苗",
+      "plantDialogSummary": "选择当前地块要种下的树苗",
+      "toolsDialogTitle": "种植工具",
+      "toolsDialogSummary": "升级工具以提高日常种植效率",
+      "closeDialog": "关闭",
+      "plantAction": "种植",
+      "buySaplings": "购买树苗和种植用品",
+      "upgradeTool": "升级",
       "toolUpgrade": "升到 Lv.{level} · {coins} 金币",
       "maxTool": "已满级",
       "states": {
@@ -945,6 +997,7 @@
     "achievements": {
       "events": {
         "rewardClaimed": "成就「{title}」奖励已领取。",
+        "rewardsClaimed": "已领取 {count} 项成就奖励。",
         "unlocked": "成就「{title}」已解锁。",
         "dailyStipendClaimed": "已领取每日成就津贴：{coins} 金币。"
       },
@@ -955,6 +1008,7 @@
         "pomodoroCoinBonus": "番茄钟金币 +{amount}",
         "cleanCooldown": "清洁冷却 {seconds} 秒",
         "extraHeartChance": "额外小心心概率 +{percent}%",
+        "gardenExtraDropChance": "收获时额外产物概率 +{percent}%",
         "globalFlatBonus": "全局收益 +{amount}",
         "dailyStipend": "每日成就津贴 +{coins} 金币",
         "careStatBonus": "喂食和清洁恢复 +{amount}",
@@ -1050,12 +1104,40 @@
           "description": "累计领取 100 次每日愿望奖励。"
         },
         "return_welcome_1": {
-          "title": "欢迎回来",
-          "description": "领取 1 次回归欢迎奖励。"
+          "title": "陪伴印记",
+          "description": "获得 1 点陪伴印记。每领取 1 次回归奖励，或每累计活跃 30 天，可获得 1 点。"
         },
         "daily_login_7": {
           "title": "路过也很好",
           "description": "领取 7 次每日登录奖励，不要求连续。"
+        },
+        "garden_first_plant": {
+          "title": "初次播种",
+          "description": "在种植园成功种下 1 棵树。"
+        },
+        "garden_first_harvest": {
+          "title": "第一篮收获",
+          "description": "在种植园完成第 1 次收获。"
+        },
+        "garden_water_20": {
+          "title": "勤快浇水",
+          "description": "在种植园成功浇水 20 次。"
+        },
+        "garden_harvest_30": {
+          "title": "大丰收",
+          "description": "在种植园累计收获 30 次。"
+        },
+        "garden_tree_catalogue": {
+          "title": "园艺大师",
+          "description": "果树、护理之树、礼物树、摇钱树和金苹果树各收获至少 1 次。"
+        },
+        "garden_all_slots": {
+          "title": "花园之主",
+          "description": "解锁种植园的全部 5 个栏位。"
+        },
+        "garden_tools_max": {
+          "title": "工具专家",
+          "description": "将水壶、铲子和肥料箱全部升级到 3 级。"
         },
         "first_purchase": {
           "title": "第一次采购",
@@ -1223,11 +1305,11 @@
         },
         "hidden_never_give_you_up": {
           "title": "never give you up",
-          "description": "领取 3 次回归奖励。"
+          "description": "获得 3 点陪伴印记。回归奖励与每 30 个累计活跃日都会贡献 1 点。"
         },
         "hidden_never_let_you_down": {
           "title": "never let you down",
-          "description": "领取 10 次回归奖励。"
+          "description": "获得 10 点陪伴印记。回归奖励与每 30 个累计活跃日都会贡献 1 点。"
         },
         "hidden_quiet_companion": {
           "title": "默默陪伴",

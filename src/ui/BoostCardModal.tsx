@@ -1,6 +1,7 @@
 import { Heart, Sparkles, X } from 'lucide-react';
 import { boostCardDefinitions, boostCardIds, getActiveBoostCard, getBoostCardEffects, type BoostCardId, type PetState } from '../core/pet';
 import { t } from '../i18n';
+import { DialogShell } from './DialogShell';
 
 interface BoostCardModalProps {
   pet: PetState;
@@ -18,8 +19,7 @@ export const BoostCardModal = ({ pet, onClose, onBuyCard, onClaimDailyCoins }: B
   const bestFriendActive = activeCardId === 'best_friend_pass';
 
   return (
-    <div className="modal-backdrop" role="presentation">
-      <section className="boost-card-modal" role="dialog" aria-modal="true" aria-labelledby="boost-card-title">
+    <DialogShell className="boost-card-modal" labelId="boost-card-title" onClose={onClose}>
         <header className="boost-card-modal__header">
           <div>
             <span>{t('ui.boostCards.kicker')}</span>
@@ -59,7 +59,6 @@ export const BoostCardModal = ({ pet, onClose, onBuyCard, onClaimDailyCoins }: B
             );
           })}
         </div>
-      </section>
-    </div>
+    </DialogShell>
   );
 };

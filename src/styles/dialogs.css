@@ -1,0 +1,214 @@
+.dialog-shell {
+  width: min(100%, 560px);
+  max-height: min(760px, calc(100dvh - var(--safe-top) - var(--safe-bottom) - 36px));
+  overflow: auto;
+  border: 1px solid rgba(255, 255, 255, 0.8);
+  border-radius: 8px;
+  background: var(--surface);
+  box-shadow: 0 22px 56px rgba(20, 35, 52, 0.24);
+  outline: 0;
+}
+
+.dialog-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+}
+
+.dialog-title-group {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  gap: 10px;
+}
+
+.dialog-title-group > div {
+  display: grid;
+  min-width: 0;
+  gap: 2px;
+}
+
+.dialog-title-group h2,
+.dialog-title-group p {
+  margin: 0;
+}
+
+.dialog-title-group h2 {
+  color: var(--text);
+  font-size: 1.3rem;
+}
+
+.dialog-title-group p {
+  color: var(--text-muted);
+  font-size: 0.8rem;
+  font-weight: 700;
+}
+
+.dialog-title-icon {
+  display: grid;
+  width: 42px;
+  height: 42px;
+  flex: 0 0 auto;
+  place-items: center;
+  border-radius: 8px;
+  color: #245b96;
+  background: var(--surface-blue);
+}
+
+.dialog-header__actions {
+  display: flex;
+  flex: 0 0 auto;
+  align-items: center;
+  gap: 8px;
+}
+
+.inventory-modal {
+  display: grid;
+  grid-template-rows: auto auto minmax(0, 1fr);
+  width: min(680px, calc(100vw - 32px));
+  align-content: start;
+  gap: 14px;
+  padding: 18px;
+}
+
+.inventory-tabs {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 6px;
+  padding: 5px;
+  border-radius: 8px;
+  background: #edf2f7;
+}
+
+.inventory-tab {
+  display: inline-flex;
+  min-width: 0;
+  min-height: 42px;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  border: 0;
+  border-radius: 8px;
+  color: var(--text-muted);
+  background: transparent;
+  font-weight: 850;
+}
+
+.inventory-tab small {
+  min-width: 20px;
+  padding: 2px 5px;
+  border-radius: 999px;
+  color: #53647a;
+  background: rgba(255, 255, 255, 0.72);
+  font-size: 0.68rem;
+}
+
+.inventory-tab[aria-selected="true"] {
+  color: var(--text);
+  background: var(--surface);
+  box-shadow: 0 5px 14px rgba(35, 58, 83, 0.1);
+}
+
+.inventory-modal__list {
+  display: grid;
+  max-height: min(500px, 58dvh);
+  min-height: 0;
+  align-content: start;
+  gap: 8px;
+  overflow: auto;
+  padding-right: 2px;
+  overscroll-behavior: contain;
+}
+
+.inventory-modal__item {
+  display: grid;
+  grid-template-columns: 56px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+  padding: 11px 12px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--surface-soft);
+}
+
+.inventory-modal__item .inventory-item__icon-wrap img {
+  width: 48px;
+  height: 48px;
+  object-fit: contain;
+  image-rendering: pixelated;
+}
+
+.inventory-modal__action {
+  min-width: 96px;
+  white-space: nowrap;
+}
+
+.inventory-modal__empty {
+  display: grid;
+  min-height: 230px;
+  place-items: center;
+  align-content: center;
+  gap: 12px;
+  border: 1px dashed rgba(42, 58, 78, 0.18);
+  border-radius: 8px;
+  color: var(--text-muted);
+  background: var(--surface-soft);
+  text-align: center;
+}
+
+.shop-modal,
+.settings-modal,
+.boost-card-modal,
+.help-modal {
+  border: 1px solid rgba(255, 255, 255, 0.8);
+  background: var(--surface);
+  box-shadow: 0 22px 56px rgba(20, 35, 52, 0.24);
+}
+
+@media (max-width: 560px) {
+  .modal-backdrop {
+    align-items: end;
+    padding: calc(10px + var(--safe-top)) 10px 0;
+  }
+
+  .dialog-shell {
+    width: 100%;
+    max-height: calc(100dvh - var(--safe-top) - 10px);
+    border-radius: 8px 8px 0 0;
+  }
+
+  .inventory-modal {
+    width: 100%;
+    min-height: min(82dvh, 720px);
+    padding: 14px;
+  }
+
+  .inventory-modal__header {
+    align-items: flex-start;
+  }
+
+  .dialog-header__actions .secondary-button {
+    width: 42px;
+    padding: 0;
+    font-size: 0;
+  }
+
+  .inventory-tabs {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .inventory-modal__list {
+    max-height: none;
+  }
+
+  .inventory-modal__item {
+    grid-template-columns: 50px minmax(0, 1fr);
+  }
+
+  .inventory-modal__action {
+    grid-column: 2;
+    justify-self: start;
+  }
+}

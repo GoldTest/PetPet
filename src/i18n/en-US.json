@@ -46,6 +46,15 @@
       "aria": "Inventory",
       "kicker": "Inventory",
       "title": "Food and Items",
+      "modalTitle": "Inventory",
+      "ownedKinds": "{count} item types owned",
+      "tabsAria": "Inventory categories",
+      "close": "Close inventory",
+      "use": "Use",
+      "unavailable": "Unavailable",
+      "goGarden": "Go to garden",
+      "emptyCategory": "There are no items in this category yet.",
+      "openCategoryShop": "Browse the shop",
       "shop": "Shop",
       "empty": "Inventory is empty. You can claim 3 soda biscuits from the shop each day."
     },
@@ -112,12 +121,16 @@
         "title": "Save",
         "summary": "Export the current pet save. Saves that reference a mod still need that mod installed separately.",
         "exportText": "Export text",
-        "download": "Download save",
+        "download": "Save to file",
         "importFile": "Import file",
         "exportedAria": "Exported save text",
         "pasteText": "Paste save text",
         "importPasted": "Import pasted save",
         "generated": "Save text generated.",
+        "saved": "Save exported to the selected file.",
+        "downloadStarted": "Save download started.",
+        "saveCancelled": "Save export cancelled.",
+        "saveFailed": "Failed to save the save file.",
         "imported": "Save imported.",
         "importedMissingMod": "Save imported, but it references {name} v{version}. Import the matching mod zip for the same appearance.",
         "importFailed": "Failed to import save.",
@@ -190,7 +203,13 @@
       "activityAlt": "{name}'s activity",
       "statusAlt": "{name} {status}",
       "sceneAria": "Pet status",
-      "interactAria": "Interact with pet"
+      "interactAria": "Interact with pet",
+      "expandWeather": "Expand weather details",
+      "collapseWeather": "Collapse weather details",
+      "expandSeason": "Expand season details",
+      "collapseSeason": "Collapse season details",
+      "expandStatus": "Expand status bar",
+      "collapseStatus": "Collapse status bar"
     },
     "actionDock": {
       "dock": "Care actions",
@@ -217,6 +236,8 @@
       "level": "Lv.{level}",
       "cost": "{cost} hearts",
       "maxLevel": "Max level",
+      "inventory": "Inventory",
+      "inventoryKinds": "{count} types owned",
       "pomodoro": "Pomodoro",
       "boostCards": "Boost cards",
       "boostCardsHint": "Daily bonus perks",
@@ -330,12 +351,15 @@
       "back": "Back",
       "kicker": "Achievement",
       "title": "Achievements",
-      "unlocked": "Unlocked",
-      "unlockedProgress": "Unlocked {unlocked}/{total}",
+      "unlocked": "Completed",
+      "unlockedProgress": "Completed {unlocked}/{total}",
       "claimable": "Claimable",
       "dailyStipend": "Daily achievement stipend",
       "dailyStipendAmount": "+{coins} coins",
       "claim": "Claim",
+      "claimAll": "Claim all ({count})",
+      "gardenExtraDrop": "Bonus produce",
+      "gardenExtraDropAmount": "+{percent}%",
       "dailyStipendClaimed": "Claimed today",
       "reviewNotice": "Older save data or multiple achievements have been organized. Review them here.",
       "tabsAria": "Achievement categories",
@@ -352,6 +376,7 @@
         "all": "All",
         "care": "Care",
         "daily": "Daily",
+        "garden": "Garden",
         "shop": "Shop",
         "inventory": "Inventory",
         "pomodoro": "Pomodoro",
@@ -368,6 +393,7 @@
       "dailyStipendAuto": "Paid automatically with daily login rewards",
       "cg": {
         "open": "View {title} memorial image",
+        "view": "View memorial",
         "kicker": "Memorial image",
         "save": "Save image",
         "close": "Close"
@@ -391,6 +417,32 @@
       "dropTitle": "{count} item(s)",
       "dailyLimit": "Daily limit reached",
       "toolsAria": "Garden tools",
+      "openTools": "Open tool upgrades",
+      "toolsButton": "Garden tools",
+      "environmentAria": "Garden environment and bonuses",
+      "weatherLabel": "Weather · {weather}",
+      "seasonLabel": "Season · {season}",
+      "weatherEffects": {
+        "sunny": "New growth cycle time -5%",
+        "cloudy": "Bonus harvest chance +5%",
+        "rainy": "Watering time reduction +5%",
+        "breezy": "New growth cycle time -3%"
+      },
+      "seasonEffects": {
+        "spring": "New growth cycle time -10%",
+        "summer": "Watering time reduction +3%",
+        "autumn": "Bonus harvest chance +10%",
+        "winter": "New trees can be harvested +1 time"
+      },
+      "chooseSapling": "Choose a sapling",
+      "plantDialogTitle": "Choose a sapling",
+      "plantDialogSummary": "Choose the sapling to plant in this slot",
+      "toolsDialogTitle": "Garden tools",
+      "toolsDialogSummary": "Upgrade tools to improve daily garden work",
+      "closeDialog": "Close",
+      "plantAction": "Plant",
+      "buySaplings": "Buy saplings and garden supplies",
+      "upgradeTool": "Upgrade",
       "toolUpgrade": "Upgrade to Lv.{level} · {coins} coins",
       "maxTool": "Max level",
       "states": {
@@ -945,6 +997,7 @@
     "achievements": {
       "events": {
         "rewardClaimed": "Achievement \"{title}\" reward claimed.",
+        "rewardsClaimed": "Claimed rewards from {count} achievements.",
         "unlocked": "Achievement \"{title}\" unlocked.",
         "dailyStipendClaimed": "Daily achievement stipend claimed: {coins} coins."
       },
@@ -955,6 +1008,7 @@
         "pomodoroCoinBonus": "Pomodoro coins +{amount}",
         "cleanCooldown": "Clean cooldown {seconds}s",
         "extraHeartChance": "Extra heart chance +{percent}%",
+        "gardenExtraDropChance": "Bonus produce chance on harvest +{percent}%",
         "globalFlatBonus": "Global yield +{amount}",
         "dailyStipend": "Daily achievement stipend +{coins} coins",
         "careStatBonus": "Feed and clean recovery +{amount}",
@@ -1050,12 +1104,40 @@
           "description": "Claim 100 daily wish rewards in total."
         },
         "return_welcome_1": {
-          "title": "Welcome Back",
-          "description": "Claim 1 return welcome reward."
+          "title": "Companion Mark",
+          "description": "Earn 1 companion mark. Each return reward or every 30 cumulative active days grants 1 mark."
         },
         "daily_login_7": {
           "title": "Just Passing By",
           "description": "Claim daily login rewards 7 times. They do not need to be consecutive."
+        },
+        "garden_first_plant": {
+          "title": "First Planting",
+          "description": "Successfully plant 1 tree in the garden."
+        },
+        "garden_first_harvest": {
+          "title": "First Basket",
+          "description": "Complete your first garden harvest."
+        },
+        "garden_water_20": {
+          "title": "Steady Watering",
+          "description": "Successfully water garden trees 20 times."
+        },
+        "garden_harvest_30": {
+          "title": "Bumper Harvest",
+          "description": "Complete 30 garden harvests."
+        },
+        "garden_tree_catalogue": {
+          "title": "Master Gardener",
+          "description": "Harvest the fruit, care, gift, money, and golden apple trees at least once each."
+        },
+        "garden_all_slots": {
+          "title": "Garden Master",
+          "description": "Unlock all 5 garden slots."
+        },
+        "garden_tools_max": {
+          "title": "Tool Expert",
+          "description": "Upgrade the watering can, shovel, and fertilizer box to level 3."
         },
         "first_purchase": {
           "title": "First Purchase",
@@ -1223,11 +1305,11 @@
         },
         "hidden_never_give_you_up": {
           "title": "never give you up",
-          "description": "Claim 3 return rewards."
+          "description": "Earn 3 companion marks. Return rewards and every 30 cumulative active days each grant 1 mark."
         },
         "hidden_never_let_you_down": {
           "title": "never let you down",
-          "description": "Claim 10 return rewards."
+          "description": "Earn 10 companion marks. Return rewards and every 30 cumulative active days each grant 1 mark."
         },
         "hidden_quiet_companion": {
           "title": "Quiet Companion",

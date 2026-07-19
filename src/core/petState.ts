@@ -246,6 +246,7 @@ export const normalizePet = (value: unknown, now = Date.now()): PetState => {
   }, now);
   const hasAchievementState = Boolean(raw.achievements && typeof raw.achievements === 'object' && !Array.isArray(raw.achievements));
   const baseCoins = clampCoins(isNumber(raw.coins) ? raw.coins : fallback.coins);
+  const garden = normalizeGardenState(raw.garden, now);
   const achievements = normalizeAchievementState(
     raw.achievements,
     now,
@@ -296,16 +297,28 @@ export const normalizePet = (value: unknown, now = Date.now()): PetState => {
     ? v2GoldenAppleBackfillIds.reduce<AchievementState['unlockedAtById']>((items, id) => ({ ...items, [id]: items[id] ?? now }), achievements.unlockedAtById)
     : achievements.unlockedAtById;
   const normalizedCoins = clampCoins(baseCoins + migrationBonusCoins);
-  const counters = migrationBonusCoins > 0
+  const countersWithMigration = migrationBonusCoins > 0
     ? {
       ...achievements.counters,
       coinEarnedTotal: clampCount(achievements.counters.coinEarnedTotal + migrationBonusCoins),
       maxCoinsHeld: Math.max(achievements.counters.maxCoinsHeld, normalizedCoins),
     }
     : achievements.counters;
-  const normalizedAchievements = claimedOneTimeRewardIds === achievements.claimedOneTimeRewardIds && unlockedAtById === achievements.unlockedAtById && counters === achievements.counters
-    ? achievements
-    : { ...achievements, unlockedAtById, claimedOneTimeRewardIds, counters };
+  const gardenHarvestCountsByTreeId = { ...countersWithMigration.gardenHarvestCountsByTreeId };
+  garden.slots.forEach((slot) => {
+    if (!slot.treeId || slot.harvestsUsed <= 0) return;
+    gardenHarvestCountsByTreeId[slot.treeId] = Math.max(gardenHarvestCountsByTreeId[slot.treeId] ?? 0, 1);
+  });
+  const counters = {
+    ...countersWithMigration,
+    gardenPlantCount: Math.max(
+      countersWithMigration.gardenPlantCount,
+      garden.lifetimeHarvestCount > 0 || garden.slots.some((slot) => slot.state !== 'empty') ? 1 : 0,
+    ),
+    gardenWaterCount: Math.max(countersWithMigration.gardenWaterCount, garden.dailyWaterCount),
+    gardenHarvestCountsByTreeId,
+  };
+  const normalizedAchievements = { ...achievements, unlockedAtById, claimedOneTimeRewardIds, counters };
 
   return {
     name: normalizedName,
@@ -383,7 +396,7 @@ export const normalizePet = (value: unknown, now = Date.now()): PetState => {
     returnWelcome: normalizeReturnWelcomeState(raw.returnWelcome),
     achievements: normalizedAchievements,
     lastCleanActionAt: isNumber(raw.lastCleanActionAt) ? Math.max(0, Math.floor(raw.lastCleanActionAt)) : 0,
-    garden: normalizeGardenState(raw.garden, now),
+    garden,
     boostCards: normalizeBoostCardState(raw.boostCards, now),
   };
 };

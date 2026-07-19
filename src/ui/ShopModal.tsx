@@ -13,6 +13,7 @@ import { currencyIcon, unknownItemIcon } from '../assets';
 import { t } from '../i18n';
 import { getItemEffectBadges } from './itemEffectBadges';
 import { formatCompactNumber } from './numberFormat';
+import { DialogShell } from './DialogShell';
 
 interface ShopModalProps {
   pet: PetState;
@@ -47,8 +48,7 @@ export const ShopModal = ({
   const exchangeCoinsText = formatCompactNumber(heartExchangeInfo.coins);
 
   return (
-    <div className="modal-backdrop" role="presentation">
-      <section className="shop-modal" role="dialog" aria-modal="true" aria-labelledby="shop-title">
+    <DialogShell className="shop-modal" labelId="shop-title" onClose={onClose}>
         <header>
           <div className="shop-title-row">
             <div className="shop-title-copy">
@@ -147,7 +147,6 @@ export const ShopModal = ({
             );
           })}
         </div>
-      </section>
-    </div>
+    </DialogShell>
   );
 };

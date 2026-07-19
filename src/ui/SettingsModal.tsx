@@ -5,6 +5,7 @@ import { defaultPetBirthday, getPetBirthdayMaxDay, type PetBirthday } from '../c
 import type { ActivePetMod } from '../core/mod';
 import { giftBoxIcon } from '../assets';
 import { languages, list, t, type LanguageCode } from '../i18n';
+import { DialogShell } from './DialogShell';
 
 interface SettingsModalProps {
   activeMod: ActivePetMod | null;
@@ -104,8 +105,8 @@ export const SettingsModal = ({
   };
 
   return (
-    <div className="modal-backdrop" role="presentation">
-      <section className="settings-modal" role="dialog" aria-modal="true" aria-labelledby="settings-title">
+    <>
+      <DialogShell className="settings-modal" labelId="settings-title" onClose={onClose} closeOnEscape={!isHelpOpen}>
         <header>
           <div className="settings-title-row">
             {page !== 'main' && (
@@ -233,6 +234,7 @@ export const SettingsModal = ({
                 <strong>{t('ui.settings.save.title')}</strong>
                 <span>{t('ui.settings.save.summary')}</span>
               </div>
+              {modMessage && <p className="settings-message">{modMessage}</p>}
               <div className="modal-actions">
                 <button type="button" className="primary-button" onClick={onExportSave}>
                   <FileText size={18} aria-hidden="true" />
@@ -268,9 +270,9 @@ export const SettingsModal = ({
             </button>
           </div>
         )}
-      </section>
+      </DialogShell>
       {isHelpOpen && (
-        <section className={hasClaimedHelpPageGift ? 'help-modal' : 'help-modal help-modal--gift'} role="dialog" aria-modal="true" aria-labelledby="settings-help-title">
+        <DialogShell className={hasClaimedHelpPageGift ? 'help-modal' : 'help-modal help-modal--gift'} labelId="settings-help-title" onClose={() => setHelpOpen(false)}>
           <header>
             <h2 id="settings-help-title">{t('ui.settings.help.title')}</h2>
             <button type="button" className="text-button" onClick={() => setHelpOpen(false)}>
@@ -305,8 +307,8 @@ export const SettingsModal = ({
               <img src={giftBoxIcon} alt="" aria-hidden="true" />
             </button>
           )}
-        </section>
+        </DialogShell>
       )}
-    </div>
+    </>
   );
 };

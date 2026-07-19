@@ -240,6 +240,9 @@ export interface AchievementCounters {
   maxCoinsHeld: number;
   manualWakeCount: number;
   naturalWakeCount: number;
+  gardenPlantCount: number;
+  gardenWaterCount: number;
+  gardenHarvestCountsByTreeId: Partial<Record<GardenTreeId, number>>;
   companionYearActiveDateKeysByYear: Record<string, string[]>;
 }
 

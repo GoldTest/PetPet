@@ -90,6 +90,7 @@ export {
   gardenTreeMaxHarvests,
   gardenWaterCost,
   getGardenClearCost,
+  getGardenEnvironmentEffects,
   getGardenReminder,
   getGardenStage,
   getGardenToolUpgradeCost,
@@ -227,9 +228,10 @@ export {
   withPetIdentityBirthday,
 } from './dateRewards';
 
-export type { AchievementCategory, AchievementEvaluationResult, AchievementRarity, AchievementReward, AchievementSummary, AchievementView } from './achievements';
+export type { AchievementCategory, AchievementClaimAllResult, AchievementEvaluationResult, AchievementRarity, AchievementReward, AchievementSummary, AchievementView } from './achievements';
 export {
   achievementDefinitions,
+  claimAllAchievementRewards,
   claimAchievementDailyStipend,
   claimAchievementReward,
   evaluateAchievementUnlocks,
