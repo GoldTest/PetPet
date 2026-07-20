@@ -1,5 +1,5 @@
-import { BadgeCheck, PackageOpen, Sprout, Timer } from 'lucide-react';
-import { canClaimBoostCardDailyCoins, getActiveBoostCard, type PetState } from '../core/pet';
+import { BadgeCheck, CalendarClock, PackageOpen, Sprout, Timer } from 'lucide-react';
+import { canClaimBoostCardDailyCoins, getActiveBoostCard, partnerScheduleUnlockLevel, type PetState } from '../core/pet';
 import { t } from '../i18n';
 import { formatPomodoroTime } from './time';
 
@@ -14,6 +14,7 @@ interface FeatureRowProps {
   onOpenPomodoro: () => void;
   onOpenGarden: () => void;
   onOpenBoostCards: () => void;
+  onOpenPartnerSchedule: () => void;
 }
 
 export const FeatureRow = ({
@@ -27,6 +28,7 @@ export const FeatureRow = ({
   onOpenPomodoro,
   onOpenGarden,
   onOpenBoostCards,
+  onOpenPartnerSchedule,
 }: FeatureRowProps) => {
   const activeBoostCardId = getActiveBoostCard(pet);
   const canClaimBoostCoins = canClaimBoostCardDailyCoins(pet);
@@ -38,6 +40,14 @@ export const FeatureRow = ({
     : gardenReminder === 'withered'
       ? t('ui.features.gardenWithered')
       : t('ui.features.gardenHint');
+  const isPartnerScheduleUnlocked = pet.level >= partnerScheduleUnlockLevel;
+  const partnerScheduleHint = !isPartnerScheduleUnlocked
+    ? t('ui.features.partnerScheduleLocked', { level: partnerScheduleUnlockLevel })
+    : pet.partnerSchedule.pendingResult
+      ? t('ui.features.partnerScheduleReady')
+      : pet.partnerSchedule.active
+        ? t('ui.features.partnerScheduleActive')
+        : t('ui.features.partnerScheduleHint');
 
   return (
     <div className="feature-row" aria-label={t('ui.features.aria')}>
@@ -89,6 +99,21 @@ export const FeatureRow = ({
           <small>{gardenHint}</small>
         </span>
         {gardenReminder && <i aria-hidden="true" />}
+      </button>
+
+      <button
+        type="button"
+        className={pet.partnerSchedule.active || pet.partnerSchedule.pendingResult ? 'feature-button feature-button--partner-schedule feature-button--active' : 'feature-button feature-button--partner-schedule'}
+        disabled={!isPartnerScheduleUnlocked}
+        onClick={onOpenPartnerSchedule}
+        title={partnerScheduleHint}
+      >
+        <CalendarClock size={20} aria-hidden="true" />
+        <span>
+          {t('ui.features.partnerSchedule')}
+          <small>{partnerScheduleHint}</small>
+        </span>
+        {pet.partnerSchedule.pendingResult ? <i aria-hidden="true" /> : null}
       </button>
     </div>
   );

@@ -52,6 +52,8 @@
       "close": "关闭背包",
       "use": "使用",
       "unavailable": "不可使用",
+      "partnerScheduleBusy": "伙伴正在进行日程，暂时不能使用这件道具。",
+      "partnerScheduleBusyShort": "日程进行中",
       "goGarden": "前往种植园",
       "emptyCategory": "这一分类暂时没有道具。",
       "openCategoryShop": "去商店看看",
@@ -204,6 +206,7 @@
       "statusAlt": "{name} {status}",
       "sceneAria": "宠物状态",
       "interactAria": "和宠物互动",
+      "partnerScheduleBusy": "伙伴正在进行日程",
       "expandWeather": "展开天气详情",
       "collapseWeather": "收起天气详情",
       "expandSeason": "展开季节详情",
@@ -246,7 +249,96 @@
       "garden": "花园",
       "gardenHint": "种下与收获",
       "gardenReady": "有树可收获",
-      "gardenWithered": "有枯树待清理"
+      "gardenWithered": "有枯树待清理",
+      "partnerSchedule": "伙伴日程",
+      "partnerScheduleHint": "安排今天的活动",
+      "partnerScheduleLocked": "Lv.{level} 解锁",
+      "partnerScheduleReady": "有活动收获待领取",
+      "partnerScheduleActive": "日程进行中"
+    },
+    "partnerSchedule": {
+      "aria": "伙伴日程",
+      "back": "返回首页",
+      "kicker": "Partner Schedule",
+      "title": "伙伴日程",
+      "summary": "安排伙伴完成现实时间活动，期间宠物状态暂停自然变化。",
+      "skillsAria": "活动熟练度",
+      "skillLevel": "熟练度 Lv.{level}",
+      "categories": {
+        "study": "学习",
+        "cooking": "料理",
+        "garden": "园艺",
+        "exercise": "运动"
+      },
+      "sizes": {
+        "short": "短活动",
+        "standard": "标准活动",
+        "long": "长活动"
+      },
+      "todayKicker": "Today",
+      "todayTitle": "今天的活动",
+      "dailyCount": "已完成 {count}/{total}",
+      "activeAria": "进行中的活动",
+      "activeKicker": "日程进行中",
+      "homeDockAria": "当前伙伴日程",
+      "homeDockKicker": "伙伴日程",
+      "open": "查看伙伴日程",
+      "busyShort": "日程进行中",
+      "busyHint": "伙伴正在进行日程，暂时不能进行照顾操作。",
+      "remaining": "还需 {time}",
+      "progress": "活动进度 {percent}%",
+      "cancel": "提前结束",
+      "completed": "已完成",
+      "start": "开始活动",
+      "rewardPreview": "{coins} 金币 · 熟练度 +{xp}",
+      "cost": {
+        "energy": "体力 -{amount}",
+        "hunger": "饱腹 -{amount}",
+        "mood": "心情 -{amount}"
+      },
+      "blocked": {
+        "locked": "尚未解锁",
+        "busy": "已有活动",
+        "pending": "先领取收获",
+        "completed": "已完成",
+        "sleeping": "正在睡觉",
+        "energy": "体力不足",
+        "hunger": "饱腹不足",
+        "mood": "心情不足",
+        "health": "健康不足",
+        "missing": "暂不可用"
+      },
+      "resultAria": "活动收获",
+      "resultKicker": "活动完成",
+      "resultSummary": "选择这次活动更需要的收获。",
+      "claimCoins": "领取 {coins} 金币",
+      "claimXp": "熟练度 +{xp}",
+      "categoryRewards": {
+        "study": "整理笔记 · {coins} 金币",
+        "cooking": "留下餐点 · {coins} 金币",
+        "garden": "带回树苗 · {coins} 金币",
+        "exercise": "充分休息 · {coins} 金币"
+      },
+      "cancelDialog": {
+        "title": "提前结束活动？",
+        "message": "当前进度会清空，开始时消耗的状态不会返还。",
+        "keep": "继续活动",
+        "confirm": "提前结束"
+      },
+      "activities": {
+        "study_notes": { "title": "整理随手笔记", "summary": "把零散记录重新分类，顺便复习今天学到的内容。" },
+        "study_archive": { "title": "整理旧书", "summary": "清点书页和标签，完成一份可以长期使用的目录。" },
+        "study_research": { "title": "专题研究", "summary": "安静地完成一段深入阅读，并整理完整结论。" },
+        "cooking_snack": { "title": "准备小点心", "summary": "用现有食材做一份简单点心，练习掌握火候。" },
+        "cooking_lunch": { "title": "准备午餐", "summary": "规划搭配并完成一份营养均衡的便当。" },
+        "cooking_feast": { "title": "筹备丰盛餐点", "summary": "处理多种食材，完成一次更有挑战的料理。" },
+        "garden_seedlings": { "title": "照看果苗", "summary": "检查新芽和土壤，让幼苗保持良好状态。" },
+        "garden_orchard": { "title": "整理果园", "summary": "逐一检查树木并记录下一轮养护安排。" },
+        "garden_field_day": { "title": "全天园艺计划", "summary": "集中完成修整、浇水和土壤管理。" },
+        "exercise_walk": { "title": "轻快散步", "summary": "用舒服的节奏活动身体，顺便熟悉周围环境。" },
+        "exercise_training": { "title": "体能训练", "summary": "完成一组循序渐进的练习，保持稳定节奏。" },
+        "exercise_challenge": { "title": "耐力挑战", "summary": "为一个更长的目标分配体力并坚持到底。" }
+      }
     },
     "rewards": {
       "claim": "领取奖励",
@@ -1339,6 +1431,29 @@
           "title": "任务达人",
           "description": "完成 36 个普通任务即可解锁。"
         }
+      }
+    },
+    "partnerSchedule": {
+      "completed": "{name} 完成了今天的活动，可以去看看收获。",
+      "started": "{name} 开始进行今天的伙伴日程。",
+      "startBlocked": {
+        "locked": "伙伴日程会在 Lv.3 解锁。",
+        "busy": "{name} 已经有正在进行的活动。",
+        "pending": "先领取上一次活动的收获。",
+        "completed": "这个活动今天已经完成了。",
+        "sleeping": "{name} 还在睡觉，醒来后再安排活动吧。",
+        "energy": "{name} 的体力还不足以开始这项活动。",
+        "hunger": "{name} 需要先吃点东西。",
+        "mood": "{name} 现在没有心情开始这项活动。",
+        "health": "{name} 需要先恢复健康。",
+        "missing": "这个活动已经不可用了。"
+      },
+      "busyAction": "{name} 正在进行伙伴日程，现在不能进行宠物照顾。",
+      "cancelled": "{name} 提前结束了活动，已经完成的进度没有保留。",
+      "noResult": "现在没有可以领取的活动收获。",
+      "claimed": {
+        "coins": "领取了活动收获，金币 +{coins}。",
+        "category": "带回了活动成果，金币 +{coins}。"
       }
     },
     "garden": {

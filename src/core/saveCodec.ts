@@ -198,7 +198,7 @@ export const parseSaveFileText = (text: string, now = Date.now()): PocPetImporte
 export const loadStoredPetJson = (raw: string | null, now = Date.now()) => {
   if (!raw) return createDefaultPet(now);
   try {
-    return advancePet(normalizePet(JSON.parse(raw), now), now);
+    return advancePet(JSON.parse(raw) as PetState, now);
   } catch {
     return createDefaultPet(now);
   }

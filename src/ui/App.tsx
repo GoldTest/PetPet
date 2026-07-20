@@ -4,6 +4,8 @@ import {
   buyBoostCard,
   claimBoostCardDailyCoins,
   getGardenReminder,
+  cancelPartnerSchedule,
+  claimPartnerScheduleResult,
   applyPetAction,
   claimAllAchievementRewards,
   claimAchievementReward,
@@ -37,6 +39,7 @@ import {
   updatePetProfile,
   shopCategories,
   startPomodoro,
+  startPartnerSchedule,
   updatePomodoroSettings,
   upgradePet,
   useInventoryItem,
@@ -53,6 +56,7 @@ import {
   type PetBirthday,
   type PetState,
   type PetStatus,
+  type PartnerScheduleRewardChoice,
   type PomodoroDurations,
   type ShopCategory,
 } from '../core/pet';
@@ -83,6 +87,7 @@ import { GardenPage } from './GardenPage';
 import { HomePage } from './HomePage';
 import { InventoryModal } from './InventoryModal';
 import { PomodoroOverlay } from './PomodoroOverlay';
+import { PartnerSchedulePage } from './PartnerSchedulePage';
 import { RolePicker } from './RolePicker';
 import { SettingsModal } from './SettingsModal';
 import { ShopModal } from './ShopModal';
@@ -203,6 +208,7 @@ const PetApp = ({ initialPet, initialActiveMod, onResetToPicker }: PetAppProps) 
   const [saveText, setSaveText] = useState('');
   const [importSaveText, setImportSaveText] = useState('');
   const [isResetConfirmOpen, setResetConfirmOpen] = useState(false);
+  const [isPartnerScheduleCancelConfirmOpen, setPartnerScheduleCancelConfirmOpen] = useState(false);
   const [activeAchievementCategory, setActiveAchievementCategory] = useState<'all' | AchievementCategory>('all');
   const [achievementCgPopup, setAchievementCgPopup] = useState<AchievementCgPopup | null>(null);
   const completedFocusCountRef = useRef(pet.pomodoro.completedFocusCount);
@@ -435,6 +441,47 @@ const PetApp = ({ initialPet, initialActiveMod, onResetToPicker }: PetAppProps) 
     playAfterUnlock('close');
     resetGardenClearConfirm();
     setActivePage('home');
+  };
+
+  const handleOpenPartnerSchedule = () => {
+    if (petRef.current.level < 3) {
+      playAfterUnlock('error');
+      return;
+    }
+    playAfterUnlock('open');
+    setActivePage('partnerSchedule');
+    setPet((current) => recordPetInteraction(current));
+  };
+
+  const handleClosePartnerSchedule = () => {
+    playAfterUnlock('close');
+    setPartnerScheduleCancelConfirmOpen(false);
+    setActivePage('home');
+  };
+
+  const handleStartPartnerSchedule = (offerId: string) => {
+    playAfterUnlock('tap');
+    const next = startPartnerSchedule(petRef.current, offerId);
+    const didStart = next.partnerSchedule.active?.offerId === offerId;
+    playSfx(didStart ? 'action_work_play_medicine' : 'error');
+    setPet(commitPet(next));
+    if (didStart) setActivePage('home');
+  };
+
+  const handleClaimPartnerSchedule = (choice: PartnerScheduleRewardChoice) => {
+    playAfterUnlock('tap');
+    setPet((current) => {
+      const hadResult = Boolean(current.partnerSchedule.pendingResult);
+      const next = claimPartnerScheduleResult(current, choice);
+      playSfx(hadResult && !next.partnerSchedule.pendingResult ? 'coin' : 'error');
+      return commitPet(next);
+    });
+  };
+
+  const handleConfirmPartnerScheduleCancel = () => {
+    setPartnerScheduleCancelConfirmOpen(false);
+    playAfterUnlock('close');
+    setPet((current) => commitPet(cancelPartnerSchedule(current)));
   };
 
   const handleOpenBoostCards = () => {
@@ -924,6 +971,15 @@ const PetApp = ({ initialPet, initialActiveMod, onResetToPicker }: PetAppProps) 
           compensationCoins={gardenCompensationCoins}
           onClaimCompensation={hasClaimedGardenCompensation ? undefined : handleClaimGardenCompensation}
         />
+      ) : activePage === 'partnerSchedule' ? (
+        <PartnerSchedulePage
+          pet={pet}
+          itemIconMap={itemIconMap}
+          onBack={handleClosePartnerSchedule}
+          onStart={handleStartPartnerSchedule}
+          onCancel={() => setPartnerScheduleCancelConfirmOpen(true)}
+          onClaim={handleClaimPartnerSchedule}
+        />
       ) : (
         <HomePage
           pet={pet}
@@ -948,6 +1004,7 @@ const PetApp = ({ initialPet, initialActiveMod, onResetToPicker }: PetAppProps) 
           onOpenPomodoro={handleOpenPomodoro}
           onOpenGarden={handleOpenGarden}
           onOpenBoostCards={handleOpenBoostCards}
+          onOpenPartnerSchedule={handleOpenPartnerSchedule}
           onAction={handleAction}
         />
       )}
@@ -979,6 +1036,7 @@ const PetApp = ({ initialPet, initialActiveMod, onResetToPicker }: PetAppProps) 
           inventory={pet.inventory}
           itemIconMap={itemIconMap}
           activeCategory={inventoryController.activeCategory}
+          isPetBusy={Boolean(pet.partnerSchedule.active)}
           onCategoryChange={inventoryController.setActiveCategory}
           onClose={handleCloseInventory}
           onOpenShop={handleOpenShop}
@@ -1093,6 +1151,16 @@ const PetApp = ({ initialPet, initialActiveMod, onResetToPicker }: PetAppProps) 
           confirmLabel={t('ui.settings.resetDialog.confirm')}
           onCancel={handleCancelReset}
           onConfirm={handleConfirmReset}
+        />
+      )}
+      {isPartnerScheduleCancelConfirmOpen && (
+        <ConfirmDialog
+          title={t('ui.partnerSchedule.cancelDialog.title')}
+          message={t('ui.partnerSchedule.cancelDialog.message')}
+          cancelLabel={t('ui.partnerSchedule.cancelDialog.keep')}
+          confirmLabel={t('ui.partnerSchedule.cancelDialog.confirm')}
+          onCancel={() => setPartnerScheduleCancelConfirmOpen(false)}
+          onConfirm={handleConfirmPartnerScheduleCancel}
         />
       )}
       {gardenClearConfirm && (

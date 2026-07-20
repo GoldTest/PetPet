@@ -214,6 +214,17 @@
   background: var(--surface-pink);
 }
 
+.pet:disabled {
+  cursor: default;
+}
+
+.pet-level-button:disabled {
+  cursor: not-allowed;
+  color: #7c8798;
+  background: #e6ebf2;
+  opacity: 0.78;
+}
+
 .pet-badge__collapse {
   width: 30px;
   height: 30px;

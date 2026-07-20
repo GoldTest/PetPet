@@ -52,6 +52,8 @@
       "close": "Close inventory",
       "use": "Use",
       "unavailable": "Unavailable",
+      "partnerScheduleBusy": "Your companion is busy with a schedule, so this item cannot be used now.",
+      "partnerScheduleBusyShort": "Schedule active",
       "goGarden": "Go to garden",
       "emptyCategory": "There are no items in this category yet.",
       "openCategoryShop": "Browse the shop",
@@ -204,6 +206,7 @@
       "statusAlt": "{name} {status}",
       "sceneAria": "Pet status",
       "interactAria": "Interact with pet",
+      "partnerScheduleBusy": "Companion schedule in progress",
       "expandWeather": "Expand weather details",
       "collapseWeather": "Collapse weather details",
       "expandSeason": "Expand season details",
@@ -246,7 +249,96 @@
       "garden": "Garden",
       "gardenHint": "Grow trees",
       "gardenReady": "Ready to harvest",
-      "gardenWithered": "Withered tree"
+      "gardenWithered": "Withered tree",
+      "partnerSchedule": "Partner Schedule",
+      "partnerScheduleHint": "Plan today's activities",
+      "partnerScheduleLocked": "Unlocks at Lv.{level}",
+      "partnerScheduleReady": "Activity rewards ready",
+      "partnerScheduleActive": "Schedule in progress"
+    },
+    "partnerSchedule": {
+      "aria": "Partner Schedule",
+      "back": "Back home",
+      "kicker": "Partner Schedule",
+      "title": "Partner Schedule",
+      "summary": "Schedule a real-time companion activity while natural pet stats are paused.",
+      "skillsAria": "Activity proficiency",
+      "skillLevel": "Proficiency Lv.{level}",
+      "categories": {
+        "study": "Study",
+        "cooking": "Cooking",
+        "garden": "Gardening",
+        "exercise": "Exercise"
+      },
+      "sizes": {
+        "short": "Short",
+        "standard": "Standard",
+        "long": "Long"
+      },
+      "todayKicker": "Today",
+      "todayTitle": "Today's activities",
+      "dailyCount": "Completed {count}/{total}",
+      "activeAria": "Active schedule",
+      "activeKicker": "Schedule in progress",
+      "homeDockAria": "Current partner schedule",
+      "homeDockKicker": "Partner Schedule",
+      "open": "Open partner schedule",
+      "busyShort": "Schedule active",
+      "busyHint": "Your companion is busy with a schedule, so pet care is unavailable.",
+      "remaining": "{time} remaining",
+      "progress": "Activity progress {percent}%",
+      "cancel": "End early",
+      "completed": "Completed",
+      "start": "Start",
+      "rewardPreview": "{coins} coins · proficiency +{xp}",
+      "cost": {
+        "energy": "Energy -{amount}",
+        "hunger": "Hunger -{amount}",
+        "mood": "Mood -{amount}"
+      },
+      "blocked": {
+        "locked": "Locked",
+        "busy": "Already active",
+        "pending": "Claim reward first",
+        "completed": "Completed",
+        "sleeping": "Sleeping",
+        "energy": "Low energy",
+        "hunger": "Low hunger",
+        "mood": "Low mood",
+        "health": "Low health",
+        "missing": "Unavailable"
+      },
+      "resultAria": "Activity rewards",
+      "resultKicker": "Activity complete",
+      "resultSummary": "Choose the reward that matters most this time.",
+      "claimCoins": "Claim {coins} coins",
+      "claimXp": "Proficiency +{xp}",
+      "categoryRewards": {
+        "study": "Organize notes · {coins} coins",
+        "cooking": "Keep the meal · {coins} coins",
+        "garden": "Bring a sapling · {coins} coins",
+        "exercise": "Recover well · {coins} coins"
+      },
+      "cancelDialog": {
+        "title": "End this activity early?",
+        "message": "Current progress will be lost, and the starting stat costs will not be restored.",
+        "keep": "Keep going",
+        "confirm": "End early"
+      },
+      "activities": {
+        "study_notes": { "title": "Organize Notes", "summary": "Sort loose notes and review what was learned today." },
+        "study_archive": { "title": "Archive Old Books", "summary": "Check pages and labels, then build a useful catalog." },
+        "study_research": { "title": "Focused Research", "summary": "Complete a deeper reading session and record the findings." },
+        "cooking_snack": { "title": "Make a Snack", "summary": "Prepare something simple and practice timing the heat." },
+        "cooking_lunch": { "title": "Prepare Lunch", "summary": "Plan and make a balanced bento for the day." },
+        "cooking_feast": { "title": "Prepare a Feast", "summary": "Handle several ingredients in a more demanding meal." },
+        "garden_seedlings": { "title": "Tend Seedlings", "summary": "Check fresh shoots and keep the soil in good condition." },
+        "garden_orchard": { "title": "Organize the Orchard", "summary": "Inspect every tree and plan the next care cycle." },
+        "garden_field_day": { "title": "Full Garden Day", "summary": "Handle pruning, watering, and soil care in one long session." },
+        "exercise_walk": { "title": "Brisk Walk", "summary": "Move at a comfortable pace and explore the neighborhood." },
+        "exercise_training": { "title": "Fitness Training", "summary": "Complete a steady set of progressive exercises." },
+        "exercise_challenge": { "title": "Endurance Challenge", "summary": "Budget energy carefully and stay with a longer goal." }
+      }
     },
     "rewards": {
       "claim": "Claim reward",
@@ -1339,6 +1431,29 @@
           "title": "Task Master",
           "description": "Complete 36 normal tasks to unlock."
         }
+      }
+    },
+    "partnerSchedule": {
+      "completed": "{name} finished today's activity. The rewards are ready.",
+      "started": "{name} started today's partner schedule.",
+      "startBlocked": {
+        "locked": "Partner Schedule unlocks at Lv.3.",
+        "busy": "{name} already has an active schedule.",
+        "pending": "Claim the previous activity reward first.",
+        "completed": "This activity is already complete today.",
+        "sleeping": "{name} is still asleep. Try again after waking up.",
+        "energy": "{name} needs more energy for this activity.",
+        "hunger": "{name} needs something to eat first.",
+        "mood": "{name} is not in the mood for this activity.",
+        "health": "{name} needs to recover first.",
+        "missing": "This activity is no longer available."
+      },
+      "busyAction": "{name} is busy with a partner schedule, so pet care is unavailable.",
+      "cancelled": "{name} ended the activity early. Its progress was not kept.",
+      "noResult": "There are no activity rewards to claim.",
+      "claimed": {
+        "coins": "Activity rewards claimed. Coins +{coins}.",
+        "category": "Activity results collected. Coins +{coins}."
       }
     },
     "garden": {

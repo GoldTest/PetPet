@@ -13,6 +13,7 @@ import type { BuiltinItemId, BuyItemOptions, CareActionKey, ItemId, PetAction, P
 import { defaultPomodoroState, getDefaultPomodoroRemainingMs, getPomodoroPhaseDurationMs, normalizePomodoroSettings, pickPomodoroActivity, pomodoroMinHealthThreshold, pomodoroPhaseLabels, pomodoroResetEventMinFocusMs } from './pomodoro';
 import { settleSleep, startSleepSnapshot } from './petEvents';
 import { getLocalDateKey, randomInt } from './utils';
+import { isPartnerSchedulePetBusy } from './partnerSchedule';
 
 const clearLowCleanlinessSleepConfirm = (pet: PetState): PetState =>
   pet.lowCleanlinessSleepConfirmCount > 0 ? { ...pet, lowCleanlinessSleepConfirmCount: 0 } : pet;
@@ -43,6 +44,9 @@ export const getWorkReward = (pet: PetState, now = Date.now()) => {
 
 export const upgradePet = (pet: PetState, now = Date.now()): PetState => {
   const current = clearLowCleanlinessSleepConfirm(advancePet(pet, now));
+  if (isPartnerSchedulePetBusy(current)) {
+    return { ...current, recentEvent: t('pet.partnerSchedule.busyAction', { name: current.name }) };
+  }
   if (current.level >= maxPetLevel) {
     return { ...current, recentEvent: t('pet.upgrade.maxLevel', { level: current.level }) };
   }
@@ -99,6 +103,13 @@ export const exchangeHeartForCoins = (pet: PetState, now = Date.now()): PetState
 export const applyPetAction = (pet: PetState, action: PetAction, now = Date.now()): PetState => {
   const advanced = markInteraction(advancePet(pet, now), now);
   const current = action === 'sleep' ? advanced : clearLowCleanlinessSleepConfirm(advanced);
+
+  if (isPartnerSchedulePetBusy(current)) {
+    return {
+      ...current,
+      recentEvent: t('pet.partnerSchedule.busyAction', { name: current.name }),
+    };
+  }
 
   if (action !== 'sleep' && current.isSleeping) {
     return incrementManualWake({
@@ -306,6 +317,9 @@ export const useInventoryItem = (
   options: UseInventoryItemOptions = {},
 ): PetState => {
   const current = clearLowCleanlinessSleepConfirm(markInteraction(advancePet(pet, now), now));
+  if (isPartnerSchedulePetBusy(current)) {
+    return { ...current, recentEvent: t('pet.partnerSchedule.busyAction', { name: current.name }) };
+  }
   const item = options.item ?? getInventoryItem(itemId);
   if (!item) return { ...current, recentEvent: t('pet.item.missing') };
   const isUsable = 'usable' in item ? item.usable : true;
@@ -434,6 +448,9 @@ export const useInventoryItem = (
 
 export const interactWithPet = (pet: PetState, now = Date.now()): PetState => {
   const current = clearLowCleanlinessSleepConfirm(markInteraction(advancePet(pet, now), now));
+  if (isPartnerSchedulePetBusy(current)) {
+    return { ...current, recentEvent: t('pet.partnerSchedule.busyAction', { name: current.name }) };
+  }
   if (now - current.lastPetInteractionAt < petInteractionCooldownMs) {
     return {
       ...current,

@@ -67,18 +67,19 @@
 
 .garden-environment__item {
   --environment-accent: #2f73c9;
-  --environment-border: rgba(47, 115, 201, 0.24);
-  --environment-tint: var(--surface-blue);
+  --environment-border: rgba(47, 115, 201, 0.3);
+  --environment-tint: rgba(234, 243, 255, 0.8);
   display: flex;
   min-width: 0;
   align-items: center;
   gap: 8px;
   border: 1px solid var(--environment-border);
-  border-left-width: 4px;
+  border-left-width: 3px;
   border-radius: 8px;
   padding: 6px 8px;
   background: var(--environment-tint);
-  box-shadow: 0 8px 20px rgba(40, 67, 91, 0.07);
+  box-shadow: 0 5px 14px rgba(44, 64, 86, 0.07);
+  backdrop-filter: blur(10px);
 }
 
 .garden-environment__item > span:last-child {
@@ -107,50 +108,50 @@
   place-items: center;
   border-radius: 8px;
   color: var(--environment-accent);
-  background: rgba(255, 255, 255, 0.64);
+  background: transparent;
 }
 
 .garden-environment__item--weather-sunny,
 .garden-environment__item--season-summer {
   --environment-accent: #8a6114;
   --environment-border: rgba(166, 110, 22, 0.28);
-  --environment-tint: var(--surface-gold);
+  --environment-tint: rgba(255, 245, 216, 0.82);
 }
 
 .garden-environment__item--weather-cloudy {
   --environment-accent: #526c82;
   --environment-border: rgba(82, 108, 130, 0.26);
-  --environment-tint: #eef4f8;
+  --environment-tint: rgba(238, 244, 248, 0.82);
 }
 
 .garden-environment__item--weather-rainy {
   --environment-accent: #2f73c9;
   --environment-border: rgba(47, 115, 201, 0.28);
-  --environment-tint: var(--surface-blue);
+  --environment-tint: rgba(234, 243, 255, 0.84);
 }
 
 .garden-environment__item--weather-breezy {
   --environment-accent: #347a68;
   --environment-border: rgba(52, 122, 104, 0.26);
-  --environment-tint: #e9f8f3;
+  --environment-tint: rgba(233, 248, 243, 0.84);
 }
 
 .garden-environment__item--season-spring {
   --environment-accent: #a9476d;
   --environment-border: rgba(185, 79, 117, 0.26);
-  --environment-tint: var(--surface-pink);
+  --environment-tint: rgba(255, 240, 245, 0.84);
 }
 
 .garden-environment__item--season-autumn {
   --environment-accent: #75602f;
   --environment-border: rgba(117, 96, 47, 0.26);
-  --environment-tint: #f7f3e3;
+  --environment-tint: rgba(248, 244, 230, 0.84);
 }
 
 .garden-environment__item--season-winter {
   --environment-accent: #4d7089;
   --environment-border: rgba(77, 112, 137, 0.26);
-  --environment-tint: #edf6fa;
+  --environment-tint: rgba(237, 246, 250, 0.84);
 }
 
 .garden-tools-button--stage {
@@ -282,6 +283,10 @@
 .garden-tree-stage > img {
   width: min(410px, 74vw);
   max-height: 390px;
+}
+
+.garden-drops {
+  transform: translate(-50%, 54px);
 }
 
 .garden-action-grid {

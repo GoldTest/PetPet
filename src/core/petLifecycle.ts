@@ -19,6 +19,7 @@ import {
   pomodoroMinHealthThreshold,
 } from './pomodoro';
 import { normalizePet } from './petState';
+import { advancePartnerSchedule, isPartnerSchedulePetBusy } from './partnerSchedule';
 import { getCleanlinessDecaySeasonModifier, getMoodDecaySeasonModifier } from './season';
 import { ensureYearlyStatsForDate, recordYearlyPomodoroFocus } from './yearlyStats';
 import { getWeatherForDate } from './weather';
@@ -29,7 +30,11 @@ export const getEnergyRecoveryInfo = (pet: PetState, now = Date.now()) => {
   const statCap = getPetStatCap(current);
   const intervalMs = getEnergyRecoveryIntervalMs(current, current.isSleeping, now);
   if (current.energy >= statCap) {
-    return { intervalMs, remainingMs: 0, isFull: true };
+    return { intervalMs, remainingMs: 0, isFull: true, isPaused: false };
+  }
+
+  if (isPartnerSchedulePetBusy(current)) {
+    return { intervalMs, remainingMs: intervalMs, isFull: false, isPaused: true };
   }
 
   const startedAt = Math.min(current.lastEnergyRecoveryAt, now);
@@ -40,6 +45,7 @@ export const getEnergyRecoveryInfo = (pet: PetState, now = Date.now()) => {
     intervalMs,
     remainingMs: remainingMs === intervalMs && elapsedMs > 0 ? 0 : remainingMs,
     isFull: false,
+    isPaused: false,
   };
 };
 
@@ -270,9 +276,21 @@ const applyDailyEncounter = (pet: PetState, now: number): PetState => {
 };
 
 export const advancePet = (pet: PetState, now = Date.now()): PetState => {
-  const current = advanceGarden(ensureDailyWishForDate(ensureYearlyStatsForDate(normalizePet(pet, now), now), now), now);
+  const prepared = advanceGarden(ensureDailyWishForDate(ensureYearlyStatsForDate(
+    normalizePet(pet, now, { preserveExpiredPartnerSchedule: true }),
+    now,
+  ), now), now);
+  const scheduleForInterval = prepared.partnerSchedule.active;
+  const current = advancePartnerSchedule(prepared, now);
   const deltaMs = Math.max(0, now - current.lastUpdatedAt);
-  const elapsedSeconds = deltaMs / 1000;
+  const getProtectedScheduleMs = (from: number, to: number) => {
+    if (!scheduleForInterval || to <= from) return 0;
+    const overlapStart = Math.max(from, scheduleForInterval.startedAt);
+    const overlapEnd = Math.min(to, scheduleForInterval.endsAt);
+    return Math.max(0, overlapEnd - overlapStart);
+  };
+  const lifecycleDeltaMs = Math.max(0, deltaMs - getProtectedScheduleMs(current.lastUpdatedAt, now));
+  const elapsedSeconds = lifecycleDeltaMs / 1000;
   const weather = getWeatherForDate(now);
   const weatherChanged = current.weatherDate !== getLocalDateKey(now) || current.weather !== weather;
   const currentWithWeather = weatherChanged
@@ -288,7 +306,7 @@ export const advancePet = (pet: PetState, now = Date.now()): PetState => {
       ? { ...currentWithPomodoro, lastInteractionAt: now }
       : currentWithPomodoro;
 
-  if (elapsedSeconds < 1) {
+  if (deltaMs < 1000) {
     return advancePomodoro(currentForActivity, now);
   }
 
@@ -300,6 +318,7 @@ export const advancePet = (pet: PetState, now = Date.now()): PetState => {
   const pressure = [currentForActivity.hunger <= 18, currentForActivity.cleanliness <= 22, currentForActivity.mood <= 18].filter(Boolean).length;
   const autoSleepByIdle =
     !currentForActivity.pomodoro.isRunning &&
+    !currentForActivity.partnerSchedule.active &&
     !currentForActivity.isSleeping &&
     isNightTime(now) &&
     now - currentForActivity.lastInteractionAt >= 30 * 60 * 1000;
@@ -320,23 +339,20 @@ export const advancePet = (pet: PetState, now = Date.now()): PetState => {
 
   const energyRecoveryIntervalMs = getEnergyRecoveryIntervalMs(currentForActivity, sleepingForDecay, now);
   const recoveryStartedAt = Math.min(currentForActivity.lastEnergyRecoveryAt, now);
-  const elapsedRecoveryMs = Math.max(0, now - recoveryStartedAt);
+  const elapsedRecoveryMs = Math.max(0, now - recoveryStartedAt - getProtectedScheduleMs(recoveryStartedAt, now));
   const recoverableEnergy = Math.max(0, statCap - currentForActivity.energy);
   const energyRecoveryPoints = currentForActivity.energy >= statCap ? 0 : Math.floor(elapsedRecoveryMs / energyRecoveryIntervalMs);
   const recoveredEnergy = Math.min(recoverableEnergy, energyRecoveryPoints);
   const energy = clampPetStat(currentForActivity, currentForActivity.energy + recoveredEnergy);
-  const lastEnergyRecoveryAt =
-    energy >= statCap
-      ? now
-      : recoveredEnergy > 0
-        ? recoveryStartedAt + energyRecoveryPoints * energyRecoveryIntervalMs
-        : currentForActivity.lastEnergyRecoveryAt;
+  const lastEnergyRecoveryAt = energy >= statCap
+    ? now
+    : now - (elapsedRecoveryMs % energyRecoveryIntervalMs);
 
   const hunger = clampPetStat(currentForActivity, currentForActivity.hunger + hungerDelta);
   const mood = clampPetStat(currentForActivity, currentForActivity.mood + moodDelta);
   const cleanliness = clampPetStat(currentForActivity, currentForActivity.cleanliness + cleanDelta);
   const health = clampPetHealth(currentForActivity, currentForActivity.health + healthDelta);
-  const ageSeconds = currentForActivity.ageSeconds + elapsedSeconds;
+  const ageSeconds = currentForActivity.ageSeconds + deltaMs / 1000;
   const keepSleepingAtNight =
     sleepingForDecay && isNightTime(now) && now - currentForActivity.lastInteractionAt >= 30 * 60 * 1000;
   const wokeUp = currentForActivity.isSleeping && energy >= statCap && !keepSleepingAtNight;
@@ -344,8 +360,8 @@ export const advancePet = (pet: PetState, now = Date.now()): PetState => {
   let recentEvent = currentForActivity.recentEvent;
   let recentActivity = currentForActivity.recentActivityUntil > now ? currentForActivity.recentActivity : 'idle';
   let recentActivityUntil = currentForActivity.recentActivityUntil > now ? currentForActivity.recentActivityUntil : 0;
-  const offlineDiaryDue = !currentForActivity.pomodoro.isRunning && deltaMs >= 30 * 60 * 1000;
-  const offlineEventDue = !currentForActivity.pomodoro.isRunning && deltaMs >= 2 * 60 * 60 * 1000;
+  const offlineDiaryDue = !currentForActivity.pomodoro.isRunning && lifecycleDeltaMs >= 30 * 60 * 1000;
+  const offlineEventDue = !currentForActivity.pomodoro.isRunning && lifecycleDeltaMs >= 2 * 60 * 60 * 1000;
   if (wokeUp) {
     recentEvent = t('pet.advance.wokeUp', { name: currentForActivity.name });
   } else if (autoSleepByIdle) {
@@ -395,6 +411,10 @@ export const advancePet = (pet: PetState, now = Date.now()): PetState => {
       return withReturnWelcome;
     }
     next = withReturnWelcome;
+  }
+
+  if (currentForActivity.partnerSchedule.active) {
+    return next;
   }
 
   if (offlineEventDue) {

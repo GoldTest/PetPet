@@ -10,6 +10,7 @@ interface InventoryModalProps {
   inventory: Inventory;
   itemIconMap: Partial<Record<string, string>>;
   activeCategory: ShopCategory;
+  isPetBusy: boolean;
   onCategoryChange: (category: ShopCategory) => void;
   onClose: () => void;
   onOpenShop: (category: ShopCategory) => void;
@@ -22,6 +23,7 @@ export const InventoryModal = ({
   inventory,
   itemIconMap,
   activeCategory,
+  isPetBusy,
   onCategoryChange,
   onClose,
   onOpenShop,
@@ -96,11 +98,18 @@ export const InventoryModal = ({
                 <button
                   type="button"
                   className={isGardenItem ? 'secondary-button inventory-modal__action' : 'primary-button inventory-modal__action'}
-                  disabled={!isGardenItem && !item.usable}
+                  disabled={!isGardenItem && (isPetBusy || !item.usable)}
+                  title={!isGardenItem && isPetBusy ? t('ui.inventory.partnerScheduleBusy') : undefined}
                   onClick={() => isGardenItem ? onOpenGarden() : onUseItem(item.id)}
                 >
                   {isGardenItem && <Sprout size={17} aria-hidden="true" />}
-                  {isGardenItem ? t('ui.inventory.goGarden') : item.usable ? t('ui.inventory.use') : t('ui.inventory.unavailable')}
+                  {isGardenItem
+                    ? t('ui.inventory.goGarden')
+                    : isPetBusy
+                      ? t('ui.inventory.partnerScheduleBusyShort')
+                      : item.usable
+                        ? t('ui.inventory.use')
+                        : t('ui.inventory.unavailable')}
                 </button>
               </article>
             );

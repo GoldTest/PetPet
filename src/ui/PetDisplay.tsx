@@ -1,6 +1,6 @@
 import { useState, type ReactNode } from 'react';
 import { CalendarDays, ChevronDown, ChevronUp, Cloud, CloudRain, Sparkles, Sun, Wind, type LucideIcon } from 'lucide-react';
-import { getPrimaryStatus, getSeasonInfo, getStatusText, weatherInfo, type PetState, type PetStatus, type RecentActivity, type WeatherType } from '../core/pet';
+import { getPartnerScheduleActivity, getPrimaryStatus, getSeasonInfo, getStatusText, weatherInfo, type PetState, type PetStatus, type RecentActivity, type WeatherType } from '../core/pet';
 import { petActivityImages as defaultPetActivityImages, petStatusImages as defaultPetStatusImages } from '../assets';
 import { t } from '../i18n';
 import { formatCompactNumber } from './numberFormat';
@@ -16,6 +16,7 @@ interface PetDisplayProps {
   pet: PetState;
   onInteract: () => void;
   canUpgrade: boolean;
+  isPetBusy: boolean;
   nextUpgradeCost: number;
   onUpgrade: () => void;
   overlay?: ReactNode;
@@ -28,6 +29,7 @@ export const PetDisplay = ({
   pet,
   onInteract,
   canUpgrade,
+  isPetBusy,
   nextUpgradeCost,
   onUpgrade,
   overlay,
@@ -39,8 +41,11 @@ export const PetDisplay = ({
   const [isSeasonExpanded, setSeasonExpanded] = useState(false);
   const [isStatusCollapsed, setStatusCollapsed] = useState(false);
   const status = getPrimaryStatus(pet);
-  const activeActivity = !pet.isSleeping && pet.recentActivity !== 'idle' && pet.recentActivityUntil > Date.now()
-    ? pet.recentActivity
+  const scheduleActivity = pet.partnerSchedule.active
+    ? getPartnerScheduleActivity(pet.partnerSchedule.active.category)
+    : undefined;
+  const activeActivity = !pet.isSleeping
+    ? scheduleActivity ?? (pet.recentActivity !== 'idle' && pet.recentActivityUntil > Date.now() ? pet.recentActivity : undefined)
     : undefined;
   const petImage = activeActivity ? petActivityImages[activeActivity] ?? petStatusImages[status] : petStatusImages[status];
   const statusLabel = getStatusLabel(status);
@@ -92,7 +97,14 @@ export const PetDisplay = ({
         </section>
       </div>
       {overlay}
-      <button type="button" className={`pet pet--image pet--${status}`} onClick={onInteract} aria-label={t('ui.petDisplay.interactAria')}>
+      <button
+        type="button"
+        className={`pet pet--image pet--${status}`}
+        disabled={isPetBusy}
+        title={isPetBusy ? t('ui.petDisplay.partnerScheduleBusy') : undefined}
+        onClick={onInteract}
+        aria-label={isPetBusy ? t('ui.petDisplay.partnerScheduleBusy') : t('ui.petDisplay.interactAria')}
+      >
         <img src={petImage} alt={petAlt} draggable="false" />
       </button>
       <div className="pet-scene__ground" />
@@ -102,8 +114,9 @@ export const PetDisplay = ({
             <div className="pet-badge__status"><strong>{statusLabel}</strong></div>
             <button
               type="button"
-              className={canUpgrade ? 'pet-level-button pet-level-button--ready' : 'pet-level-button'}
-              title={nextUpgradeCost > 0 ? t('ui.features.upgradeTitle', { cost: nextUpgradeCost }) : t('ui.features.maxLevel')}
+              className={canUpgrade && !isPetBusy ? 'pet-level-button pet-level-button--ready' : 'pet-level-button'}
+              disabled={isPetBusy}
+              title={isPetBusy ? t('ui.petDisplay.partnerScheduleBusy') : nextUpgradeCost > 0 ? t('ui.features.upgradeTitle', { cost: nextUpgradeCost }) : t('ui.features.maxLevel')}
               onClick={onUpgrade}
             >
               <Sparkles size={16} aria-hidden="true" />

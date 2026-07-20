@@ -170,12 +170,12 @@
 @media (max-width: 560px) {
   .modal-backdrop {
     align-items: end;
-    padding: calc(10px + var(--safe-top)) 10px 0;
+    padding: calc(10px + var(--safe-top)) 10px calc(10px + var(--safe-bottom));
   }
 
   .dialog-shell {
     width: 100%;
-    max-height: calc(100dvh - var(--safe-top) - 10px);
+    max-height: calc(100dvh - var(--safe-top) - var(--safe-bottom) - 20px);
     border-radius: 8px 8px 0 0;
   }
 

@@ -12,6 +12,7 @@ import {
 import { t } from '../i18n';
 import { ActionDock } from './ActionDock';
 import { FeatureRow } from './FeatureRow';
+import { PartnerScheduleDock } from './PartnerScheduleDock';
 import { PetDisplay } from './PetDisplay';
 import { StatusBar } from './StatusBar';
 
@@ -38,6 +39,7 @@ interface HomePageProps {
   onOpenPomodoro: () => void;
   onOpenGarden: () => void;
   onOpenBoostCards: () => void;
+  onOpenPartnerSchedule: () => void;
   onAction: (action: PetAction) => void;
 }
 
@@ -83,11 +85,13 @@ export const HomePage = ({
   onOpenPomodoro,
   onOpenGarden,
   onOpenBoostCards,
+  onOpenPartnerSchedule,
   onAction,
 }: HomePageProps) => {
   const statCap = getPetStatCap(pet);
+  const isPetBusy = Boolean(pet.partnerSchedule.active);
   const energyRecoveryInfo = getEnergyRecoveryInfo(pet);
-  const energyRecoveryText = energyRecoveryInfo.isFull ? '' : formatCountdownTime(energyRecoveryInfo.remainingMs);
+  const energyRecoveryText = energyRecoveryInfo.isFull || energyRecoveryInfo.isPaused ? '' : formatCountdownTime(energyRecoveryInfo.remainingMs);
   const stats = [
     { label: t('ui.stats.hunger'), value: pet.hunger, max: statCap, tone: 'food' as const },
     { label: t('ui.stats.mood'), value: pet.mood, max: statCap, tone: 'mood' as const },
@@ -117,6 +121,7 @@ export const HomePage = ({
           petActivityImages={petActivityImages}
           getStatusLabel={getStatusLabel}
           canUpgrade={canUpgrade}
+          isPetBusy={isPetBusy}
           nextUpgradeCost={nextUpgradeCost}
           onUpgrade={onUpgrade}
         />
@@ -140,7 +145,15 @@ export const HomePage = ({
                   <p>{returnWelcomeView.description}</p>
                   <small>{returnWelcomeView.progressText} · {returnWelcomeView.rewardText}</small>
                 </div>
-                <button type="button" className="primary-button wish-panel__button" onClick={onReturnWelcome}>{returnWelcomeButtonLabel}</button>
+                <button
+                  type="button"
+                  className="primary-button wish-panel__button"
+                  disabled={isPetBusy && !returnWelcomeView.canClaim}
+                  title={isPetBusy && !returnWelcomeView.canClaim ? t('ui.partnerSchedule.busyHint') : undefined}
+                  onClick={onReturnWelcome}
+                >
+                  {isPetBusy && !returnWelcomeView.canClaim ? t('ui.partnerSchedule.busyShort') : returnWelcomeButtonLabel}
+                </button>
               </section>
             )}
             {!dailyWishView.claimed && (
@@ -151,7 +164,15 @@ export const HomePage = ({
                   <p>{dailyWishView.description}</p>
                   <small>{dailyWishView.progressText} · {dailyWishView.rewardText}</small>
                 </div>
-                <button type="button" className="primary-button wish-panel__button" disabled={dailyWishView.claimed} onClick={onDailyWish}>{dailyWishButtonLabel}</button>
+                <button
+                  type="button"
+                  className="primary-button wish-panel__button"
+                  disabled={dailyWishView.claimed || (isPetBusy && !dailyWishView.canClaim)}
+                  title={isPetBusy && !dailyWishView.canClaim ? t('ui.partnerSchedule.busyHint') : undefined}
+                  onClick={onDailyWish}
+                >
+                  {isPetBusy && !dailyWishView.canClaim ? t('ui.partnerSchedule.busyShort') : dailyWishButtonLabel}
+                </button>
               </section>
             )}
           </div>
@@ -167,6 +188,7 @@ export const HomePage = ({
             onOpenPomodoro={onOpenPomodoro}
             onOpenGarden={onOpenGarden}
             onOpenBoostCards={onOpenBoostCards}
+            onOpenPartnerSchedule={onOpenPartnerSchedule}
           />
 
           <div className="meta-row" aria-label={t('ui.dashboard.metaAria')}>
@@ -176,7 +198,16 @@ export const HomePage = ({
         </section>
       </div>
 
-      <ActionDock isSleeping={pet.isSleeping} isLowEnergy={isLowEnergy} isCriticallyHungry={isCriticallyHungry} onAction={onAction} />
+      {pet.partnerSchedule.active ? (
+        <PartnerScheduleDock pet={pet} onOpen={onOpenPartnerSchedule} />
+      ) : (
+        <ActionDock
+          isSleeping={pet.isSleeping}
+          isLowEnergy={isLowEnergy}
+          isCriticallyHungry={isCriticallyHungry}
+          onAction={onAction}
+        />
+      )}
     </>
   );
 };

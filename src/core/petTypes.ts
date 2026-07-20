@@ -221,6 +221,55 @@ export interface ReturnWelcomeState {
   completedAt?: number;
   claimedAt?: number;
 }
+
+export type PartnerScheduleCategory = 'study' | 'cooking' | 'garden' | 'exercise';
+
+export type PartnerScheduleSize = 'short' | 'standard' | 'long';
+
+export type PartnerScheduleRewardChoice = 'coins' | 'category';
+
+export interface PartnerScheduleOffer {
+  id: string;
+  templateId: string;
+  dateKey: string;
+}
+
+export interface PartnerScheduleSkill {
+  level: number;
+  xp: number;
+}
+
+export interface ActivePartnerSchedule {
+  offerId: string;
+  templateId: string;
+  category: PartnerScheduleCategory;
+  size: PartnerScheduleSize;
+  startedAt: number;
+  endsAt: number;
+  coinReward: number;
+  skillXp: number;
+}
+
+export interface PartnerScheduleResult {
+  offerId: string;
+  templateId: string;
+  category: PartnerScheduleCategory;
+  size: PartnerScheduleSize;
+  completedAt: number;
+  coinReward: number;
+  skillXp: number;
+}
+
+export interface PartnerScheduleState {
+  schemaVersion: 2;
+  boardDateKey: string;
+  offers: PartnerScheduleOffer[];
+  completedOfferIds: string[];
+  active?: ActivePartnerSchedule;
+  pendingResult?: PartnerScheduleResult;
+  skills: Record<PartnerScheduleCategory, PartnerScheduleSkill>;
+}
+
 export type AchievementId = string;
 
 export interface AchievementCounters {
@@ -313,6 +362,7 @@ export interface PetState {
   lastCleanActionAt: number;
   garden: GardenState;
   boostCards: BoostCardState;
+  partnerSchedule: PartnerScheduleState;
 }
 
 export type PetAction = 'play' | 'clean' | 'sleep' | 'work';

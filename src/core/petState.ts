@@ -9,6 +9,7 @@ import { dailyBiscuitClaimLimit, dailyHeartExchangeLimit, isBuiltinItemId } from
 import { clampCoins, clampCount, clampHealth, clampLevel, clampStat, defaultPetName, getPetStatCap, lowCleanlinessSleepConfirmClicks } from './petStats';
 import type { AchievementState, ActionStreak, BuiltinItemId, Inventory, PetState, PetStatus, RecentActivity, WeatherType } from './petTypes';
 import { defaultPomodoroState, normalizePomodoroState } from './pomodoro';
+import { defaultPartnerScheduleState, normalizePartnerScheduleState } from './partnerSchedule';
 import { getWeatherForDate, weatherTypeSet } from './weather';
 import { getLocalDateKey, isNumber } from './utils';
 import { defaultYearlyStats, normalizeYearReview, normalizeYearlyStats } from './yearlyStats';
@@ -136,6 +137,7 @@ export const createDefaultPet = (now = Date.now()): PetState => ({
   lastCleanActionAt: 0,
   garden: defaultGardenState(now),
   boostCards: defaultBoostCardState(now),
+  partnerSchedule: defaultPartnerScheduleState({ level: 1, createdAt: now }, now),
   dailyWish: createDailyWish({
     createdAt: now,
     name: defaultPetName,
@@ -179,7 +181,11 @@ const normalizeBuiltinItemIdList = (value: unknown, maxLength: number): BuiltinI
   return ids.slice(0, maxLength);
 };
 
-export const normalizePet = (value: unknown, now = Date.now()): PetState => {
+interface NormalizePetOptions {
+  preserveExpiredPartnerSchedule?: boolean;
+}
+
+export const normalizePet = (value: unknown, now = Date.now(), options: NormalizePetOptions = {}): PetState => {
   const fallback = createDefaultPet(now);
   if (!value || typeof value !== 'object') return fallback;
 
@@ -319,6 +325,12 @@ export const normalizePet = (value: unknown, now = Date.now()): PetState => {
     gardenHarvestCountsByTreeId,
   };
   const normalizedAchievements = { ...achievements, unlockedAtById, claimedOneTimeRewardIds, counters };
+  const partnerSchedule = normalizePartnerScheduleState(
+    raw.partnerSchedule,
+    { level, createdAt },
+    now,
+    !options.preserveExpiredPartnerSchedule,
+  );
 
   return {
     name: normalizedName,
@@ -398,6 +410,7 @@ export const normalizePet = (value: unknown, now = Date.now()): PetState => {
     lastCleanActionAt: isNumber(raw.lastCleanActionAt) ? Math.max(0, Math.floor(raw.lastCleanActionAt)) : 0,
     garden,
     boostCards: normalizeBoostCardState(raw.boostCards, now),
+    partnerSchedule,
   };
 };
 
