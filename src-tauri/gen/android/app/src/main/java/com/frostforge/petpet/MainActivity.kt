@@ -1,4 +1,4 @@
-package com.frostforge.pocpet
+package com.frostforge.petpet
 
 import android.os.Bundle
 import android.webkit.WebView
