@@ -16,12 +16,15 @@ Trigger when user mentions 发版, release, 发布版本, or anything involving 
 
 Steps:
 1. **检查本地代码**: Run `npm run build` (typecheck + vite build) until zero errors.
-2. **推送当前代码**: `git push` (ensure all changes including fixes are pushed).
+2. **推送当前代码**: `git push` — 确保本次发版要包含的所有改动（feature、fix 等）都已提交并推送到远端。
 3. **更新版本号**: 根据改动范围决定版本更新策略（见版本规则），同步到 `package.json`、`src-tauri/Cargo.toml` 和 `src-tauri/tauri.conf.json`。
 4. **提交版本更新**: `git add package.json src-tauri/Cargo.toml src-tauri/tauri.conf.json` → `git commit -m "chore(release): bump to x.y.z"`.
-5. **创建并推送 tag**: `git tag vx.y.z && git push origin vx.y.z`.
-6. Tag 推送会触发 CI release workflow，构建产物并创建 GitHub Release。
-7. GitHub Pages 也自动部署。
+5. **推送版本更新到 main**: `git push` — 先把版本号更新提交推上去，再打 tag。
+6. **创建并推送 tag**: `git tag vx.y.z && git push origin vx.y.z`.
+7. Tag 推送会触发 CI release workflow，构建产物并创建 GitHub Release。
+8. GitHub Pages 也自动部署。
+
+> ⚠️ 必须先 `git push` 版本更新 commit，再 `git push origin vx.y.z` tag。只推送 tag 不推 main 会导致 tag 指向的 commit 不在远端分支上。
 
 ### 版本规则
 
