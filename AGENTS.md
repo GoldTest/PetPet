@@ -25,6 +25,7 @@
 - Answer first, elaborate only if needed. No sycophantic openers.
 - For yes/no or status questions, lead with the answer.
 - Skip preamble. Match response length to task complexity.
+- CI 构建已触发即视为完成，无需等待构建结果。直接告知构建已触发即可。
 
 ## Workflow
 1. **Before coding**: Read nearest `AGENTS.md` + check Golden Samples for the area you're touching. For new features, follow HarnSpec SDD lifecycle first (see `.agents/skills/harnspec/SKILL.md`).
