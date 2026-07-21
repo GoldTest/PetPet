@@ -1,7 +1,7 @@
 import { normalizePet, type PetState } from './pet';
 import { loadStoredPetJson } from './saveCodec';
 
-const storageKey = 'pocpet.pet.v1';
+const storageKey = 'petpet.pet.v1';
 
 export const hasStoredPet = () => window.localStorage.getItem(storageKey) !== null;
 

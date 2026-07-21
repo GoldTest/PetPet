@@ -248,7 +248,7 @@ export const SettingsModal = ({
                   {t('ui.settings.save.importFile')}
                 </button>
               </div>
-              <input ref={saveFileInputRef} className="file-input" type="file" accept=".pocpet,.json,.txt,application/json,text/plain" onChange={onImportSaveFileChange} />
+              <input ref={saveFileInputRef} className="file-input" type="file" accept=".petpet,.json,.txt,application/json,text/plain" onChange={onImportSaveFileChange} />
               {saveText && <textarea className="save-textarea" readOnly value={saveText} aria-label={t('ui.settings.save.exportedAria')} />}
               <label className="field">
                 <span>{t('ui.settings.save.pasteText')}</span>

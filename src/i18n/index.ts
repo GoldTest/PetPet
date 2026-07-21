@@ -17,7 +17,7 @@ const languageLabels: Record<LanguageCode, string> = {
   'en-US': 'English',
 };
 
-const storageKey = 'pocpet.language';
+const storageKey = 'petpet.language';
 const fallbackLanguage: LanguageCode = 'zh-CN';
 
 const isLanguageCode = (value: unknown): value is LanguageCode =>

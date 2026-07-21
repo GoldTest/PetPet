@@ -14,8 +14,8 @@ export const createSaveFileName = (petName: string, now = Date.now()) => {
     .replace(invalidFileNameCharacters, '_')
     .replace(/\s+/g, ' ')
     .trim()
-    .slice(0, 48) || 'PocPet';
-  return `${safePetName}-${dateKey}-pocpet-save.pocpet`;
+    .slice(0, 48) || 'PetPet';
+  return `${safePetName}-${dateKey}-petpet-save.petpet`;
 };
 
 const downloadTextFile = (fileName: string, text: string) => {
@@ -42,7 +42,7 @@ export const saveTextFile = async (fileName: string, text: string): Promise<Save
   ]);
   const destination = await save({
     defaultPath: fileName,
-    filters: [{ name: 'PocPet Save', extensions: ['pocpet'] }],
+    filters: [{ name: 'PetPet Save', extensions: ['petpet'] }],
   });
 
   if (!destination) return 'cancelled';

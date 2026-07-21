@@ -2,29 +2,29 @@ import { advancePet, createDefaultPet, normalizePet, type PetState } from './pet
 import type { PetModManifest } from './mod';
 
 export const saveFileSchemaVersion = 1;
-const appId = 'PocPet';
-const protectedSavePrefix = 'POCPET-SAVE-v2:';
+const appId = 'PetPet';
+const protectedSavePrefix = 'PETPET-SAVE-v2:';
 const protectedSaveKey = `${appId}:save-file:v2`;
 const textEncoder = new TextEncoder();
 const textDecoder = new TextDecoder();
 
-export interface PocPetSaveModSummary {
+export interface PetPetSaveModSummary {
   id: string;
   name: string;
   version: string;
 }
 
-export interface PocPetSaveFileV1 {
+export interface PetPetSaveFileV1 {
   schemaVersion: 1;
   app: typeof appId;
   exportedAt: string;
   pet: PetState;
-  activeMod?: PocPetSaveModSummary;
+  activeMod?: PetPetSaveModSummary;
 }
 
-export interface PocPetImportedSave {
+export interface PetPetImportedSave {
   pet: PetState;
-  activeMod?: PocPetSaveModSummary;
+  activeMod?: PetPetSaveModSummary;
 }
 
 const isObject = (value: unknown): value is Record<string, unknown> =>
@@ -36,7 +36,7 @@ const readSummaryString = (value: unknown, maxLength: number) => {
   return text ? text.slice(0, maxLength) : undefined;
 };
 
-const readActiveModSummary = (value: unknown): PocPetSaveModSummary | undefined => {
+const readActiveModSummary = (value: unknown): PetPetSaveModSummary | undefined => {
   if (!isObject(value)) return undefined;
   const id = readSummaryString(value.id, 64);
   const name = readSummaryString(value.name, 48);
@@ -117,7 +117,7 @@ const unprotectSaveFileText = (text: string) => {
 };
 
 export const createSaveFileText = (pet: PetState, activeMod?: PetModManifest | null, now = Date.now()) => {
-  const file: PocPetSaveFileV1 = {
+  const file: PetPetSaveFileV1 = {
     schemaVersion: saveFileSchemaVersion,
     app: appId,
     exportedAt: new Date(now).toISOString(),
@@ -165,12 +165,12 @@ const resetImportedTimeBaseline = (pet: PetState, now: number): PetState => {
   };
 };
 
-export const parseSaveFileText = (text: string, now = Date.now()): PocPetImportedSave => {
+export const parseSaveFileText = (text: string, now = Date.now()): PetPetImportedSave => {
   let parsed: unknown;
   try {
     parsed = JSON.parse(unprotectSaveFileText(text));
   } catch {
-    throw new Error('Save text is not valid PocPet save data.');
+    throw new Error('Save text is not valid PetPet save data.');
   }
 
   if (!isObject(parsed)) {
@@ -178,10 +178,10 @@ export const parseSaveFileText = (text: string, now = Date.now()): PocPetImporte
   }
 
   if (parsed.app === appId || parsed.schemaVersion !== undefined) {
-    if (parsed.app !== appId) throw new Error('This is not a PocPet save file.');
+    if (parsed.app !== appId) throw new Error('This is not a PetPet save file.');
     if (parsed.schemaVersion !== saveFileSchemaVersion) {
       if (typeof parsed.schemaVersion === 'number' && parsed.schemaVersion > saveFileSchemaVersion) {
-        throw new Error('This save file comes from a newer PocPet version. Please upgrade the app.');
+        throw new Error('This save file comes from a newer PetPet version. Please upgrade the app.');
       }
       throw new Error('Unsupported save file version.');
     }
