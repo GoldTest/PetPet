@@ -1,5 +1,4 @@
 param(
-  [ValidateSet('x64', 'x86')]
   [string]$Target = 'x64'
 )
 
@@ -17,10 +16,7 @@ if ([string]::IsNullOrWhiteSpace($version)) {
   throw 'Project version not found in package.json.'
 }
 
-$targetConfig = switch ($Target) {
-  'x64' { @{ Source = 'src-tauri\target\release\app.exe'; Suffix = '' } }
-  'x86' { @{ Source = 'src-tauri\target\i686-pc-windows-msvc\release\app.exe'; Suffix = '-win32' } }
-}
+$targetConfig = @{ Source = 'src-tauri\target\release\app.exe'; Suffix = '' }
 $sourceRelative = [string]$targetConfig['Source']
 $outputSuffix = [string]$targetConfig['Suffix']
 

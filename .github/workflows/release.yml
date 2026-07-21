@@ -12,7 +12,7 @@ on:
   workflow_dispatch:
     inputs:
       full_build:
-        description: "Build all release artifacts: Windows x64/x86, Android arm64/ARMv7, web, macOS, and Linux"
+        description: "Build all release artifacts: Windows x64, Android arm64, web, macOS, and Linux"
         required: false
         default: false
         type: boolean
@@ -125,40 +125,6 @@ jobs:
           path: release/pocket${{ needs.metadata.outputs.version }}.exe
           if-no-files-found: error
 
-  windows_x86:
-    name: Windows 32-bit portable
-    needs: metadata
-    if: needs.metadata.outputs.release_build == 'true' && needs.metadata.outputs.full_build == 'true'
-    runs-on: windows-latest
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Setup Node
-        uses: actions/setup-node@v4
-        with:
-          node-version: ${{ env.NODE_VERSION }}
-          cache: npm
-
-      - name: Setup Rust
-        uses: dtolnay/rust-toolchain@stable
-        with:
-          targets: i686-pc-windows-msvc
-
-      - name: Install dependencies
-        run: npm ci
-
-      - name: Build 32-bit portable exe
-        shell: powershell
-        run: npm.cmd run package:win:portable:x86
-
-      - name: Upload Windows 32-bit artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: petpet-windows-x86-${{ needs.metadata.outputs.version }}
-          path: release/pocket${{ needs.metadata.outputs.version }}-win32.exe
-          if-no-files-found: error
-
   android:
     name: Android arm64 APK
     needs: metadata
@@ -208,57 +174,6 @@ jobs:
         with:
           name: petpet-android-arm64-${{ needs.metadata.outputs.version }}
           path: release/pocket${{ needs.metadata.outputs.version }}.apk
-          if-no-files-found: error
-
-  android_armv7:
-    name: Android 32-bit ARMv7 APK
-    needs: metadata
-    if: needs.metadata.outputs.release_build == 'true' && needs.metadata.outputs.full_build == 'true'
-    runs-on: windows-latest
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Setup Node
-        uses: actions/setup-node@v4
-        with:
-          node-version: ${{ env.NODE_VERSION }}
-          cache: npm
-
-      - name: Setup Java
-        uses: actions/setup-java@v4
-        with:
-          distribution: temurin
-          java-version: "17"
-
-      - name: Setup Rust
-        uses: dtolnay/rust-toolchain@stable
-        with:
-          targets: armv7-linux-androideabi
-
-      - name: Setup Android SDK
-        uses: android-actions/setup-android@v3
-
-      - name: Install Android SDK packages
-        shell: powershell
-        run: |
-          sdkmanager "platforms;android-36" "build-tools;36.0.0" "ndk;${{ env.ANDROID_NDK_VERSION }}"
-          $ndkPath = Join-Path $env:ANDROID_HOME "ndk\${{ env.ANDROID_NDK_VERSION }}"
-          "ANDROID_NDK_HOME=$ndkPath" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
-          "NDK_HOME=$ndkPath" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
-
-      - name: Install dependencies
-        run: npm ci
-
-      - name: Build 32-bit debug-signed APK
-        shell: powershell
-        run: npm.cmd run package:android:armv7
-
-      - name: Upload Android 32-bit artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: petpet-android-armv7-${{ needs.metadata.outputs.version }}
-          path: release/pocket${{ needs.metadata.outputs.version }}-32bit.apk
           if-no-files-found: error
 
   web:
@@ -392,9 +307,7 @@ jobs:
       - metadata
       - validate
       - windows
-      - windows_x86
       - android
-      - android_armv7
       - web
       - linux
       - macos
@@ -407,8 +320,6 @@ jobs:
       (
         needs.metadata.outputs.full_build != 'true' ||
         (
-          needs.windows_x86.result == 'success' &&
-          needs.android_armv7.result == 'success' &&
           needs.web.result == 'success' &&
           needs.linux.result == 'success' &&
           needs.macos.result == 'success'

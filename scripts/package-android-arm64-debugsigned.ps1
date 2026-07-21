@@ -1,6 +1,4 @@
 param(
-  [ValidateSet('aarch64', 'armv7')]
-  [Alias('Target')]
   [string]$AndroidTarget = 'aarch64',
   [switch]$RebuildRust
 )
@@ -19,27 +17,15 @@ if ([string]::IsNullOrWhiteSpace($version)) {
   throw 'Project version not found in package.json.'
 }
 
-$targetConfigs = @{
-  aarch64 = @{
-    Label = 'arm64'
-    TauriTarget = 'aarch64'
-    RustTarget = 'aarch64-linux-android'
-    Abi = 'arm64-v8a'
-    GradleVariant = 'Arm64'
-    ApkDirName = 'arm64'
-    OutputSuffix = ''
-  }
-  armv7 = @{
-    Label = 'ARMv7'
-    TauriTarget = 'armv7'
-    RustTarget = 'armv7-linux-androideabi'
-    Abi = 'armeabi-v7a'
-    GradleVariant = 'Arm'
-    ApkDirName = 'arm'
-    OutputSuffix = '-32bit'
-  }
+$config = @{
+  Label = 'arm64'
+  TauriTarget = 'aarch64'
+  RustTarget = 'aarch64-linux-android'
+  Abi = 'arm64-v8a'
+  GradleVariant = 'Arm64'
+  ApkDirName = 'arm64'
+  OutputSuffix = ''
 }
-$config = $targetConfigs[$AndroidTarget]
 $label = [string]$config['Label']
 $tauriTarget = [string]$config['TauriTarget']
 $rustTarget = [string]$config['RustTarget']

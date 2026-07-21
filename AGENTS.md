@@ -102,9 +102,7 @@
 <!-- AGENTS-GENERATED:START ci-rules -->
 - **validate** (ubuntu): `npm run build` — typecheck + vite build, required for all PRs
 - **windows** (x64): portable exe on push/tag
-- **windows_x86** (32-bit): only on full builds (x.y.0 semver or manual flag)
 - **android** (arm64): APK on push/tag
-- **android_armv7** (32-bit): only on full builds
 - **web**: deploy zip, only on full builds
 - **linux** (AppImage + deb): ubuntu-22.04, only on full builds
 - **macos** (dmg): macos-latest, only on full builds
@@ -201,15 +199,13 @@ The nearest `AGENTS.md` wins. Explicit user prompts override files.
 - 日常打包默认只生成简名测试包：
   - Windows x64：`release/pocket<version>.exe`
   - Android arm64：`release/pocket<version>.apk`
-- 日常打包不要额外生成 Web、macOS、Linux、Windows 32 位或 Android 32 位产物，除非用户明确要求。
+- 日常打包不要额外生成 Web、macOS、Linux 产物，除非用户明确要求。
 - 全量打包在以下任一条件触发：
   - 当前版本号是 semver 的 `x.y.0`，例如 `1.1.0`、`1.2.0`、`2.0.0`
-  - 用户明确要求"全量打包""完整包"，或明确要求包含 macOS、Linux、32 位、Web 部署包等产物
+  - 用户明确要求"全量打包""完整包"，或明确要求包含 macOS、Linux、Web 部署包等产物
 - 全量打包产物命名：
   - Windows x64：`release/pocket<version>.exe`
-  - Windows 32 位 x86：`release/pocket<version>-win32.exe`
   - Android arm64：`release/pocket<version>.apk`
-  - Android 32 位 ARMv7 / `armeabi-v7a`：`release/pocket<version>-32bit.apk`
   - Web 部署包：`release/pocket<version>-web.zip`
   - macOS 图形桌面包：`release/pocket<version>-mac.dmg`
   - Ubuntu/Linux 图形桌面包：优先 `release/pocket<version>-ubuntu.AppImage`，如 CI/runner 支持也保留 `release/pocket<version>-ubuntu.deb`
