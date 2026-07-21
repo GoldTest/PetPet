@@ -371,7 +371,7 @@ const baseAchievementDefinitionConfigs: readonly Omit<AchievementDefinition, 'ti
   { id: 'garden_harvest_30', category: 'garden', rarity: 'normal', target: 30, progress: (pet) => pet.garden.lifetimeHarvestCount, reward: { coins: 200, items: [{ itemId: 'heart_fertilizer', amount: 1 }] } },
   { id: 'garden_harvest_100', category: 'garden', rarity: 'rare', target: 100, progress: (pet) => pet.garden.lifetimeHarvestCount, reward: { coins: 500, items: [{ itemId: 'heart_fertilizer', amount: 2 }], gardenExtraDropChancePercent: 10 } },
   { id: 'garden_tree_catalogue', category: 'garden', rarity: 'rare', target: achievementGardenTreeIds.length, progress: getHarvestedGardenTreeKindCount, reward: { coins: 300, items: [{ itemId: 'heart_fertilizer', amount: 2 }], gardenExtraDropChancePercent: 10 } },
-  { id: 'garden_all_slots', category: 'garden', rarity: 'rare', target: 5, progress: getUnlockedGardenSlotCount, reward: { coins: 500, gardenExtraDropChancePercent: 20 } },
+  { id: 'garden_all_slots', category: 'garden', rarity: 'rare', target: 9, progress: getUnlockedGardenSlotCount, reward: { coins: 500, gardenExtraDropChancePercent: 20 } },
   { id: 'garden_tools_max', category: 'garden', rarity: 'rare', target: 3, progress: getMaxedGardenToolCount, reward: { coins: 300, gardenExtraDropChancePercent: 10 } },
   { id: 'schedule_first', category: 'schedule', rarity: 'normal', target: 1, progress: (pet) => pet.achievements.counters.partnerScheduleClaimCount, reward: { coins: 80 } },
   { id: 'schedule_10', category: 'schedule', rarity: 'normal', target: 10, progress: (pet) => pet.achievements.counters.partnerScheduleClaimCount, reward: { coins: 200 } },

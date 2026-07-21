@@ -5,7 +5,6 @@ import {
   getGardenClearCost,
   harvestTree,
   plantTree,
-  selectGardenSlot,
   unlockGardenSlot,
   upgradeGardenTool,
   useGardenNutrient,
@@ -37,11 +36,6 @@ export const useGardenController = ({ petRef, setPet, commitPet, playAfterUnlock
       playSfx(next.recentEvent === previousEvent ? 'error' : successSfx);
       return commitPet(next);
     });
-  };
-
-  const selectSlot = (slotIndex: number) => {
-    playAfterUnlock('tap');
-    setPet((current) => selectGardenSlot(current, slotIndex));
   };
 
   const clearSlot = (slotIndex: number) => commitAction((current) => clearWitheredTree(current, slotIndex), 'purchase');
@@ -77,7 +71,6 @@ export const useGardenController = ({ petRef, setPet, commitPet, playAfterUnlock
   return {
     clearConfirm,
     resetClearConfirm: () => setClearConfirm(null),
-    selectSlot,
     unlockSlot: (slotIndex: number) => commitAction((current) => unlockGardenSlot(current, slotIndex), 'purchase'),
     plantTree: (slotIndex: number, treeId: GardenTreeId) => commitAction((current) => plantTree(current, slotIndex, treeId), 'purchase'),
     waterTree: (slotIndex: number) => commitAction((current) => waterTree(current, slotIndex), 'tap'),

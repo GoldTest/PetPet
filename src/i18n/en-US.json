@@ -540,9 +540,9 @@
       "back": "Back",
       "kicker": "Garden",
       "title": "Garden",
-      "prevSlot": "Previous slot",
-      "nextSlot": "Next slot",
-      "slotsAria": "Tree slots",
+      "prevSlot": "Previous plot",
+      "nextSlot": "Next plot",
+      "slotsAria": "Garden plots",
       "slotTitle": "Slot {slot}",
       "treeLife": "{tree} · harvest {used}/{max}",
       "remaining": "{time} left",
@@ -1295,7 +1295,7 @@
         },
         "garden_all_slots": {
           "title": "Garden Master",
-          "description": "Unlock all 5 garden slots."
+          "description": "Unlock all garden plots."
         },
         "garden_tools_max": {
           "title": "Tool Expert",

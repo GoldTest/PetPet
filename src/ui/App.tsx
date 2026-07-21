@@ -341,7 +341,6 @@ const PetApp = ({ initialPet, initialActiveMod, onResetToPicker }: PetAppProps) 
   const {
     clearConfirm: gardenClearConfirm,
     resetClearConfirm: resetGardenClearConfirm,
-    selectSlot: handleSelectGardenSlot,
     unlockSlot: handleUnlockGardenSlot,
     plantTree: handlePlantTree,
     waterTree: handleWaterTree,
@@ -1100,7 +1099,6 @@ const PetApp = ({ initialPet, initialActiveMod, onResetToPicker }: PetAppProps) 
           pet={pet}
           itemIconMap={itemIconMap}
           onBack={handleCloseGarden}
-          onSelectSlot={handleSelectGardenSlot}
           onUnlockSlot={handleUnlockGardenSlot}
           onPlantTree={handlePlantTree}
           onWater={handleWaterTree}

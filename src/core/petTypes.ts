@@ -81,8 +81,7 @@ export interface GardenTools {
 }
 
 export interface GardenState {
-  schemaVersion: 1;
-  activeSlotIndex: number;
+  schemaVersion: 2;
   slots: GardenSlot[];
   dailyCareDateKey: string;
   dailyWaterCount: number;
