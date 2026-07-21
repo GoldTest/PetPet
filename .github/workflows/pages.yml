@@ -25,10 +25,10 @@ jobs:
       PAGES_TOKEN: ${{ secrets.PAGES_TOKEN }}
     steps:
       - name: Checkout
-        uses: actions/checkout@v7
+        uses: actions/checkout@v4
 
       - name: Setup Node
-        uses: actions/setup-node@v6
+        uses: actions/setup-node@v4
         with:
           node-version: "24"
           cache: npm

@@ -10,12 +10,6 @@ on:
     tags:
       - "v*"
   workflow_dispatch:
-    inputs:
-      full_build:
-        description: "Build all release artifacts: Windows x64, Android arm64, web, macOS, and Linux"
-        required: false
-        default: false
-        type: boolean
 
 permissions:
   contents: read
@@ -34,8 +28,6 @@ jobs:
       release_build: ${{ steps.meta.outputs.release_build }}
       full_build: ${{ steps.meta.outputs.full_build }}
       publish_release: ${{ steps.meta.outputs.publish_release }}
-    env:
-      MANUAL_FULL_BUILD: ${{ inputs.full_build || 'false' }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -57,10 +49,7 @@ jobs:
           fi
 
           full_build=false
-          if [[ "$version" =~ ^[0-9]+\.[0-9]+\.0($|[-+]) ]]; then
-            full_build=true
-          fi
-          if [[ "${MANUAL_FULL_BUILD}" == "true" ]]; then
+          if [[ "${GITHUB_REF}" == refs/tags/v* || "${GITHUB_EVENT_NAME}" == "workflow_dispatch" ]]; then
             full_build=true
           fi
 
