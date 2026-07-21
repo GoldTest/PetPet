@@ -143,7 +143,7 @@
 
 ### Never Do
 - Commit secrets, credentials, or sensitive data
-- 禁止凭印象或过时知识修改代码。任何修改前必须验证目标在当前日期是否有效。
+- 禁止凭印象或过时知识修改代码。任何修改前必须验证目标在当前日期是否有效。若无法验证，找用户确认。代码修改范围应尽可能小，防止扰动。
 - Modify `node_modules/`, `src-tauri/gen/`, or `src-tauri/target/`
 - Push directly to main branch — open a PR
 - Edit installed skill cache paths (`.claude/skills/`, `.agents/skills/` — edit source in `.agents/` instead)
