@@ -2,6 +2,7 @@ import { t } from '../i18n';
 import { getAchievementEffects, incrementAchievementGardenHarvest, incrementAchievementGardenPlant, incrementAchievementGardenWater, recordEarnedCoins } from './achievements';
 import { getBoostCardEffects, getSixAmResetDateKey, normalizeBoostCardState, spendBoostCardGardenExtraDrop } from './boostCards';
 import { addInventoryItem, getInventoryCount, isBuiltinItemId, removeInventoryItem } from './items';
+import { getPartnerScheduleCrossSystemEffects } from './partnerScheduleEffects';
 import { clampCoins, clampCount } from './petStats';
 import { getSeasonForDate, type Season } from './season';
 import type { BoostCardState, BuiltinItemId, GardenDrop, GardenFertilizerId, GardenSlot, GardenSlotState, GardenState, GardenToolId, GardenTools, GardenTreeId, ItemId, PetState, WeatherType } from './petTypes';
@@ -202,7 +203,8 @@ export const getGardenEnvironmentEffects = (pet: PetState, now = Date.now()): Ga
 const applyGrowMultiplier = (pet: PetState, durationMs: number, now: number) => {
   const environmentMultiplier = getGardenEnvironmentEffects(pet, now).growTimeMultiplier;
   const boostMultiplier = getBoostCardEffects(pet, now).gardenGrowTimeMultiplier;
-  return Math.max(60 * 1000, Math.round(durationMs * environmentMultiplier * boostMultiplier));
+  const masteryMultiplier = getPartnerScheduleCrossSystemEffects(pet).gardenTimeMultiplier;
+  return Math.max(60 * 1000, Math.round(durationMs * environmentMultiplier * boostMultiplier * masteryMultiplier));
 };
 const getGrowDuration = (pet: PetState, treeId: GardenTreeId, now: number) => applyGrowMultiplier(pet, gardenTreeDefinitions[treeId].growDurationMs, now);
 const getHarvestCooldown = (pet: PetState, treeId: GardenTreeId, now: number) => applyGrowMultiplier(pet, gardenTreeDefinitions[treeId].harvestCooldownMs, now);

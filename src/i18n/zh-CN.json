@@ -264,6 +264,43 @@
       "summary": "安排伙伴完成现实时间活动，期间宠物状态暂停自然变化。",
       "skillsAria": "活动熟练度",
       "skillLevel": "熟练度 Lv.{level}",
+      "skillProgress": "Lv.{level} · {xp}/{needed}",
+      "passives": {
+        "level2": "Lv.2：该分类日程体力消耗 -10%",
+        "level4": "Lv.4：饱腹与心情消耗 -10%",
+        "level5": "Lv.5：活动时间 -5%",
+        "level7": "Lv.7：熟练度收益 +15%",
+        "level8": "Lv.8：该分类日程金币 +5%",
+        "level9": "Lv.9：活动时间总计 -10%",
+        "level10": "Lv.10：解锁大师技能"
+      },
+      "mastery": {
+        "count": "大师 · 已完成 {count} 次",
+        "unlocked": "大师技能已解锁",
+        "reward": "大师次数 +1",
+        "next10": "{count}/{target} · 体力总减免提升至 15%",
+        "next30": "{count}/{target} · 分类金币总加成提升至 10%",
+        "next60": "{count}/{target} · 强化大师长期被动",
+        "complete": "大师传承已完成 · 生涯 {count} 次"
+      },
+      "masterPassives": {
+        "study": { "base": "每日愿望金币 +10%", "advanced": "每日愿望金币 +20%" },
+        "cooking": { "base": "普通食物正面效果 +10%", "advanced": "普通食物正面效果 +15%" },
+        "garden": { "base": "新花园周期时间 -5%", "advanced": "新花园周期时间 -8%" },
+        "exercise": { "base": "清醒体力恢复间隔 -8%", "advanced": "清醒体力恢复间隔 -12%" }
+      },
+      "milestones": {
+        "aria": "全技能成长里程碑",
+        "level3Title": "全技能 Lv.3",
+        "level6Title": "全技能 Lv.6",
+        "progress": "{count}/4 项达到 Lv.{level}",
+        "level3Locked": "全部达到后：金币 +5%，次日 4 项可选",
+        "level6Locked": "全部达到后：金币总加成 15%，次日 5 项可选",
+        "level3Active": "4 项可选已生效 · 金币 +5%",
+        "level6Active": "5 项可选已生效 · 金币总加成 15%",
+        "nextReset": "金币已生效，次日调整为 {count} 项可选",
+        "income": "当前里程碑金币 +{percent}%"
+      },
       "categories": {
         "study": "学习",
         "cooking": "料理",
@@ -277,7 +314,7 @@
       },
       "todayKicker": "Today",
       "todayTitle": "今天的活动",
-      "dailyCount": "已完成 {count}/{total}",
+      "dailyCount": "已完成 {count}/{limit} · 今日可选 {offers} 项",
       "activeAria": "进行中的活动",
       "activeKicker": "日程进行中",
       "homeDockAria": "当前伙伴日程",
@@ -291,6 +328,7 @@
       "completed": "已完成",
       "start": "开始活动",
       "rewardPreview": "{coins} 金币 · 熟练度 +{xp}",
+      "rewardPreviewMaster": "{coins} 金币 · 大师次数 +1",
       "cost": {
         "energy": "体力 -{amount}",
         "hunger": "饱腹 -{amount}",
@@ -301,6 +339,7 @@
         "busy": "已有活动",
         "pending": "先领取收获",
         "completed": "已完成",
+        "daily_limit": "今日已完成 3 项",
         "sleeping": "正在睡觉",
         "energy": "体力不足",
         "hunger": "饱腹不足",
@@ -311,6 +350,7 @@
       "resultAria": "活动收获",
       "resultKicker": "活动完成",
       "resultSummary": "选择这次活动更需要的收获。",
+      "extraRewardChance": "当前有 {percent}% 概率额外获得一份完整奖励",
       "claimCoins": "领取 {coins} 金币",
       "claimXp": "熟练度 +{xp}",
       "categoryRewards": {
@@ -466,6 +506,9 @@
       },
       "categories": {
         "all": "全部",
+        "companion": "陪伴",
+        "life": "生活",
+        "schedule": "日程",
         "care": "照顾",
         "daily": "日常",
         "garden": "种植园",
@@ -1101,6 +1144,7 @@
         "cleanCooldown": "清洁冷却 {seconds} 秒",
         "extraHeartChance": "额外小心心概率 +{percent}%",
         "gardenExtraDropChance": "收获时额外产物概率 +{percent}%",
+        "partnerScheduleExtraRewardChance": "伙伴日程完整奖励额外一份概率 +{percent}%",
         "globalFlatBonus": "全局收益 +{amount}",
         "dailyStipend": "每日成就津贴 +{coins} 金币",
         "careStatBonus": "喂食和清洁恢复 +{amount}",
@@ -1203,6 +1247,10 @@
           "title": "路过也很好",
           "description": "领取 7 次每日登录奖励，不要求连续。"
         },
+        "daily_login_30": {
+          "title": "月度相伴",
+          "description": "累计领取 30 次每日登录奖励，不要求连续。"
+        },
         "garden_first_plant": {
           "title": "初次播种",
           "description": "在种植园成功种下 1 棵树。"
@@ -1219,6 +1267,10 @@
           "title": "大丰收",
           "description": "在种植园累计收获 30 次。"
         },
+        "garden_harvest_100": {
+          "title": "百次丰收",
+          "description": "在种植园累计收获 100 次。"
+        },
         "garden_tree_catalogue": {
           "title": "园艺大师",
           "description": "果树、护理之树、礼物树、摇钱树和金苹果树各收获至少 1 次。"
@@ -1231,6 +1283,54 @@
           "title": "工具专家",
           "description": "将水壶、铲子和肥料箱全部升级到 3 级。"
         },
+        "schedule_first": {
+          "title": "初次出发",
+          "description": "领取 1 次伙伴日程奖励。"
+        },
+        "schedule_10": {
+          "title": "日程渐入佳境",
+          "description": "累计领取 10 次伙伴日程奖励。"
+        },
+        "schedule_50": {
+          "title": "日程达人",
+          "description": "累计领取 50 次伙伴日程奖励。"
+        },
+        "schedule_all_categories": {
+          "title": "多面手",
+          "description": "学习、烹饪、种植和锻炼日程各领取至少 1 次奖励。"
+        },
+        "schedule_long_5": {
+          "title": "长线计划",
+          "description": "累计完成并领取 5 次长日程奖励。"
+        },
+        "schedule_long_all_categories": {
+          "title": "四路远行",
+          "description": "四类长日程各完成并领取至少 1 次奖励。"
+        },
+        "schedule_category_reward_10": {
+          "title": "专业有回报",
+          "description": "累计选择 10 次专业奖励。"
+        },
+        "schedule_daily_three": {
+          "title": "行程满满",
+          "description": "同一天完成 3 项伙伴日程。"
+        },
+        "schedule_all_skills_3": {
+          "title": "四项熟练",
+          "description": "四项伙伴日程技能全部达到 3 级。"
+        },
+        "schedule_all_skills_6": {
+          "title": "四项精进",
+          "description": "四项伙伴日程技能全部达到 6 级。"
+        },
+        "schedule_all_skills_max": {
+          "title": "全能伙伴",
+          "description": "四项伙伴日程技能全部达到 10 级。"
+        },
+        "schedule_all_master_10": {
+          "title": "四艺大师",
+          "description": "四项伙伴日程技能达到 10 级后，每类各完成 10 次大师日程。"
+        },
         "first_purchase": {
           "title": "第一次采购",
           "description": "第一次购买非免费道具。"
@@ -1239,9 +1339,17 @@
           "title": "小仓库补货中",
           "description": "累计购买或领取 20 次道具。"
         },
+        "paid_purchase_100": {
+          "title": "商店常客",
+          "description": "累计完成 100 次非免费道具购买。"
+        },
         "item_use_20": {
           "title": "背包不是摆设",
           "description": "累计使用 20 次道具。"
+        },
+        "item_use_100": {
+          "title": "物尽其用",
+          "description": "累计使用 100 次道具。"
         },
         "fruit_taster": {
           "title": "水果试吃员",
@@ -1270,6 +1378,10 @@
         "pomodoro_100": {
           "title": "深度专注",
           "description": "累计完成 100 次专注阶段。"
+        },
+        "pomodoro_250": {
+          "title": "专注成习",
+          "description": "累计完成 250 次专注阶段。"
         },
         "pomodoro_day_4": {
           "title": "今天很专心",
@@ -1346,6 +1458,10 @@
         "rare_level_10": {
           "title": "闪闪发光的伙伴",
           "description": "宠物升到 10 级。"
+        },
+        "rare_level_20": {
+          "title": "一起长大",
+          "description": "宠物升到 20 级。"
         },
         "hidden_good_ending_year_1": {
           "title": "好结局",
@@ -1429,7 +1545,7 @@
         },
         "hidden_full_catalogue": {
           "title": "任务达人",
-          "description": "完成 36 个普通任务即可解锁。"
+          "description": "完成至少 80% 的普通成就即可解锁。"
         }
       }
     },
@@ -1441,6 +1557,7 @@
         "busy": "{name} 已经有正在进行的活动。",
         "pending": "先领取上一次活动的收获。",
         "completed": "这个活动今天已经完成了。",
+        "daily_limit": "今天已经完成 3 项伙伴日程了。",
         "sleeping": "{name} 还在睡觉，醒来后再安排活动吧。",
         "energy": "{name} 的体力还不足以开始这项活动。",
         "hunger": "{name} 需要先吃点东西。",
@@ -1451,6 +1568,8 @@
       "busyAction": "{name} 正在进行伙伴日程，现在不能进行宠物照顾。",
       "cancelled": "{name} 提前结束了活动，已经完成的进度没有保留。",
       "noResult": "现在没有可以领取的活动收获。",
+      "masterCompletion": " 大师完成次数 +1（累计 {count} 次）。",
+      "extraRewardTriggered": "成就加成触发，额外获得 {count} 份完整日程奖励。",
       "claimed": {
         "coins": "领取了活动收获，金币 +{coins}。",
         "category": "带回了活动成果，金币 +{coins}。"

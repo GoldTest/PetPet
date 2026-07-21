@@ -1,7 +1,14 @@
 import { t } from '../i18n';
-import { recordEarnedCoins } from './achievements';
+import { getAchievementEffects, incrementAchievementPartnerScheduleClaim, recordEarnedCoins } from './achievements';
 import { getSixAmResetDateKey } from './dateRewards';
 import { addInventoryItem } from './items';
+import {
+  getPartnerScheduleCategoryEffects,
+  getPartnerScheduleGlobalCoinBonusPercent,
+  getPartnerScheduleUnlockedOfferCount,
+  partnerScheduleCategories,
+  partnerScheduleDailyCompletionLimit,
+} from './partnerScheduleEffects';
 import { clampCoins, clampCount, clampPetHealth, clampPetStat } from './petStats';
 import { getWorkSeasonCoinBonus } from './season';
 import type {
@@ -19,9 +26,9 @@ import type {
 } from './petTypes';
 import { hashString, isNumber } from './utils';
 
-export const partnerScheduleSchemaVersion = 2;
+export const partnerScheduleSchemaVersion = 3;
 export const partnerScheduleUnlockLevel = 3;
-export const partnerScheduleMaxSkillLevel = 5;
+export const partnerScheduleMaxSkillLevel = 10;
 
 const minuteMs = 60 * 1000;
 const maxScheduleDurationMs = 24 * 60 * 60 * 1000;
@@ -91,7 +98,7 @@ const templateIds: Record<PartnerScheduleCategory, Record<PartnerScheduleSize, s
   exercise: { short: 'exercise_walk', standard: 'exercise_training', long: 'exercise_challenge' },
 };
 
-const categories: readonly PartnerScheduleCategory[] = ['study', 'cooking', 'garden', 'exercise'];
+const categories = partnerScheduleCategories;
 const sizes: readonly PartnerScheduleSize[] = ['short', 'standard', 'long'];
 const categorySet = new Set<PartnerScheduleCategory>(categories);
 const sizeSet = new Set<PartnerScheduleSize>(sizes);
@@ -129,7 +136,7 @@ export const getPartnerScheduleDefinition = (id: string) => definitionMap.get(id
 
 export const getPartnerScheduleActivity = (category: PartnerScheduleCategory) => categoryActivities[category];
 
-const defaultSkill = (): PartnerScheduleSkill => ({ level: 1, xp: 0 });
+const defaultSkill = (): PartnerScheduleSkill => ({ level: 1, xp: 0, masterCompletions: 0 });
 
 const defaultSkills = (): PartnerScheduleState['skills'] => ({
   study: defaultSkill(),
@@ -138,16 +145,21 @@ const defaultSkills = (): PartnerScheduleState['skills'] => ({
   exercise: defaultSkill(),
 });
 
-const getBoardSizes = (level: number): PartnerScheduleSize[] => {
-  if (level >= 8) return ['short', 'standard', 'long'];
-  if (level >= 5) return ['short', 'standard', 'standard'];
-  return ['short', 'short', 'standard'];
+const getBoardSizes = (level: number, offerCount: number): PartnerScheduleSize[] => {
+  const baseSizes: PartnerScheduleSize[] = level >= 8
+    ? ['short', 'standard', 'long']
+    : level >= 5
+      ? ['short', 'standard', 'standard']
+      : ['short', 'short', 'standard'];
+  if (offerCount >= 4) baseSizes.push('standard');
+  if (offerCount >= 5) baseSizes.push('short');
+  return baseSizes;
 };
 
-const generateOffers = (level: number, createdAt: number, dateKey: string): PartnerScheduleOffer[] => {
+const generateOffers = (level: number, createdAt: number, dateKey: string, offerCount: number): PartnerScheduleOffer[] => {
   if (level < partnerScheduleUnlockLevel) return [];
   const usedCategories = new Set<PartnerScheduleCategory>();
-  return getBoardSizes(level).map((size, index) => {
+  return getBoardSizes(level, offerCount).map((size, index) => {
     const available = categories.filter((category) => !usedCategories.has(category));
     const pool = available.length > 0 ? available : [...categories];
     const category = pool[hashString(`${dateKey}:${Math.floor(createdAt)}:${level}:${index}`) % pool.length];
@@ -168,10 +180,12 @@ export const defaultPartnerScheduleState = (
   now = Date.now(),
 ): PartnerScheduleState => {
   const boardDateKey = getSixAmResetDateKey(now);
+  const boardOfferCount = pet.level < partnerScheduleUnlockLevel ? 0 : 3;
   return {
     schemaVersion: partnerScheduleSchemaVersion,
     boardDateKey,
-    offers: generateOffers(pet.level, pet.createdAt, boardDateKey),
+    boardOfferCount,
+    offers: generateOffers(pet.level, pet.createdAt, boardDateKey, boardOfferCount),
     completedOfferIds: [],
     skills: defaultSkills(),
   };
@@ -182,10 +196,13 @@ const normalizeSkill = (value: unknown): PartnerScheduleSkill => {
   const raw = value as Record<string, unknown>;
   const level = Math.max(1, Math.min(partnerScheduleMaxSkillLevel, clampCount(isNumber(raw.level) ? raw.level : 1)));
   const xp = level >= partnerScheduleMaxSkillLevel ? 0 : Math.min(9999, clampCount(isNumber(raw.xp) ? raw.xp : 0));
-  return { level, xp };
+  const masterCompletions = level >= partnerScheduleMaxSkillLevel
+    ? Math.min(999999, clampCount(isNumber(raw.masterCompletions) ? raw.masterCompletions : 0))
+    : 0;
+  return { level, xp, masterCompletions };
 };
 
-const normalizeOffers = (value: unknown, dateKey: string): PartnerScheduleOffer[] => {
+const normalizeOffers = (value: unknown, dateKey: string, limit: number): PartnerScheduleOffer[] => {
   if (!Array.isArray(value)) return [];
   const offers: PartnerScheduleOffer[] = [];
   value.forEach((item) => {
@@ -195,7 +212,7 @@ const normalizeOffers = (value: unknown, dateKey: string): PartnerScheduleOffer[
     if (!definitionMap.has(raw.templateId) || offers.some((offer) => offer.id === raw.id)) return;
     offers.push({ id: raw.id.slice(0, 128), templateId: raw.templateId, dateKey });
   });
-  return offers.slice(0, 3);
+  return offers.slice(0, limit);
 };
 
 const getNormalizedCoinReward = (rawReward: unknown, level: number, size: PartnerScheduleSize, now: number) => {
@@ -241,6 +258,7 @@ const normalizeActive = (value: unknown, level: number, now: number): ActivePart
     endsAt,
     coinReward: getNormalizedCoinReward(raw.coinReward, level, definition.size, now),
     skillXp: Math.min(9999, clampCount(isNumber(raw.skillXp) ? raw.skillXp : sizeSkillXp[definition.size])),
+    grantsMasterCompletion: raw.grantsMasterCompletion === true,
   };
 };
 
@@ -257,6 +275,7 @@ const normalizeResult = (value: unknown, level: number, now: number): PartnerSch
     completedAt: Math.max(0, Math.min(now, isNumber(raw.completedAt) ? Math.floor(raw.completedAt) : now)),
     coinReward: getNormalizedCoinReward(raw.coinReward, level, definition.size, now),
     skillXp: Math.min(9999, clampCount(isNumber(raw.skillXp) ? raw.skillXp : sizeSkillXp[definition.size])),
+    grantsMasterCompletion: raw.grantsMasterCompletion === true,
   };
 };
 
@@ -278,14 +297,23 @@ export const normalizePartnerScheduleState = (
   });
   const boardDateKey = getSixAmResetDateKey(now);
   const savedDateKey = typeof raw.boardDateKey === 'string' ? raw.boardDateKey : '';
-  const savedOffers = savedDateKey === boardDateKey ? normalizeOffers(raw.offers, boardDateKey) : [];
+  const rawOffersLength = Array.isArray(raw.offers) ? raw.offers.length : 0;
+  const savedBoardOfferCount = Math.max(3, Math.min(5, clampCount(
+    isNumber(raw.boardOfferCount) ? raw.boardOfferCount : rawOffersLength,
+  )));
+  const boardOfferCount = pet.level < partnerScheduleUnlockLevel
+    ? 0
+    : savedDateKey === boardDateKey
+      ? savedBoardOfferCount
+      : getPartnerScheduleUnlockedOfferCount(skills);
+  const savedOffers = savedDateKey === boardDateKey ? normalizeOffers(raw.offers, boardDateKey, boardOfferCount) : [];
   const offers = pet.level < partnerScheduleUnlockLevel
     ? []
-    : savedOffers.length === 3
+    : savedOffers.length === boardOfferCount
       ? savedOffers
-      : generateOffers(pet.level, pet.createdAt, boardDateKey);
+      : generateOffers(pet.level, pet.createdAt, boardDateKey, boardOfferCount);
   const completedOfferIds = savedDateKey === boardDateKey && Array.isArray(raw.completedOfferIds)
-    ? Array.from(new Set(raw.completedOfferIds.filter((id): id is string => typeof id === 'string').map((id) => id.slice(0, 128)))).slice(0, 3)
+    ? Array.from(new Set(raw.completedOfferIds.filter((id): id is string => typeof id === 'string').map((id) => id.slice(0, 128)))).slice(0, partnerScheduleDailyCompletionLimit)
     : [];
   let pendingResult = normalizeResult(raw.pendingResult, pet.level, now);
   let active = pendingResult ? undefined : normalizeActive(raw.active, pet.level, now);
@@ -298,12 +326,14 @@ export const normalizePartnerScheduleState = (
       completedAt: active.endsAt,
       coinReward: active.coinReward,
       skillXp: active.skillXp,
+      grantsMasterCompletion: active.grantsMasterCompletion,
     };
     active = undefined;
   }
   return {
     schemaVersion: partnerScheduleSchemaVersion,
     boardDateKey,
+    boardOfferCount,
     offers,
     completedOfferIds,
     active,
@@ -314,13 +344,25 @@ export const normalizePartnerScheduleState = (
 
 const refreshBoard = (pet: PetState, now: number): PetState => {
   const dateKey = getSixAmResetDateKey(now);
-  if (pet.partnerSchedule.boardDateKey === dateKey && (pet.level < partnerScheduleUnlockLevel || pet.partnerSchedule.offers.length === 3)) return pet;
+  const isCurrentBoard = pet.partnerSchedule.boardDateKey === dateKey;
+  const hasValidCurrentBoard = pet.level < partnerScheduleUnlockLevel
+    ? pet.partnerSchedule.boardOfferCount === 0 && pet.partnerSchedule.offers.length === 0
+    : pet.partnerSchedule.boardOfferCount >= 3
+      && pet.partnerSchedule.boardOfferCount <= 5
+      && pet.partnerSchedule.offers.length === pet.partnerSchedule.boardOfferCount;
+  if (isCurrentBoard && hasValidCurrentBoard) return pet;
+  const boardOfferCount = pet.level < partnerScheduleUnlockLevel
+    ? 0
+    : isCurrentBoard && pet.partnerSchedule.boardOfferCount >= 3
+      ? pet.partnerSchedule.boardOfferCount
+      : getPartnerScheduleUnlockedOfferCount(pet.partnerSchedule.skills);
   return {
     ...pet,
     partnerSchedule: {
       ...pet.partnerSchedule,
       boardDateKey: dateKey,
-      offers: generateOffers(pet.level, pet.createdAt, dateKey),
+      boardOfferCount,
+      offers: generateOffers(pet.level, pet.createdAt, dateKey, boardOfferCount),
       completedOfferIds: [],
     },
   };
@@ -345,6 +387,7 @@ const finishActiveSchedule = (pet: PetState, completedAt: number): PetState => {
         completedAt,
         coinReward: active.coinReward,
         skillXp: active.skillXp,
+        grantsMasterCompletion: active.grantsMasterCompletion,
       },
     },
   };
@@ -371,9 +414,41 @@ export const getPartnerScheduleCoinReward = (
 
 export const getPartnerScheduleSkillXpReward = (size: PartnerScheduleSize) => sizeSkillXp[size];
 
+export interface PartnerScheduleOfferPreview {
+  durationMs: number;
+  energyCost: number;
+  hungerCost: number;
+  moodCost: number;
+  coinReward: number;
+  skillXp: number;
+  grantsMasterCompletion: boolean;
+}
+
+export const getPartnerScheduleOfferPreview = (
+  pet: PetState,
+  definition: PartnerScheduleDefinition,
+  now = Date.now(),
+): PartnerScheduleOfferPreview => {
+  const skill = pet.partnerSchedule.skills[definition.category];
+  const effects = getPartnerScheduleCategoryEffects(skill);
+  const globalCoinBonusPercent = getPartnerScheduleGlobalCoinBonusPercent(pet.partnerSchedule.skills);
+  const baseCoinReward = getPartnerScheduleCoinReward(pet, definition.size, now);
+  return {
+    durationMs: Math.max(minuteMs, Math.round(definition.durationMinutes * minuteMs * effects.durationMultiplier)),
+    energyCost: Math.max(1, Math.round(definition.energyCost * effects.energyCostMultiplier)),
+    hungerCost: Math.max(1, Math.round(definition.hungerCost * effects.hungerMoodCostMultiplier)),
+    moodCost: Math.max(1, Math.round(definition.moodCost * effects.hungerMoodCostMultiplier)),
+    coinReward: Math.max(1, Math.round(baseCoinReward * (1 + (globalCoinBonusPercent + effects.coinBonusPercent) / 100))),
+    skillXp: effects.grantsMasterCompletion
+      ? 0
+      : Math.max(1, Math.round(getPartnerScheduleSkillXpReward(definition.size) * effects.skillXpMultiplier)),
+    grantsMasterCompletion: effects.grantsMasterCompletion,
+  };
+};
+
 export interface PartnerScheduleStartCheck {
   canStart: boolean;
-  reason?: 'locked' | 'busy' | 'pending' | 'completed' | 'sleeping' | 'energy' | 'hunger' | 'mood' | 'health' | 'missing';
+  reason?: 'locked' | 'busy' | 'pending' | 'completed' | 'daily_limit' | 'sleeping' | 'energy' | 'hunger' | 'mood' | 'health' | 'missing';
 }
 
 export const getPartnerScheduleStartCheck = (
@@ -386,6 +461,9 @@ export const getPartnerScheduleStartCheck = (
   if (current.partnerSchedule.pendingResult) return { canStart: false, reason: 'pending' };
   if (current.partnerSchedule.active) return { canStart: false, reason: 'busy' };
   if (current.partnerSchedule.completedOfferIds.includes(offerId)) return { canStart: false, reason: 'completed' };
+  if (current.partnerSchedule.completedOfferIds.length >= partnerScheduleDailyCompletionLimit) {
+    return { canStart: false, reason: 'daily_limit' };
+  }
   if (current.isSleeping) return { canStart: false, reason: 'sleeping' };
   const offer = current.partnerSchedule.offers.find((item) => item.id === offerId);
   const definition = offer ? definitionMap.get(offer.templateId) : undefined;
@@ -410,21 +488,23 @@ export const startPartnerSchedule = (
   const offer = current.partnerSchedule.offers.find((item) => item.id === offerId);
   const definition = offer ? definitionMap.get(offer.templateId) : undefined;
   if (!offer || !definition) return current;
+  const preview = getPartnerScheduleOfferPreview(current, definition, now);
   const active: ActivePartnerSchedule = {
     offerId: offer.id,
     templateId: definition.id,
     category: definition.category,
     size: definition.size,
     startedAt: now,
-    endsAt: now + definition.durationMinutes * minuteMs,
-    coinReward: getPartnerScheduleCoinReward(current, definition.size, now),
-    skillXp: getPartnerScheduleSkillXpReward(definition.size),
+    endsAt: now + preview.durationMs,
+    coinReward: preview.coinReward,
+    skillXp: preview.skillXp,
+    grantsMasterCompletion: preview.grantsMasterCompletion,
   };
   return {
     ...current,
-    energy: clampPetStat(current, current.energy - definition.energyCost),
-    hunger: clampPetStat(current, current.hunger - definition.hungerCost),
-    mood: clampPetStat(current, current.mood - definition.moodCost),
+    energy: clampPetStat(current, current.energy - preview.energyCost),
+    hunger: clampPetStat(current, current.hunger - preview.hungerCost),
+    mood: clampPetStat(current, current.mood - preview.moodCost),
     recentActivity: definition.activity,
     recentActivityUntil: active.endsAt,
     recentEvent: t('pet.partnerSchedule.started', { name: current.name }),
@@ -450,8 +530,10 @@ export const cancelPartnerSchedule = (pet: PetState, now = Date.now()): PetState
   };
 };
 
+const partnerScheduleSkillXpNeededByLevel = [40, 60, 90, 130, 180, 260, 360, 480, 620] as const;
+
 export const getPartnerScheduleSkillXpNeeded = (level: number) =>
-  level >= partnerScheduleMaxSkillLevel ? 0 : 20 + Math.max(1, level) * 15;
+  level >= partnerScheduleMaxSkillLevel ? 0 : partnerScheduleSkillXpNeededByLevel[Math.max(1, Math.floor(level)) - 1] ?? 0;
 
 const addSkillXp = (skill: PartnerScheduleSkill, amount: number): PartnerScheduleSkill => {
   let level = skill.level;
@@ -462,7 +544,7 @@ const addSkillXp = (skill: PartnerScheduleSkill, amount: number): PartnerSchedul
     xp -= needed;
     level += 1;
   }
-  return { level, xp: level >= partnerScheduleMaxSkillLevel ? 0 : xp };
+  return { ...skill, level, xp: level >= partnerScheduleMaxSkillLevel ? 0 : xp };
 };
 
 export interface PartnerScheduleClaimPreview {
@@ -484,13 +566,35 @@ export const getPartnerScheduleClaimPreview = (
   }
   const base: PartnerScheduleClaimPreview = {
     coins: Math.max(1, Math.round(result.coinReward * 0.8)),
-    skillXp: Math.max(1, Math.round(result.skillXp * 1.5)),
+    skillXp: result.skillXp > 0 ? Math.max(1, Math.round(result.skillXp * 1.5)) : 0,
   };
   const amount = result.size === 'long' ? 2 : 1;
   if (result.category === 'study') return { ...base, skillXp: result.skillXp * 2, mood: 8 * amount };
   if (result.category === 'cooking') return { ...base, itemId: 'bento', itemAmount: amount };
   if (result.category === 'garden') return { ...base, itemId: 'fruit_tree_sapling', itemAmount: amount };
   return { ...base, energy: 10 * amount, health: 6 * amount };
+};
+
+export const getPartnerScheduleExtraRewardCopies = (
+  pet: PetState,
+  result: PartnerScheduleResult,
+) => {
+  const chancePercent = Math.max(0, getAchievementEffects(pet).partnerScheduleExtraRewardChancePercent);
+  const guaranteedCopies = Math.floor(chancePercent / 100);
+  const remainderChance = chancePercent % 100;
+  if (remainderChance <= 0) return guaranteedCopies;
+  const seed = [
+    result.offerId,
+    result.templateId,
+    result.category,
+    result.size,
+    result.completedAt,
+    result.coinReward,
+    result.skillXp,
+    result.grantsMasterCompletion ? 1 : 0,
+    'achievement-extra-reward',
+  ].join(':');
+  return guaranteedCopies + (hashString(seed) % 100 < remainderChance ? 1 : 0);
 };
 
 export const claimPartnerScheduleResult = (
@@ -503,25 +607,37 @@ export const claimPartnerScheduleResult = (
   if (!result) return { ...current, recentEvent: t('pet.partnerSchedule.noResult') };
   const safeChoice = result.size === 'short' ? 'coins' : choice;
   const reward = getPartnerScheduleClaimPreview(result, safeChoice);
+  const extraRewardCopies = getPartnerScheduleExtraRewardCopies(current, result);
+  const rewardMultiplier = 1 + extraRewardCopies;
+  const rewardCoins = reward.coins * rewardMultiplier;
+  const rewardSkillXp = reward.skillXp * rewardMultiplier;
+  const currentSkill = current.partnerSchedule.skills[result.category];
+  const nextSkill = result.grantsMasterCompletion && currentSkill.level >= partnerScheduleMaxSkillLevel
+    ? { ...currentSkill, xp: 0, masterCompletions: clampCount(currentSkill.masterCompletions + 1) }
+    : addSkillXp(currentSkill, rewardSkillXp);
   const skills = {
     ...current.partnerSchedule.skills,
-    [result.category]: addSkillXp(current.partnerSchedule.skills[result.category], reward.skillXp),
+    [result.category]: nextSkill,
   };
   const inventory = reward.itemId
-    ? addInventoryItem(current.inventory, reward.itemId, reward.itemAmount ?? 1)
+    ? addInventoryItem(current.inventory, reward.itemId, (reward.itemAmount ?? 1) * rewardMultiplier)
     : current.inventory;
   const belongsToCurrentBoard = current.partnerSchedule.offers.some((offer) => offer.id === result.offerId);
   const completedOfferIds = belongsToCurrentBoard
-    ? Array.from(new Set([...current.partnerSchedule.completedOfferIds, result.offerId])).slice(-3)
+    ? Array.from(new Set([...current.partnerSchedule.completedOfferIds, result.offerId])).slice(-partnerScheduleDailyCompletionLimit)
     : current.partnerSchedule.completedOfferIds;
   const rewarded = recordEarnedCoins({
     ...current,
-    coins: clampCoins(current.coins + reward.coins),
+    coins: clampCoins(current.coins + rewardCoins),
     inventory,
-    energy: clampPetStat(current, current.energy + (reward.energy ?? 0)),
-    health: clampPetHealth(current, current.health + (reward.health ?? 0)),
-    mood: clampPetStat(current, current.mood + (reward.mood ?? 0)),
-    recentEvent: t(`pet.partnerSchedule.claimed.${safeChoice}`, { coins: reward.coins }),
+    energy: clampPetStat(current, current.energy + (reward.energy ?? 0) * rewardMultiplier),
+    health: clampPetHealth(current, current.health + (reward.health ?? 0) * rewardMultiplier),
+    mood: clampPetStat(current, current.mood + (reward.mood ?? 0) * rewardMultiplier),
+    recentEvent: [
+      t(`pet.partnerSchedule.claimed.${safeChoice}`, { coins: rewardCoins }),
+      result.grantsMasterCompletion ? t('pet.partnerSchedule.masterCompletion', { count: nextSkill.masterCompletions }).trim() : '',
+      extraRewardCopies > 0 ? t('pet.partnerSchedule.extraRewardTriggered', { count: extraRewardCopies }) : '',
+    ].filter(Boolean).join(' '),
     lastInteractionAt: now,
     partnerSchedule: {
       ...current.partnerSchedule,
@@ -529,8 +645,8 @@ export const claimPartnerScheduleResult = (
       pendingResult: undefined,
       skills,
     },
-  }, reward.coins);
-  return rewarded;
+  }, rewardCoins);
+  return incrementAchievementPartnerScheduleClaim(rewarded, result.category, result.size, safeChoice);
 };
 
 export const getPartnerScheduleProgress = (active: ActivePartnerSchedule, now = Date.now()) => {

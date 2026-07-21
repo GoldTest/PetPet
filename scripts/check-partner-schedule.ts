@@ -1,24 +1,40 @@
 import assert from 'node:assert/strict';
 import { buyItem, interactWithPet, upgradePet, useInventoryItem, applyPetAction } from '../src/core/petActions';
+import { achievementDefinitions, claimAchievementReward, evaluateAchievements, getAchievementEffects, taskMasterCompletionRatio } from '../src/core/achievements';
+import { claimDailyWishReward, getDailyWishView } from '../src/core/dailyWishes';
 import { advancePet } from '../src/core/petLifecycle';
-import { selectGardenSlot } from '../src/core/garden';
+import { plantTree, selectGardenSlot } from '../src/core/garden';
+import { getEnergyRecoveryIntervalMs } from '../src/core/petStats';
 import {
   advancePartnerSchedule,
   claimPartnerScheduleResult,
+  getPartnerScheduleClaimPreview,
   getPartnerScheduleDefinition,
+  getPartnerScheduleExtraRewardCopies,
+  getPartnerScheduleOfferPreview,
   getPartnerScheduleProgress,
+  getPartnerScheduleSkillXpNeeded,
+  getPartnerScheduleStartCheck,
   getPartnerScheduleSkillXpReward,
   normalizePartnerScheduleState,
   partnerScheduleDefinitions,
   startPartnerSchedule,
 } from '../src/core/partnerSchedule';
-import { createDefaultPet } from '../src/core/petState';
+import {
+  getPartnerScheduleCategoryEffects,
+  getPartnerScheduleCrossSystemEffects,
+  getPartnerScheduleGlobalCoinBonusPercent,
+  getPartnerScheduleUnlockedOfferCount,
+  partnerScheduleDailyCompletionLimit,
+} from '../src/core/partnerScheduleEffects';
+import { createDefaultPet, normalizePet } from '../src/core/petState';
 import { loadStoredPetJson } from '../src/core/saveCodec';
 import { startPomodoro } from '../src/core/petActions';
-import type { PartnerScheduleState, PetState } from '../src/core/petTypes';
+import type { PartnerScheduleCategory, PartnerScheduleResult, PartnerScheduleState, PetState } from '../src/core/petTypes';
 
 const minuteMs = 60 * 1000;
 const now = new Date(2026, 6, 20, 12, 0, 0).getTime();
+const skill = (level: number, xp = 0, masterCompletions = 0) => ({ level, xp, masterCompletions });
 
 const createReadyPet = (level: number, createdAt = now - 10 * 24 * 60 * minuteMs) => {
   const pet = createDefaultPet(now);
@@ -35,6 +51,18 @@ const createReadyPet = (level: number, createdAt = now - 10 * 24 * 60 * minuteMs
     lastEnergyRecoveryAt: now,
   }, now);
 };
+
+const withCategorySkill = (
+  pet: PetState,
+  category: PartnerScheduleCategory,
+  nextSkill: ReturnType<typeof skill>,
+): PetState => ({
+  ...pet,
+  partnerSchedule: {
+    ...pet.partnerSchedule,
+    skills: { ...pet.partnerSchedule.skills, [category]: nextSkill },
+  },
+});
 
 const level2 = createReadyPet(2);
 assert.equal(level2.partnerSchedule.offers.length, 0, 'Lv2 should remain locked');
@@ -56,10 +84,99 @@ assert.deepEqual(
   [10, 23, 50],
   'skill XP should use the unified reward values',
 );
+const xpCurve = Array.from({ length: 9 }, (_, index) => getPartnerScheduleSkillXpNeeded(index + 1));
+assert.deepEqual(xpCurve, [40, 60, 90, 130, 180, 260, 360, 480, 620]);
+assert.equal(xpCurve.reduce((sum, amount) => sum + amount, 0), 2220, 'one skill should require 2220 XP to reach Lv10');
+
+const allLevel3 = {
+  ...level8,
+  partnerSchedule: {
+    ...level8.partnerSchedule,
+    skills: { study: skill(3), cooking: skill(3), garden: skill(3), exercise: skill(3) },
+  },
+};
+assert.equal(getPartnerScheduleGlobalCoinBonusPercent(allLevel3.partnerSchedule.skills), 5);
+assert.equal(getPartnerScheduleUnlockedOfferCount(allLevel3.partnerSchedule.skills), 4);
+assert.equal(allLevel3.partnerSchedule.offers.length, 3, 'new choice count should wait for the next board reset');
+const level3MilestoneNextDay = advancePartnerSchedule(allLevel3, now + 24 * 60 * minuteMs);
+assert.equal(level3MilestoneNextDay.partnerSchedule.offers.length, 4);
+assert.equal(new Set(level3MilestoneNextDay.partnerSchedule.offers.map((item) => getPartnerScheduleDefinition(item.templateId)?.category)).size, 4);
+
+const allLevel6 = {
+  ...level8,
+  partnerSchedule: {
+    ...level8.partnerSchedule,
+    skills: { study: skill(6), cooking: skill(6), garden: skill(6), exercise: skill(6) },
+  },
+};
+assert.equal(getPartnerScheduleGlobalCoinBonusPercent(allLevel6.partnerSchedule.skills), 15);
+assert.equal(getPartnerScheduleUnlockedOfferCount(allLevel6.partnerSchedule.skills), 5);
+assert.equal(allLevel6.partnerSchedule.offers.length, 3);
+const level6MilestoneNextDay = advancePartnerSchedule(allLevel6, now + 24 * 60 * minuteMs);
+assert.equal(level6MilestoneNextDay.partnerSchedule.offers.length, 5);
+assert.equal(new Set(level6MilestoneNextDay.partnerSchedule.offers.slice(0, 4).map((item) => getPartnerScheduleDefinition(item.templateId)?.category)).size, 4);
+const expandedSameDay = normalizePartnerScheduleState({
+  ...allLevel6.partnerSchedule,
+  boardOfferCount: 5,
+  offers: [],
+}, { level: allLevel6.level, createdAt: allLevel6.createdAt }, now);
+assert.deepEqual(
+  expandedSameDay.offers.slice(0, 3).map((item) => item.templateId),
+  allLevel6.partnerSchedule.offers.map((item) => item.templateId),
+  'expanding a board should preserve the original first three deterministic offers',
+);
+const dailyLimitState = {
+  ...allLevel6,
+  partnerSchedule: {
+    ...expandedSameDay,
+    completedOfferIds: expandedSameDay.offers.slice(0, partnerScheduleDailyCompletionLimit).map((item) => item.id),
+  },
+};
+assert.equal(getPartnerScheduleStartCheck(dailyLimitState, expandedSameDay.offers[3].id, now).reason, 'daily_limit');
+const resetDailyLimitState = advancePartnerSchedule(dailyLimitState, now + 24 * 60 * minuteMs);
+assert.equal(resetDailyLimitState.partnerSchedule.completedOfferIds.length, 0, 'daily completion limit should reset with the board');
+assert.equal(resetDailyLimitState.partnerSchedule.offers.length, 5);
 
 const offer = level3.partnerSchedule.offers[0];
 const definition = getPartnerScheduleDefinition(offer.templateId);
 assert(definition, 'offer definition should exist');
+const milestoneDefinition = getPartnerScheduleDefinition(level8.partnerSchedule.offers[0].templateId)!;
+const milestoneBasePreview = getPartnerScheduleOfferPreview(level8, milestoneDefinition, now);
+assert.equal(
+  getPartnerScheduleOfferPreview(allLevel3, milestoneDefinition, now).coinReward,
+  Math.round(milestoneBasePreview.coinReward * 1.05),
+  'all-skill Lv3 coin bonus should apply immediately to newly started schedules',
+);
+assert.equal(
+  getPartnerScheduleOfferPreview(allLevel6, milestoneDefinition, now).coinReward,
+  Math.round(milestoneBasePreview.coinReward * 1.15),
+  'all-skill Lv6 total coin bonus should be 15%',
+);
+const basePreview = getPartnerScheduleOfferPreview(level3, definition, now);
+const level2Preview = getPartnerScheduleOfferPreview(withCategorySkill(level3, definition.category, skill(2)), definition, now);
+assert.equal(level2Preview.energyCost, Math.max(1, Math.round(definition.energyCost * 0.9)));
+const level4Preview = getPartnerScheduleOfferPreview(withCategorySkill(level3, definition.category, skill(4)), definition, now);
+assert.equal(level4Preview.hungerCost, Math.max(1, Math.round(definition.hungerCost * 0.9)));
+assert.equal(level4Preview.moodCost, Math.max(1, Math.round(definition.moodCost * 0.9)));
+const level5Preview = getPartnerScheduleOfferPreview(withCategorySkill(level3, definition.category, skill(5)), definition, now);
+assert.equal(level5Preview.durationMs, Math.round(definition.durationMinutes * minuteMs * 0.95));
+const level7Preview = getPartnerScheduleOfferPreview(withCategorySkill(level3, definition.category, skill(7)), definition, now);
+assert.equal(level7Preview.skillXp, Math.round(getPartnerScheduleSkillXpReward(definition.size) * 1.15));
+const level8Preview = getPartnerScheduleOfferPreview(withCategorySkill(level3, definition.category, skill(8)), definition, now);
+assert.equal(level8Preview.coinReward, Math.round(basePreview.coinReward * 1.05));
+const level9Preview = getPartnerScheduleOfferPreview(withCategorySkill(level3, definition.category, skill(9)), definition, now);
+assert.equal(level9Preview.durationMs, Math.round(definition.durationMinutes * minuteMs * 0.9));
+const level10Preview = getPartnerScheduleOfferPreview(withCategorySkill(level3, definition.category, skill(10)), definition, now);
+assert.equal(level10Preview.skillXp, 0);
+assert(level10Preview.grantsMasterCompletion);
+const master10Preview = getPartnerScheduleOfferPreview(withCategorySkill(level3, definition.category, skill(10, 0, 10)), definition, now);
+assert.equal(master10Preview.energyCost, Math.max(1, Math.round(definition.energyCost * 0.85)));
+const master30Preview = getPartnerScheduleOfferPreview(withCategorySkill(level3, definition.category, skill(10, 0, 30)), definition, now);
+assert.equal(master30Preview.coinReward, Math.round(basePreview.coinReward * 1.1));
+assert.equal(getPartnerScheduleCategoryEffects(skill(10, 0, 9)).energyCostMultiplier, 0.9);
+assert.equal(getPartnerScheduleCategoryEffects(skill(10, 0, 10)).energyCostMultiplier, 0.85);
+assert.equal(getPartnerScheduleCategoryEffects(skill(10, 0, 29)).coinBonusPercent, 5);
+assert.equal(getPartnerScheduleCategoryEffects(skill(10, 0, 30)).coinBonusPercent, 10);
 const started = startPartnerSchedule(level3, offer.id, now);
 assert(started.partnerSchedule.active, 'schedule should start');
 assert.equal(started.partnerSchedule.active.endsAt - started.partnerSchedule.active.startedAt, definition.durationMinutes * minuteMs);
@@ -128,8 +245,503 @@ assert(pendingAdvanced.hunger < completed.hunger, 'pending rewards must not free
 const claimed = claimPartnerScheduleResult(completed, 'coins', completedAt + 30 * minuteMs);
 const claimedAgain = claimPartnerScheduleResult(claimed, 'coins', completedAt + 30 * minuteMs);
 assert.equal(claimedAgain.coins, claimed.coins, 'claiming twice must not duplicate rewards');
+assert.equal(claimed.achievements.counters.partnerScheduleClaimCount, 1, 'successful claims should count once');
+assert.equal(claimed.achievements.counters.partnerScheduleClaimCountsByCategory[definition.category], 1);
+assert.equal(claimedAgain.achievements.counters.partnerScheduleClaimCount, 1, 'duplicate claims must not advance achievements');
+const evaluatedClaim = evaluateAchievements(claimed, completedAt + 30 * minuteMs);
+assert(evaluatedClaim.achievements.unlockedAtById.schedule_first, 'the first schedule claim should unlock its achievement');
+
+const nearMasterSkillPet = withCategorySkill(level8, definition.category, skill(9, 619));
+const reachesMasterState: PetState = {
+  ...nearMasterSkillPet,
+  partnerSchedule: {
+    ...nearMasterSkillPet.partnerSchedule,
+    pendingResult: {
+      offerId: 'reach-master',
+      templateId: definition.id,
+      category: definition.category,
+      size: definition.size,
+      completedAt: now,
+      coinReward: 10,
+      skillXp: 1,
+      grantsMasterCompletion: false,
+    },
+  },
+};
+const reachedMaster = claimPartnerScheduleResult(reachesMasterState, 'coins', now);
+assert.equal(reachedMaster.partnerSchedule.skills[definition.category].level, 10);
+assert.equal(reachedMaster.partnerSchedule.skills[definition.category].masterCompletions, 0, 'the claim that reaches Lv10 must not count as a master completion');
+const masterCompletionState: PetState = {
+  ...reachedMaster,
+  partnerSchedule: {
+    ...reachedMaster.partnerSchedule,
+    pendingResult: {
+      offerId: 'first-master-completion',
+      templateId: definition.id,
+      category: definition.category,
+      size: definition.size,
+      completedAt: now,
+      coinReward: 10,
+      skillXp: 0,
+      grantsMasterCompletion: true,
+    },
+  },
+};
+const firstMasterCompletion = claimPartnerScheduleResult(masterCompletionState, 'coins', now);
+assert.equal(firstMasterCompletion.partnerSchedule.skills[definition.category].masterCompletions, 1);
+const afterSixtyMasterState = withCategorySkill(masterCompletionState, definition.category, skill(10, 0, 60));
+const afterSixtyMasterClaim = claimPartnerScheduleResult(afterSixtyMasterState, 'coins', now);
+assert.equal(afterSixtyMasterClaim.partnerSchedule.skills[definition.category].masterCompletions, 61, 'master completions should keep counting after all effects are capped');
+
+const readyWishPet = createReadyPet(8);
+const studyMasterPet = withCategorySkill({
+  ...readyWishPet,
+  dailyWish: {
+    ...readyWishPet.dailyWish,
+    progress: readyWishPet.dailyWish.target,
+    completedAt: now,
+  },
+}, 'study', skill(10));
+const expectedWishCoins = Math.round(studyMasterPet.dailyWish.rewardCoins * 1.1);
+assert(getDailyWishView(studyMasterPet).rewardText.includes(String(expectedWishCoins)), 'daily wish preview should include the study master bonus');
+const claimedWish = claimDailyWishReward(studyMasterPet, now);
+assert.equal(claimedWish.coins - studyMasterPet.coins, expectedWishCoins, 'daily wish claim should use the displayed study master reward');
+
+const foodTestPet = {
+  ...createReadyPet(8),
+  hunger: 20,
+  mood: 20,
+  cleanliness: 20,
+  energy: 20,
+  health: 20,
+  inventory: { emergency_biscuit: 1, golden_apple: 1 },
+};
+const normalFoodUse = useInventoryItem(foodTestPet, 'emergency_biscuit', now);
+const cookingMasterFoodUse = useInventoryItem(withCategorySkill(foodTestPet, 'cooking', skill(10)), 'emergency_biscuit', now);
+assert(cookingMasterFoodUse.hunger > normalFoodUse.hunger, 'cooking mastery should improve normal food effects');
+const normalGoldenAppleUse = useInventoryItem(foodTestPet, 'golden_apple', now);
+const cookingGoldenAppleUse = useInventoryItem(withCategorySkill(foodTestPet, 'cooking', skill(10)), 'golden_apple', now);
+assert.equal(cookingGoldenAppleUse.hunger, normalGoldenAppleUse.hunger, 'golden apple fixed effects must ignore cooking mastery');
+
+const gardenTestPet = {
+  ...createReadyPet(8),
+  inventory: { fruit_tree_sapling: 1 },
+  garden: {
+    ...createReadyPet(8).garden,
+    slots: createReadyPet(8).garden.slots.map((slot, index) => index === 0 ? { ...slot, unlocked: true } : slot),
+  },
+};
+const normalPlant = plantTree(gardenTestPet, 0, 'fruit_tree', now);
+const gardenMasterPlant = plantTree(withCategorySkill(gardenTestPet, 'garden', skill(10)), 0, 'fruit_tree', now);
+const normalGrowDuration = normalPlant.garden.slots[0].nextReadyAt - now;
+const masterGrowDuration = gardenMasterPlant.garden.slots[0].nextReadyAt - now;
+assert.equal(masterGrowDuration, Math.round(normalGrowDuration * 0.95), 'garden mastery should affect only newly generated growth time');
+
+const recoveryTestPet = createReadyPet(8);
+const exerciseMasterPet = withCategorySkill(recoveryTestPet, 'exercise', skill(10));
+assert.equal(getEnergyRecoveryIntervalMs(exerciseMasterPet, false, now), Math.round(getEnergyRecoveryIntervalMs(recoveryTestPet, false, now) * 0.92));
+assert.equal(getEnergyRecoveryIntervalMs(exerciseMasterPet, true, now), getEnergyRecoveryIntervalMs(recoveryTestPet, true, now), 'exercise mastery must not affect sleep recovery');
+const master60Effects = getPartnerScheduleCrossSystemEffects({
+  ...studyMasterPet,
+  partnerSchedule: {
+    ...studyMasterPet.partnerSchedule,
+    skills: {
+      study: skill(10, 0, 60),
+      cooking: skill(10, 0, 60),
+      garden: skill(10, 0, 60),
+      exercise: skill(10, 0, 60),
+    },
+  },
+});
+assert.deepEqual(master60Effects, {
+  dailyWishCoinMultiplier: 1.2,
+  foodEffectMultiplier: 1.15,
+  gardenTimeMultiplier: 0.92,
+  awakeEnergyRecoveryMultiplier: 0.88,
+});
+
+const standardDefinition = partnerScheduleDefinitions.find((item) => item.size === 'standard');
+assert(standardDefinition, 'a standard schedule definition should exist');
+const categoryRewardState: PetState = {
+  ...level8,
+  partnerSchedule: {
+    ...level8.partnerSchedule,
+    active: undefined,
+    pendingResult: {
+      offerId: 'achievement-category-reward',
+      templateId: standardDefinition.id,
+      category: standardDefinition.category,
+      size: standardDefinition.size,
+      completedAt: now,
+      coinReward: 100,
+      skillXp: getPartnerScheduleSkillXpReward('standard'),
+      grantsMasterCompletion: false,
+    },
+  },
+};
+const categoryRewardClaimed = claimPartnerScheduleResult(categoryRewardState, 'category', now);
+assert.equal(categoryRewardClaimed.achievements.counters.partnerScheduleCategoryRewardClaimCount, 1, 'category reward choices should be tracked');
+
+const withUnlockedAchievements = (pet: PetState, ids: readonly string[]): PetState => ({
+  ...pet,
+  achievements: {
+    ...pet.achievements,
+    unlockedAtById: {
+      ...pet.achievements.unlockedAtById,
+      ...Object.fromEntries(ids.map((id) => [id, now])),
+    },
+  },
+});
+
+const findResultWithExtraCopies = (
+  pet: PetState,
+  baseResult: PartnerScheduleResult,
+  expectedCopies: number,
+): PartnerScheduleResult => {
+  for (let index = 0; index < 1000; index += 1) {
+    const candidate = { ...baseResult, offerId: `${baseResult.offerId}:${index}` };
+    if (getPartnerScheduleExtraRewardCopies(pet, candidate) === expectedCopies) return candidate;
+  }
+  throw new Error(`Could not find a deterministic schedule result with ${expectedCopies} extra copies`);
+};
+
+const fullBoardBonusPet = withUnlockedAchievements(level8, ['schedule_daily_three']);
+const allSkillsBonusPet = withUnlockedAchievements(level8, ['schedule_all_skills_max']);
+const combinedScheduleBonusPet = withUnlockedAchievements(level8, ['schedule_daily_three', 'schedule_all_skills_max']);
+assert.equal(getAchievementEffects(level8).partnerScheduleExtraRewardChancePercent, 0);
+assert.equal(getAchievementEffects(fullBoardBonusPet).partnerScheduleExtraRewardChancePercent, 10);
+assert.equal(getAchievementEffects(allSkillsBonusPet).partnerScheduleExtraRewardChancePercent, 20);
+assert.equal(getAchievementEffects(combinedScheduleBonusPet).partnerScheduleExtraRewardChancePercent, 30);
+
+const baseBonusResult: PartnerScheduleResult = {
+  offerId: 'deterministic-schedule-bonus',
+  templateId: standardDefinition.id,
+  category: standardDefinition.category,
+  size: 'standard',
+  completedAt: now,
+  coinReward: 100,
+  skillXp: 4,
+  grantsMasterCompletion: false,
+};
+const deterministicBonusResult = findResultWithExtraCopies(combinedScheduleBonusPet, baseBonusResult, 1);
+const deterministicNoBonusResult = findResultWithExtraCopies(combinedScheduleBonusPet, baseBonusResult, 0);
+assert.equal(getPartnerScheduleExtraRewardCopies(combinedScheduleBonusPet, deterministicBonusResult), 1);
+assert.equal(getPartnerScheduleExtraRewardCopies(combinedScheduleBonusPet, { ...deterministicBonusResult }), 1, 'the same result snapshot should keep the same bonus roll');
+assert.equal(getPartnerScheduleExtraRewardCopies(combinedScheduleBonusPet, deterministicNoBonusResult), 0);
+
+const coinBonusPreview = getPartnerScheduleClaimPreview(deterministicBonusResult, 'coins');
+const coinBonusState: PetState = {
+  ...combinedScheduleBonusPet,
+  coins: 100,
+  energy: 50,
+  health: 50,
+  mood: 50,
+  partnerSchedule: {
+    ...combinedScheduleBonusPet.partnerSchedule,
+    offers: [
+      { id: deterministicBonusResult.offerId, templateId: deterministicBonusResult.templateId, dateKey: combinedScheduleBonusPet.partnerSchedule.boardDateKey },
+      ...combinedScheduleBonusPet.partnerSchedule.offers.slice(1),
+    ],
+    completedOfferIds: [],
+    active: undefined,
+    pendingResult: deterministicBonusResult,
+    skills: {
+      ...combinedScheduleBonusPet.partnerSchedule.skills,
+      [deterministicBonusResult.category]: skill(1),
+    },
+  },
+};
+const coinBonusClaimed = claimPartnerScheduleResult(coinBonusState, 'coins', now);
+assert.equal(coinBonusClaimed.coins - coinBonusState.coins, coinBonusPreview.coins * 2, 'coin choice should receive a complete extra coin reward');
+assert.equal(coinBonusClaimed.partnerSchedule.skills[deterministicBonusResult.category].xp, coinBonusPreview.skillXp * 2, 'coin choice should receive a complete extra skill reward');
+assert.equal(coinBonusClaimed.partnerSchedule.completedOfferIds.length, 1, 'bonus rewards must not duplicate daily completion records');
+assert.equal(coinBonusClaimed.achievements.counters.partnerScheduleClaimCount, 1, 'bonus rewards must not duplicate achievement claim counts');
+assert.equal(coinBonusClaimed.achievements.counters.partnerScheduleCategoryRewardClaimCount, 0);
+
+for (const category of ['study', 'cooking', 'garden', 'exercise'] as const) {
+  const categoryDefinition = partnerScheduleDefinitions.find((item) => item.category === category && item.size === 'standard');
+  assert(categoryDefinition, `${category} standard schedule should exist`);
+  const categoryResult = findResultWithExtraCopies(combinedScheduleBonusPet, {
+    ...baseBonusResult,
+    offerId: `deterministic-${category}-bonus`,
+    templateId: categoryDefinition.id,
+    category,
+  }, 1);
+  const categoryPreview = getPartnerScheduleClaimPreview(categoryResult, 'category');
+  const categoryBonusState: PetState = {
+    ...combinedScheduleBonusPet,
+    coins: 100,
+    energy: 50,
+    health: 50,
+    mood: 50,
+    partnerSchedule: {
+      ...combinedScheduleBonusPet.partnerSchedule,
+      offers: [
+        { id: categoryResult.offerId, templateId: categoryResult.templateId, dateKey: combinedScheduleBonusPet.partnerSchedule.boardDateKey },
+        ...combinedScheduleBonusPet.partnerSchedule.offers.slice(1),
+      ],
+      completedOfferIds: [],
+      active: undefined,
+      pendingResult: categoryResult,
+      skills: { ...combinedScheduleBonusPet.partnerSchedule.skills, [category]: skill(1) },
+    },
+  };
+  const categoryBonusClaimed = claimPartnerScheduleResult(categoryBonusState, 'category', now);
+  assert.equal(categoryBonusClaimed.coins - categoryBonusState.coins, categoryPreview.coins * 2, `${category} should duplicate category coins`);
+  assert.equal(categoryBonusClaimed.partnerSchedule.skills[category].xp, categoryPreview.skillXp * 2, `${category} should duplicate category skill XP`);
+  assert.equal(categoryBonusClaimed.energy, categoryBonusState.energy + (categoryPreview.energy ?? 0) * 2, `${category} should duplicate energy recovery`);
+  assert.equal(categoryBonusClaimed.health, categoryBonusState.health + (categoryPreview.health ?? 0) * 2, `${category} should duplicate health recovery`);
+  assert.equal(categoryBonusClaimed.mood, categoryBonusState.mood + (categoryPreview.mood ?? 0) * 2, `${category} should duplicate mood recovery`);
+  if (categoryPreview.itemId) {
+    assert.equal(
+      (categoryBonusClaimed.inventory[categoryPreview.itemId] ?? 0) - (categoryBonusState.inventory[categoryPreview.itemId] ?? 0),
+      (categoryPreview.itemAmount ?? 1) * 2,
+      `${category} should duplicate item rewards`,
+    );
+  }
+  assert.equal(categoryBonusClaimed.partnerSchedule.completedOfferIds.length, 1);
+  assert.equal(categoryBonusClaimed.achievements.counters.partnerScheduleClaimCount, 1);
+  assert.equal(categoryBonusClaimed.achievements.counters.partnerScheduleCategoryRewardClaimCount, 1);
+}
+
+const masterBonusResult = findResultWithExtraCopies(combinedScheduleBonusPet, {
+  ...baseBonusResult,
+  offerId: 'deterministic-master-bonus',
+  skillXp: 0,
+  grantsMasterCompletion: true,
+}, 1);
+const masterBonusState: PetState = {
+  ...combinedScheduleBonusPet,
+  partnerSchedule: {
+    ...combinedScheduleBonusPet.partnerSchedule,
+    offers: [
+      { id: masterBonusResult.offerId, templateId: masterBonusResult.templateId, dateKey: combinedScheduleBonusPet.partnerSchedule.boardDateKey },
+      ...combinedScheduleBonusPet.partnerSchedule.offers.slice(1),
+    ],
+    completedOfferIds: [],
+    active: undefined,
+    pendingResult: masterBonusResult,
+    skills: { ...combinedScheduleBonusPet.partnerSchedule.skills, [masterBonusResult.category]: skill(10) },
+  },
+};
+const masterBonusClaimed = claimPartnerScheduleResult(masterBonusState, 'coins', now);
+assert.equal(masterBonusClaimed.partnerSchedule.skills[masterBonusResult.category].masterCompletions, 1, 'extra rewards must not duplicate master completions');
+assert.equal(masterBonusClaimed.partnerSchedule.completedOfferIds.length, 1);
+assert.equal(masterBonusClaimed.achievements.counters.partnerScheduleClaimCount, 1);
+
+const normalAchievementCount = achievementDefinitions.filter((achievement) => achievement.rarity === 'normal').length;
+const normalAchievementIds = achievementDefinitions.filter((achievement) => achievement.rarity === 'normal').map((achievement) => achievement.id);
+const taskMaster = achievementDefinitions.find((achievement) => achievement.id === 'hidden_full_catalogue');
+const expectedTaskMasterTarget = Math.ceil(normalAchievementCount * taskMasterCompletionRatio);
+assert.equal(taskMaster?.target, expectedTaskMasterTarget, 'Task Master should require 80% of normal achievements');
+assert.equal(expectedTaskMasterTarget, 40, 'the current 50 normal achievements should produce a target of 40');
+const taskMasterBase = createReadyPet(1, now);
+const taskMasterStateWithCount = (count: number): PetState => ({
+  ...taskMasterBase,
+  achievements: {
+    ...taskMasterBase.achievements,
+    unlockedAtById: Object.fromEntries(normalAchievementIds.slice(0, count).map((id) => [id, now])),
+  },
+});
+const taskMasterBelowTarget = evaluateAchievements(taskMasterStateWithCount(expectedTaskMasterTarget - 1), now);
+const taskMasterAtTarget = evaluateAchievements(taskMasterStateWithCount(expectedTaskMasterTarget), now);
+assert.equal(taskMasterBelowTarget.achievements.unlockedAtById.hidden_full_catalogue, undefined, '39 normal achievements should not unlock Task Master');
+assert(taskMasterAtTarget.achievements.unlockedAtById.hidden_full_catalogue, '40 normal achievements should unlock Task Master');
+const retainedTaskMaster = evaluateAchievements(withUnlockedAchievements(taskMasterBase, ['hidden_full_catalogue']), now);
+assert(retainedTaskMaster.achievements.unlockedAtById.hidden_full_catalogue, 'previously unlocked Task Master should never relock');
+
+const newAchievementIds = [
+  'schedule_all_skills_6',
+  'schedule_all_master_10',
+  'daily_login_30',
+  'garden_harvest_100',
+  'item_use_100',
+  'paid_purchase_100',
+  'pomodoro_250',
+  'rare_level_20',
+] as const;
+for (const id of newAchievementIds) {
+  assert.equal(achievementDefinitions.find((achievement) => achievement.id === id)?.rarity, 'rare', `${id} should be a rare achievement`);
+}
+
+const milestoneBase = createReadyPet(8);
+const milestoneBelowCases: readonly [typeof newAchievementIds[number], PetState][] = [
+  ['schedule_all_skills_6', {
+    ...milestoneBase,
+    partnerSchedule: { ...milestoneBase.partnerSchedule, skills: { study: skill(5), cooking: skill(5), garden: skill(5), exercise: skill(5) } },
+  }],
+  ['schedule_all_master_10', {
+    ...milestoneBase,
+    partnerSchedule: { ...milestoneBase.partnerSchedule, skills: { study: skill(10, 0, 9), cooking: skill(10, 0, 9), garden: skill(10, 0, 9), exercise: skill(10, 0, 9) } },
+  }],
+  ['daily_login_30', {
+    ...milestoneBase,
+    achievements: { ...milestoneBase.achievements, counters: { ...milestoneBase.achievements.counters, dateRewardClaimCountsByKind: { daily_login: 29 } } },
+  }],
+  ['garden_harvest_100', { ...milestoneBase, garden: { ...milestoneBase.garden, lifetimeHarvestCount: 99 } }],
+  ['item_use_100', {
+    ...milestoneBase,
+    achievements: { ...milestoneBase.achievements, counters: { ...milestoneBase.achievements.counters, totalItemUseCount: 99 } },
+  }],
+  ['paid_purchase_100', {
+    ...milestoneBase,
+    achievements: { ...milestoneBase.achievements, counters: { ...milestoneBase.achievements.counters, paidPurchaseCount: 99 } },
+  }],
+  ['pomodoro_250', {
+    ...milestoneBase,
+    achievements: { ...milestoneBase.achievements, counters: { ...milestoneBase.achievements.counters, pomodoroFocusCount: 249 } },
+  }],
+  ['rare_level_20', { ...milestoneBase, level: 19 }],
+];
+for (const [id, state] of milestoneBelowCases) {
+  assert.equal(evaluateAchievements(state, now).achievements.unlockedAtById[id], undefined, `${id} should remain locked one step below its target`);
+}
+
+const milestoneTargetBase = createReadyPet(20);
+const milestoneTargetState = evaluateAchievements({
+  ...milestoneTargetBase,
+  garden: { ...milestoneTargetBase.garden, lifetimeHarvestCount: 100 },
+  achievements: {
+    ...milestoneTargetBase.achievements,
+    counters: {
+      ...milestoneTargetBase.achievements.counters,
+      dateRewardClaimCountsByKind: { daily_login: 30 },
+      totalItemUseCount: 100,
+      paidPurchaseCount: 100,
+      pomodoroFocusCount: 250,
+    },
+  },
+  partnerSchedule: {
+    ...milestoneTargetBase.partnerSchedule,
+    skills: {
+      study: skill(10, 0, 10),
+      cooking: skill(10, 0, 10),
+      garden: skill(10, 0, 10),
+      exercise: skill(10, 0, 10),
+    },
+  },
+}, now);
+for (const id of newAchievementIds) {
+  assert(milestoneTargetState.achievements.unlockedAtById[id], `${id} should unlock exactly at its target`);
+}
+
+const isolatedLevel20State = evaluateAchievements({ ...createReadyPet(20), level: 20 }, now);
+const isolatedLevel20Effects = getAchievementEffects(isolatedLevel20State);
+assert.equal(isolatedLevel20Effects.extraHeartChancePercent, 20, 'Growing Up Together should grant +20% heart chance');
+assert.equal(isolatedLevel20Effects.gardenExtraDropChancePercent, 20, 'Growing Up Together should grant +20% harvest chance');
+const claimedLevel20Reward = claimAchievementReward(isolatedLevel20State, 'rare_level_20', now);
+const claimedLevel20RewardAgain = claimAchievementReward(claimedLevel20Reward, 'rare_level_20', now);
+assert.equal(claimedLevel20Reward.coins - isolatedLevel20State.coins, 1500);
+assert.equal((claimedLevel20Reward.inventory.golden_apple ?? 0) - (isolatedLevel20State.inventory.golden_apple ?? 0), 2);
+assert.equal(claimedLevel20RewardAgain.coins, claimedLevel20Reward.coins, 'Growing Up Together one-time coins must not duplicate');
+assert.equal(claimedLevel20RewardAgain.inventory.golden_apple, claimedLevel20Reward.inventory.golden_apple, 'Growing Up Together one-time items must not duplicate');
+
+const scheduleCoverageState = evaluateAchievements({
+  ...level8,
+  achievements: {
+    ...level8.achievements,
+    counters: {
+      ...level8.achievements.counters,
+      partnerScheduleClaimCount: 50,
+      partnerScheduleClaimCountsByCategory: { study: 12, cooking: 12, garden: 13, exercise: 13 },
+      partnerScheduleLongClaimCountsByCategory: { study: 2, cooking: 1, garden: 1, exercise: 1 },
+      partnerScheduleCategoryRewardClaimCount: 10,
+    },
+  },
+  partnerSchedule: {
+    ...level8.partnerSchedule,
+    skills: {
+      study: skill(3),
+      cooking: skill(3),
+      garden: skill(3),
+      exercise: skill(3),
+    },
+  },
+}, now);
+for (const id of ['schedule_10', 'schedule_50', 'schedule_all_categories', 'schedule_long_5', 'schedule_long_all_categories', 'schedule_category_reward_10', 'schedule_all_skills_3']) {
+  assert(scheduleCoverageState.achievements.unlockedAtById[id], `${id} should unlock from its completed schedule milestone`);
+}
+
+const fullBoardState = evaluateAchievements({
+  ...level8,
+  partnerSchedule: {
+    ...level8.partnerSchedule,
+    completedOfferIds: level8.partnerSchedule.offers.map((item) => item.id),
+  },
+}, now);
+assert(fullBoardState.achievements.unlockedAtById.schedule_daily_three, 'finishing all daily offers should unlock the hidden full-board achievement');
+
+const skillProgressState = evaluateAchievements({
+  ...level8,
+  partnerSchedule: {
+    ...level8.partnerSchedule,
+    skills: {
+      study: skill(3),
+      cooking: skill(3),
+      garden: skill(3),
+      exercise: skill(3),
+    },
+  },
+}, now);
+assert(skillProgressState.achievements.unlockedAtById.schedule_all_skills_3, 'all four level-three skills should unlock their achievement');
+const maxSkillAchievementState = evaluateAchievements({
+  ...level8,
+  partnerSchedule: {
+    ...level8.partnerSchedule,
+    skills: {
+      study: skill(10),
+      cooking: skill(10),
+      garden: skill(10),
+      exercise: skill(10),
+    },
+  },
+}, now);
+assert(maxSkillAchievementState.achievements.unlockedAtById.schedule_all_skills_max, 'the all-skill achievement should now require Lv10');
+assert.equal(achievementDefinitions.find((achievement) => achievement.id === 'schedule_all_skills_max')?.target, 10);
+
+const legacySkillState = createReadyPet(8);
+legacySkillState.partnerSchedule.skills.study = skill(1, 10);
+const backfilledSkillState = normalizePet(legacySkillState, now);
+assert.equal(backfilledSkillState.achievements.counters.partnerScheduleClaimCountsByCategory.study, 1, 'existing skill progress should conservatively backfill one category claim');
+assert.equal(backfilledSkillState.achievements.counters.partnerScheduleClaimCount, 1, 'backfilled category progress should update the total lower bound');
 
 const baseSchedule = level3.partnerSchedule;
+const { boardOfferCount: _legacyBoardOfferCount, ...v2ScheduleWithoutOfferCount } = level8.partnerSchedule;
+const { grantsMasterCompletion: _legacyActiveMasterFlag, ...v2ActiveWithoutMasterFlag } = started.partnerSchedule.active!;
+const migratedV2Active = normalizePartnerScheduleState({
+  ...v2ScheduleWithoutOfferCount,
+  schemaVersion: 2,
+  active: v2ActiveWithoutMasterFlag,
+  pendingResult: undefined,
+  skills: {
+    study: { level: 5, xp: 0 },
+    cooking: { level: 5, xp: 0 },
+    garden: { level: 5, xp: 0 },
+    exercise: { level: 5, xp: 0 },
+  },
+}, { level: level8.level, createdAt: level8.createdAt }, now);
+assert.equal(migratedV2Active.schemaVersion, 3);
+assert.equal(migratedV2Active.boardOfferCount, 3, 'schema v2 should preserve the current three-choice board until reset');
+assert.equal(migratedV2Active.skills.study.level, 5);
+assert.equal(migratedV2Active.skills.study.masterCompletions, 0);
+assert.equal(migratedV2Active.active?.grantsMasterCompletion, false);
+const migratedV2Pending = normalizePartnerScheduleState({
+  ...v2ScheduleWithoutOfferCount,
+  schemaVersion: 2,
+  active: undefined,
+  pendingResult: {
+    offerId: 'v2-pending',
+    templateId: definition.id,
+    category: definition.category,
+    size: definition.size,
+    completedAt: now,
+    coinReward: 77,
+    skillXp: 10,
+  },
+}, { level: level8.level, createdAt: level8.createdAt }, now);
+assert.equal(migratedV2Pending.pendingResult?.coinReward, 77);
+assert.equal(migratedV2Pending.pendingResult?.grantsMasterCompletion, false);
+
 const legacyCommon = {
   offerId: offer.id,
   templateId: offer.templateId,
@@ -155,7 +767,7 @@ const migratedIndependent = normalizeLegacy({
   requiredFocusMs: 25 * minuteMs,
   focusProgressMs: 0,
 });
-assert.equal(migratedIndependent.schemaVersion, 2);
+assert.equal(migratedIndependent.schemaVersion, 3);
 assert.equal(migratedIndependent.active?.endsAt, legacyIndependentEnd, 'v1 independent activity should preserve its end time');
 
 const migratedTogether = normalizeLegacy({
@@ -204,7 +816,7 @@ const nextDayBoard = advancePartnerSchedule(level3, now + 24 * 60 * minuteMs);
 assert.notEqual(nextDayBoard.partnerSchedule.boardDateKey, level3.partnerSchedule.boardDateKey, 'the board should refresh after the daily boundary');
 assert.equal(nextDayBoard.partnerSchedule.offers.length, 3);
 
-const schemaCheck: PartnerScheduleState['schemaVersion'] = 2;
+const schemaCheck: PartnerScheduleState['schemaVersion'] = 3;
 const stateCheck: PetState = { ...level3, partnerSchedule: migratedTogether };
 assert.equal(schemaCheck, stateCheck.partnerSchedule.schemaVersion);
 

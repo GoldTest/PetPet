@@ -181,6 +181,8 @@ export {
   getPartnerScheduleClaimPreview,
   getPartnerScheduleCoinReward,
   getPartnerScheduleDefinition,
+  getPartnerScheduleExtraRewardCopies,
+  getPartnerScheduleOfferPreview,
   getPartnerScheduleProgress,
   getPartnerScheduleSkillXpNeeded,
   getPartnerScheduleSkillXpReward,
@@ -193,6 +195,17 @@ export {
   isPartnerSchedulePetBusy,
   startPartnerSchedule,
 } from './partnerSchedule';
+export {
+  getPartnerScheduleCategoryEffects,
+  getPartnerScheduleCrossSystemEffects,
+  getPartnerScheduleGlobalCoinBonusPercent,
+  getPartnerScheduleMasteryNextThreshold,
+  getPartnerScheduleMinimumSkillLevel,
+  getPartnerScheduleUnlockedOfferCount,
+  partnerScheduleCategories,
+  partnerScheduleDailyCompletionLimit,
+  partnerScheduleMasteryThresholds,
+} from './partnerScheduleEffects';
 export {
   createDefaultPet,
   gardenCompensationCoins,

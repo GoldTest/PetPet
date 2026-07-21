@@ -1,4 +1,5 @@
 import { getEnergyRecoverySeasonModifier } from './season';
+import { getPartnerScheduleCrossSystemEffects } from './partnerScheduleEffects';
 import type { PetState } from './petTypes';
 
 export const lowEnergyThreshold = 10;
@@ -51,5 +52,8 @@ export const getNextUpgradeHeartCost = (pet: PetState) =>
 
 export const getEnergyRecoveryIntervalMs = (pet: PetState, isSleeping = pet.isSleeping, now = Date.now()) => {
   const baseIntervalMs = isSleeping ? sleepEnergyRecoveryMs : pet.weather === 'breezy' ? breezyEnergyRecoveryMs : awakeEnergyRecoveryMs;
-  return Math.max(1, Math.round(baseIntervalMs * getEnergyRecoverySeasonModifier(now, isSleeping)));
+  const masteryMultiplier = isSleeping
+    ? 1
+    : getPartnerScheduleCrossSystemEffects(pet).awakeEnergyRecoveryMultiplier;
+  return Math.max(1, Math.round(baseIntervalMs * getEnergyRecoverySeasonModifier(now, isSleeping) * masteryMultiplier));
 };

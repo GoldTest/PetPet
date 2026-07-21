@@ -264,6 +264,43 @@
       "summary": "Schedule a real-time companion activity while natural pet stats are paused.",
       "skillsAria": "Activity proficiency",
       "skillLevel": "Proficiency Lv.{level}",
+      "skillProgress": "Lv.{level} · {xp}/{needed}",
+      "passives": {
+        "level2": "Lv.2: Energy cost -10% for this category",
+        "level4": "Lv.4: Hunger and mood costs -10%",
+        "level5": "Lv.5: Activity duration -5%",
+        "level7": "Lv.7: Proficiency XP +15%",
+        "level8": "Lv.8: Schedule coins +5% for this category",
+        "level9": "Lv.9: Total activity duration -10%",
+        "level10": "Lv.10: Unlock the master skill"
+      },
+      "mastery": {
+        "count": "Master · {count} completed",
+        "unlocked": "Master skill unlocked",
+        "reward": "Master completion +1",
+        "next10": "{count}/{target} · Raise total energy reduction to 15%",
+        "next30": "{count}/{target} · Raise category coin bonus to 10%",
+        "next60": "{count}/{target} · Strengthen the long-term master passive",
+        "complete": "Master legacy complete · {count} lifetime"
+      },
+      "masterPassives": {
+        "study": { "base": "Daily wish coins +10%", "advanced": "Daily wish coins +20%" },
+        "cooking": { "base": "Normal food effects +10%", "advanced": "Normal food effects +15%" },
+        "garden": { "base": "New garden cycle time -5%", "advanced": "New garden cycle time -8%" },
+        "exercise": { "base": "Awake energy recovery interval -8%", "advanced": "Awake energy recovery interval -12%" }
+      },
+      "milestones": {
+        "aria": "All-skill progression milestones",
+        "level3Title": "All Skills Lv.3",
+        "level6Title": "All Skills Lv.6",
+        "progress": "{count}/4 at Lv.{level}",
+        "level3Locked": "All skills: coins +5%, 4 choices next day",
+        "level6Locked": "All skills: total coins +15%, 5 choices next day",
+        "level3Active": "4 choices active · coins +5%",
+        "level6Active": "5 choices active · total coins +15%",
+        "nextReset": "Coin bonus active; {count} choices from the next reset",
+        "income": "Current milestone coins +{percent}%"
+      },
       "categories": {
         "study": "Study",
         "cooking": "Cooking",
@@ -277,7 +314,7 @@
       },
       "todayKicker": "Today",
       "todayTitle": "Today's activities",
-      "dailyCount": "Completed {count}/{total}",
+      "dailyCount": "Completed {count}/{limit} · {offers} choices today",
       "activeAria": "Active schedule",
       "activeKicker": "Schedule in progress",
       "homeDockAria": "Current partner schedule",
@@ -291,6 +328,7 @@
       "completed": "Completed",
       "start": "Start",
       "rewardPreview": "{coins} coins · proficiency +{xp}",
+      "rewardPreviewMaster": "{coins} coins · master completion +1",
       "cost": {
         "energy": "Energy -{amount}",
         "hunger": "Hunger -{amount}",
@@ -301,6 +339,7 @@
         "busy": "Already active",
         "pending": "Claim reward first",
         "completed": "Completed",
+        "daily_limit": "3 completed today",
         "sleeping": "Sleeping",
         "energy": "Low energy",
         "hunger": "Low hunger",
@@ -311,6 +350,7 @@
       "resultAria": "Activity rewards",
       "resultKicker": "Activity complete",
       "resultSummary": "Choose the reward that matters most this time.",
+      "extraRewardChance": "Current chance to gain one extra full reward: {percent}%",
       "claimCoins": "Claim {coins} coins",
       "claimXp": "Proficiency +{xp}",
       "categoryRewards": {
@@ -466,6 +506,9 @@
       },
       "categories": {
         "all": "All",
+        "companion": "Companion",
+        "life": "Daily Life",
+        "schedule": "Schedule",
         "care": "Care",
         "daily": "Daily",
         "garden": "Garden",
@@ -1101,6 +1144,7 @@
         "cleanCooldown": "Clean cooldown {seconds}s",
         "extraHeartChance": "Extra heart chance +{percent}%",
         "gardenExtraDropChance": "Bonus produce chance on harvest +{percent}%",
+        "partnerScheduleExtraRewardChance": "Chance of one extra full schedule reward +{percent}%",
         "globalFlatBonus": "Global yield +{amount}",
         "dailyStipend": "Daily achievement stipend +{coins} coins",
         "careStatBonus": "Feed and clean recovery +{amount}",
@@ -1203,6 +1247,10 @@
           "title": "Just Passing By",
           "description": "Claim daily login rewards 7 times. They do not need to be consecutive."
         },
+        "daily_login_30": {
+          "title": "A Month Together",
+          "description": "Claim daily login rewards 30 times. They do not need to be consecutive."
+        },
         "garden_first_plant": {
           "title": "First Planting",
           "description": "Successfully plant 1 tree in the garden."
@@ -1219,6 +1267,10 @@
           "title": "Bumper Harvest",
           "description": "Complete 30 garden harvests."
         },
+        "garden_harvest_100": {
+          "title": "Hundred Harvests",
+          "description": "Complete 100 garden harvests."
+        },
         "garden_tree_catalogue": {
           "title": "Master Gardener",
           "description": "Harvest the fruit, care, gift, money, and golden apple trees at least once each."
@@ -1231,6 +1283,54 @@
           "title": "Tool Expert",
           "description": "Upgrade the watering can, shovel, and fertilizer box to level 3."
         },
+        "schedule_first": {
+          "title": "First Trip",
+          "description": "Claim 1 partner schedule reward."
+        },
+        "schedule_10": {
+          "title": "Finding a Rhythm",
+          "description": "Claim 10 partner schedule rewards in total."
+        },
+        "schedule_50": {
+          "title": "Schedule Expert",
+          "description": "Claim 50 partner schedule rewards in total."
+        },
+        "schedule_all_categories": {
+          "title": "All-Rounder",
+          "description": "Claim at least 1 reward from study, cooking, garden, and exercise schedules."
+        },
+        "schedule_long_5": {
+          "title": "Long-Term Plan",
+          "description": "Complete and claim 5 long schedule rewards."
+        },
+        "schedule_long_all_categories": {
+          "title": "Four Long Roads",
+          "description": "Complete and claim at least 1 long schedule reward in every category."
+        },
+        "schedule_category_reward_10": {
+          "title": "Specialized Returns",
+          "description": "Choose the category reward 10 times."
+        },
+        "schedule_daily_three": {
+          "title": "Full Itinerary",
+          "description": "Complete 3 partner schedules on the same day."
+        },
+        "schedule_all_skills_3": {
+          "title": "Skilled in Four",
+          "description": "Raise all 4 partner schedule skills to level 3."
+        },
+        "schedule_all_skills_6": {
+          "title": "Four Skills Refined",
+          "description": "Raise all 4 partner schedule skills to level 6."
+        },
+        "schedule_all_skills_max": {
+          "title": "Ultimate Partner",
+          "description": "Raise all 4 partner schedule skills to level 10."
+        },
+        "schedule_all_master_10": {
+          "title": "Master of Four Paths",
+          "description": "After all 4 partner schedule skills reach level 10, complete 10 master schedules in each category."
+        },
         "first_purchase": {
           "title": "First Purchase",
           "description": "Buy a non-free item for the first time."
@@ -1239,9 +1339,17 @@
           "title": "Restocking the Little Pantry",
           "description": "Buy or claim items 20 times in total."
         },
+        "paid_purchase_100": {
+          "title": "Shop Regular",
+          "description": "Buy non-free items 100 times in total."
+        },
         "item_use_20": {
           "title": "The Bag Gets Used",
           "description": "Use items 20 times in total."
+        },
+        "item_use_100": {
+          "title": "Put to Good Use",
+          "description": "Use items 100 times in total."
         },
         "fruit_taster": {
           "title": "Fruit Taster",
@@ -1270,6 +1378,10 @@
         "pomodoro_100": {
           "title": "Deep Focus",
           "description": "Complete 100 focus phases in total."
+        },
+        "pomodoro_250": {
+          "title": "Focus as a Habit",
+          "description": "Complete 250 focus phases in total."
         },
         "pomodoro_day_4": {
           "title": "Focused Today",
@@ -1346,6 +1458,10 @@
         "rare_level_10": {
           "title": "Shining Companion",
           "description": "Raise your pet to level 10."
+        },
+        "rare_level_20": {
+          "title": "Growing Up Together",
+          "description": "Raise your pet to level 20."
         },
         "hidden_good_ending_year_1": {
           "title": "Good Ending",
@@ -1429,7 +1545,7 @@
         },
         "hidden_full_catalogue": {
           "title": "Task Master",
-          "description": "Complete 36 normal tasks to unlock."
+          "description": "Complete at least 80% of normal achievements to unlock."
         }
       }
     },
@@ -1441,6 +1557,7 @@
         "busy": "{name} already has an active schedule.",
         "pending": "Claim the previous activity reward first.",
         "completed": "This activity is already complete today.",
+        "daily_limit": "Three partner schedules are already complete today.",
         "sleeping": "{name} is still asleep. Try again after waking up.",
         "energy": "{name} needs more energy for this activity.",
         "hunger": "{name} needs something to eat first.",
@@ -1451,6 +1568,8 @@
       "busyAction": "{name} is busy with a partner schedule, so pet care is unavailable.",
       "cancelled": "{name} ended the activity early. Its progress was not kept.",
       "noResult": "There are no activity rewards to claim.",
+      "masterCompletion": " Master completion +1 ({count} total).",
+      "extraRewardTriggered": "Achievement bonus triggered: gained {count} extra full schedule reward(s).",
       "claimed": {
         "coins": "Activity rewards claimed. Coins +{coins}.",
         "category": "Activity results collected. Coins +{coins}."

@@ -2,7 +2,16 @@ import { ArrowLeft, CheckCircle2, Gift, Images, Lock, Sparkles, Sprout, Trophy }
 import { getAchievementSummary, getAchievementViews, type AchievementCategory, type AchievementId, type AchievementView, type ItemId, type PetState } from '../core/pet';
 import { t } from '../i18n';
 
-const baseCategories: readonly ('all' | AchievementCategory)[] = ['all', 'care', 'daily', 'garden', 'shop', 'inventory', 'pomodoro', 'growth', 'date'];
+export type AchievementTabId = 'all' | 'companion' | 'growth' | 'life' | 'schedule' | 'hidden';
+
+const achievementTabCategories: Record<Exclude<AchievementTabId, 'all' | 'hidden'>, readonly AchievementCategory[]> = {
+  companion: ['care', 'daily', 'date'],
+  growth: ['growth', 'pomodoro'],
+  life: ['shop', 'inventory', 'garden'],
+  schedule: ['schedule'],
+};
+
+const baseTabs: readonly AchievementTabId[] = ['all', 'companion', 'growth', 'life', 'schedule'];
 
 const labels = {
   aria: t('ui.achievements.aria'),
@@ -23,21 +32,22 @@ const labels = {
     hidden: t('ui.achievements.rarity.hidden'),
     normal: t('ui.achievements.rarity.normal'),
   },
-  categories: {
+  tabs: {
     all: t('ui.achievements.categories.all'),
-    care: t('ui.achievements.categories.care'),
-    daily: t('ui.achievements.categories.daily'),
-    garden: t('ui.achievements.categories.garden'),
-    shop: t('ui.achievements.categories.shop'),
-    inventory: t('ui.achievements.categories.inventory'),
-    pomodoro: t('ui.achievements.categories.pomodoro'),
+    companion: t('ui.achievements.categories.companion'),
     growth: t('ui.achievements.categories.growth'),
-    date: t('ui.achievements.categories.date'),
+    life: t('ui.achievements.categories.life'),
+    schedule: t('ui.achievements.categories.schedule'),
     hidden: t('ui.achievements.categories.hidden'),
   },
 } as const;
 
-const categoryLabel = (category: 'all' | AchievementCategory) => labels.categories[category];
+const tabLabel = (tab: AchievementTabId) => labels.tabs[tab];
+const achievementMatchesTab = (achievement: AchievementView, tab: AchievementTabId) => {
+  if (tab === 'all') return true;
+  if (tab === 'hidden') return achievement.category === 'hidden';
+  return achievementTabCategories[tab].includes(achievement.category);
+};
 const progressLabel = (progress: number, target: number) => t('ui.achievements.progress', { progress, target });
 
 const formatDateTime = (time?: number) => {
@@ -69,10 +79,10 @@ const sortAchievements = (achievements: AchievementView[]) => [...achievements].
 
 export interface AchievementsPageProps {
   pet: PetState;
-  activeCategory: 'all' | AchievementCategory;
+  activeCategory: AchievementTabId;
   itemIconMap: Partial<Record<ItemId, string>>;
   onBack: () => void;
-  onCategoryChange: (category: 'all' | AchievementCategory) => void;
+  onCategoryChange: (category: AchievementTabId) => void;
   onClaimReward: (id: AchievementId) => void;
   onClaimAllRewards: () => void;
   onOpenCg?: (achievement: AchievementView) => void;
@@ -91,9 +101,9 @@ export const AchievementsPage = ({
   const summary = getAchievementSummary(pet);
   const allAchievements = getAchievementViews(pet);
   const hasUnlockedHiddenAchievement = allAchievements.some((achievement) => achievement.rarity === 'hidden' && achievement.unlocked);
-  const visibleCategories = hasUnlockedHiddenAchievement ? [...baseCategories, 'hidden' as const] : baseCategories;
+  const visibleCategories = hasUnlockedHiddenAchievement ? [...baseTabs, 'hidden' as const] : baseTabs;
   const safeActiveCategory = activeCategory === 'hidden' && !hasUnlockedHiddenAchievement ? 'all' : activeCategory;
-  const achievements = sortAchievements(allAchievements.filter((achievement) => safeActiveCategory === 'all' || achievement.category === safeActiveCategory));
+  const achievements = sortAchievements(allAchievements.filter((achievement) => achievementMatchesTab(achievement, safeActiveCategory)));
 
   return (
     <section className="achievements-page" aria-label={labels.aria}>
@@ -144,7 +154,7 @@ export const AchievementsPage = ({
             key={category}
             onClick={() => onCategoryChange(category)}
           >
-            {categoryLabel(category)}
+            {tabLabel(category)}
           </button>
         ))}
       </div>

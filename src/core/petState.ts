@@ -7,7 +7,7 @@ import { defaultGardenState, normalizeGardenState } from './garden';
 import { addInventoryItem } from './items';
 import { dailyBiscuitClaimLimit, dailyHeartExchangeLimit, isBuiltinItemId } from './items';
 import { clampCoins, clampCount, clampHealth, clampLevel, clampStat, defaultPetName, getPetStatCap, lowCleanlinessSleepConfirmClicks } from './petStats';
-import type { AchievementState, ActionStreak, BuiltinItemId, Inventory, PetState, PetStatus, RecentActivity, WeatherType } from './petTypes';
+import type { AchievementState, ActionStreak, BuiltinItemId, Inventory, PartnerScheduleCategory, PetState, PetStatus, RecentActivity, WeatherType } from './petTypes';
 import { defaultPomodoroState, normalizePomodoroState } from './pomodoro';
 import { defaultPartnerScheduleState, normalizePartnerScheduleState } from './partnerSchedule';
 import { getWeatherForDate, weatherTypeSet } from './weather';
@@ -24,6 +24,7 @@ const goldenAppleStarterBackfillRewardId = 'golden_apple_starter_backfill_v1';
 const legacySave13BonusRewardId = 'legacy_save_1_3_bonus_v1';
 const legacySave13BonusCoins = 3000;
 const goldenAppleBackfillRewardId = 'golden_apple_achievement_backfill_v1';
+const partnerScheduleCategories: readonly PartnerScheduleCategory[] = ['study', 'cooking', 'garden', 'exercise'];
 const goldenAppleBackfillV2RewardId = 'golden_apple_achievement_backfill_v2';
 const goldenAppleBackfillAchievementIds = ['rare_fruit_collector', 'anniversary_first', 'hidden_never_give_you_up', 'companion_100'] as const;
 type GoldenAppleBackfillAchievementId = typeof goldenAppleBackfillAchievementIds[number];
@@ -315,6 +316,23 @@ export const normalizePet = (value: unknown, now = Date.now(), options: Normaliz
     if (!slot.treeId || slot.harvestsUsed <= 0) return;
     gardenHarvestCountsByTreeId[slot.treeId] = Math.max(gardenHarvestCountsByTreeId[slot.treeId] ?? 0, 1);
   });
+  const partnerSchedule = normalizePartnerScheduleState(
+    raw.partnerSchedule,
+    { level, createdAt },
+    now,
+    !options.preserveExpiredPartnerSchedule,
+  );
+  const partnerScheduleClaimCountsByCategory = { ...countersWithMigration.partnerScheduleClaimCountsByCategory };
+  partnerScheduleCategories.forEach((category) => {
+    const skill = partnerSchedule.skills[category];
+    if (skill.level > 1 || skill.xp > 0) {
+      partnerScheduleClaimCountsByCategory[category] = Math.max(partnerScheduleClaimCountsByCategory[category] ?? 0, 1);
+    }
+  });
+  const inferredPartnerScheduleClaimCount = partnerScheduleCategories.reduce(
+    (sum, category) => sum + (partnerScheduleClaimCountsByCategory[category] ?? 0),
+    0,
+  );
   const counters = {
     ...countersWithMigration,
     gardenPlantCount: Math.max(
@@ -323,14 +341,10 @@ export const normalizePet = (value: unknown, now = Date.now(), options: Normaliz
     ),
     gardenWaterCount: Math.max(countersWithMigration.gardenWaterCount, garden.dailyWaterCount),
     gardenHarvestCountsByTreeId,
+    partnerScheduleClaimCount: Math.max(countersWithMigration.partnerScheduleClaimCount, inferredPartnerScheduleClaimCount),
+    partnerScheduleClaimCountsByCategory,
   };
   const normalizedAchievements = { ...achievements, unlockedAtById, claimedOneTimeRewardIds, counters };
-  const partnerSchedule = normalizePartnerScheduleState(
-    raw.partnerSchedule,
-    { level, createdAt },
-    now,
-    !options.preserveExpiredPartnerSchedule,
-  );
 
   return {
     name: normalizedName,

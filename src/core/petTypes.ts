@@ -237,6 +237,7 @@ export interface PartnerScheduleOffer {
 export interface PartnerScheduleSkill {
   level: number;
   xp: number;
+  masterCompletions: number;
 }
 
 export interface ActivePartnerSchedule {
@@ -248,6 +249,7 @@ export interface ActivePartnerSchedule {
   endsAt: number;
   coinReward: number;
   skillXp: number;
+  grantsMasterCompletion: boolean;
 }
 
 export interface PartnerScheduleResult {
@@ -258,11 +260,13 @@ export interface PartnerScheduleResult {
   completedAt: number;
   coinReward: number;
   skillXp: number;
+  grantsMasterCompletion: boolean;
 }
 
 export interface PartnerScheduleState {
-  schemaVersion: 2;
+  schemaVersion: 3;
   boardDateKey: string;
+  boardOfferCount: number;
   offers: PartnerScheduleOffer[];
   completedOfferIds: string[];
   active?: ActivePartnerSchedule;
@@ -292,6 +296,10 @@ export interface AchievementCounters {
   gardenPlantCount: number;
   gardenWaterCount: number;
   gardenHarvestCountsByTreeId: Partial<Record<GardenTreeId, number>>;
+  partnerScheduleClaimCount: number;
+  partnerScheduleClaimCountsByCategory: Partial<Record<PartnerScheduleCategory, number>>;
+  partnerScheduleLongClaimCountsByCategory: Partial<Record<PartnerScheduleCategory, number>>;
+  partnerScheduleCategoryRewardClaimCount: number;
   companionYearActiveDateKeysByYear: Record<string, string[]>;
 }
 

@@ -45,7 +45,6 @@ import {
   useInventoryItem,
   withBackfilledBirthday,
   withPetIdentityBirthday,
-  type AchievementCategory,
   type AchievementId,
   type AchievementView,
   type BoostCardId,
@@ -80,7 +79,7 @@ import {
 } from '../core/mod';
 import { clearActivePetMod, loadActivePetMod, saveActivePetMod } from '../core/modStorage';
 import { createSaveFileText, parseSaveFileText } from '../core/saveCodec';
-import { AchievementsPage } from './AchievementsPage';
+import { AchievementsPage, type AchievementTabId } from './AchievementsPage';
 import { BoostCardModal } from './BoostCardModal';
 import { ConfirmDialog } from './ConfirmDialog';
 import { GardenPage } from './GardenPage';
@@ -209,7 +208,7 @@ const PetApp = ({ initialPet, initialActiveMod, onResetToPicker }: PetAppProps) 
   const [importSaveText, setImportSaveText] = useState('');
   const [isResetConfirmOpen, setResetConfirmOpen] = useState(false);
   const [isPartnerScheduleCancelConfirmOpen, setPartnerScheduleCancelConfirmOpen] = useState(false);
-  const [activeAchievementCategory, setActiveAchievementCategory] = useState<'all' | AchievementCategory>('all');
+  const [activeAchievementCategory, setActiveAchievementCategory] = useState<AchievementTabId>('all');
   const [achievementCgPopup, setAchievementCgPopup] = useState<AchievementCgPopup | null>(null);
   const completedFocusCountRef = useRef(pet.pomodoro.completedFocusCount);
   const lastHeartExchangeAtRef = useRef(0);

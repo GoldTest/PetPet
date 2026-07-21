@@ -12,6 +12,7 @@ import { clampCoins, clampCount, clampPetHealth, clampPetStat, getPetStatCap, ge
 import type { BuiltinItemId, BuyItemOptions, CareActionKey, ItemId, PetAction, PetBirthday, PetState, PomodoroDurations, RecentActivity, UseInventoryItemOptions } from './petTypes';
 import { defaultPomodoroState, getDefaultPomodoroRemainingMs, getPomodoroPhaseDurationMs, normalizePomodoroSettings, pickPomodoroActivity, pomodoroMinHealthThreshold, pomodoroPhaseLabels, pomodoroResetEventMinFocusMs } from './pomodoro';
 import { settleSleep, startSleepSnapshot } from './petEvents';
+import { getPartnerScheduleCrossSystemEffects } from './partnerScheduleEffects';
 import { getLocalDateKey, randomInt } from './utils';
 import { isPartnerSchedulePetBusy } from './partnerSchedule';
 
@@ -376,6 +377,13 @@ export const useInventoryItem = (
     return recordWishProgress(recordEarnedHearts(withWakeRecord, heartGain.amount), 'feed', now);
   }
 
+  const foodEffectMultiplier = item.kind === 'food'
+    ? getPartnerScheduleCrossSystemEffects(current).foodEffectMultiplier
+    : 1;
+  const scaleFoodEffect = (amount: number | undefined) => {
+    if (amount === undefined || amount <= 0 || foodEffectMultiplier === 1) return amount ?? 0;
+    return Math.max(1, Math.round(amount * foodEffectMultiplier));
+  };
   const effect = item.effect;
   const runtimeFavoriteFoodIdSet = options.favoriteFoodIds ? new Set<ItemId>(options.favoriteFoodIds) : favoriteFoodIdSet;
   const favoriteMoodBonus = runtimeFavoriteFoodIdSet.has(itemId) ? 4 : 0;
@@ -426,11 +434,11 @@ export const useInventoryItem = (
     recordYearlyCareAction({
       ...withActivity(base, itemActivity[itemId] ?? defaultItemActivity, now),
       isSleeping: false,
-      hunger: clampPetStat(base, base.hunger + (effect.hunger ?? 0) + (item.kind === 'food' ? getAchievementEffects(base).careStatBonus : 0)),
-      mood: clampPetStat(base, base.mood + (effect.mood ?? 0) + favoriteMoodBonus - (wokePet ? 2 : 0)),
-      cleanliness: clampPetStat(base, base.cleanliness + (effect.cleanliness ?? 0)),
-      energy: clampPetStat(base, base.energy + (effect.energy ?? 0)),
-      health: clampPetHealth(base, base.health + (effect.health ?? 0)),
+      hunger: clampPetStat(base, base.hunger + scaleFoodEffect(effect.hunger) + (item.kind === 'food' ? getAchievementEffects(base).careStatBonus : 0)),
+      mood: clampPetStat(base, base.mood + scaleFoodEffect(effect.mood) + favoriteMoodBonus - (wokePet ? 2 : 0)),
+      cleanliness: clampPetStat(base, base.cleanliness + scaleFoodEffect(effect.cleanliness)),
+      energy: clampPetStat(base, base.energy + scaleFoodEffect(effect.energy)),
+      health: clampPetHealth(base, base.health + scaleFoodEffect(effect.health)),
       hearts: giftHeartBonus > 0 ? giftHeartGain.hearts : base.hearts,
       boostCards: giftHeartBonus > 0 ? giftHeartGain.boostCards : base.boostCards,
       inventory: removeInventoryItem(base.inventory, itemId),
