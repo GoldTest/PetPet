@@ -1,3 +1,4 @@
+import { useEffect, useRef } from 'react';
 import { Heart } from 'lucide-react';
 import {
   getDailyBiscuitClaimInfo,
@@ -17,7 +18,7 @@ import { DialogShell } from './DialogShell';
 
 interface ShopModalProps {
   pet: PetState;
-  visibleItems: readonly InventoryItemDefinition[];
+  items: readonly InventoryItemDefinition[];
   activeCategory: ShopCategory;
   itemIconMap: Partial<Record<string, string>>;
   onClose: () => void;
@@ -29,7 +30,7 @@ interface ShopModalProps {
 
 export const ShopModal = ({
   pet,
-  visibleItems,
+  items,
   activeCategory,
   itemIconMap,
   onClose,
@@ -38,6 +39,67 @@ export const ShopModal = ({
   onExchangeHeart,
   isHeartExchangeCoolingDown,
 }: ShopModalProps) => {
+  const gridRef = useRef<HTMLDivElement>(null);
+  const isProgrammaticScrollRef = useRef(false);
+  const activeCategoryRef = useRef(activeCategory);
+  activeCategoryRef.current = activeCategory;
+
+  const scrollToCategory = (categoryId: ShopCategory) => {
+    const grid = gridRef.current;
+    if (!grid) return;
+    const section = grid.querySelector(`[data-category="${categoryId}"]`) as HTMLElement | null;
+    if (section) {
+      isProgrammaticScrollRef.current = true;
+      const sectionRect = section.getBoundingClientRect();
+      const gridRect = grid.getBoundingClientRect();
+      grid.scrollTo({ top: grid.scrollTop + (sectionRect.top - gridRect.top) });
+      setTimeout(() => { isProgrammaticScrollRef.current = false; }, 60);
+    }
+  };
+
+  const handleTabClick = (categoryId: ShopCategory) => {
+    onSelectCategory(categoryId);
+  };
+
+  // Scroll to section when activeCategory changes
+  useEffect(() => {
+    scrollToCategory(activeCategory);
+  }, [activeCategory]);
+
+  // Scroll-spy: detect which section is near the top of the grid
+  useEffect(() => {
+    const grid = gridRef.current;
+    if (!grid) return;
+
+    const handleScroll = () => {
+      if (isProgrammaticScrollRef.current) return;
+
+      const { clientHeight } = grid;
+      const gridRect = grid.getBoundingClientRect();
+      const sections = grid.querySelectorAll('[data-category]');
+      let activeSection: ShopCategory | null = null;
+
+      sections.forEach((section) => {
+        const el = section as HTMLElement;
+        const sectionTop = el.getBoundingClientRect().top;
+        if (sectionTop < gridRect.top + clientHeight) {
+          activeSection = el.getAttribute('data-category') as ShopCategory;
+        }
+      });
+
+      if (!activeSection && sections.length > 0) {
+        activeSection = sections[0].getAttribute('data-category') as ShopCategory;
+      }
+
+      if (activeSection && activeSection !== activeCategoryRef.current) {
+        onSelectCategory(activeSection);
+      }
+    };
+
+    grid.addEventListener('scroll', handleScroll, { passive: true });
+    return () => grid.removeEventListener('scroll', handleScroll);
+  }, [onSelectCategory]);
+
   const discountInfo = getDailyShopDiscountInfo(pet);
   const heartExchangeInfo = getDailyHeartExchangeInfo(pet);
   const canExchangeHeart = pet.hearts > 0 && heartExchangeInfo.canExchange && !isHeartExchangeCoolingDown;
@@ -90,60 +152,72 @@ export const ShopModal = ({
               role="tab"
               aria-selected={activeCategory === category.id}
               className={activeCategory === category.id ? 'shop-tab shop-tab--active' : 'shop-tab'}
-              onClick={() => onSelectCategory(category.id)}
+              onClick={() => handleTabClick(category.id)}
             >
               {category.label}
             </button>
           ))}
         </div>
 
-        <div className="shop-grid">
-          {visibleItems.map((item) => {
-            const discountEntry = discountInfo?.items.find((discountItem) => discountItem.itemId === item.id);
-            const isDiscountItem = Boolean(discountEntry);
-            const isDiscountAvailable = Boolean(discountEntry && !discountEntry.used);
-            const effectBadges = getItemEffectBadges(item.effect);
-            const icon = itemIconMap[item.id] ?? item.imageUrl ?? unknownItemIcon;
-            const displayPrice = isDiscountAvailable ? discountEntry?.price ?? item.price : item.price;
-            const displayPriceText = formatCompactNumber(displayPrice);
-            const priceTitle = t('ui.shop.price', { price: displayPrice });
-            const originalPriceText = discountEntry?.originalPrice === undefined ? '' : formatCompactNumber(discountEntry.originalPrice);
-            const originalPriceTitle = discountEntry?.originalPrice === undefined
-              ? ''
-              : t('ui.shop.priceNote', { originalPrice: discountEntry.originalPrice, label: discountInfo?.label });
-            const canAfford = pet.coins >= displayPrice;
-            const biscuitClaimInfo = item.id === 'emergency_biscuit' ? getDailyBiscuitClaimInfo(pet) : undefined;
-            const isClaimedOut = biscuitClaimInfo ? !biscuitClaimInfo.canClaim : false;
-            const buttonLabel = biscuitClaimInfo
-              ? isClaimedOut
-                ? t('ui.shop.claimedOut')
-                : t('ui.shop.freeClaim', { claimed: biscuitClaimInfo.claimed, limit: biscuitClaimInfo.limit })
-              : t('ui.shop.price', { price: displayPriceText });
+        <div className="shop-grid" ref={gridRef}>
+          {shopCategories.map((category) => {
+            const categoryItems = items.filter((item) => item.kind === category.id);
+            if (categoryItems.length === 0) return null;
 
             return (
-              <article className="shop-item" key={item.id} data-item-id={item.id}>
-                <img className="shop-item__icon" src={icon} alt="" aria-hidden="true" />
-                <div>
-                  <div className="shop-item__title-row">
-                    <strong>
-                      {item.displayName}
-                      {isDiscountItem && <em className={isDiscountAvailable ? 'shop-badge' : 'shop-badge shop-badge--used'}>{isDiscountAvailable ? t('ui.shop.discountToday') : t('ui.shop.discountUsed')}</em>}
-                    </strong>
-                    {effectBadges.length > 0 && (
-                      <div className="shop-effect-badges" aria-label={effectBadges.map((badge) => badge.label).join(', ')}>
-                        {effectBadges.map((badge) => (
-                          <span className="shop-effect-badge" key={badge.key}>
-                            {badge.label}
-                          </span>
-                        ))}
-                      </div>
-                    )}
-                  </div>
-                  <span className="shop-item__summary">{item.displaySummary}</span>
-                  {isDiscountAvailable && <small className="shop-price-note" title={originalPriceTitle}>{t('ui.shop.priceNote', { originalPrice: originalPriceText, label: discountInfo?.label })}</small>}
+              <div key={category.id} data-category={category.id}>
+                <div className="shop-section-header">
+                  {category.label}
                 </div>
-                <button type="button" data-buy-item={item.id} disabled={isClaimedOut || !canAfford} title={biscuitClaimInfo ? undefined : priceTitle} onClick={() => onBuyItem(item.id)}>{buttonLabel}</button>
-              </article>
+                {categoryItems.map((item) => {
+                  const discountEntry = discountInfo?.items.find((discountItem) => discountItem.itemId === item.id);
+                  const isDiscountItem = Boolean(discountEntry);
+                  const isDiscountAvailable = Boolean(discountEntry && !discountEntry.used);
+                  const effectBadges = getItemEffectBadges(item.effect);
+                  const icon = itemIconMap[item.id] ?? item.imageUrl ?? unknownItemIcon;
+                  const displayPrice = isDiscountAvailable ? discountEntry?.price ?? item.price : item.price;
+                  const displayPriceText = formatCompactNumber(displayPrice);
+                  const priceTitle = t('ui.shop.price', { price: displayPrice });
+                  const originalPriceText = discountEntry?.originalPrice === undefined ? '' : formatCompactNumber(discountEntry.originalPrice);
+                  const originalPriceTitle = discountEntry?.originalPrice === undefined
+                    ? ''
+                    : t('ui.shop.priceNote', { originalPrice: discountEntry.originalPrice, label: discountInfo?.label });
+                  const canAfford = pet.coins >= displayPrice;
+                  const biscuitClaimInfo = item.id === 'emergency_biscuit' ? getDailyBiscuitClaimInfo(pet) : undefined;
+                  const isClaimedOut = biscuitClaimInfo ? !biscuitClaimInfo.canClaim : false;
+                  const buttonLabel = biscuitClaimInfo
+                    ? isClaimedOut
+                      ? t('ui.shop.claimedOut')
+                      : t('ui.shop.freeClaim', { claimed: biscuitClaimInfo.claimed, limit: biscuitClaimInfo.limit })
+                    : t('ui.shop.price', { price: displayPriceText });
+
+                  return (
+                    <article className="shop-item" key={item.id} data-item-id={item.id}>
+                      <img className="shop-item__icon" src={icon} alt="" aria-hidden="true" />
+                      <div>
+                        <div className="shop-item__title-row">
+                          <strong>
+                            {item.displayName}
+                            {isDiscountItem && <em className={isDiscountAvailable ? 'shop-badge' : 'shop-badge shop-badge--used'}>{isDiscountAvailable ? t('ui.shop.discountToday') : t('ui.shop.discountUsed')}</em>}
+                          </strong>
+                          {effectBadges.length > 0 && (
+                            <div className="shop-effect-badges" aria-label={effectBadges.map((badge) => badge.label).join(', ')}>
+                              {effectBadges.map((badge) => (
+                                <span className="shop-effect-badge" key={badge.key}>
+                                  {badge.label}
+                                </span>
+                              ))}
+                            </div>
+                          )}
+                        </div>
+                        <span className="shop-item__summary">{item.displaySummary}</span>
+                        {isDiscountAvailable && <small className="shop-price-note" title={originalPriceTitle}>{t('ui.shop.priceNote', { originalPrice: originalPriceText, label: discountInfo?.label })}</small>}
+                      </div>
+                      <button type="button" data-buy-item={item.id} disabled={isClaimedOut || !canAfford} title={biscuitClaimInfo ? undefined : priceTitle} onClick={() => onBuyItem(item.id)}>{buttonLabel}</button>
+                    </article>
+                  );
+                })}
+              </div>
             );
           })}
         </div>

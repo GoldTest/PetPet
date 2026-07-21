@@ -1344,6 +1344,17 @@ h1 {
   gap: 10px;
 }
 
+.shop-section-header {
+  color: #5d6d83;
+  background: #eef4fb;
+  font-size: 0.78rem;
+  font-weight: 850;
+  line-height: 1;
+  padding: 7px 10px;
+  border-radius: 6px;
+  letter-spacing: 0.04em;
+}
+
 .shop-item {
   display: grid;
   grid-template-columns: 58px minmax(0, 1fr) auto;

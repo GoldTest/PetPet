@@ -1236,7 +1236,7 @@ const PetApp = ({ initialPet, initialActiveMod, onResetToPicker }: PetAppProps) 
       {isShopOpen && (
         <ShopModal
           pet={pet}
-          visibleItems={visibleShopItems}
+          items={displayShopItems}
           activeCategory={activeShopCategory}
           itemIconMap={itemIconMap}
           onClose={handleCloseShop}
