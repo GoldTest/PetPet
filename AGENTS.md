@@ -143,6 +143,7 @@
 
 ### Never Do
 - Commit secrets, credentials, or sensitive data
+- "修复"版本号、依赖版本、API 版本等之前，必须先验证目标版本在当前日期是否存在。禁止凭印象或过时知识做降级/升级操作。
 - Modify `node_modules/`, `src-tauri/gen/`, or `src-tauri/target/`
 - Push directly to main branch — open a PR
 - Edit installed skill cache paths (`.claude/skills/`, `.agents/skills/` — edit source in `.agents/` instead)
