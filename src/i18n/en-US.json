@@ -30,7 +30,8 @@
       "settings": "Settings",
       "openSettings": "Open settings",
       "openAchievements": "Open achievements",
-      "openBoostCards": "Open boost cards"
+      "openBoostCards": "Open boost cards",
+      "openModSwitch": "Switch mod"
     },
     "dashboard": {
       "aria": "Pet stats",
@@ -679,6 +680,19 @@
       "installedSummary": "Create the mod companion named {pet}.",
       "importTitle": "Import mod",
       "importSummary": "Pick a zip file and create a companion from it."
+    },
+    "modSwitch": {
+      "title": "Mod Switch",
+      "close": "Close",
+      "defaultTitle": "Default Furo",
+      "defaultSummary": "Default companion without a mod",
+      "active": "Active",
+      "importMod": "Import mod",
+      "sourceImported": "Imported",
+      "sourceBuiltin": "Built-in",
+      "deleteMod": "Delete {name}",
+      "confirmDelete": "Confirm delete?",
+      "switchSuccess": "Switched to {name}."
     }
   },
   "pet": {
@@ -1186,6 +1200,10 @@
         "first_gift": {
           "title": "Gift Time",
           "description": "Use a gift item for the first time."
+        },
+        "first_mod_switch": {
+          "title": "New Look",
+          "description": "Switch mod appearance for the first time."
         },
         "care_25": {
           "title": "A Familiar Rhythm",

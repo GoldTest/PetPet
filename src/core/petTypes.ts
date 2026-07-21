@@ -301,6 +301,7 @@ export interface AchievementCounters {
   partnerScheduleLongClaimCountsByCategory: Partial<Record<PartnerScheduleCategory, number>>;
   partnerScheduleCategoryRewardClaimCount: number;
   companionYearActiveDateKeysByYear: Record<string, string[]>;
+  modSwitchCount: number;
 }
 
 export interface AchievementState {

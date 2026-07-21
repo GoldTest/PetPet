@@ -30,7 +30,8 @@
       "settings": "设置",
       "openSettings": "打开设置",
       "openAchievements": "打开成就",
-      "openBoostCards": "打开增益卡"
+      "openBoostCards": "打开增益卡",
+      "openModSwitch": "切换 Mod"
     },
     "dashboard": {
       "aria": "宠物数值",
@@ -679,6 +680,19 @@
       "installedSummary": "创建默认名字为 {pet} 的 Mod 伙伴。",
       "importTitle": "导入 Mod",
       "importSummary": "选择 zip 文件并用它创建新伙伴。"
+    },
+    "modSwitch": {
+      "title": "Mod 切换",
+      "close": "关闭",
+      "defaultTitle": "默认 Furo",
+      "defaultSummary": "不使用 Mod 的默认伙伴",
+      "active": "使用中",
+      "importMod": "导入 Mod",
+      "sourceImported": "手动导入",
+      "sourceBuiltin": "内置",
+      "deleteMod": "删除 {name}",
+      "confirmDelete": "确认删除？",
+      "switchSuccess": "已切换到 {name}。"
     }
   },
   "pet": {
@@ -1186,6 +1200,10 @@
         "first_gift": {
           "title": "礼物时间",
           "description": "第一次使用礼物类道具。"
+        },
+        "first_mod_switch": {
+          "title": "新形象",
+          "description": "第一次切换 Mod 外观。"
         },
         "care_25": {
           "title": "熟悉的节奏",

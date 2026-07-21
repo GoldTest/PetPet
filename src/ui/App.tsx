@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState, type ChangeEvent } from 'react';
-import { Heart, Settings, Trophy, Volume2, VolumeX } from 'lucide-react';
+import { Heart, Layers, Settings, Trophy, Volume2, VolumeX } from 'lucide-react';
 import {
   buyBoostCard,
   claimBoostCardDailyCoins,
@@ -19,6 +19,7 @@ import {
   defaultPetName,
   dismissYearReview,
   getAchievementSummary,
+  incrementModSwitchCount,
   gardenCompensationCoins,
   gardenCompensationRewardId,
   getNextUpgradeHeartCost,
@@ -77,7 +78,8 @@ import {
   parsePetModZip,
   type ActivePetMod,
 } from '../core/mod';
-import { clearActivePetMod, loadActivePetMod, saveActivePetMod } from '../core/modStorage';
+import { clearActivePetMod, getActiveBuiltinId, listStoredMods, loadActivePetMod, loadPetMod, removePetMod, saveActivePetMod, setActiveBuiltinId, setActiveModId } from '../core/modStorage';
+import { buildActivePetModFromBuiltin, getBuiltinMods } from '../core/builtinMods';
 import { createSaveFileText, parseSaveFileText } from '../core/saveCodec';
 import { AchievementsPage, type AchievementTabId } from './AchievementsPage';
 import { BoostCardModal } from './BoostCardModal';
@@ -85,6 +87,7 @@ import { ConfirmDialog } from './ConfirmDialog';
 import { GardenPage } from './GardenPage';
 import { HomePage } from './HomePage';
 import { InventoryModal } from './InventoryModal';
+import { ModSwitchPanel, type StoredModInfo } from './ModSwitchPanel';
 import { PomodoroOverlay } from './PomodoroOverlay';
 import { PartnerSchedulePage } from './PartnerSchedulePage';
 import { RolePicker } from './RolePicker';
@@ -218,6 +221,60 @@ const PetApp = ({ initialPet, initialActiveMod, onResetToPicker }: PetAppProps) 
   const isShopOpen = utilityDialog === 'shop';
   const isBoostCardOpen = utilityDialog === 'boostCards';
   const isSettingsOpen = utilityDialog === 'settings';
+  const isModSwitchOpen = utilityDialog === 'modSwitch';
+  const [storedMods, setStoredMods] = useState<StoredModInfo[]>([]);
+
+  const refreshStoredMods = () => {
+    const entries = listStoredMods();
+    const builtinMods = getBuiltinMods();
+    const importedIds = new Set(entries.map((e) => e.manifest.id));
+    const infos: StoredModInfo[] = [];
+
+    for (const bm of builtinMods) {
+      infos.push({
+        id: bm.manifest.id,
+        name: bm.manifest.name,
+        version: bm.manifest.version,
+        importedAt: 0,
+        contentImageUrl: bm.petImageUrls.content,
+        isBuiltin: true,
+      });
+    }
+
+    for (const e of entries) {
+      infos.push({
+        id: e.manifest.id,
+        name: e.manifest.name,
+        version: e.manifest.version,
+        fileName: e.fileName,
+        importedAt: e.importedAt,
+        contentImageUrl: e.manifest.id === activeMod?.manifest.id ? activeMod?.petImageUrls.content : undefined,
+        isBuiltin: false,
+      });
+    }
+
+    infos.sort((a, b) => {
+      if (a.isBuiltin && !b.isBuiltin) return -1;
+      if (!a.isBuiltin && b.isBuiltin) return 1;
+      return b.importedAt - a.importedAt;
+    });
+
+    setStoredMods(infos);
+
+    void (async () => {
+      for (const info of infos) {
+        if (info.contentImageUrl) continue;
+        if (info.isBuiltin) {
+          const bm = builtinMods.find((m) => m.manifest.id === info.id);
+          if (bm) info.contentImageUrl = bm.petImageUrls.content;
+        } else {
+          const mod = await loadPetMod(info.id);
+          if (mod) info.contentImageUrl = mod.petImageUrls.content;
+        }
+      }
+      setStoredMods([...infos]);
+    })();
+  };
 
   useEffect(() => {
     setActiveMod(initialActiveMod);
@@ -238,6 +295,10 @@ const PetApp = ({ initialPet, initialActiveMod, onResetToPicker }: PetAppProps) 
     }
     hasLoadedModRef.current = true;
   }, [initialActiveMod]);
+
+  useEffect(() => {
+    refreshStoredMods();
+  }, [activeMod]);
 
   const itemIconMap = useMemo(() => resolveItemIcons(activeMod), [activeMod]);
   const itemRegistry = useMemo(() => createItemRegistry(activeMod, itemIconMap), [activeMod, itemIconMap]);
@@ -723,7 +784,7 @@ const PetApp = ({ initialPet, initialActiveMod, onResetToPicker }: PetAppProps) 
     try {
       const oldDefaultName = activeMod?.manifest.defaultPetName ?? defaultPetName;
       const parsed = await parsePetModZip(file);
-      await saveActivePetMod(parsed);
+      await saveActivePetMod(parsed, file.name);
       const loaded = await loadActivePetMod();
       setActiveMod(loaded);
       setModMessage(
@@ -768,6 +829,76 @@ const PetApp = ({ initialPet, initialActiveMod, onResetToPicker }: PetAppProps) 
     } catch (error) {
       setModMessage(error instanceof Error ? error.message : t('ui.settings.mod.restoreFailed'));
     }
+  };
+
+  const handleSwitchMod = async (modId: string | null) => {
+    if (modId === null) {
+      setActiveModId(null);
+      setActiveBuiltinId(null);
+      setActiveMod(null);
+      setPet((current) => withBackfilledBirthday(current, defaultPetBirthday));
+      setDraftBirthday(defaultPetBirthday);
+      setModMessage('');
+      return;
+    }
+
+    const builtinMods = getBuiltinMods();
+    const builtin = builtinMods.find((m) => m.manifest.id === modId);
+    if (builtin) {
+      const loaded = buildActivePetModFromBuiltin(builtin);
+      setActiveBuiltinId(modId);
+      setActiveMod(loaded);
+      const oldDefaultName = activeMod?.manifest.defaultPetName ?? defaultPetName;
+      setPet((current) => {
+        const shouldUseModDefaultName = current.name === defaultPetName || current.name === oldDefaultName;
+        const nextName = shouldUseModDefaultName ? loaded.manifest.defaultPetName : current.name;
+        return {
+          ...withPetIdentityBirthday(current, loaded.manifest.birthday),
+          name: nextName,
+          recentEvent: loaded.manifest.texts?.recentEvent ?? t('ui.modSwitch.switchSuccess', { name: loaded.manifest.name }),
+        };
+      });
+      setDraftName((current) => (current === defaultPetName || current === oldDefaultName ? loaded.manifest.defaultPetName : current));
+      setDraftBirthday(loaded.manifest.birthday);
+      setPet((current) => incrementModSwitchCount(current));
+      setModMessage(t('ui.modSwitch.switchSuccess', { name: loaded.manifest.name }));
+      return;
+    }
+
+    const loaded = await loadPetMod(modId);
+    if (!loaded) {
+      setModMessage(t('ui.settings.mod.loadFailed'));
+      return;
+    }
+    setActiveModId(modId);
+    const oldDefaultName = activeMod?.manifest.defaultPetName ?? defaultPetName;
+    setActiveMod(loaded);
+    setPet((current) => {
+      const shouldUseModDefaultName = current.name === defaultPetName || current.name === oldDefaultName;
+      const nextName = shouldUseModDefaultName ? loaded.manifest.defaultPetName : current.name;
+      return {
+        ...withPetIdentityBirthday(current, loaded.manifest.birthday),
+        name: nextName,
+        recentEvent: loaded.manifest.texts?.recentEvent ?? t('ui.modSwitch.switchSuccess', { name: loaded.manifest.name }),
+      };
+    });
+    setDraftName((current) => (current === defaultPetName || current === oldDefaultName ? loaded.manifest.defaultPetName : current));
+    setDraftBirthday(loaded.manifest.birthday);
+    setPet((current) => incrementModSwitchCount(current));
+    setModMessage(t('ui.modSwitch.switchSuccess', { name: loaded.manifest.name }));
+  };
+
+  const handleDeleteMod = async (modId: string) => {
+    const isActive = activeMod?.manifest.id === modId;
+    await removePetMod(modId);
+    if (isActive) {
+      setActiveModId(null);
+      setActiveMod(null);
+      setPet((current) => withBackfilledBirthday(current, defaultPetBirthday));
+      setDraftBirthday(defaultPetBirthday);
+      setModMessage('');
+    }
+    refreshStoredMods();
   };
 
   const handleExportSave = () => {
@@ -923,6 +1054,18 @@ const PetApp = ({ initialPet, initialActiveMod, onResetToPicker }: PetAppProps) 
             onClick={handleAudioToggle}
           >
             {isAudioEnabled ? <Volume2 size={21} aria-hidden="true" /> : <VolumeX size={21} aria-hidden="true" />}
+          </button>
+          <button
+            type="button"
+            className={`icon-button${activeMod ? ' icon-button--mod-active' : ''}`}
+            aria-label={t('ui.top.openModSwitch')}
+            title={activeMod ? activeMod.manifest.name : t('ui.top.openModSwitch')}
+            onClick={() => {
+              playAfterUnlock('open');
+              openUtilityDialog('modSwitch');
+            }}
+          >
+            <Layers size={21} aria-hidden="true" />
           </button>
           <button
             type="button"
@@ -1111,6 +1254,19 @@ const PetApp = ({ initialPet, initialActiveMod, onResetToPicker }: PetAppProps) 
           onClaimDailyCoins={handleClaimBoostCardCoins}
         />
       )}
+      {isModSwitchOpen && (
+        <ModSwitchPanel
+          activeMod={activeMod}
+          storedMods={storedMods}
+          onSwitchMod={handleSwitchMod}
+          onImportMod={handleModFileChange}
+          onDeleteMod={handleDeleteMod}
+          onClose={() => {
+            playAfterUnlock('close');
+            closeUtilityDialog();
+          }}
+        />
+      )}
       {isSettingsOpen && (
         <SettingsModal
           activeMod={activeMod}
@@ -1189,10 +1345,27 @@ export const App = () => {
   const [isAudioEnabled, setAudioEnabledState] = useState(() => getAudioEnabled());
 
   useEffect(() => {
-    void loadActivePetMod()
-      .then((mod) => setInstalledMod(mod))
-      .catch((error) => setModMessage(error instanceof Error ? error.message : t('ui.settings.mod.loadFailed')))
-      .finally(() => setHasLoadedInitialMod(true));
+    void (async () => {
+      try {
+        const storedMod = await loadActivePetMod();
+        if (storedMod) {
+          setInstalledMod(storedMod);
+        } else {
+          const builtinId = getActiveBuiltinId();
+          if (builtinId) {
+            const builtinMods = getBuiltinMods();
+            const builtin = builtinMods.find((m) => m.manifest.id === builtinId);
+            if (builtin) {
+              setInstalledMod(buildActivePetModFromBuiltin(builtin));
+            }
+          }
+        }
+      } catch (error) {
+        setModMessage(error instanceof Error ? error.message : t('ui.settings.mod.loadFailed'));
+      } finally {
+        setHasLoadedInitialMod(true);
+      }
+    })();
   }, []);
 
   const handleAudioToggle = () => {
@@ -1271,7 +1444,7 @@ export const App = () => {
 
   return (
     <PetApp
-      key={initialPet.createdAt + ':' + (installedMod?.manifest.id ?? 'builtin')}
+      key={initialPet.createdAt}
       initialPet={initialPet}
       initialActiveMod={installedMod}
       onResetToPicker={(storedMod) => {

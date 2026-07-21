@@ -281,6 +281,7 @@ export {
   getAchievementEffects,
   getAchievementSummary,
   getAchievementViews,
+  incrementModSwitchCount,
   markAchievementReviewSeen,
   recordEarnedCoins,
 } from './achievements';

@@ -142,6 +142,7 @@ export const defaultAchievementCounters = (): AchievementCounters => ({
   partnerScheduleLongClaimCountsByCategory: {},
   partnerScheduleCategoryRewardClaimCount: 0,
   companionYearActiveDateKeysByYear: {},
+  modSwitchCount: 0,
 });
 
 export const getCompanionYear = (createdAt: number, now = Date.now()) => {
@@ -304,6 +305,7 @@ export const normalizeAchievementState = (
       partnerScheduleLongClaimCountsByCategory,
       partnerScheduleCategoryRewardClaimCount: clampCount(isNumber(rawCounters.partnerScheduleCategoryRewardClaimCount) ? rawCounters.partnerScheduleCategoryRewardClaimCount : 0),
       companionYearActiveDateKeysByYear,
+      modSwitchCount: clampCount(isNumber(rawCounters.modSwitchCount) ? rawCounters.modSwitchCount : 0),
     },
   };
 };
@@ -343,6 +345,7 @@ const baseAchievementDefinitionConfigs: readonly Omit<AchievementDefinition, 'ti
   { id: 'first_work', category: 'care', rarity: 'normal', target: 1, progress: (pet) => getCareCount(pet, 'work'), reward: { coins: 24 } },
   { id: 'first_sleep', category: 'care', rarity: 'normal', target: 1, progress: (pet) => pet.achievements.counters.sleepStartCount, reward: { coins: 20 } },
   { id: 'first_gift', category: 'care', rarity: 'normal', target: 1, progress: (pet) => getCareCount(pet, 'gift'), reward: { coins: 20 } },
+  { id: 'first_mod_switch', category: 'growth', rarity: 'normal', target: 1, progress: (pet) => pet.achievements.counters.modSwitchCount, reward: { coins: 50 } },
   { id: 'care_25', category: 'care', rarity: 'normal', target: 25, progress: getTotalCareCount, reward: { coins: 36 } },
   { id: 'care_100', category: 'care', rarity: 'normal', target: 100, progress: getTotalCareCount, reward: { coins: 90 } },
   { id: 'feed_30', category: 'care', rarity: 'normal', target: 30, progress: (pet) => getCareCount(pet, 'feed'), reward: { coins: 45 } },
@@ -675,6 +678,11 @@ export const incrementManualWake = (pet: PetState): PetState => ({
 export const incrementNaturalWake = (pet: PetState): PetState => ({
   ...pet,
   achievements: { ...pet.achievements, counters: { ...pet.achievements.counters, naturalWakeCount: pet.achievements.counters.naturalWakeCount + 1 } },
+});
+
+export const incrementModSwitchCount = (pet: PetState): PetState => ({
+  ...pet,
+  achievements: { ...pet.achievements, counters: { ...pet.achievements.counters, modSwitchCount: pet.achievements.counters.modSwitchCount + 1 } },
 });
 
 export const incrementAchievementGardenPlant = (pet: PetState): PetState => ({

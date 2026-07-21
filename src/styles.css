@@ -171,6 +171,12 @@ h1 {
   color: #6d7583;
   background: rgba(232, 237, 244, 0.92);
 }
+
+.icon-button--mod-active {
+  color: #245b96;
+  box-shadow: 0 0 0 2px #245b96;
+}
+
 .content-grid {
   display: grid;
   gap: 16px;
