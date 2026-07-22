@@ -40,8 +40,8 @@ $sourceSo = Join-Path $root "src-tauri\target\$rustTarget\release\libapp_lib.so"
 $jniDir = Join-Path $appDir "src\main\jniLibs\$abi"
 $jniSo = Join-Path $jniDir 'libapp_lib.so'
 $releaseDir = Join-Path $root 'release'
-$alignedApk = Join-Path $releaseDir "pocket$version$outputSuffix-aligned.apk"
-$finalApk = Join-Path $releaseDir "pocket$version$outputSuffix.apk"
+$alignedApk = Join-Path $releaseDir "petpet$version$outputSuffix-aligned.apk"
+$finalApk = Join-Path $releaseDir "petpet$version$outputSuffix.apk"
 
 function Convert-VersionNameToCode([string]$versionName) {
   $core = ($versionName -split '[-+]')[0]
