@@ -7,7 +7,6 @@ import {
   type PetAction,
   type PetState,
   type PetStatus,
-  type RecentActivity,
 } from '../core/pet';
 import { t } from '../i18n';
 import { ActionDock } from './ActionDock';
@@ -29,7 +28,7 @@ interface HomePageProps {
   gardenReminder?: 'ready' | 'withered';
   pomodoroOverlay?: ReactNode;
   petStatusImages: Record<PetStatus, string>;
-  petActivityImages: Partial<Record<RecentActivity, string>>;
+  petActivityImages: Record<string, string | undefined>;
   getStatusLabel: (status: PetStatus) => string;
   onInteract: () => void;
   onUpgrade: () => void;

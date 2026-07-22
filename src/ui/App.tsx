@@ -77,10 +77,12 @@ import {
   getModStatusText,
   parsePetModZip,
   type ActivePetMod,
+  type PetModManifestV3,
 } from '../core/mod';
 import { clearActivePetMod, getActiveBuiltinId, listStoredMods, loadActivePetMod, loadPetMod, removePetMod, saveActivePetMod, setActiveBuiltinId, setActiveModId } from '../core/modStorage';
 import { buildActivePetModFromBuiltin, getBuiltinMods } from '../core/builtinMods';
 import { createSaveFileText, parseSaveFileText } from '../core/saveCodec';
+import { setModEventDefs } from '../core/petEvents';
 import { AchievementsPage, type AchievementTabId } from './AchievementsPage';
 import { BoostCardModal } from './BoostCardModal';
 import { ConfirmDialog } from './ConfirmDialog';
@@ -278,6 +280,7 @@ const PetApp = ({ initialPet, initialActiveMod, onResetToPicker }: PetAppProps) 
 
   useEffect(() => {
     setActiveMod(initialActiveMod);
+    applyModEventDefs(initialActiveMod);
     setPet((current) => {
       if (!initialActiveMod) return withBackfilledBirthday(current, defaultPetBirthday);
       const next = withPetIdentityBirthday(current, initialActiveMod.manifest.birthday);
@@ -835,6 +838,7 @@ const PetApp = ({ initialPet, initialActiveMod, onResetToPicker }: PetAppProps) 
       setActiveModId(null);
       setActiveBuiltinId(null);
       setActiveMod(null);
+      applyModEventDefs(null);
       setPet((current) => withBackfilledBirthday(current, defaultPetBirthday));
       setDraftBirthday(defaultPetBirthday);
       setModMessage('');
@@ -847,6 +851,7 @@ const PetApp = ({ initialPet, initialActiveMod, onResetToPicker }: PetAppProps) 
       const loaded = buildActivePetModFromBuiltin(builtin);
       setActiveBuiltinId(modId);
       setActiveMod(loaded);
+      applyModEventDefs(loaded);
       const oldDefaultName = activeMod?.manifest.defaultPetName ?? defaultPetName;
       setPet((current) => {
         const shouldUseModDefaultName = current.name === defaultPetName || current.name === oldDefaultName;
@@ -872,6 +877,7 @@ const PetApp = ({ initialPet, initialActiveMod, onResetToPicker }: PetAppProps) 
     setActiveModId(modId);
     const oldDefaultName = activeMod?.manifest.defaultPetName ?? defaultPetName;
     setActiveMod(loaded);
+    applyModEventDefs(loaded);
     setPet((current) => {
       const shouldUseModDefaultName = current.name === defaultPetName || current.name === oldDefaultName;
       const nextName = shouldUseModDefaultName ? loaded.manifest.defaultPetName : current.name;
@@ -1334,6 +1340,14 @@ const PetApp = ({ initialPet, initialActiveMod, onResetToPicker }: PetAppProps) 
   );
 };
 
+
+const applyModEventDefs = (mod: ActivePetMod | null) => {
+  if (mod?.manifest.schemaVersion === 3) {
+    setModEventDefs((mod.manifest as PetModManifestV3).events ?? null);
+  } else {
+    setModEventDefs(null);
+  }
+};
 
 export const App = () => {
   const [initialPet, setInitialPet] = useState<PetState | null>(() => loadPetOrNull());

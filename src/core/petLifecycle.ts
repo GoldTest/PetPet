@@ -3,7 +3,7 @@ import { ensureDailyWishForDate, maybeCreateReturnWelcome, returnWelcomeMinAwayM
 import { getAchievementEffects, incrementAchievementPomodoroFocus, incrementNaturalWake, recordEarnedCoins } from './achievements';
 import { advanceGarden } from './garden';
 import { dailyBiscuitClaimLimit } from './items';
-import { applyTimedEvent, getRandomDailyEncounter, getRandomOfflineDiary, getRandomOfflineEvent, maybeApplyDreamTalk, settleSleep, startSleepSnapshot } from './petEvents';
+import { applyTimedEvent, getRandomDailyEncounterWithMod, getRandomOfflineDiary, getRandomOfflineEventWithMod, maybeApplyDreamTalk, settleSleep, startSleepSnapshot } from './petEvents';
 import { clampCoins, clampCount, clampPetHealth, clampPetStat, criticalHungerActionThreshold, getEnergyRecoveryIntervalMs, getPetStatCap, lowEnergyThreshold } from './petStats';
 import type { PetState } from './petTypes';
 import {
@@ -271,7 +271,7 @@ export const advancePomodoro = (pet: PetState, now = Date.now()): PetState => {
 const applyDailyEncounter = (pet: PetState, now: number): PetState => {
   if (isSameLocalDay(pet.lastDailyEncounterAt, now)) return pet;
 
-  const encounter = getRandomDailyEncounter(pet.name);
+  const encounter = getRandomDailyEncounterWithMod(pet);
   return applyTimedEvent(pet, encounter, now, t('pet.prefix.dailyEncounter'));
 };
 
@@ -418,7 +418,7 @@ export const advancePet = (pet: PetState, now = Date.now()): PetState => {
   }
 
   if (offlineEventDue) {
-    return applyTimedEvent(next, getRandomOfflineEvent(next.name, weather), now, t('pet.prefix.offlineEvent'));
+    return applyTimedEvent(next, getRandomOfflineEventWithMod(next, weather), now, t('pet.prefix.offlineEvent'));
   }
 
   if (offlineDiaryDue) {

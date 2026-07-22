@@ -111,7 +111,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: petpet-windows-x64-${{ needs.metadata.outputs.version }}
-          path: release/pocket${{ needs.metadata.outputs.version }}.exe
+          path: release/petpet${{ needs.metadata.outputs.version }}.exe
           if-no-files-found: error
 
   android:
@@ -162,7 +162,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: petpet-android-arm64-${{ needs.metadata.outputs.version }}
-          path: release/pocket${{ needs.metadata.outputs.version }}.apk
+          path: release/petpet${{ needs.metadata.outputs.version }}.apk
           if-no-files-found: error
 
   web:
@@ -191,7 +191,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: petpet-web-${{ needs.metadata.outputs.version }}
-          path: release/pocket${{ needs.metadata.outputs.version }}-web.zip
+          path: release/petpet${{ needs.metadata.outputs.version }}-web.zip
           if-no-files-found: error
 
   linux:
@@ -233,11 +233,11 @@ jobs:
             echo "No AppImage found."
             exit 1
           fi
-          cp "$appimage" "artifacts/pocket${version}-ubuntu.AppImage"
+          cp "$appimage" "artifacts/petpet${version}-ubuntu.AppImage"
 
           deb=$(find src-tauri/target/release/bundle -type f -name '*.deb' | head -n 1 || true)
           if [[ -n "$deb" ]]; then
-            cp "$deb" "artifacts/pocket${version}-ubuntu.deb"
+            cp "$deb" "artifacts/petpet${version}-ubuntu.deb"
           fi
 
       - name: Upload Linux artifacts
@@ -281,13 +281,13 @@ jobs:
             echo "No dmg found."
             exit 1
           fi
-          cp "$dmg" "artifacts/pocket${version}-mac.dmg"
+          cp "$dmg" "artifacts/petpet${version}-mac.dmg"
 
       - name: Upload macOS artifact
         uses: actions/upload-artifact@v4
         with:
           name: petpet-macos-${{ needs.metadata.outputs.version }}
-          path: artifacts/pocket${{ needs.metadata.outputs.version }}-mac.dmg
+          path: artifacts/petpet${{ needs.metadata.outputs.version }}-mac.dmg
           if-no-files-found: error
 
   release:

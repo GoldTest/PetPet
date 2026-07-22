@@ -3,7 +3,8 @@ import { applyHeartGain, recordEarnedCoins, recordEarnedHearts } from './achieve
 import { addInventoryItem } from './items';
 import { clampCoins, clampCount, clampPetHealth, clampPetStat } from './petStats';
 import type { ItemEffect, ItemId, PetState, WeatherType } from './petTypes';
-import { hashString, pickRandom } from './utils';
+import type { PetModEventDef, PetModEvents } from './mod';
+import { hashString, pickRandom, randomInt } from './utils';
 
 export interface DailyEncounter {
   coins?: number;
@@ -122,6 +123,73 @@ export const getRandomDreamEvent = (name: string): TimedEvent =>
     },
   ]);
 
+const modEventToDailyEncounter = (def: PetModEventDef, pet: PetState): DailyEncounter => ({
+  coins: def.rewards.coins,
+  hearts: def.rewards.hearts,
+  itemId: def.rewards.itemId,
+  itemAmount: def.rewards.itemAmount,
+  effect: def.rewards.effect,
+  text: interpolateModEventText(def.textKey, pet, 0),
+});
+
+const modEventToTimedEvent = (def: PetModEventDef, pet: PetState): TimedEvent => ({
+  coins: def.rewards.coins,
+  hearts: def.rewards.hearts,
+  itemId: def.rewards.itemId,
+  itemAmount: def.rewards.itemAmount,
+  effect: def.rewards.effect,
+  text: interpolateModEventText(def.textKey, pet, 0),
+});
+
+const getEligibleModEvents = (pet: PetState, trigger: PetModEventDef['trigger']): PetModEventDef[] => {
+  const defs = getModEventsForTrigger(trigger);
+  if (!defs) return [];
+  return defs.filter((def) => checkModEventCondition(pet, def.conditions));
+};
+
+const pickWeighted = <T extends { weight?: number }>(items: T[]): T | undefined => {
+  if (items.length === 0) return undefined;
+  const totalWeight = items.reduce((sum, item) => sum + (item.weight ?? 1), 0);
+  if (totalWeight <= 0) return items[Math.floor(Math.random() * items.length)];
+  let roll = Math.random() * totalWeight;
+  for (const item of items) {
+    roll -= item.weight ?? 1;
+    if (roll <= 0) return item;
+  }
+  return items[items.length - 1];
+};
+
+export const getRandomDailyEncounterWithMod = (pet: PetState): DailyEncounter | TimedEvent => {
+  const builtin = getRandomDailyEncounter(pet.name);
+  const eligible = getEligibleModEvents(pet, 'daily_encounter');
+  if (eligible.length === 0) return builtin;
+  const modEvents: (DailyEncounter & { weight: number })[] = eligible.map((def) => ({
+    ...modEventToDailyEncounter(def, pet),
+    weight: def.weight,
+  }));
+
+  const combined = [
+    { ...builtin, weight: 1 },
+    ...modEvents,
+  ];
+  return pickWeighted(combined) ?? builtin;
+};
+
+export const getRandomOfflineEventWithMod = (pet: PetState, weather: WeatherType): TimedEvent => {
+  const builtin = getRandomOfflineEvent(pet.name, weather);
+  const eligible = getEligibleModEvents(pet, 'offline');
+  if (eligible.length === 0) return builtin;
+  const modEvents: (TimedEvent & { weight: number })[] = eligible.map((def) => ({
+    ...modEventToTimedEvent(def, pet),
+    weight: def.weight,
+  }));
+  const combined = [
+    { ...builtin, weight: 1 },
+    ...modEvents,
+  ];
+  return pickWeighted(combined) ?? builtin;
+};
+
 export const applyTimedEvent = (pet: PetState, event: TimedEvent, now: number, prefix: string): PetState => {
   const effect = event.effect ?? {};
   const heartGain = applyHeartGain(pet, event.hearts ?? 0);
@@ -143,6 +211,41 @@ export const applyTimedEvent = (pet: PetState, event: TimedEvent, now: number, p
   return recordEarnedHearts(recordEarnedCoins(withEvent, event.coins ?? 0), heartGain.amount);
 };
 
+// ---- Mod Event Integration ----
+
+let activeModEvents: PetModEvents | null = null;
+
+export const setModEventDefs = (events: PetModEvents | null) => {
+  activeModEvents = events;
+};
+
+export const getModEventDefs = (): PetModEvents | null => activeModEvents;
+
+const checkModEventCondition = (pet: PetState, conditions: PetModEventDef['conditions']): boolean => {
+  if (!conditions) return true;
+  if (conditions.minLevel !== undefined && pet.level < conditions.minLevel) return false;
+  if (conditions.minHearts !== undefined && pet.hearts < conditions.minHearts) return false;
+  if (conditions.requiredItemId !== undefined && !pet.inventory[conditions.requiredItemId]) return false;
+  if (conditions.weather !== undefined && pet.weather !== conditions.weather) return false;
+  return true;
+};
+
+const interpolateModEventText = (textKey: string, pet: PetState, heartAmount: number): string => {
+  const template = t(textKey) as string;
+  return template
+    .replace(/\{name\}/g, pet.name)
+    .replace(/\{hearts\}/g, String(heartAmount));
+};
+
+const getModEventsForTrigger = (trigger: PetModEventDef['trigger']): PetModEventDef[] | undefined => {
+  if (!activeModEvents) return undefined;
+  switch (trigger) {
+    case 'daily_encounter': return activeModEvents.daily_encounter;
+    case 'offline': return activeModEvents.offline;
+    case 'sleep': return activeModEvents.sleep;
+  }
+};
+
 const addEffects = (left?: ItemEffect, right?: ItemEffect): ItemEffect | undefined => {
   if (!left && !right) return undefined;
   return {
@@ -154,10 +257,25 @@ const addEffects = (left?: ItemEffect, right?: ItemEffect): ItemEffect | undefin
   };
 };
 
+export const getRandomDreamEventWithMod = (pet: PetState): TimedEvent => {
+  const builtin = getRandomDreamEvent(pet.name);
+  const eligible = getEligibleModEvents(pet, 'sleep');
+  if (eligible.length === 0) return builtin;
+  const modEvents: (TimedEvent & { weight: number })[] = eligible.map((def) => ({
+    ...modEventToTimedEvent(def, pet),
+    weight: def.weight,
+  }));
+  const combined = [
+    { ...builtin, weight: 1 },
+    ...modEvents,
+  ];
+  return pickWeighted(combined) ?? builtin;
+};
+
 const addDreamEvent = (event: TimedEvent, pet: PetState, sleptMinutes: number): TimedEvent => {
   if (sleptMinutes < dreamEventMinSleepMinutes) return event;
 
-  const dream = getRandomDreamEvent(pet.name);
+  const dream = getRandomDreamEventWithMod(pet);
   return {
     effect: addEffects(event.effect, dream.effect),
     coins: (event.coins ?? 0) + (dream.coins ?? 0),

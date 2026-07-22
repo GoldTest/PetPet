@@ -3,8 +3,9 @@ import type {
   ModCgImageKey,
   PetImageKey,
   PetModManifest,
+  PetModManifestV3,
 } from './mod';
-import { modCgImageKeys, petActivityImageKeys, petStatusImageKeys } from './mod';
+import { getModCustomActivityPaths, modCgImageKeys, petActivityImageKeys, petStatusImageKeys } from './mod';
 import { validatePetModManifest } from './mod';
 
 interface BuiltinModEntry {
@@ -60,6 +61,15 @@ const createBuiltinModEntry = (dir: string): BuiltinModEntry | null => {
     const path = `../mods/${dir}/pet/${key}.png`;
     const url = petImageModules[path as keyof typeof petImageModules];
     if (url) petImageUrls[key as PetImageKey] = url;
+  }
+  if (manifest.schemaVersion === 3) {
+    const v3 = manifest as PetModManifestV3;
+    const customPaths = getModCustomActivityPaths(v3);
+    for (const [imagePath, activityId] of customPaths) {
+      const path = `../mods/${dir}/${imagePath}`;
+      const url = petImageModules[path as keyof typeof petImageModules];
+      if (url) petImageUrls[activityId as PetImageKey] = url;
+    }
   }
 
   const cgImageUrls: BuiltinModEntry['cgImageUrls'] = {};

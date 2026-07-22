@@ -1,6 +1,6 @@
 import { useState, type ReactNode } from 'react';
 import { CalendarDays, ChevronDown, ChevronUp, Cloud, CloudRain, Sparkles, Sun, Wind, type LucideIcon } from 'lucide-react';
-import { getPartnerScheduleActivity, getPrimaryStatus, getSeasonInfo, getStatusText, weatherInfo, type PetState, type PetStatus, type RecentActivity, type WeatherType } from '../core/pet';
+import { getPartnerScheduleActivity, getPrimaryStatus, getSeasonInfo, getStatusText, weatherInfo, type PetState, type PetStatus, type WeatherType } from '../core/pet';
 import { petActivityImages as defaultPetActivityImages, petStatusImages as defaultPetStatusImages } from '../assets';
 import { t } from '../i18n';
 import { formatCompactNumber } from './numberFormat';
@@ -21,7 +21,7 @@ interface PetDisplayProps {
   onUpgrade: () => void;
   overlay?: ReactNode;
   petStatusImages?: Record<PetStatus, string>;
-  petActivityImages?: Partial<Record<RecentActivity, string>>;
+  petActivityImages?: Record<string, string | undefined>;
   getStatusLabel?: (status: PetStatus) => string;
 }
 

@@ -8,6 +8,7 @@ import {
   type ParsedPetMod,
   type PetImageKey,
   type PetModManifest,
+  type PetModManifestV3,
 } from './mod';
 
 const manifestsStorageKey = 'petpet.mod.manifests.v1';
@@ -278,7 +279,16 @@ export const loadPetMod = async (modId: string): Promise<ActivePetMod | null> =>
   const itemImageUrls: ActivePetMod['itemImageUrls'] = {};
   const cgImageUrls: ActivePetMod['cgImageUrls'] = {};
 
-  for (const key of [...petStatusImageKeys, ...petActivityImageKeys]) {
+  const allPetImageKeys = [...petStatusImageKeys, ...petActivityImageKeys];
+  if (manifest.schemaVersion === 3) {
+    const v3 = manifest as PetModManifestV3;
+    if (v3.activities) {
+      for (const act of v3.activities) {
+        allPetImageKeys.push(act.id as PetImageKey);
+      }
+    }
+  }
+  for (const key of allPetImageKeys) {
     const record = await getRecord(getImageRecordKey(manifest.id, 'pet', key));
     if (!record?.blob) continue;
     const url = URL.createObjectURL(record.blob);

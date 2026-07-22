@@ -119,7 +119,7 @@ export interface ActionStreak {
   lastAt: number;
 }
 
-export type RecentActivity =
+export type BuiltinActivity =
   | 'idle'
   | 'happy'
   | 'bath'
@@ -133,6 +133,8 @@ export type RecentActivity =
   | 'work_food'
   | 'work_plants';
 
+export type RecentActivity = string;
+
 export type PomodoroPhase = 'focus' | 'short_break';
 
 export interface PomodoroDurations {
@@ -141,7 +143,7 @@ export interface PomodoroDurations {
   targetRounds: number;
 }
 
-export type PomodoroActivity = Extract<RecentActivity, 'reading_books' | 'workout' | 'work_food' | 'work_plants'>;
+export type PomodoroActivity = 'reading_books' | 'workout' | 'work_food' | 'work_plants';
 
 export interface PomodoroState {
   isRunning: boolean;

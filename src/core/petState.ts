@@ -7,7 +7,7 @@ import { defaultGardenState, normalizeGardenState } from './garden';
 import { addInventoryItem } from './items';
 import { dailyBiscuitClaimLimit, dailyHeartExchangeLimit, isBuiltinItemId } from './items';
 import { clampCoins, clampCount, clampHealth, clampLevel, clampStat, defaultPetName, getPetStatCap, lowCleanlinessSleepConfirmClicks } from './petStats';
-import type { AchievementState, ActionStreak, BuiltinItemId, Inventory, PartnerScheduleCategory, PetState, PetStatus, RecentActivity, WeatherType } from './petTypes';
+import type { AchievementState, ActionStreak, BuiltinItemId, BuiltinActivity, Inventory, PartnerScheduleCategory, PetState, PetStatus, RecentActivity, WeatherType } from './petTypes';
 import { defaultPomodoroState, normalizePomodoroState } from './pomodoro';
 import { defaultPartnerScheduleState, normalizePartnerScheduleState } from './partnerSchedule';
 import { getWeatherForDate, weatherTypeSet } from './weather';
@@ -70,7 +70,7 @@ export const defaultActionStreak = (now: number): ActionStreak => ({
   lastAt: 0,
 });
 
-export const recentActivities = new Set<RecentActivity>([
+export const builtinActivities = [
   'idle',
   'happy',
   'bath',
@@ -83,10 +83,12 @@ export const recentActivities = new Set<RecentActivity>([
   'workout',
   'work_food',
   'work_plants',
-]);
+] as const satisfies readonly BuiltinActivity[];
+
+export const recentActivities = new Set<string>(builtinActivities);
 
 export const isRecentActivity = (value: unknown): value is RecentActivity =>
-  typeof value === 'string' && recentActivities.has(value as RecentActivity);
+  typeof value === 'string' && value.length > 0;
 
 export const createDefaultPet = (now = Date.now()): PetState => ({
   name: defaultPetName,

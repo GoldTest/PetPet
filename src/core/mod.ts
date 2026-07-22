@@ -9,9 +9,10 @@ import type {
   RecentActivity,
   ShopCategory,
   ShopItem,
+  WeatherType,
 } from './petTypes';
 
-export const modSchemaVersion = 2;
+export const modSchemaVersion = 3;
 
 export const petStatusImageKeys = [
   'content',
@@ -109,6 +110,44 @@ export interface PetModItems {
   custom?: PetModCustomItem[];
 }
 
+export type ModActivityId = string;
+
+export interface PetModActivityDef {
+  id: ModActivityId;
+  labelKey: string;
+  durationMs: number;
+  images: string[];
+}
+
+export interface PetModEventCondition {
+  minLevel?: number;
+  minHearts?: number;
+  requiredItemId?: ItemId;
+  weather?: WeatherType;
+}
+
+export interface PetModEventReward {
+  coins?: number;
+  hearts?: number;
+  itemId?: ItemId;
+  itemAmount?: number;
+  effect?: ItemEffect;
+}
+
+export interface PetModEventDef {
+  trigger: 'daily_encounter' | 'offline' | 'sleep';
+  weight: number;
+  conditions?: PetModEventCondition;
+  rewards: PetModEventReward;
+  textKey: string;
+}
+
+export interface PetModEvents {
+  daily_encounter?: PetModEventDef[];
+  offline?: PetModEventDef[];
+  sleep?: PetModEventDef[];
+}
+
 interface PetModManifestBase {
   id: string;
   name: string;
@@ -130,11 +169,18 @@ export interface PetModManifestV2 extends PetModManifestBase {
   items?: PetModItems;
 }
 
-export type PetModManifest = PetModManifestV1 | PetModManifestV2;
+export interface PetModManifestV3 extends PetModManifestBase {
+  schemaVersion: 3;
+  items?: PetModItems;
+  activities?: PetModActivityDef[];
+  events?: PetModEvents;
+}
+
+export type PetModManifest = PetModManifestV1 | PetModManifestV2 | PetModManifestV3;
 
 export interface ParsedPetMod {
   manifest: PetModManifest;
-  petImages: Partial<Record<PetImageKey, Blob>>;
+  petImages: Record<string, Blob | undefined>;
   itemImages: Partial<Record<string, Blob>>;
   cgImages: Partial<Record<ModCgImageKey, Blob>>;
   warnings: string[];
@@ -353,14 +399,110 @@ const readV2Items = (value: unknown, modId: string): PetModItems | undefined => 
   return items.overrides || items.custom ? items : undefined;
 };
 
+const readActivityDef = (value: unknown, modId: string, index: number): PetModActivityDef => {
+  const field = 'activities[' + index + ']';
+  if (!isObject(value)) throw new Error(field + ' must be an object.');
+  const id = ensureString(value.id, field + '.id', 96) as ModActivityId;
+  const namespace = modId + ':';
+  if (!id.startsWith(namespace)) throw new Error(field + '.id must start with ' + namespace);
+  const labelKey = ensureString(value.labelKey, field + '.labelKey', 128);
+  const durationMs = typeof value.durationMs === 'number' && Number.isFinite(value.durationMs) && value.durationMs > 0
+    ? Math.trunc(value.durationMs)
+    : 4500;
+  const images = Array.isArray(value.images) ? value.images.map((img: unknown) => asTrimmedString(img, 128)).filter((s): s is string => Boolean(s)) : [];
+  return { id, labelKey, durationMs, images };
+};
+
+const readEventCondition = (value: unknown, field: string): PetModEventCondition | undefined => {
+  if (value === undefined) return undefined;
+  if (!isObject(value)) throw new Error(field + ' must be an object.');
+  const condition: PetModEventCondition = {};
+  if (value.minLevel !== undefined) {
+    if (typeof value.minLevel !== 'number' || !Number.isFinite(value.minLevel)) throw new Error(field + '.minLevel must be a number.');
+    condition.minLevel = Math.trunc(value.minLevel);
+  }
+  if (value.minHearts !== undefined) {
+    if (typeof value.minHearts !== 'number' || !Number.isFinite(value.minHearts)) throw new Error(field + '.minHearts must be a number.');
+    condition.minHearts = Math.trunc(value.minHearts);
+  }
+  if (value.requiredItemId !== undefined) {
+    condition.requiredItemId = asTrimmedString(value.requiredItemId, 96) as ItemId;
+  }
+  if (value.weather !== undefined) {
+    const w = asTrimmedString(value.weather, 16);
+    if (w && ['sunny', 'cloudy', 'rainy', 'breezy'].includes(w)) condition.weather = w as WeatherType;
+  }
+  return Object.keys(condition).length > 0 ? condition : undefined;
+};
+
+const readEventReward = (value: unknown, field: string): PetModEventReward => {
+  if (!isObject(value)) throw new Error(field + ' must be an object.');
+  const reward: PetModEventReward = {};
+  if (value.coins !== undefined) {
+    if (typeof value.coins !== 'number' || !Number.isFinite(value.coins)) throw new Error(field + '.coins must be a number.');
+    reward.coins = Math.trunc(value.coins);
+  }
+  if (value.hearts !== undefined) {
+    if (typeof value.hearts !== 'number' || !Number.isFinite(value.hearts)) throw new Error(field + '.hearts must be a number.');
+    reward.hearts = Math.trunc(value.hearts);
+  }
+  if (value.itemId !== undefined) {
+    reward.itemId = asTrimmedString(value.itemId, 96) as ItemId;
+  }
+  if (value.itemAmount !== undefined) {
+    if (typeof value.itemAmount !== 'number' || !Number.isFinite(value.itemAmount)) throw new Error(field + '.itemAmount must be a number.');
+    reward.itemAmount = Math.trunc(value.itemAmount);
+  }
+  reward.effect = readItemEffect(value.effect, field + '.effect');
+  return reward;
+};
+
+const readEventDefs = (value: unknown, field: string): PetModEventDef[] | undefined => {
+  if (!Array.isArray(value)) throw new Error(field + ' must be an array.');
+  return value.map((rawEvent, index) => {
+    const ef = field + '[' + index + ']';
+    if (!isObject(rawEvent)) throw new Error(ef + ' must be an object.');
+    const trigger = asTrimmedString(rawEvent.trigger, 20);
+    if (trigger !== 'daily_encounter' && trigger !== 'offline' && trigger !== 'sleep') {
+      throw new Error(ef + '.trigger must be daily_encounter, offline, or sleep.');
+    }
+    const weight = typeof rawEvent.weight === 'number' && Number.isFinite(rawEvent.weight) && rawEvent.weight > 0
+      ? Math.trunc(rawEvent.weight)
+      : 1;
+    const conditions = readEventCondition(rawEvent.conditions, ef + '.conditions');
+    const rewards = readEventReward(rawEvent.rewards, ef + '.rewards');
+    const textKey = ensureString(rawEvent.textKey, ef + '.textKey', 128);
+    return { trigger: trigger as PetModEventDef['trigger'], weight, conditions, rewards, textKey };
+  });
+};
+
+const readV3Events = (value: unknown): PetModEvents | undefined => {
+  if (value === undefined) return undefined;
+  if (!isObject(value)) throw new Error('events must be an object.');
+  const events: PetModEvents = {};
+  if (value.daily_encounter !== undefined) {
+    const defs = readEventDefs(value.daily_encounter, 'events.daily_encounter');
+    if (defs && defs.length > 0) events.daily_encounter = defs;
+  }
+  if (value.offline !== undefined) {
+    const defs = readEventDefs(value.offline, 'events.offline');
+    if (defs && defs.length > 0) events.offline = defs;
+  }
+  if (value.sleep !== undefined) {
+    const defs = readEventDefs(value.sleep, 'events.sleep');
+    if (defs && defs.length > 0) events.sleep = defs;
+  }
+  return Object.keys(events).length > 0 ? events : undefined;
+};
+
 export const validatePetModManifest = (value: unknown): PetModManifest => {
   if (!isObject(value)) throw new Error('manifest.json must be a JSON object.');
 
-  if (value.schemaVersion !== 1 && value.schemaVersion !== 2) {
+  if (value.schemaVersion !== 1 && value.schemaVersion !== 2 && value.schemaVersion !== 3) {
     if (typeof value.schemaVersion === 'number' && value.schemaVersion > modSchemaVersion) {
       throw new Error('This mod uses a newer schema version. Please upgrade PetPet.');
     }
-    throw new Error('manifest.json schemaVersion must be 1 or 2.');
+    throw new Error('manifest.json schemaVersion must be 1, 2, or 3.');
   }
 
   const id = ensureString(value.id, 'id', 64);
@@ -408,6 +550,18 @@ export const validatePetModManifest = (value: unknown): PetModManifest => {
     };
   }
 
+  if (value.schemaVersion === 3) {
+    return {
+      schemaVersion: 3,
+      ...common,
+      items: readV2Items(value.items, id),
+      activities: Array.isArray(value.activities)
+        ? value.activities.map((a: unknown, i: number) => readActivityDef(a, id, i))
+        : undefined,
+      events: readV3Events(value.events),
+    };
+  }
+
   return {
     schemaVersion: 1,
     ...common,
@@ -435,6 +589,20 @@ const getReferencedItemImagePaths = (manifest: PetModManifest) => {
   return paths;
 };
 
+export const getModCustomActivityPaths = (manifest: PetModManifestV3): Map<string, string> => {
+  const paths = new Map<string, string>();
+  if (manifest.schemaVersion !== 3 || !manifest.activities) return paths;
+  for (const activity of manifest.activities) {
+    for (const image of activity.images) {
+      const normalized = normalizePath(image);
+      if (normalized.startsWith('pet/') && normalized.endsWith('.png')) {
+        paths.set(normalized, activity.id);
+      }
+    }
+  }
+  return paths;
+};
+
 export const parsePetModZip = async (file: File): Promise<ParsedPetMod> => {
   if (file.size > maxZipBytes) {
     throw new Error('Mod zip is larger than 25MB. Please compress the images.');
@@ -453,11 +621,12 @@ export const parsePetModZip = async (file: File): Promise<ParsedPetMod> => {
   }
   const manifest = validatePetModManifest(rawManifest);
   const warnings: string[] = [];
-  const petImages: ParsedPetMod['petImages'] = {};
+  const petImages: Record<string, Blob | undefined> = {};
   const itemImages: ParsedPetMod['itemImages'] = {};
   const cgImages: ParsedPetMod['cgImages'] = {};
   const referencedItemImagePaths = getReferencedItemImagePaths(manifest);
-  const allowedPaths = new Set(['manifest.json', ...allowedPetPaths.keys(), ...referencedItemImagePaths.keys(), ...allowedCgPaths.keys()]);
+  const customActivityPaths = manifest.schemaVersion === 3 ? getModCustomActivityPaths(manifest) : new Map<string, string>();
+  const allowedPaths = new Set(['manifest.json', ...allowedPetPaths.keys(), ...customActivityPaths.keys(), ...referencedItemImagePaths.keys(), ...allowedCgPaths.keys()]);
 
   for (const entry of Object.values(zip.files)) {
     const path = normalizePath(entry.name);
@@ -477,6 +646,18 @@ export const parsePetModZip = async (file: File): Promise<ParsedPetMod> => {
     if (blob.size > maxImageBytes) throw new Error(path + ' is larger than 3MB.');
     if (!(await isPngBlob(blob))) throw new Error(path + ' must be a PNG image.');
     petImages[key] = blob.slice(0, blob.size, 'image/png');
+  }
+
+  for (const [path, activityId] of customActivityPaths) {
+    const entry = zip.file(path);
+    if (!entry) {
+      warnings.push('Missing ' + path + '; custom activity image will be skipped.');
+      continue;
+    }
+    const blob = await entry.async('blob');
+    if (blob.size > maxImageBytes) throw new Error(path + ' is larger than 3MB.');
+    if (!(await isPngBlob(blob))) throw new Error(path + ' must be a PNG image.');
+    petImages[activityId] = blob.slice(0, blob.size, 'image/png');
   }
 
   for (const [path, itemIds] of referencedItemImagePaths) {

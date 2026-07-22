@@ -56,7 +56,7 @@ import tree3 from './assets/tree3.png';
 import tree4 from './assets/tree4.png';
 import tree5 from './assets/tree5.png';
 import type { ActivePetMod } from './core/mod';
-import type { BuiltinItemId, PetStatus, RecentActivity } from './core/petTypes';
+import type { BuiltinItemId, PetStatus } from './core/petTypes';
 
 export const currencyIcon = coin;
 export const giftBoxIcon = itemGiftBox;
@@ -110,7 +110,7 @@ export const petStatusImages: Record<PetStatus, string> = {
   sleeping: petSleep,
 };
 
-export const petActivityImages: Partial<Record<RecentActivity, string>> = {
+export const petActivityImages: Record<string, string | undefined> = {
   happy: petHappy,
   bath: petBath,
   eat_cookie: petEatCookie,
@@ -143,7 +143,7 @@ export const resolvePetStatusImages = (mod?: ActivePetMod | null): Record<PetSta
   ...omitUndefinedValues(mod?.petImageUrls),
 });
 
-export const resolvePetActivityImages = (mod?: ActivePetMod | null): Partial<Record<RecentActivity, string>> => ({
+export const resolvePetActivityImages = (mod?: ActivePetMod | null): Record<string, string | undefined> => ({
   ...petActivityImages,
   ...omitUndefinedValues(mod?.petImageUrls),
 });
