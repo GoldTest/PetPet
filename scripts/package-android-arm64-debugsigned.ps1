@@ -142,12 +142,14 @@ $apksigner = Resolve-BuildTool $sdk 'apksigner.bat'
 $keytool = Resolve-Keytool
 $debugKeystore = Ensure-DebugKeystore $keytool
 
+$rustBuiltHere = $false
 if ($RebuildRust -or -not (Test-Path -LiteralPath $sourceSo)) {
   $previousSourceSoWriteTime = if (Test-Path -LiteralPath $sourceSo) { (Get-Item -LiteralPath $sourceSo).LastWriteTimeUtc } else { $null }
   Write-Host "Rebuilding $label Rust library and Tauri Android assets..."
   Push-Location $root
   try {
     & npm.cmd run tauri -- android build --target $tauriTarget --apk --ci
+    $rustBuiltHere = $true
     if ($LASTEXITCODE -ne 0) {
       $rebuiltSourceSo = Test-Path -LiteralPath $sourceSo
       $currentSourceSoWriteTime = if ($rebuiltSourceSo) { (Get-Item -LiteralPath $sourceSo).LastWriteTimeUtc } else { $null }
@@ -176,9 +178,13 @@ $tauriProperties = Join-Path $appDir 'tauri.properties'
 Write-Host "Android versionName: $version"
 Write-Host "Android versionCode: $androidVersionCode"
 
-New-Item -ItemType Directory -Force -Path $jniDir | Out-Null
-Copy-Item -LiteralPath $sourceSo -Destination $jniSo -Force
-Write-Host "Copied $label library: $jniSo"
+if (-not $rustBuiltHere) {
+  New-Item -ItemType Directory -Force -Path $jniDir | Out-Null
+  Copy-Item -LiteralPath $sourceSo -Destination $jniSo -Force
+  Write-Host "Copied $label library: $jniSo"
+} else {
+  Write-Host "Skipping copy of $label library: already placed by tauri android build"
+}
 
 $assembleTask = "assemble${gradleVariant}Release"
 $rustBuildTask = "rustBuild${gradleVariant}Release"
