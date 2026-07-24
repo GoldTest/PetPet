@@ -20,13 +20,19 @@ export const baseStatCap = 100;
 
 export const statCapPerLevel = 5;
 
+export const linearUpgradeHeartStartLevel = 20;
+
+export const linearUpgradeHeartBaseCost = 6900;
+
+export const linearUpgradeHeartCostPerLevel = 22;
+
 export const awakeEnergyRecoveryMs = 5 * 60 * 1000;
 
 export const breezyEnergyRecoveryMs = 4 * 60 * 1000;
 
 export const sleepEnergyRecoveryMs = 3 * 60 * 1000;
 
-export const clampStat = (value: number, max = baseStatCap) => Math.max(0, Math.min(max, Math.round(value)));
+export const clampStat = (value: number, max = baseStatCap) => Math.max(0, Math.min(max, value));
 
 export const clampHealth = (value: number, max = baseStatCap) => Math.max(1, clampStat(value, max));
 
@@ -45,7 +51,28 @@ export const clampPetStat = (pet: PetState, value: number) => clampStat(value, g
 
 export const clampPetHealth = (pet: PetState, value: number) => clampHealth(value, getPetStatCap(pet));
 
-export const getUpgradeHeartCost = (targetLevel: number) => clampLevel(targetLevel) ** 3;
+export const getPetStatScale = (petOrLevel: PetState | number) =>
+  getPetStatCap(petOrLevel) / baseStatCap;
+
+export const scalePetStatDelta = (petOrLevel: PetState | number, amount: number) =>
+  amount * getPetStatScale(petOrLevel);
+
+export const roundPetStatDisplayAmount = (amount: number) => Math.round(amount);
+
+export const getPetStatThreshold = (petOrLevel: PetState | number, baseThreshold: number) =>
+  scalePetStatDelta(petOrLevel, baseThreshold);
+
+export const getPetEnergyCap = (pet: PetState) => getPetStatCap(pet);
+
+export const clampPetEnergy = (pet: PetState, value: number) =>
+  Math.round(clampStat(value, getPetEnergyCap(pet)));
+
+export const getUpgradeHeartCost = (targetLevel: number) => {
+  const level = clampLevel(targetLevel);
+  return level < linearUpgradeHeartStartLevel
+    ? level ** 3
+    : linearUpgradeHeartBaseCost + linearUpgradeHeartCostPerLevel * (level - linearUpgradeHeartStartLevel);
+};
 
 export const getNextUpgradeHeartCost = (pet: PetState) =>
   pet.level >= maxPetLevel ? 0 : getUpgradeHeartCost(pet.level + 1);

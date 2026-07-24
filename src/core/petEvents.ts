@@ -328,6 +328,13 @@ export const resetSleepSnapshot = (pet: PetState): PetState => ({
   lastDreamTalkAt: 0,
 });
 
+export const wakePet = (pet: PetState, now: number): PetState => ({
+  ...pet,
+  isSleeping: false,
+  lastEnergyRecoveryAt: now,
+  lastUpdatedAt: now,
+});
+
 export const startSleepSnapshot = (pet: PetState, now: number): PetState => ({
   ...pet,
   sleepStartedAt: pet.sleepStartedAt > 0 ? pet.sleepStartedAt : now,
