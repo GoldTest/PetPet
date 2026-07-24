@@ -76,6 +76,54 @@ export const getRandomDailyEncounter = (name: string): DailyEncounter =>
     },
   ]);
 
+const getLevelTierDailyPool = (name: string, level: number): DailyEncounter[] => {
+  const base = getRandomDailyEncounter(name);
+  if (level < 4) return [base];
+  const tier4: DailyEncounter[] = [
+    {
+      coins: 30,
+      text: t('pet.dailyEncounter.coins', { name }),
+    },
+    {
+      itemId: 'bento',
+      itemAmount: 1,
+      text: t('pet.dailyEncounter.scaled.bento'),
+    },
+    {
+      effect: { mood: 12, energy: 5 },
+      text: t('pet.dailyEncounter.scaled.goodDay', { name }),
+    },
+    {
+      hearts: 2,
+      text: t('pet.dailyEncounter.heart', { name, hearts: '{hearts}' }),
+    },
+  ];
+  if (level < 8) return [base, ...tier4];
+  return [
+    ...tier4,
+    {
+      coins: 45,
+      text: t('pet.dailyEncounter.coins', { name }),
+    },
+    {
+      itemId: 'strawberry_cake',
+      itemAmount: 1,
+      text: t('pet.dailyEncounter.scaled.cake'),
+    },
+    {
+      effect: { mood: 16, hunger: 8, energy: 8 },
+      text: t('pet.dailyEncounter.scaled.wonderful', { name }),
+    },
+    {
+      hearts: 3,
+      text: t('pet.dailyEncounter.heart', { name, hearts: '{hearts}' }),
+    },
+  ];
+};
+
+export const getRandomDailyEncounterScaled = (pet: PetState): DailyEncounter =>
+  pickRandom(getLevelTierDailyPool(pet.name, pet.level));
+
 export const getRandomOfflineDiary = (name: string, weather: WeatherType) => pick(`pet.offlineDiary.${weather}`, { name });
 
 export const getRandomOfflineEvent = (name: string, weather: WeatherType): TimedEvent =>
@@ -110,6 +158,50 @@ export const getRandomOfflineEvent = (name: string, weather: WeatherType): Timed
       text: t('pet.offlineEvent.mess', { name }),
     },
   ]);
+
+const getLevelTierOfflinePool = (name: string, weather: WeatherType, level: number): TimedEvent[] => {
+  const base = getRandomOfflineEvent(name, weather);
+  if (level < 4) return [base];
+  const tier4: TimedEvent[] = [
+    {
+      coins: 22,
+      text: t('pet.offlineEvent.coins', { name }),
+    },
+    {
+      itemId: 'apple',
+      itemAmount: 1,
+      text: t('pet.offlineEvent.scaled.fruit'),
+    },
+    {
+      effect: { mood: 8, energy: 4 },
+      text: t('pet.offlineEvent.scaled.stroll', { name }),
+    },
+  ];
+  if (level < 8) return [base, ...tier4];
+  return [
+    ...tier4,
+    {
+      coins: 35,
+      text: t('pet.offlineEvent.coins', { name }),
+    },
+    {
+      itemId: 'nutri_meal',
+      itemAmount: 1,
+      text: t('pet.offlineEvent.scaled.meal'),
+    },
+    {
+      effect: { mood: 12, health: 2 },
+      text: t('pet.offlineEvent.scaled.adventure', { name }),
+    },
+    {
+      hearts: 2,
+      text: t('pet.offlineEvent.heart', { name, hearts: '{hearts}' }),
+    },
+  ];
+};
+
+export const getRandomOfflineEventScaled = (pet: PetState, weather: WeatherType): TimedEvent =>
+  pickRandom(getLevelTierOfflinePool(pet.name, weather, pet.level));
 
 export const getRandomDreamEvent = (name: string): TimedEvent =>
   pickRandom([
@@ -173,7 +265,7 @@ const pickWeighted = <T extends { weight?: number }>(items: T[]): T | undefined 
 };
 
 export const getRandomDailyEncounterWithMod = (pet: PetState): DailyEncounter | TimedEvent => {
-  const builtin = getRandomDailyEncounter(pet.name);
+  const builtin = getRandomDailyEncounterScaled(pet);
   const eligible = getEligibleModEvents(pet, 'daily_encounter');
   if (eligible.length === 0) return builtin;
   const modEvents: (DailyEncounter & { weight: number })[] = eligible.map((def) => ({
@@ -189,7 +281,7 @@ export const getRandomDailyEncounterWithMod = (pet: PetState): DailyEncounter | 
 };
 
 export const getRandomOfflineEventWithMod = (pet: PetState, weather: WeatherType): TimedEvent => {
-  const builtin = getRandomOfflineEvent(pet.name, weather);
+  const builtin = getRandomOfflineEventScaled(pet, weather);
   const eligible = getEligibleModEvents(pet, 'offline');
   if (eligible.length === 0) return builtin;
   const modEvents: (TimedEvent & { weight: number })[] = eligible.map((def) => ({

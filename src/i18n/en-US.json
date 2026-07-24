@@ -954,6 +954,12 @@
       "nightmare": "{name} had a tiny bad dream, mood -5.",
       "heart": "{name} received a small sticker, hearts +{hearts}."
     },
+    "scaled": {
+      "bento": "A neighbor shared a bento box, inventory +1.",
+      "goodDay": "{name} had a wonderful day playing, mood +12, energy +5.",
+      "cake": "A friend left a strawberry cake, inventory +1.",
+      "wonderful": "{name} had a fantastic day, mood +16, hunger +8, energy +8."
+    },
     "offlineDiary": {
       "sunny": [
         "{name} napped in the sun and looked for you with sleepy eyes.",
@@ -981,6 +987,13 @@
       "hungryHappy": "{name} got a little hungry waiting, but was happy to see you, hunger -4, mood +4.",
       "rest": "{name} rested calmly for a while, energy +8.",
       "mess": "{name} turned the corner into a mess, cleanliness -5."
+    },
+    "scaled": {
+      "fruit": "A small fruit was left by the window, inventory +1.",
+      "stroll": "{name} went for a quiet stroll and returned relaxed, mood +8, energy +4.",
+      "meal": "A nutritious meal was delivered, inventory +1.",
+      "adventure": "{name} found a little adventure, mood +12, health +2.",
+      "heart": "{name} received hearts from a passerby, hearts +{hearts}."
     },
     "sleepSettlement": {
       "tooShort": "{name} woke soon after lying down, a little groggy, mood -1.",
