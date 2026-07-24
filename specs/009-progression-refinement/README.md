@@ -1,5 +1,5 @@
 ---
-status: planned
+status: in-progress
 created: 2026-07-24
 priority: medium
 tags:
@@ -7,7 +7,7 @@ tags:
   - reference-approach
   - upstream-analysis
 created_at: 2026-07-24T21:00:00Z
-updated_at: 2026-07-24T21:00:00Z
+updated_at: 2026-07-24T23:00:00Z
 ---
 
 # Progression 精炼（参考上游思路）
@@ -33,11 +33,11 @@ updated_at: 2026-07-24T21:00:00Z
 
 ## Requirements
 
-- [ ] 分析上游 progression 精炼的设计思路
-- [ ] 评估哪些精炼点适用于 PetPet 当前架构
-- [ ] 借鉴日期奖励和花园系统的改进思路（排除抽卡相关）
-- [ ] 在不引入 Gacha/终极系统的前提下精炼进度逻辑
-- [ ] 确保与现有 Partner Schedule 系统兼容
+- [x] 分析上游 progression 精炼的设计思路
+- [x] 评估哪些精炼点适用于 PetPet 当前架构
+- [x] 借鉴日期奖励和花园系统的改进思路（排除抽卡相关）
+- [x] 在不引入 Gacha/终极系统的前提下精炼进度逻辑
+- [x] 确保与现有 Partner Schedule 系统兼容
 
 ## Non-Goals
 
