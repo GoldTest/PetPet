@@ -1,0 +1,51 @@
+{
+  "//": "AI 快查表：天气定义 | 来源：weather.ts, petActions.ts 中的天气效果",
+  "weather": [
+    {
+      "id": "sunny",
+      "labelKey": "pet.weather.sunny.label",
+      "summaryKey": "pet.weather.sunny.summary",
+      "effects": {
+        "playHappinessBonus": 2,
+        "workGoldPenalty": 0,
+        "cleanBonus": 0,
+        "energyRecoveryMs": 300000
+      }
+    },
+    {
+      "id": "cloudy",
+      "labelKey": "pet.weather.cloudy.label",
+      "summaryKey": "pet.weather.cloudy.summary",
+      "effects": {
+        "playHappinessBonus": 0,
+        "workGoldPenalty": 0,
+        "cleanBonus": 5,
+        "energyRecoveryMs": 300000
+      }
+    },
+    {
+      "id": "rainy",
+      "labelKey": "pet.weather.rainy.label",
+      "summaryKey": "pet.weather.rainy.summary",
+      "effects": {
+        "playHappinessBonus": 0,
+        "workGoldPenalty": -4,
+        "workEnergyCost": -10,
+        "cleanBonus": 5,
+        "energyRecoveryMs": 300000
+      }
+    },
+    {
+      "id": "breezy",
+      "labelKey": "pet.weather.breezy.label",
+      "summaryKey": "pet.weather.breezy.summary",
+      "effects": {
+        "playHappinessBonus": 0,
+        "workGoldPenalty": 0,
+        "workEnergyCost": -10,
+        "cleanBonus": 0,
+        "energyRecoveryMs": 240000
+      }
+    }
+  ]
+}

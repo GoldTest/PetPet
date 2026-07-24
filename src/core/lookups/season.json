@@ -1,0 +1,57 @@
+{
+  "//": "AI 快查表：季节定义 | 来源：season.ts",
+  "seasons": [
+    {
+      "id": "spring",
+      "labelKey": "pet.season.spring.label",
+      "summaryKey": "pet.season.spring.summary",
+      "months": [3, 4, 5],
+      "effects": {
+        "moodDecayModifier": 0.9,
+        "cleanlinessDecayModifier": 1.0,
+        "cleanActionBonus": 0,
+        "workCoinBonus": 0,
+        "energyRecoveryModifier": 1.0
+      }
+    },
+    {
+      "id": "summer",
+      "labelKey": "pet.season.summer.label",
+      "summaryKey": "pet.season.summer.summary",
+      "months": [6, 7, 8],
+      "effects": {
+        "moodDecayModifier": 1.0,
+        "cleanlinessDecayModifier": 1.08,
+        "cleanActionBonus": 3,
+        "workCoinBonus": 0,
+        "energyRecoveryModifier": 1.0
+      }
+    },
+    {
+      "id": "autumn",
+      "labelKey": "pet.season.autumn.label",
+      "summaryKey": "pet.season.autumn.summary",
+      "months": [9, 10, 11],
+      "effects": {
+        "moodDecayModifier": 1.0,
+        "cleanlinessDecayModifier": 1.0,
+        "cleanActionBonus": 0,
+        "workCoinBonus": 2,
+        "energyRecoveryModifier": 1.0
+      }
+    },
+    {
+      "id": "winter",
+      "labelKey": "pet.season.winter.label",
+      "summaryKey": "pet.season.winter.summary",
+      "months": [12, 1, 2],
+      "effects": {
+        "moodDecayModifier": 1.0,
+        "cleanlinessDecayModifier": 1.0,
+        "cleanActionBonus": 0,
+        "workCoinBonus": 0,
+        "energyRecoveryModifier": 0.9
+      }
+    }
+  ]
+}

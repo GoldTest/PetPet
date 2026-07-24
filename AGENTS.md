@@ -38,6 +38,7 @@
 | Path | Purpose |
 |------|---------|
 | `src/` | Frontend source (React/TSX components, game logic, i18n, CSS) |
+| `src/core/lookups/` | AI 全局快查表（状态、事件、物品、天气、季节、可操作事件） |
 | `src/core/` | Pure game logic modules (no UI imports) |
 | `src/ui/` | React UI components |
 | `src/styles/` | CSS modules (design tokens, base, component styles) |
@@ -161,6 +162,27 @@
 | `src/platform/` | Tauri APIs, browser APIs | Game logic |
 | `src/mods/` | Nothing (self-contained packs) | N/A |
 <!-- AGENTS-GENERATED:END module-boundaries -->
+
+## 全局快查表 (Global Quick Reference Tables)
+<!-- AGENTS-GENERATED:START global-lookups -->
+`src/core/lookups/` 存放 6 张快查表，专为 AI 设计（纯结构化数据，非人类可读优化）：
+
+| 表 | 文件 | 内容 | 来源 |
+|---|------|------|------|
+| 状态表 | `status.ts` | 7 种宠物状态的阈值、效果、解除方式 | petTypes.ts, petState.ts |
+| 事件表 | `events.ts` | 所有事件类型（每日遭遇、离线、梦境、睡眠结算、动作溢出、健康意外） | petEvents.ts, petCommon.ts |
+| 物品表 | `items.json` | 32 种物品的价格、效果、分类、标签 | items.ts |
+| 天气表 | `weather.json` | 4 种天气的效果修正（心情、工作、清洁、能量恢复） | weather.ts, petActions.ts |
+| 季节表 | `season.json` | 4 个季节的月份范围、属性衰减/加成倍率 | season.ts |
+| 可操作事件表 | `actions.ts` | 所有玩家动作的定义、效果、冷却、前提条件 | petActions.ts, petTypes.ts |
+| 统一导出 | `index.ts` | 重导出所有表，供 AI 统一引用 | - |
+
+**AI 读写规范：**
+- 读取：`import { STATUS_TABLE } from './lookups/status'` 或 `import items from './lookups/items.json'`
+- 写入：直接编辑对应 TS/JSON 文件，遵循现有数据结构
+- 新增表：在 `lookups/` 下创建文件，在 `index.ts` 中导出
+- 数据来源以最新代码为准，快查表应同步更新
+<!-- AGENTS-GENERATED:END global-lookups -->
 
 ## Codebase State
 <!-- AGENTS-GENERATED:START codebase-state -->
