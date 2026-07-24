@@ -38,12 +38,6 @@ const getModIdFromPath = (path: string): string | null => {
   return match?.[1] ?? null;
 };
 
-const getImageKeyFromPath = (path: string): string | null => {
-  const name = path.split('/').pop();
-  if (!name) return null;
-  return name.replace(/\.png$/i, '');
-};
-
 const createBuiltinModEntry = (dir: string): BuiltinModEntry | null => {
   const manifestPath = `../mods/${dir}/manifest.json`;
   const rawManifest = manifestModules[manifestPath];
@@ -104,13 +98,7 @@ export const getBuiltinMods = (): BuiltinModEntry[] => {
 };
 
 export const getBuiltinMod = (dir: string): BuiltinModEntry | null => {
-  return getBuiltinMods().find((m) => {
-    const builtinDir = Object.keys(manifestModules).find((path) => {
-      const d = getModIdFromPath(path);
-      return d === dir && manifestModules[path];
-    });
-    return Boolean(builtinDir);
-  }) ?? null;
+  return getBuiltinMods().find((entry) => entry.manifest.id === dir) ?? null;
 };
 
 export const buildActivePetModFromBuiltin = (builtin: BuiltinModEntry): ActivePetMod => ({

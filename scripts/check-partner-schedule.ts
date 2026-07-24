@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import { buyItem, interactWithPet, upgradePet, useInventoryItem, applyPetAction } from '../src/core/petActions';
+import { buyItem, interactWithPet, upgradePet, consumeInventoryItem, applyPetAction } from '../src/core/petActions';
 import { achievementDefinitions, claimAchievementReward, evaluateAchievements, getAchievementEffects, taskMasterCompletionRatio } from '../src/core/achievements';
 import { claimDailyWishReward, getDailyWishView } from '../src/core/dailyWishes';
 import { advancePet } from '../src/core/petLifecycle';
@@ -215,7 +215,7 @@ assert(pomodoroAdvanced.pomodoro.sessionFocusMs > 0, 'Pomodoro should continue i
 const blockedAction = applyPetAction(started, 'clean', now + minuteMs);
 assert.equal(blockedAction.cleanliness, started.cleanliness, 'cleaning should be blocked in core');
 assert(blockedAction.partnerSchedule.active, 'blocked care should not cancel the schedule');
-const blockedItem = useInventoryItem(started, 'emergency_biscuit', now + minuteMs);
+const blockedItem = consumeInventoryItem(started, 'emergency_biscuit', now + minuteMs);
 assert.deepEqual(blockedItem.inventory, started.inventory, 'item use should be blocked in core');
 const blockedTouch = interactWithPet(started, now + minuteMs);
 assert.equal(blockedTouch.lastPetInteractionAt, started.lastPetInteractionAt, 'pet touch should be blocked in core');
@@ -316,11 +316,11 @@ const foodTestPet = {
   health: 20,
   inventory: { emergency_biscuit: 1, golden_apple: 1 },
 };
-const normalFoodUse = useInventoryItem(foodTestPet, 'emergency_biscuit', now);
-const cookingMasterFoodUse = useInventoryItem(withCategorySkill(foodTestPet, 'cooking', skill(10)), 'emergency_biscuit', now);
+const normalFoodUse = consumeInventoryItem(foodTestPet, 'emergency_biscuit', now);
+const cookingMasterFoodUse = consumeInventoryItem(withCategorySkill(foodTestPet, 'cooking', skill(10)), 'emergency_biscuit', now);
 assert(cookingMasterFoodUse.hunger > normalFoodUse.hunger, 'cooking mastery should improve normal food effects');
-const normalGoldenAppleUse = useInventoryItem(foodTestPet, 'golden_apple', now);
-const cookingGoldenAppleUse = useInventoryItem(withCategorySkill(foodTestPet, 'cooking', skill(10)), 'golden_apple', now);
+const normalGoldenAppleUse = consumeInventoryItem(foodTestPet, 'golden_apple', now);
+const cookingGoldenAppleUse = consumeInventoryItem(withCategorySkill(foodTestPet, 'cooking', skill(10)), 'golden_apple', now);
 assert.equal(cookingGoldenAppleUse.hunger, normalGoldenAppleUse.hunger, 'golden apple fixed effects must ignore cooking mastery');
 
 const gardenTestPet = {

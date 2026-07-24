@@ -311,7 +311,7 @@ export const buyItem = (pet: PetState, itemId: ItemId, now = Date.now(), options
   }, price > 0);
 };
 
-export const useInventoryItem = (
+export const consumeInventoryItem = (
   pet: PetState,
   itemId: ItemId,
   now = Date.now(),

@@ -1,6 +1,8 @@
 export type SaveTextFileResult = 'saved' | 'cancelled' | 'downloaded';
 
-const invalidFileNameCharacters = /[<>:"/\\|?*\u0000-\u001f]/g;
+const invalidFileNameCharacters = /[<>:"/\\|?*]/g;
+const replaceControlCharacters = (value: string) =>
+  Array.from(value, (character) => character.charCodeAt(0) < 32 || character.charCodeAt(0) === 127 ? '_' : character).join('');
 
 export const createSaveFileName = (petName: string, now = Date.now()) => {
   const date = new Date(now);
@@ -9,9 +11,10 @@ export const createSaveFileName = (petName: string, now = Date.now()) => {
     String(date.getMonth() + 1).padStart(2, '0'),
     String(date.getDate()).padStart(2, '0'),
   ].join('-');
-  const safePetName = petName
+  const cleanPetName = petName
     .normalize('NFKC')
-    .replace(invalidFileNameCharacters, '_')
+    .replace(invalidFileNameCharacters, '_');
+  const safePetName = replaceControlCharacters(cleanPetName)
     .replace(/\s+/g, ' ')
     .trim()
     .slice(0, 48) || 'PetPet';

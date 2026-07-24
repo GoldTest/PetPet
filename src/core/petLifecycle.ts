@@ -1,11 +1,10 @@
 import { t } from '../i18n';
-import { getDailyResetDateKey, normalizeLegacyDailyDateKey } from './dailyReset';
 import { ensureDailyWishForDate, maybeCreateReturnWelcome, returnWelcomeMinAwayMs } from './dailyWishes';
 import { getAchievementEffects, incrementAchievementPomodoroFocus, incrementNaturalWake, recordEarnedCoins } from './achievements';
 import { advanceGarden } from './garden';
 import { dailyBiscuitClaimLimit } from './items';
-import { applyTimedEvent, getRandomDailyEncounterWithMod, getRandomOfflineDiary, getRandomOfflineEventWithMod, maybeApplyDreamTalk, resetSleepSnapshot, settleSleep, startSleepSnapshot, wakePet } from './petEvents';
-import { clampCoins, clampCount, clampPetEnergy, clampPetHealth, clampPetStat, criticalHungerActionThreshold, getEnergyRecoveryIntervalMs, getPetEnergyCap, getPetStatCap, getPetStatThreshold, lowEnergyThreshold, roundPetStatDisplayAmount, scalePetStatDelta } from './petStats';
+import { applyTimedEvent, getRandomDailyEncounterWithMod, getRandomOfflineDiary, getRandomOfflineEventWithMod, maybeApplyDreamTalk, settleSleep, startSleepSnapshot } from './petEvents';
+import { clampCoins, clampCount, clampPetHealth, clampPetStat, criticalHungerActionThreshold, getEnergyRecoveryIntervalMs, getPetEnergyCap, getPetStatCap, getPetStatThreshold, lowEnergyThreshold, roundPetStatDisplayAmount, scalePetStatDelta } from './petStats';
 import type { PetState } from './petTypes';
 import {
   getDefaultPomodoroRemainingMs,
@@ -363,8 +362,8 @@ export const advancePet = (pet: PetState, now = Date.now()): PetState => {
   const wokeUp = currentForActivity.isSleeping && energy >= statCap && !keepSleepingAtNight;
 
   let recentEvent = currentForActivity.recentEvent;
-  let recentActivity = currentForActivity.recentActivityUntil > now ? currentForActivity.recentActivity : 'idle';
-  let recentActivityUntil = currentForActivity.recentActivityUntil > now ? currentForActivity.recentActivityUntil : 0;
+  const recentActivity = currentForActivity.recentActivityUntil > now ? currentForActivity.recentActivity : 'idle';
+  const recentActivityUntil = currentForActivity.recentActivityUntil > now ? currentForActivity.recentActivityUntil : 0;
   const offlineDiaryDue = !currentForActivity.pomodoro.isRunning && lifecycleDeltaMs >= 30 * 60 * 1000;
   const offlineEventDue = !currentForActivity.pomodoro.isRunning && lifecycleDeltaMs >= 2 * 60 * 60 * 1000;
   if (wokeUp) {

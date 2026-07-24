@@ -1,16 +1,18 @@
 ---
-status: planned
+status: in-progress
 created: 2026-07-24
 priority: medium
 tags:
-  - lifecycle
-  - hardening
-  - reference-approach
-  - stability
+- lifecycle
+- hardening
+- reference-approach
+- stability
 created_at: 2026-07-24T21:00:00Z
-updated_at: 2026-07-24T21:00:00Z
+updated_at: 2026-07-24T13:06:24.057731800Z
+transitions:
+- status: in-progress
+  at: 2026-07-24T13:05:27.016804600Z
 ---
-
 # Lifecycle 加固（参考上游思路）
 
 ## Overview
@@ -41,17 +43,22 @@ updated_at: 2026-07-24T21:00:00Z
 
 ## Requirements
 
-- [ ] 分析上游 lifecycle 加固的设计思路
-- [ ] 评估时序优化对 PetPet 现有存档系统的影响
-- [ ] 增强存档恢复逻辑，提升崩溃后状态一致性
-- [ ] 优化动作冷却与交互缩放逻辑
-- [ ] 确保生命周期阶段转换的稳定性和可预测性
+- [x] Replace getLocalDateKey with getEffectiveDailyDateKey in petLifecycle
+- [x] Add getPetEnergyCap + getPetStatThreshold + scalePetStatDelta imports from petStats
+- [x] Add resetSleepSnapshot + wakePet to petEvents imports
+- [ ] Add canClaimBoostCardDailyReward import from boostCards
+- [x] Add roundPetStatDisplayAmount for display rounding
+- [ ] Refine advancePet loop with clock reconciliation and slice-based advancement
+- [ ] Enhance save recovery logic in saveCodec.ts
+- [ ] Add normalizeLegacyDailyDateKey for legacy compat
+- [ ] Remove Gacha-related imports (goldenAppleGacha)
+- [ ] Remove neighborGiftDailyLimit import (neighbors.ts not present yet)
 
 ## Non-Goals
 
-- 不引入抽卡/终极系统
-- 不改变 PetPet 现有的存档数据格式（保持向后兼容）
-- 不引入上游未经验证的新机制
+- 不引入抽卡相关导入（goldenAppleGachaDailyTicketLimit, resolveDailyGachaTicket）
+- 不引入 neighborGiftDailyLimit（neighbors.ts 尚未实现）
+- 不改变 PetPet 现有的存档数据格式
 
 ## Technical Notes
 

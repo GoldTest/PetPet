@@ -105,7 +105,7 @@ const unprotectSaveFileText = (text: string) => {
   const payload = body.slice(separatorIndex + 1);
   if (!/^[0-9a-f]{8}$/.test(expectedChecksum) || !payload) throw new Error('Save text is damaged.');
 
-  let plainText = '';
+  let plainText: string;
   try {
     plainText = textDecoder.decode(transformSaveBytes(base64UrlToBytes(payload)));
   } catch {

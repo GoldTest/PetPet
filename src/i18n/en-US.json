@@ -77,7 +77,7 @@
         "aria": "Heart exchange",
         "rate": "1 heart = {coins} coins",
         "progress": "Today {count}/{limit}",
-        "button": "Exchange +{coins}"
+        "button": "Exchange"
       }
     },
     "settings": {
@@ -251,6 +251,8 @@
       "gardenHint": "Grow trees",
       "gardenReady": "Ready to harvest",
       "gardenWithered": "Withered tree",
+      "shop": "Shop",
+      "shopHint": "Daily deals",
       "partnerSchedule": "Partner Schedule",
       "partnerScheduleHint": "Plan today's activities",
       "partnerScheduleLocked": "Unlocks at Lv.{level}",

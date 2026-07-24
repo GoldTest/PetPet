@@ -1,4 +1,4 @@
-import { PackagePlus, Trash2, Upload, X } from 'lucide-react';
+import { PackagePlus, Trash2 } from 'lucide-react';
 import { useRef, useState, type ChangeEvent } from 'react';
 import { resolvePetStatusImages } from '../assets';
 import type { ActivePetMod } from '../core/mod';

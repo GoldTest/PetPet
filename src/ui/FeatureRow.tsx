@@ -1,4 +1,4 @@
-import { BadgeCheck, CalendarClock, PackageOpen, Sprout, Timer } from 'lucide-react';
+import { BadgeCheck, CalendarClock, PackageOpen, Sprout, Store, Timer } from 'lucide-react';
 import { canClaimBoostCardDailyCoins, getActiveBoostCard, partnerScheduleUnlockLevel, type PetState } from '../core/pet';
 import { t } from '../i18n';
 import { formatPomodoroTime } from './time';
@@ -10,10 +10,12 @@ interface FeatureRowProps {
   pomodoroRemainingMs: number;
   pomodoroStartTitle?: string;
   gardenReminder?: 'ready' | 'withered';
+  hasShopDiscount: boolean;
   onOpenInventory: () => void;
   onOpenPomodoro: () => void;
   onOpenGarden: () => void;
   onOpenBoostCards: () => void;
+  onOpenShop: () => void;
   onOpenPartnerSchedule: () => void;
 }
 
@@ -24,10 +26,12 @@ export const FeatureRow = ({
   pomodoroRemainingMs,
   pomodoroStartTitle,
   gardenReminder,
+  hasShopDiscount,
   onOpenInventory,
   onOpenPomodoro,
   onOpenGarden,
   onOpenBoostCards,
+  onOpenShop,
   onOpenPartnerSchedule,
 }: FeatureRowProps) => {
   const activeBoostCardId = getActiveBoostCard(pet);
@@ -61,21 +65,6 @@ export const FeatureRow = ({
 
       <button
         type="button"
-        className={pet.pomodoro.isRunning ? 'feature-button feature-button--pomodoro feature-button--active' : 'feature-button feature-button--pomodoro'}
-        title={pomodoroStartTitle}
-        aria-pressed={isPomodoroOpen}
-        onClick={onOpenPomodoro}
-      >
-        <Timer size={20} aria-hidden="true" />
-        <span>
-          {t('ui.features.pomodoro')}
-          <small>{pet.pomodoro.isRunning ? t('ui.pomodoro.running') : formatPomodoroTime(pomodoroRemainingMs)}</small>
-        </span>
-        {pet.pomodoro.isRunning && <i aria-hidden="true" />}
-      </button>
-
-      <button
-        type="button"
         className={canClaimBoostCoins ? 'feature-button feature-button--boost-card feature-button--active' : 'feature-button feature-button--boost-card'}
         onClick={onOpenBoostCards}
         title={t('ui.top.openBoostCards')}
@@ -99,6 +88,34 @@ export const FeatureRow = ({
           <small>{gardenHint}</small>
         </span>
         {gardenReminder && <i aria-hidden="true" />}
+      </button>
+
+      <button
+        type="button"
+        className={pet.pomodoro.isRunning ? 'feature-button feature-button--pomodoro feature-button--active' : 'feature-button feature-button--pomodoro'}
+        title={pomodoroStartTitle}
+        aria-pressed={isPomodoroOpen}
+        onClick={onOpenPomodoro}
+      >
+        <Timer size={20} aria-hidden="true" />
+        <span>
+          {t('ui.features.pomodoro')}
+          <small>{pet.pomodoro.isRunning ? t('ui.pomodoro.running') : formatPomodoroTime(pomodoroRemainingMs)}</small>
+        </span>
+        {pet.pomodoro.isRunning && <i aria-hidden="true" />}
+      </button>
+
+      <button
+        type="button"
+        className="feature-button feature-button--shop"
+        onClick={onOpenShop}
+      >
+        <Store size={20} aria-hidden="true" />
+        <span>
+          {t('ui.features.shop')}
+          <small>{t('ui.features.shopHint')}</small>
+        </span>
+        {hasShopDiscount && <i aria-hidden="true" />}
       </button>
 
       <button

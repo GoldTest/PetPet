@@ -4,7 +4,6 @@ import { currencyIcon, giftBoxIcon, treeStageImages } from '../assets';
 import {
   gardenFertilizerItemIds,
   gardenNutrientItemId,
-  gardenSlotCount,
   gardenSlotUnlockCosts,
   gardenToolIds,
   gardenTreeDefinitions,
@@ -87,7 +86,6 @@ export const GardenPage = ({ pet, itemIconMap, onBack, onUnlockSlot, onPlantTree
   const activeSlotIndex = selectedSlot !== null && selectedSlot < view.garden.slots.length ? selectedSlot : view.garden.slots.findIndex((s) => s.state === 'ready' || s.treeId);
   const slot = view.garden.slots[activeSlotIndex >= 0 ? activeSlotIndex : 0];
   const slotView = activeSlotIndex >= 0 ? view.slotViews[activeSlotIndex] : view.slotViews[0];
-  const treeImage = slot && slot.treeId ? treeStageImages[Math.max(0, Math.min(4, getGardenStage(slot, now) - 1))] : undefined;
   const unlockCost = slot ? gardenSlotUnlockCosts[slot.slotIndex] ?? 0 : 0;
   const clearCost = getGardenClearCost(pet.garden.tools);
   const wateredToday = sameGardenDate(slot.lastWateredAt);

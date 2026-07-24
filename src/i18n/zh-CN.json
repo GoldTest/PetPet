@@ -77,7 +77,7 @@
         "aria": "小心心兑换",
         "rate": "1 小心心 = {coins} 金币",
         "progress": "今日已兑换 {count}/{limit}",
-        "button": "兑换 +{coins} 金币"
+        "button": "兑换"
       }
     },
     "settings": {
@@ -251,6 +251,8 @@
       "gardenHint": "种下与收获",
       "gardenReady": "有树可收获",
       "gardenWithered": "有枯树待清理",
+      "shop": "商店",
+      "shopHint": "每日特价",
       "partnerSchedule": "伙伴日程",
       "partnerScheduleHint": "安排今天的活动",
       "partnerScheduleLocked": "Lv.{level} 解锁",

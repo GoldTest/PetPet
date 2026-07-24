@@ -2,10 +2,10 @@ import { pick, t } from '../i18n';
 import { applyHeartGain, recordEarnedCoins, recordEarnedHearts } from './achievements';
 import { addInventoryItem } from './items';
 import { createNeighborGift } from './neighborGifts';
-import { clampCoins, clampCount, clampPetHealth, clampPetStat } from './petStats';
+import { clampCoins, clampPetHealth, clampPetStat } from './petStats';
 import type { ItemEffect, ItemId, NeighborEventContext, PetState, WeatherType } from './petTypes';
 import type { PetModEventDef, PetModEvents } from './mod';
-import { hashString, pickRandom, randomInt } from './utils';
+import { hashString, pickRandom } from './utils';
 
 export interface DailyEncounter {
   kind?: 'neighbor_gift';
@@ -27,7 +27,7 @@ export interface TimedEvent {
   text: string;
 }
 
-export const getNeighborGiftEvent = (context: NeighborEventContext | undefined, key: 'dailyEncounter' | 'offlineEvent'): TimedEvent => {
+export const getNeighborGiftEvent = (context: NeighborEventContext | undefined, _key: 'dailyEncounter' | 'offlineEvent'): TimedEvent => {
   const { neighborName, gift } = createNeighborGift(context);
   return {
     kind: 'neighbor_gift',

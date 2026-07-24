@@ -3,6 +3,7 @@ import { Heart, Layers, Settings, Trophy, Volume2, VolumeX } from 'lucide-react'
 import {
   buyBoostCard,
   claimBoostCardDailyCoins,
+  getDailyShopDiscountInfo,
   getGardenReminder,
   cancelPartnerSchedule,
   claimPartnerScheduleResult,
@@ -21,7 +22,6 @@ import {
   getAchievementSummary,
   incrementModSwitchCount,
   gardenCompensationCoins,
-  gardenCompensationRewardId,
   getNextUpgradeHeartCost,
   getInventoryItem,
   getInventoryDefinitions,
@@ -43,7 +43,7 @@ import {
   startPartnerSchedule,
   updatePomodoroSettings,
   upgradePet,
-  useInventoryItem,
+  consumeInventoryItem,
   withBackfilledBirthday,
   withPetIdentityBirthday,
   type AchievementId,
@@ -229,7 +229,6 @@ const PetApp = ({ initialPet, initialActiveMod, onResetToPicker }: PetAppProps) 
   const refreshStoredMods = () => {
     const entries = listStoredMods();
     const builtinMods = getBuiltinMods();
-    const importedIds = new Set(entries.map((e) => e.manifest.id));
     const infos: StoredModInfo[] = [];
 
     for (const bm of builtinMods) {
@@ -312,10 +311,6 @@ const PetApp = ({ initialPet, initialActiveMod, onResetToPicker }: PetAppProps) 
   const displayShopItems = useMemo(() => getShopDefinitions(itemRegistry), [itemRegistry]);
   const getStatusLabel = (status: PetStatus) => getModStatusText(activeMod, status) ?? t(`pet.status.${status}`);
   const ownedItems = displayInventoryItems;
-  const visibleShopItems = useMemo(
-    () => displayShopItems.filter((item) => item.kind === activeShopCategory),
-    [activeShopCategory, displayShopItems],
-  );
   const isLowEnergy = isPetLowEnergy(pet);
   const isCriticallyHungry = isPetCriticallyHungry(pet);
   const nextUpgradeCost = getNextUpgradeHeartCost(pet);
@@ -334,6 +329,8 @@ const PetApp = ({ initialPet, initialActiveMod, onResetToPicker }: PetAppProps) 
   const achievementSummary = getAchievementSummary(pet);
   const hasAchievementNotice = achievementSummary.pendingReviewNotice || achievementSummary.claimable > 0;
   const gardenReminder = getGardenReminder(pet);
+  const shopDiscountInfo = getDailyShopDiscountInfo(pet);
+  const hasShopDiscount = Boolean(shopDiscountInfo && shopDiscountInfo.items.some((item) => !item.used));
 
   const playAfterUnlock = (id: SfxId) => {
     void unlockAudio().then(() => playSfx(id));
@@ -453,7 +450,7 @@ const PetApp = ({ initialPet, initialActiveMod, onResetToPicker }: PetAppProps) 
       const beforeCount = getInventoryCount(current, itemId);
       const displayItem = getDisplayItem(displayInventoryItems, itemId);
       const item = getItemDefinition(itemRegistry, itemId);
-      const next = useInventoryItem(current, itemId, Date.now(), {
+      const next = consumeInventoryItem(current, itemId, Date.now(), {
         favoriteFoodIds: getModFavoriteFoodIds(activeMod),
         favoriteText: (amount) => formatFavoriteFoodText(activeMod, amount),
         itemName: displayItem?.displayName,
@@ -684,7 +681,7 @@ const PetApp = ({ initialPet, initialActiveMod, onResetToPicker }: PetAppProps) 
       const beforeCount = getInventoryCount(current, foodItem.id);
       const displayItem = getDisplayItem(displayInventoryItems, foodItem.id);
       const item = getItemDefinition(itemRegistry, foodItem.id);
-      const next = useInventoryItem(current, foodItem.id, Date.now(), {
+      const next = consumeInventoryItem(current, foodItem.id, Date.now(), {
         favoriteFoodIds: getModFavoriteFoodIds(activeMod),
         favoriteText: (amount) => formatFavoriteFoodText(activeMod, amount),
         itemName: displayItem?.displayName,
@@ -1142,6 +1139,7 @@ const PetApp = ({ initialPet, initialActiveMod, onResetToPicker }: PetAppProps) 
           petStatusImages={petStatusImageMap}
           petActivityImages={petActivityImageMap}
           getStatusLabel={getStatusLabel}
+          hasShopDiscount={hasShopDiscount}
           onInteract={handleInteract}
           onUpgrade={handleUpgrade}
           onDailyWish={handleDailyWishButton}
@@ -1150,6 +1148,7 @@ const PetApp = ({ initialPet, initialActiveMod, onResetToPicker }: PetAppProps) 
           onOpenPomodoro={handleOpenPomodoro}
           onOpenGarden={handleOpenGarden}
           onOpenBoostCards={handleOpenBoostCards}
+          onOpenShop={handleOpenShop}
           onOpenPartnerSchedule={handleOpenPartnerSchedule}
           onAction={handleAction}
         />

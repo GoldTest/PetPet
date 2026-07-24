@@ -1,5 +1,3 @@
-import type { PetState } from './petTypes';
-
 export const dailyResetHour = 5;
 
 export const getDailyResetDateKey = (time: number) => {

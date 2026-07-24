@@ -114,7 +114,7 @@ export {
   selectGardenSlot,
   unlockGardenSlot,
   upgradeGardenTool,
-  useGardenNutrient,
+  applyGardenNutrient,
   waterTree,
 } from './garden';
 export {
@@ -253,7 +253,7 @@ export {
   updatePomodoroSettings,
   upgradePet,
   getWorkReward,
-  useInventoryItem,
+  consumeInventoryItem,
 } from './petActions';
 
 export type { ClaimedDateReward, DateRewardItem, DateRewardKind, FestivalConfig } from './dateRewards';

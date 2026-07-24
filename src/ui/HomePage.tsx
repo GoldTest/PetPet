@@ -30,6 +30,7 @@ interface HomePageProps {
   petStatusImages: Record<PetStatus, string>;
   petActivityImages: Record<string, string | undefined>;
   getStatusLabel: (status: PetStatus) => string;
+  hasShopDiscount: boolean;
   onInteract: () => void;
   onUpgrade: () => void;
   onDailyWish: () => void;
@@ -38,6 +39,7 @@ interface HomePageProps {
   onOpenPomodoro: () => void;
   onOpenGarden: () => void;
   onOpenBoostCards: () => void;
+  onOpenShop: () => void;
   onOpenPartnerSchedule: () => void;
   onAction: (action: PetAction) => void;
 }
@@ -76,6 +78,7 @@ export const HomePage = ({
   petStatusImages,
   petActivityImages,
   getStatusLabel,
+  hasShopDiscount,
   onInteract,
   onUpgrade,
   onDailyWish,
@@ -84,6 +87,7 @@ export const HomePage = ({
   onOpenPomodoro,
   onOpenGarden,
   onOpenBoostCards,
+  onOpenShop,
   onOpenPartnerSchedule,
   onAction,
 }: HomePageProps) => {
@@ -183,10 +187,12 @@ export const HomePage = ({
             pomodoroRemainingMs={pomodoroRemainingMs}
             pomodoroStartTitle={pomodoroStartTitle}
             gardenReminder={gardenReminder}
+            hasShopDiscount={hasShopDiscount}
             onOpenInventory={onOpenInventory}
             onOpenPomodoro={onOpenPomodoro}
             onOpenGarden={onOpenGarden}
             onOpenBoostCards={onOpenBoostCards}
+            onOpenShop={onOpenShop}
             onOpenPartnerSchedule={onOpenPartnerSchedule}
           />
 

@@ -80,8 +80,6 @@ const withStore = async <T>(mode: IDBTransactionMode, execute: (store: IDBObject
 
 const putRecord = (record: StoredImageRecord) => withStore('readwrite', (store) => store.put(record));
 const getRecord = (key: string) => withStore<StoredImageRecord | undefined>('readonly', (store) => store.get(key));
-const deleteRecord = (key: string) => withStore('readwrite', (store) => store.delete(key));
-
 const getModIds = (): string[] => {
   try {
     const raw = window.localStorage.getItem(manifestsStorageKey);
@@ -107,7 +105,7 @@ const getStoredModEntry = (modId: string): StoredModEntry | null => {
 const setStoredModEntry = (entry: StoredModEntry) => {
   try {
     const raw = window.localStorage.getItem(manifestsStorageKey);
-    let entries: StoredModEntry[] = raw ? JSON.parse(raw) : [];
+    const entries: StoredModEntry[] = raw ? JSON.parse(raw) : [];
     const existing = entries.findIndex((e) => e.manifest.id === entry.manifest.id);
     if (existing >= 0) {
       entries[existing] = entry;
