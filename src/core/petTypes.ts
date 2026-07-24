@@ -373,6 +373,9 @@ export interface PetState {
   garden: GardenState;
   boostCards: BoostCardState;
   partnerSchedule: PartnerScheduleState;
+  neighborGiftDateKey?: string;
+  neighborGiftCount?: number;
+  neighbor?: NeighborReference;
 }
 
 export type PetAction = 'play' | 'clean' | 'sleep' | 'work';
@@ -426,6 +429,27 @@ export interface UseInventoryItemOptions {
 
 export interface BuyItemOptions {
   item?: ItemDefinition;
+}
+
+export type NeighborReference =
+  | { kind: 'generic' }
+  | { kind: 'mod'; modId: string };
+
+export interface NeighborIdentity {
+  modId: string;
+  name: string;
+}
+
+export interface NeighborGiftCandidate {
+  itemId: ItemId;
+  displayName: string;
+  price: number;
+}
+
+export interface NeighborEventContext {
+  neighbors: readonly NeighborIdentity[];
+  giftCandidates: readonly NeighborGiftCandidate[];
+  random?: () => number;
 }
 
 

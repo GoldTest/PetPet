@@ -1,5 +1,5 @@
 ---
-status: planned
+status: in-progress
 created: 2026-07-24
 priority: high
 tags:
@@ -7,7 +7,7 @@ tags:
   - daily-progression
   - inherit
 created_at: 2026-07-24T21:00:00Z
-updated_at: 2026-07-24T21:00:00Z
+updated_at: 2026-07-24T22:30:00Z
 ---
 
 # Neighbor 事件系统与每日进度继承
@@ -29,10 +29,10 @@ PetPet 当前已有部分对应功能: `PartnerScheduleDock`, `usePetSession`, `
 
 ## Requirements
 
-- [ ] 评估上游 neighbors.ts 与 PetPet 现有伴侣日程系统的差异
-- [ ] 评估上游 dailyReset.ts 与 PetPet 现有日常逻辑的兼容性
-- [ ] 设计不破坏当前分支的集成方案
-- [ ] 实现 Neighbor 社交事件系统（自行实现或参考上游）
+- [x] 评估上游 neighbors.ts 与 PetPet 现有伴侣日程系统的差异
+- [x] 评估上游 dailyReset.ts 与 PetPet 现有日常逻辑的兼容性
+- [x] 设计不破坏当前分支的集成方案
+- [x] 实现 Neighbor 社交事件系统（自行实现或参考上游）
 - [ ] 实现每日进度更新机制
 
 ## Non-Goals

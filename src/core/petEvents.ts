@@ -1,12 +1,14 @@
 import { pick, t } from '../i18n';
 import { applyHeartGain, recordEarnedCoins, recordEarnedHearts } from './achievements';
 import { addInventoryItem } from './items';
+import { createNeighborGift } from './neighborGifts';
 import { clampCoins, clampCount, clampPetHealth, clampPetStat } from './petStats';
-import type { ItemEffect, ItemId, PetState, WeatherType } from './petTypes';
+import type { ItemEffect, ItemId, NeighborEventContext, PetState, WeatherType } from './petTypes';
 import type { PetModEventDef, PetModEvents } from './mod';
 import { hashString, pickRandom, randomInt } from './utils';
 
 export interface DailyEncounter {
+  kind?: 'neighbor_gift';
   coins?: number;
   hearts?: number;
   itemId?: ItemId;
@@ -16,6 +18,7 @@ export interface DailyEncounter {
 }
 
 export interface TimedEvent {
+  kind?: 'neighbor_gift';
   coins?: number;
   hearts?: number;
   itemId?: ItemId;
@@ -23,6 +26,16 @@ export interface TimedEvent {
   effect?: ItemEffect;
   text: string;
 }
+
+export const getNeighborGiftEvent = (context: NeighborEventContext | undefined, key: 'dailyEncounter' | 'offlineEvent'): TimedEvent => {
+  const { neighborName, gift } = createNeighborGift(context);
+  return {
+    kind: 'neighbor_gift',
+    itemId: gift.itemId,
+    itemAmount: 1,
+    text: neighborName ? `${neighborName}: ${gift.displayName}` : gift.displayName,
+  };
+};
 
 const dreamEventMinSleepMinutes = 15;
 
