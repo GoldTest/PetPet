@@ -37,6 +37,7 @@
 <!-- AGENTS-GENERATED:START filemap -->
 | Path | Purpose |
 |------|---------|
+| `.fork-checkpoint` | Fork evaluation checkpoint (upstream commit hash, managed by fork-check skill) |
 | `src/` | Frontend source (React/TSX components, game logic, i18n, CSS) |
 | `src/core/lookups/` | AI 全局快查表（状态、事件、物品、天气、季节、可操作事件） |
 | `src/core/` | Pure game logic modules (no UI imports) |
@@ -49,7 +50,7 @@
 | `src-tauri/src/` | Rust source (lib.rs, main.rs) |
 | `scripts/` | Build/packaging scripts (PowerShell + Node) |
 | `specs/` | HarnSpec SDD specification files |
-| `.agents/` | AI agent skill definitions (harnspec, agent-rules) |
+| `.agents/` | AI agent skill definitions (harnspec, agent-rules, git-flow, mod-maker, fork-check) |
 | `.github/` | GitHub Actions CI/CD workflows |
 | `.gitee/` | Gitee mirror CI/CD workflows |
 | `docs/` | Documentation (Chinese + English) |
