@@ -2,7 +2,7 @@ import { t } from '../i18n';
 import { ensureDailyWishForDate, maybeCreateReturnWelcome, returnWelcomeMinAwayMs } from './dailyWishes';
 import { getAchievementEffects, incrementAchievementPomodoroFocus, incrementNaturalWake, recordEarnedCoins } from './achievements';
 import { advanceGarden } from './garden';
-import { dailyBiscuitClaimLimit } from './items';
+import { dailyBiscuitClaimLimit, dailyWitheredFragmentLimit } from './items';
 import { applyTimedEvent, getRandomDailyEncounterWithMod, getRandomOfflineDiary, getRandomOfflineEventWithMod, maybeApplyDreamTalk, settleSleep, startSleepSnapshot } from './petEvents';
 import { clampCoins, clampCount, clampPetHealth, clampPetStat, criticalHungerActionThreshold, getEnergyRecoveryIntervalMs, getPetEnergyCap, getPetStatCap, getPetStatThreshold, lowEnergyThreshold, roundPetStatDisplayAmount, scalePetStatDelta } from './petStats';
 import type { PetState } from './petTypes';
@@ -69,6 +69,20 @@ export const getDailyBiscuitClaimInfo = (pet: PetState, now = Date.now()) => {
     claimed,
     limit: dailyBiscuitClaimLimit,
     canClaim: claimed < dailyBiscuitClaimLimit,
+  };
+};
+
+export const getDailyWitheredFragmentClaimInfo = (pet: PetState, now = Date.now()) => {
+  const dateKey = getEffectiveDailyDateKey(pet, now);
+  const claimed =
+    pet.dailyWitheredFragmentClaimDate === dateKey
+      ? Math.min(dailyWitheredFragmentLimit, clampCount(pet.dailyWitheredFragmentClaims))
+      : 0;
+
+  return {
+    claimed,
+    limit: dailyWitheredFragmentLimit,
+    canClaim: claimed < dailyWitheredFragmentLimit,
   };
 };
 

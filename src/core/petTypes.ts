@@ -371,6 +371,8 @@ export interface PetState {
   lastDailyEncounterAt: number;
   dailyBiscuitClaimDate: string;
   dailyBiscuitClaims: number;
+  dailyWitheredFragmentClaimDate: string;
+  dailyWitheredFragmentClaims: number;
   dailyDiscountDate: string;
   dailyDiscountItemIds: BuiltinItemId[];
   dailyDiscountUsedItemIds: BuiltinItemId[];

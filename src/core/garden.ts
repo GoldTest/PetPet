@@ -299,7 +299,10 @@ const generateGardenDrops = (pet: PetState, slot: GardenSlot, now: number, syner
   const rareWeightBonusPercent = baseRareBonus + getSynergyRareWeightBonus(slot.slotIndex, synergies);
   const drops: GardenDrop[] = [{ itemId: pickWeightedDrop(gardenTreeDefinitions[slot.treeId].dropPool, seed, rareWeightBonusPercent), amount: 1 }];
   for (let index = 0; index < extra.extraDropCount; index += 1) drops.push({ itemId: getExtraDropItem(slot.treeId, seed + ':common:' + index), amount: 1 });
-  return { drops: mergeDrops(drops).slice(0, 4), boostCards: extra.boostCards };
+  const witheredHash = seed.split('').reduce((h, c) => ((h << 5) - h + c.charCodeAt(0)) | 0, 0);
+  const witheredChance = Math.abs(witheredHash) % 100;
+  if (witheredChance < 12) drops.push({ itemId: 'withered_fragment', amount: 1 });
+  return { drops: mergeDrops(drops).slice(0, 5), boostCards: extra.boostCards };
 };
 const resetRoundBoosts = (slot: GardenSlot): GardenSlot => ({ ...slot, fertilizerType: undefined, hasNutrientBoost: false });
 export const advanceGarden = (pet: PetState, now = Date.now()): PetState => {
@@ -325,10 +328,11 @@ export const plantTree = (pet: PetState, slotIndex: number, treeId: GardenTreeId
   if (getInventoryCount(current.inventory, saplingItemId) <= 0) return failGardenAction(current, 'pet.garden.missingGardenItem', { item: getItemName(saplingItemId) });
   const environment = getGardenEnvironmentEffects(current, now);
   const synergies = findActiveSynergies(current.garden);
+  const baseDuration = getGrowDuration(current, treeId, now, slotIndex, synergies);
   return incrementAchievementGardenPlant({
     ...current,
     inventory: removeInventoryItem(current.inventory, saplingItemId),
-    garden: updateGardenSlot(current.garden, slotIndex, (target) => ({ ...resetRoundBoosts(target), treeId, plantedAt: now, nextReadyAt: now + getGrowDuration(current, treeId, now, slotIndex, synergies), harvestsUsed: 0, maxHarvests: definition.maxHarvests + environment.maxHarvestBonus, pendingDrops: [], state: 'growing' })),
+    garden: updateGardenSlot(current.garden, slotIndex, (target) => ({ ...resetRoundBoosts(target), treeId, plantedAt: now, nextReadyAt: now + baseDuration, harvestsUsed: 0, maxHarvests: definition.maxHarvests + environment.maxHarvestBonus, pendingDrops: [], state: 'growing' })),
     recentEvent: t('pet.garden.plantSuccess', { tree: t('ui.garden.trees.' + treeId + '.name'), item: getItemName(saplingItemId) }),
     lastInteractionAt: now,
   });
@@ -348,7 +352,23 @@ export const waterTree = (pet: PetState, slotIndex: number, now = Date.now()): P
     lastInteractionAt: now,
   });
 };
-export const fertilizeTree = (pet: PetState, slotIndex: number, fertilizerId: GardenFertilizerId, now = Date.now()): PetState => { const current = advanceGarden(pet, now); const slot = current.garden.slots[slotIndex]; if (!slot || slot.state !== 'growing' || !slot.treeId) return failGardenAction(current, 'pet.garden.cannotFertilize'); if (slot.lastFertilizedAt > 0 && getSixAmResetDateKey(slot.lastFertilizedAt) === getSixAmResetDateKey(now)) return failGardenAction(current, 'pet.garden.fertilizedToday'); const itemId = gardenFertilizerItemIds[fertilizerId]; if (getInventoryCount(current.inventory, itemId) <= 0) return failGardenAction(current, 'pet.garden.missingGardenItem', { item: getItemName(itemId) }); const config = fertilizerReductionConfigs[fertilizerId]; const reductionMs = Math.min(config.maxMs, Math.floor(Math.max(0, slot.nextReadyAt - now) * (config.percent / 100))); return { ...current, inventory: removeInventoryItem(current.inventory, itemId), garden: updateGardenSlot({ ...current.garden, dailyCareDateKey: getSixAmResetDateKey(now), dailyFertilizeCount: current.garden.dailyFertilizeCount + 1 }, slotIndex, (target) => ({ ...target, fertilizerType: fertilizerId, lastFertilizedAt: now, nextReadyAt: Math.max(now, target.nextReadyAt - reductionMs) })), recentEvent: t('pet.garden.fertilizeSuccess', { item: getItemName(itemId), percent: config.percent }), lastInteractionAt: now }; };
+export const fertilizeTree = (pet: PetState, slotIndex: number, fertilizerId: GardenFertilizerId, now = Date.now()): PetState => {
+  const current = advanceGarden(pet, now);
+  const slot = current.garden.slots[slotIndex];
+  if (!slot || slot.state !== 'growing' || !slot.treeId) return failGardenAction(current, 'pet.garden.cannotFertilize');
+  if (slot.lastFertilizedAt > 0 && getSixAmResetDateKey(slot.lastFertilizedAt) === getSixAmResetDateKey(now)) return failGardenAction(current, 'pet.garden.fertilizedToday');
+  const itemId = gardenFertilizerItemIds[fertilizerId];
+  if (getInventoryCount(current.inventory, itemId) <= 0) return failGardenAction(current, 'pet.garden.missingGardenItem', { item: getItemName(itemId) });
+  const config = fertilizerReductionConfigs[fertilizerId];
+  const reductionMs = Math.min(config.maxMs, Math.floor(Math.max(0, slot.nextReadyAt - now) * (config.percent / 100)));
+  return {
+    ...current,
+    inventory: removeInventoryItem(current.inventory, itemId),
+    garden: updateGardenSlot({ ...current.garden, dailyCareDateKey: getSixAmResetDateKey(now), dailyFertilizeCount: current.garden.dailyFertilizeCount + 1 }, slotIndex, (target) => ({ ...target, fertilizerType: fertilizerId, lastFertilizedAt: now, nextReadyAt: Math.max(now, target.nextReadyAt - reductionMs) })),
+    recentEvent: t('pet.garden.fertilizeSuccess', { item: getItemName(itemId), percent: config.percent }),
+    lastInteractionAt: now,
+  };
+};
 export const applyGardenNutrient = (pet: PetState, slotIndex: number, now = Date.now()): PetState => { const current = advanceGarden(pet, now); const slot = current.garden.slots[slotIndex]; if (!slot || slot.state !== 'growing' || !slot.treeId) return failGardenAction(current, 'pet.garden.cannotBoost'); if (slot.lastBoostedAt > 0 && getSixAmResetDateKey(slot.lastBoostedAt) === getSixAmResetDateKey(now)) return failGardenAction(current, 'pet.garden.boostedToday'); if (getInventoryCount(current.inventory, gardenNutrientItemId) <= 0) return failGardenAction(current, 'pet.garden.missingGardenItem', { item: getItemName(gardenNutrientItemId) }); return { ...current, inventory: removeInventoryItem(current.inventory, gardenNutrientItemId), garden: updateGardenSlot(current.garden, slotIndex, (target) => ({ ...target, hasNutrientBoost: true, lastBoostedAt: now })), recentEvent: t('pet.garden.nutrientSuccess', { item: getItemName(gardenNutrientItemId) }), lastInteractionAt: now }; };
 const addDropsToInventory = (inventory: PetState['inventory'], drops: readonly GardenDrop[]) => drops.reduce((next, drop) => drop.itemId ? addInventoryItem(next, drop.itemId, drop.amount) : next, inventory);
 const getDropItemCount = (drops: readonly GardenDrop[]) => drops.reduce((sum, drop) => sum + (drop.itemId ? drop.amount : 0), 0);

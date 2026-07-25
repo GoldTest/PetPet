@@ -6,7 +6,7 @@ import { createDailyWish, normalizeDailyWishState, normalizeReturnWelcomeState }
 import { defaultGardenState, normalizeGardenState } from './garden';
 import { defaultSpeciesBookState, normalizeSpeciesBookState } from './speciesBook';
 import { addInventoryItem } from './items';
-import { dailyBiscuitClaimLimit, dailyHeartExchangeLimit, isBuiltinItemId } from './items';
+import { dailyBiscuitClaimLimit, dailyWitheredFragmentLimit, dailyHeartExchangeLimit, isBuiltinItemId } from './items';
 import { clampCoins, clampCount, clampHealth, clampLevel, clampStat, defaultPetName, getPetStatCap, lowCleanlinessSleepConfirmClicks } from './petStats';
 import type { AchievementState, ActionStreak, BuiltinItemId, BuiltinActivity, Inventory, PartnerScheduleCategory, PetState, PetStatus, RecentActivity, WeatherType } from './petTypes';
 import { defaultPomodoroState, normalizePomodoroState } from './pomodoro';
@@ -113,6 +113,8 @@ export const createDefaultPet = (now = Date.now()): PetState => ({
   lastDailyEncounterAt: now,
   dailyBiscuitClaimDate: getLocalDateKey(now),
   dailyBiscuitClaims: 0,
+  dailyWitheredFragmentClaimDate: getLocalDateKey(now),
+  dailyWitheredFragmentClaims: 0,
   dailyDiscountDate: getLocalDateKey(now),
   dailyDiscountItemIds: [],
   dailyDiscountUsedItemIds: [],
@@ -379,6 +381,12 @@ export const normalizePet = (value: unknown, now = Date.now(), options: Normaliz
     dailyBiscuitClaims: Math.min(
       dailyBiscuitClaimLimit,
       clampCount(isNumber(raw.dailyBiscuitClaims) ? raw.dailyBiscuitClaims : fallback.dailyBiscuitClaims),
+    ),
+    dailyWitheredFragmentClaimDate:
+      typeof raw.dailyWitheredFragmentClaimDate === 'string' ? raw.dailyWitheredFragmentClaimDate : fallback.dailyWitheredFragmentClaimDate,
+    dailyWitheredFragmentClaims: Math.min(
+      dailyWitheredFragmentLimit,
+      clampCount(isNumber(raw.dailyWitheredFragmentClaims) ? raw.dailyWitheredFragmentClaims : fallback.dailyWitheredFragmentClaims),
     ),
     dailyDiscountDate,
     dailyDiscountItemIds,

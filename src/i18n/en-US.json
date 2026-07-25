@@ -68,7 +68,7 @@
       "wallet": "{coins} coins",
       "tabsAria": "Shop categories",
       "claimedOut": "Claimed out",
-      "freeClaim": "Claim free {claimed}/{limit}",
+      "freeClaim": "Free",
       "price": "{price} coins",
       "discountToday": "Today only",
       "discountUsed": "Used",
@@ -572,6 +572,12 @@
         "autumn": "Bonus harvest chance +10%",
         "winter": "New trees can be harvested +1 time"
       },
+      "synergy": {
+        "fruit_care": "Fruit + Care: extra drops +1",
+        "gift_fruit": "Gift + Fruit: grow speed +10%",
+        "money_any": "Money tree adjacent: coins +15%",
+        "same_adjacent": "Same species adjacent: rare weight +5%"
+      },
       "chooseSapling": "Choose a sapling",
       "plantDialogTitle": "Choose a sapling",
       "plantDialogSummary": "Choose the sapling to plant in this slot",
@@ -665,23 +671,6 @@
         "complete": "All species collected!",
         "harvests": "Harvested {count} times",
         "locked": "Locked"
-      },
-      "miniGame": {
-        "water": {
-          "title": "Watering Mini-Game",
-          "click": "Tap"
-        },
-        "fertilize": {
-          "title": "Fertilizing Mini-Game"
-        },
-        "harvest": {
-          "title": "Harvesting Mini-Game"
-        },
-        "plant": {
-          "title": "Planting Mini-Game",
-          "hold": "Hold"
-        },
-        "skip": "Skip"
       }
     },
     "boostCards": {
@@ -1101,6 +1090,7 @@
     "buy": {
       "missing": "This shop item does not exist.",
       "biscuitClaimedOut": "Today's soda biscuits are all claimed. Come back tomorrow.",
+      "witheredFragmentClaimedOut": "Today's withered fragments are all claimed. Come back tomorrow.",
       "freeClaim": "Got a free {item} ({claimed}/{limit}).",
       "notEnoughCoins": "Not enough coins. {item} costs {price} coins.",
       "discount": "Bought {item} at today's discount for {price} coins.",

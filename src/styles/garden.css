@@ -441,7 +441,7 @@
 
 .garden-plot__badge {
   position: absolute;
-  top: 4px;
+  bottom: 4px;
   right: 6px;
   width: 18px;
   height: 18px;
@@ -464,6 +464,44 @@
 @keyframes garden-pulse {
   0%, 100% { transform: scale(1); }
   50% { transform: scale(1.1); }
+}
+
+.garden-plot__synergy-indicator {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1px;
+  z-index: 6;
+}
+
+.synergy-dot {
+  font-size: 10px;
+  line-height: 1;
+  font-weight: 700;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+  cursor: default;
+}
+
+.synergy-tooltip {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  margin-top: 4px;
+  background: rgba(30, 30, 30, 0.92);
+  color: #fff;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 11px;
+  line-height: 1.4;
+  white-space: nowrap;
+  pointer-events: none;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
+  z-index: 10;
 }
 
 .garden-plot-detail {
@@ -878,212 +916,6 @@
   color: #8a7a5a;
   padding: 20px;
   font-size: 0.9rem;
-}
-
-/* Synergy Lines Overlay */
-.garden-plot-grid {
-  position: relative;
-}
-
-.synergy-lines {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  pointer-events: none;
-  z-index: 5;
-}
-
-/* Mini-Game Modal */
-.garden-mini-game-modal {
-  width: 320px;
-  padding: 16px;
-}
-
-.mini-game {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 16px;
-  padding: 20px 0;
-  min-height: 200px;
-}
-
-.mini-game__action {
-  padding: 12px 24px;
-  border: 2px solid rgba(67, 111, 48, 0.3);
-  border-radius: 12px;
-  background: rgba(255, 255, 255, 0.8);
-  color: #41602f;
-  font-size: 1rem;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.15s;
-}
-
-.mini-game__action:hover {
-  background: rgba(200, 230, 180, 0.8);
-  border-color: rgba(67, 111, 48, 0.5);
-}
-
-.mini-game__results {
-  display: flex;
-  gap: 8px;
-  flex-wrap: wrap;
-  justify-content: center;
-}
-
-.mini-game__result {
-  padding: 4px 8px;
-  border-radius: 6px;
-  font-size: 0.8rem;
-  font-weight: 600;
-}
-
-.mini-game__result--perfect {
-  background: rgba(76, 175, 80, 0.2);
-  color: #2e7d32;
-}
-
-.mini-game__result--great {
-  background: rgba(255, 193, 7, 0.2);
-  color: #f57f17;
-}
-
-.mini-game__result--good {
-  background: rgba(33, 150, 243, 0.2);
-  color: #1565c0;
-}
-
-.mini-game__result--miss {
-  background: rgba(244, 67, 54, 0.2);
-  color: #c62828;
-}
-
-.mini-game__skip {
-  margin-top: 16px;
-  width: 100%;
-}
-
-/* Water Mini-Game */
-.water-mini-game {
-  position: relative;
-  height: 150px;
-  width: 100%;
-}
-
-.water-mini-game .mini-game__target {
-  position: absolute;
-  bottom: 0;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 60px;
-  height: 20px;
-  background: rgba(33, 150, 243, 0.3);
-  border-radius: 10px;
-}
-
-.water-mini-game .mini-game__drop {
-  position: absolute;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 16px;
-  height: 16px;
-  background: #2196f3;
-  border-radius: 50% 50% 50% 0;
-  transform: translateX(-50%) rotate(-45deg);
-  transition: top 0.1s linear;
-}
-
-/* Fertilize Mini-Game */
-.fertilize-mini-game .mini-game__grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 8px;
-}
-
-.fertilize-mini-game .mini-game__cell {
-  width: 60px;
-  height: 60px;
-  border: 2px solid rgba(67, 111, 48, 0.3);
-  border-radius: 8px;
-  background: rgba(255, 255, 255, 0.8);
-  font-size: 0.9rem;
-  cursor: pointer;
-  transition: all 0.15s;
-}
-
-.fertilize-mini-game .mini-game__cell:hover:not(:disabled) {
-  background: rgba(200, 230, 180, 0.8);
-}
-
-.fertilize-mini-game .mini-game__cell--selected {
-  border-color: #4caf50;
-  background: rgba(76, 175, 80, 0.2);
-}
-
-.fertilize-mini-game .mini-game__cell--matched {
-  background: rgba(76, 175, 80, 0.3);
-  border-color: #4caf50;
-}
-
-.fertilize-mini-game .mini-game__timer {
-  font-size: 1.2rem;
-  font-weight: 600;
-  color: #41602f;
-}
-
-/* Harvest Mini-Game */
-.harvest-mini-game .mini-game__cards {
-  display: flex;
-  gap: 12px;
-}
-
-.harvest-mini-game .mini-game__card {
-  width: 80px;
-  height: 100px;
-  border: 2px solid rgba(67, 111, 48, 0.3);
-  border-radius: 12px;
-  background: rgba(255, 255, 255, 0.8);
-  font-size: 1.2rem;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.3s;
-}
-
-.harvest-mini-game .mini-game__card:hover:not(:disabled) {
-  background: rgba(200, 230, 180, 0.8);
-}
-
-.harvest-mini-game .mini-game__card--flipped {
-  background: rgba(76, 175, 80, 0.2);
-  border-color: #4caf50;
-}
-
-/* Plant Mini-Game */
-.plant-mini-game .mini-game__progress {
-  width: 100%;
-  height: 24px;
-  background: rgba(200, 230, 180, 0.3);
-  border-radius: 12px;
-  overflow: hidden;
-}
-
-.plant-mini-game .mini-game__progress-bar {
-  height: 100%;
-  background: linear-gradient(90deg, #4caf50, #8bc34a);
-  transition: width 0.1s linear;
-  border-radius: 12px;
-}
-
-.plant-mini-game .mini-game__action {
-  width: 100%;
-  padding: 16px;
-  font-size: 1.1rem;
-  user-select: none;
-  -webkit-user-select: none;
-  touch-action: manipulation;
 }
 
 /* Species Book Modal */

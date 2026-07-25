@@ -129,3 +129,35 @@ export const getSynergyCoinBonus = (slotIndex: number, synergies: readonly Activ
   }
   return Math.min(50, bonus);
 };
+
+export type SynergyDirection = 'up' | 'down' | 'left' | 'right';
+
+export interface SlotSynergyInfo {
+  direction: SynergyDirection;
+  synergy: ActiveSynergy;
+}
+
+const getDirection = (from: number, to: number): SynergyDirection | null => {
+  const diff = to - from;
+  if (diff === 1) return 'right';
+  if (diff === -1) return 'left';
+  if (diff === 3) return 'down';
+  if (diff === -3) return 'up';
+  return null;
+};
+
+export const getSynergiesForSlotWithDirection = (slotIndex: number, synergies: readonly ActiveSynergy[]): SlotSynergyInfo[] => {
+  const result: SlotSynergyInfo[] = [];
+  for (const synergy of synergies) {
+    let dir: SynergyDirection | null = null;
+    if (synergy.slotA === slotIndex) {
+      dir = getDirection(slotIndex, synergy.slotB);
+    } else if (synergy.slotB === slotIndex) {
+      dir = getDirection(slotIndex, synergy.slotA);
+    }
+    if (dir) {
+      result.push({ direction: dir, synergy });
+    }
+  }
+  return result;
+};

@@ -68,7 +68,7 @@
       "wallet": "{coins} 金币",
       "tabsAria": "商店分类",
       "claimedOut": "今日已领完",
-      "freeClaim": "免费领取 {claimed}/{limit}",
+      "freeClaim": "免费",
       "price": "{price} 金币",
       "discountToday": "今日特价",
       "discountUsed": "特价已用",
@@ -572,6 +572,12 @@
         "autumn": "额外收获概率 +10%",
         "winter": "新种树木可收获次数 +1"
       },
+      "synergy": {
+        "fruit_care": "果树 + 关怀树：额外掉落 +1",
+        "gift_fruit": "礼物树 + 果树：生长速度 +10%",
+        "money_any": "摇钱树相邻：金币 +15%",
+        "same_adjacent": "同种果树相邻：稀有权重 +5%"
+      },
       "chooseSapling": "选择树苗",
       "plantDialogTitle": "选择树苗",
       "plantDialogSummary": "选择当前地块要种下的树苗",
@@ -592,19 +598,24 @@
       },
       "trees": {
         "fruit_tree": {
-          "name": "神奇果树"
+          "name": "神奇果树",
+          "summary": "种植获得的果树，成熟后产出食物"
         },
         "care_tree": {
-          "name": "护理之树"
+          "name": "护理之树",
+          "summary": "种植获得的果树，成熟后产出护理道具"
         },
         "gift_tree": {
-          "name": "神奇礼物树"
+          "name": "神奇礼物树",
+          "summary": "种植获得的果树，成熟后产出礼物道具"
         },
         "money_tree": {
-          "name": "摇钱树"
+          "name": "摇钱树",
+          "summary": "高价树苗，成熟后直接收获金币"
         },
         "golden_apple_tree": {
-          "name": "金苹果树"
+          "name": "金苹果树",
+          "summary": "稀有树苗，成熟后有机会产出金苹果"
         }
       },
       "actions": {
@@ -665,23 +676,6 @@
         "complete": "全树种收集完成！",
         "harvests": "收获 {count} 次",
         "locked": "未解锁"
-      },
-      "miniGame": {
-        "water": {
-          "title": "浇水小游戏",
-          "click": "点击"
-        },
-        "fertilize": {
-          "title": "施肥小游戏"
-        },
-        "harvest": {
-          "title": "收获小游戏"
-        },
-        "plant": {
-          "title": "种植小游戏",
-          "hold": "按住"
-        },
-        "skip": "跳过"
       }
     },
     "boostCards": {
@@ -1101,6 +1095,7 @@
     "buy": {
       "missing": "这个商品不存在。",
       "biscuitClaimedOut": "今天的苏打饼干已经领完了，明天再来吧。",
+      "witheredFragmentClaimedOut": "今天的枯树碎片已经领完了，明天再来吧。",
       "freeClaim": "拿到一份免费的{item}（{claimed}/{limit}）。",
       "notEnoughCoins": "金币不够，{item} 需要 {price} 金币。",
       "discount": "今日特价购买了{item}，花费 {price} 金币。",

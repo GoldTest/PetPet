@@ -2,9 +2,8 @@ import { useState, useRef } from 'react';
 import { ArrowLeft, BookOpen, CalendarDays, Cloud, CloudRain, Clock, Droplets, Flower2, Leaf, Lock, Pickaxe, ShoppingBag, Sparkles, Sprout, Sun, Wind, Wrench, X, type LucideIcon } from 'lucide-react';
 import { currencyIcon, giftBoxIcon, treeStageImages } from '../assets';
 import { CompostBinPanel } from './CompostBinPanel';
-import { GardenMiniGameModal } from './GardenMiniGameModal';
 import { SpeciesBookModal } from './SpeciesBookModal';
-import { SynergyLines } from './SynergyLines';
+import { SynergyIndicator } from './SynergyIndicator';
 import {
   gardenFertilizerItemIds,
   gardenNutrientItemId,
@@ -28,7 +27,6 @@ import {
   type PetState,
   type WeatherType,
 } from '../core/pet';
-import type { MiniGameType, MiniGameResult } from '../core/gardenMiniGames';
 import { t } from '../i18n';
 import { DialogShell } from './DialogShell';
 
@@ -80,8 +78,6 @@ export const GardenPage = ({ pet, itemIconMap, onBack, onUnlockSlot, onPlantTree
   const [actionDialog, setActionDialog] = useState<GardenActionDialog>(null);
   const [selectedSlot, setSelectedSlot] = useState<number | null>(null);
   const [envExpanded, setEnvExpanded] = useState(false);
-  const [miniGameType, setMiniGameType] = useState<MiniGameType | null>(null);
-  const [pendingMiniGameAction, setPendingMiniGameAction] = useState<((result: MiniGameResult) => void) | null>(null);
   const [showSpeciesBook, setShowSpeciesBook] = useState(false);
   const gridRef = useRef<HTMLDivElement>(null);
   const now = Date.now();
@@ -93,32 +89,6 @@ export const GardenPage = ({ pet, itemIconMap, onBack, onUnlockSlot, onPlantTree
 
   const handleSelectSlot = (index: number) => {
     setSelectedSlot(index);
-  };
-
-  const startMiniGame = (type: MiniGameType, action: (result: MiniGameResult) => void) => {
-    setMiniGameType(type);
-    setPendingMiniGameAction(() => action);
-  };
-
-  const handleMiniGameComplete = (result: MiniGameResult) => {
-    setMiniGameType(null);
-    if (pendingMiniGameAction) {
-      pendingMiniGameAction(result);
-      setPendingMiniGameAction(null);
-    }
-  };
-
-  const handleMiniGameSkip = () => {
-    setMiniGameType(null);
-    if (pendingMiniGameAction) {
-      const skipResult: MiniGameResult = {
-        type: miniGameType || 'water',
-        rating: 'miss',
-        bonusPercent: 0,
-      };
-      pendingMiniGameAction(skipResult);
-      setPendingMiniGameAction(null);
-    }
   };
 
   const activeSlotIndex = selectedSlot !== null && selectedSlot < view.garden.slots.length ? selectedSlot : view.garden.slots.findIndex((s) => s.state === 'ready' || s.treeId);
@@ -172,7 +142,6 @@ export const GardenPage = ({ pet, itemIconMap, onBack, onUnlockSlot, onPlantTree
         </div>
 
         <div className="garden-plot-grid" role="grid" aria-label={t('ui.garden.slotsAria')} ref={gridRef}>
-          <SynergyLines garden={pet.garden} gridRef={gridRef} />
           {view.garden.slots.map((slotItem) => {
             const slotVw = view.slotViews[slotItem.slotIndex];
             const isSelected = activeSlotIndex === slotItem.slotIndex;
@@ -187,6 +156,7 @@ export const GardenPage = ({ pet, itemIconMap, onBack, onUnlockSlot, onPlantTree
                 onClick={() => handleSelectSlot(slotItem.slotIndex)}
                 aria-label={`${t('ui.garden.slotTitle', { slot: slotItem.slotIndex + 1 })}${slotItem.treeId ? ` · ${t(`ui.garden.trees.${slotItem.treeId}.name`)}` : ''} · ${t(`ui.garden.states.${slotItem.state}`)}`}
               >
+                <SynergyIndicator slotIndex={slotItem.slotIndex} garden={pet.garden} />
                 <span className="garden-plot__number">{slotItem.slotIndex + 1}</span>
                 {!slotItem.unlocked ? (
                   <div className="garden-plot__lock">
@@ -266,12 +236,12 @@ export const GardenPage = ({ pet, itemIconMap, onBack, onUnlockSlot, onPlantTree
             </button>
           )}
           {slot.state === 'growing' && <>
-            <button type="button" className="garden-choice" disabled={wateredToday} onClick={() => startMiniGame('water', (result) => onWater(slot.slotIndex))}><Droplets size={18} /><span><strong>{t('ui.garden.actions.water')}</strong><small>{t('ui.garden.waterFree', { percent: getGardenWaterReductionPercent(pet.garden.tools, environment.waterReductionBonusPercent) })}</small></span></button>
-            <button type="button" className="garden-choice" disabled={fertilizedToday || (pet.inventory[gardenFertilizerItemIds.normal] ?? 0) <= 0} onClick={() => startMiniGame('fertilize', (result) => onFertilize(slot.slotIndex, 'normal'))}><Flower2 size={18} /><span><strong>{t('ui.garden.actions.normalFertilizer')}</strong><small>{t('ui.garden.itemOwned', { count: pet.inventory[gardenFertilizerItemIds.normal] ?? 0 })}</small></span></button>
-            <button type="button" className="garden-choice" disabled={fertilizedToday || (pet.inventory[gardenFertilizerItemIds.heart] ?? 0) <= 0} onClick={() => startMiniGame('fertilize', (result) => onFertilize(slot.slotIndex, 'heart'))}><Sparkles size={18} /><span><strong>{t('ui.garden.actions.heartFertilizer')}</strong><small>{t('ui.garden.itemOwned', { count: pet.inventory[gardenFertilizerItemIds.heart] ?? 0 })}</small></span></button>
-            <button type="button" className="garden-choice" disabled={boostedToday || (pet.inventory[gardenNutrientItemId] ?? 0) <= 0} onClick={() => startMiniGame('fertilize', (result) => onNutrient(slot.slotIndex))}><Sparkles size={18} /><span><strong>{t('ui.garden.actions.nutrient')}</strong><small>{t('ui.garden.itemOwned', { count: pet.inventory[gardenNutrientItemId] ?? 0 })}</small></span></button>
+            <button type="button" className="garden-choice" disabled={wateredToday} onClick={() => onWater(slot.slotIndex)}><Droplets size={18} /><span><strong>{t('ui.garden.actions.water')}</strong><small>{t('ui.garden.waterFree', { percent: getGardenWaterReductionPercent(pet.garden.tools, environment.waterReductionBonusPercent) })}</small></span></button>
+            <button type="button" className="garden-choice" disabled={fertilizedToday || (pet.inventory[gardenFertilizerItemIds.normal] ?? 0) <= 0} onClick={() => onFertilize(slot.slotIndex, 'normal')}><Flower2 size={18} /><span><strong>{t('ui.garden.actions.normalFertilizer')}</strong><small>{t('ui.garden.itemOwned', { count: pet.inventory[gardenFertilizerItemIds.normal] ?? 0 })}</small></span></button>
+            <button type="button" className="garden-choice" disabled={fertilizedToday || (pet.inventory[gardenFertilizerItemIds.heart] ?? 0) <= 0} onClick={() => onFertilize(slot.slotIndex, 'heart')}><Sparkles size={18} /><span><strong>{t('ui.garden.actions.heartFertilizer')}</strong><small>{t('ui.garden.itemOwned', { count: pet.inventory[gardenFertilizerItemIds.heart] ?? 0 })}</small></span></button>
+            <button type="button" className="garden-choice" disabled={boostedToday || (pet.inventory[gardenNutrientItemId] ?? 0) <= 0} onClick={() => onNutrient(slot.slotIndex)}><Sparkles size={18} /><span><strong>{t('ui.garden.actions.nutrient')}</strong><small>{t('ui.garden.itemOwned', { count: pet.inventory[gardenNutrientItemId] ?? 0 })}</small></span></button>
           </>}
-          {slot.state === 'ready' && <button type="button" className="primary-button garden-harvest-button" onClick={() => startMiniGame('harvest', (result) => onHarvest(slot.slotIndex))}>{t('ui.garden.actions.harvest')}</button>}
+          {slot.state === 'ready' && <button type="button" className="primary-button garden-harvest-button" onClick={() => onHarvest(slot.slotIndex)}>{t('ui.garden.actions.harvest')}</button>}
           {slot.treeId && slot.state !== 'empty' && slot.state !== 'withered' && <button type="button" className="danger-button garden-clear-button" disabled={pet.coins < clearCost} onClick={() => onClear(slot.slotIndex)}>{t('ui.garden.actions.remove', { coins: clearCost })}</button>}
           {slot.state === 'withered' && <button type="button" className="danger-button garden-clear-button" disabled={pet.coins < clearCost} onClick={() => onClear(slot.slotIndex)}>{t('ui.garden.actions.clear', { coins: clearCost })}</button>}
         </div>
@@ -319,7 +289,7 @@ export const GardenPage = ({ pet, itemIconMap, onBack, onUnlockSlot, onPlantTree
                         className="primary-button"
                         disabled={count <= 0}
                         onClick={() => {
-                          startMiniGame('plant', (result) => onPlantTree(slot.slotIndex, treeId));
+                          onPlantTree(slot.slotIndex, treeId);
                           setActionDialog(null);
                         }}
                       >
@@ -355,14 +325,6 @@ export const GardenPage = ({ pet, itemIconMap, onBack, onUnlockSlot, onPlantTree
             </div>
           )}
         </DialogShell>
-      )}
-
-      {miniGameType && (
-        <GardenMiniGameModal
-          type={miniGameType}
-          onComplete={handleMiniGameComplete}
-          onSkip={handleMiniGameSkip}
-        />
       )}
 
       {showSpeciesBook && (

@@ -4,6 +4,7 @@ import type { BuiltinItemId, Inventory, InventoryItemDefinition, ItemDefinition,
 import { getLocalDateKey, hashString } from './utils';
 
 export const dailyBiscuitClaimLimit = 3;
+export const dailyWitheredFragmentLimit = 2;
 
 export const heartExchangeCoins = 16;
 
@@ -284,6 +285,25 @@ export const shopItems: readonly ShopItem[] = [
     tags: ['garden', 'nutrient'],
     usable: false,
   },
+] as const;
+
+export const specialItems: readonly ShopItem[] = [
+  {
+    id: 'birthday_cake',
+    name: t('pet.shop.items.birthday_cake.name'),
+    kind: 'food',
+    price: 0,
+    effect: {},
+    summary: t('pet.shop.items.birthday_cake.summary'),
+  },
+  {
+    id: 'golden_apple',
+    name: t('pet.shop.items.golden_apple.name'),
+    kind: 'food',
+    price: 0,
+    effect: { hunger: 30, mood: 30, cleanliness: 30, energy: 30, health: 30 },
+    summary: t('pet.shop.items.golden_apple.summary'),
+  },
   {
     id: 'withered_fragment',
     name: t('pet.shop.items.withered_fragment.name'),
@@ -292,6 +312,26 @@ export const shopItems: readonly ShopItem[] = [
     effect: {},
     summary: t('pet.shop.items.withered_fragment.summary'),
     tags: ['garden', 'compost'],
+    usable: false,
+  },
+  {
+    id: 'wish_fragment',
+    name: t('pet.shop.items.wish_fragment.name'),
+    kind: 'item',
+    price: 0,
+    effect: {},
+    summary: t('pet.shop.items.wish_fragment.summary'),
+    tags: ['material', 'unlock'],
+    usable: false,
+  },
+  {
+    id: 'garden_token',
+    name: t('pet.shop.items.garden_token.name'),
+    kind: 'item',
+    price: 0,
+    effect: {},
+    summary: t('pet.shop.items.garden_token.summary'),
+    tags: ['material', 'garden'],
     usable: false,
   },
   {
@@ -323,45 +363,6 @@ export const shopItems: readonly ShopItem[] = [
     summary: t('pet.shop.items.skill_fruit.summary'),
     tags: ['material', 'growth'],
     usable: true,
-  },
-  {
-    id: 'wish_fragment',
-    name: t('pet.shop.items.wish_fragment.name'),
-    kind: 'item',
-    price: 0,
-    effect: {},
-    summary: t('pet.shop.items.wish_fragment.summary'),
-    tags: ['material', 'unlock'],
-    usable: false,
-  },
-  {
-    id: 'garden_token',
-    name: t('pet.shop.items.garden_token.name'),
-    kind: 'item',
-    price: 0,
-    effect: {},
-    summary: t('pet.shop.items.garden_token.summary'),
-    tags: ['material', 'garden'],
-    usable: false,
-  },
-] as const;
-
-export const specialItems: readonly ShopItem[] = [
-  {
-    id: 'birthday_cake',
-    name: t('pet.shop.items.birthday_cake.name'),
-    kind: 'food',
-    price: 0,
-    effect: {},
-    summary: t('pet.shop.items.birthday_cake.summary'),
-  },
-  {
-    id: 'golden_apple',
-    name: t('pet.shop.items.golden_apple.name'),
-    kind: 'food',
-    price: 0,
-    effect: { hunger: 30, mood: 30, cleanliness: 30, energy: 30, health: 30 },
-    summary: t('pet.shop.items.golden_apple.summary'),
   },
 ] as const;
 

@@ -14,6 +14,7 @@ import { defaultPomodoroState, getDefaultPomodoroRemainingMs, getPomodoroPhaseDu
 import { settleSleep, startSleepSnapshot } from './petEvents';
 import { getPartnerScheduleCrossSystemEffects } from './partnerScheduleEffects';
 import { getLocalDateKey, randomInt } from './utils';
+import { getDailyResetDateKey } from './dailyReset';
 import { isPartnerSchedulePetBusy } from './partnerSchedule';
 
 const clearLowCleanlinessSleepConfirm = (pet: PetState): PetState =>
@@ -263,7 +264,7 @@ export const buyItem = (pet: PetState, itemId: ItemId, now = Date.now(), options
     return incrementAchievementPurchase({
       ...current,
       inventory: addInventoryItem(current.inventory, itemId, 1),
-      dailyBiscuitClaimDate: getLocalDateKey(now),
+      dailyBiscuitClaimDate: getDailyResetDateKey(now),
       dailyBiscuitClaims: claimInfo.claimed + 1,
       recentEvent: t('pet.buy.freeClaim', {
         item: item.name,
