@@ -33,7 +33,8 @@ export type BuiltinItemId =
   | 'golden_apple_tree_sapling'
   | 'normal_fertilizer'
   | 'heart_fertilizer'
-  | 'harvest_nutrient';
+  | 'harvest_nutrient'
+  | 'withered_fragment';
 
 export type ModItemId = `${string}:${string}`;
 
@@ -81,7 +82,7 @@ export interface GardenTools {
 }
 
 export interface GardenState {
-  schemaVersion: 2;
+  schemaVersion: 3;
   slots: GardenSlot[];
   dailyCareDateKey: string;
   dailyWaterCount: number;
@@ -90,6 +91,24 @@ export interface GardenState {
   dailyHarvestCount: number;
   tools: GardenTools;
   lifetimeHarvestCount: number;
+  compostBin: CompostBinState;
+}
+
+export type CompostBinInputType = 'fruit_care' | 'withered_fragment' | 'rare_combo';
+
+export interface CompostBinSlot {
+  slotIndex: number;
+  inputType?: CompostBinInputType;
+  inputItemId?: string;
+  startedAt: number;
+  completesAt: number;
+  outputItemId: string;
+  outputAmount: number;
+}
+
+export interface CompostBinState {
+  level: number;
+  slots: CompostBinSlot[];
 }
 
 export type BoostCardId = 'friend_pass' | 'best_friend_pass';

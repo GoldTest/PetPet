@@ -49,7 +49,7 @@ export const boostCardDefinitions: Record<BoostCardId, BoostCardDefinition> = {
     workBonusDailyLimit: 100,
     extraHeartChancePercent: 30,
     extraHeartDailyLimit: 20,
-    gardenGrowTimeMultiplier: 0.88,
+    gardenGrowTimeMultiplier: 0.92,
     gardenExtraDropChancePercent: 20,
     gardenExtraDropDailyLimit: 10,
   },

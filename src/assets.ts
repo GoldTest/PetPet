@@ -21,6 +21,7 @@ import itemGoldenAppleTreeSapling from './assets/icon/item_golden_apple_tree_sap
 import itemNormalFertilizer from './assets/icon/item_normal_fertilizer.png';
 import itemHeartFertilizer from './assets/icon/item_heart_fertilizer.png';
 import itemHarvestNutrient from './assets/icon/item_harvest_nutrient.png';
+import itemWitheredFragment from './assets/icon/item_harvest_nutrient.png';
 import itemMedicine from './assets/icon/item_medicine.png';
 import itemNutriMeal from './assets/icon/item_nutri_meal.png';
 import itemOrange from './assets/icon/item_orange.png';
@@ -98,6 +99,7 @@ export const itemIcons: Record<BuiltinItemId, string> = {
   normal_fertilizer: itemNormalFertilizer,
   heart_fertilizer: itemHeartFertilizer,
   harvest_nutrient: itemHarvestNutrient,
+  withered_fragment: itemWitheredFragment,
 };
 
 export const petStatusImages: Record<PetStatus, string> = {

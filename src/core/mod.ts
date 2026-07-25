@@ -71,6 +71,7 @@ export const itemImageKeys = [
   'normal_fertilizer',
   'heart_fertilizer',
   'harvest_nutrient',
+  'withered_fragment',
 ] as const satisfies readonly BuiltinItemId[];
 
 export type PetStatusImageKey = (typeof petStatusImageKeys)[number];

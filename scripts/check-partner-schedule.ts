@@ -356,7 +356,7 @@ const master60Effects = getPartnerScheduleCrossSystemEffects({
 assert.deepEqual(master60Effects, {
   dailyWishCoinMultiplier: 1.2,
   foodEffectMultiplier: 1.15,
-  gardenTimeMultiplier: 0.92,
+  gardenTimeMultiplier: 0.95,
   awakeEnergyRecoveryMultiplier: 0.88,
 });
 

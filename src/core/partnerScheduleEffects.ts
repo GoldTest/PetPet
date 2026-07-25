@@ -66,7 +66,7 @@ export const getPartnerScheduleCrossSystemEffects = (
   return {
     dailyWishCoinMultiplier: study.level >= 10 ? (study.masterCompletions >= 60 ? 1.2 : 1.1) : 1,
     foodEffectMultiplier: cooking.level >= 10 ? (cooking.masterCompletions >= 60 ? 1.15 : 1.1) : 1,
-    gardenTimeMultiplier: garden.level >= 10 ? (garden.masterCompletions >= 60 ? 0.92 : 0.95) : 1,
+    gardenTimeMultiplier: garden.level >= 10 ? (garden.masterCompletions >= 60 ? 0.95 : 0.97) : 1,
     awakeEnergyRecoveryMultiplier: exercise.level >= 10 ? (exercise.masterCompletions >= 60 ? 0.88 : 0.92) : 1,
   };
 };

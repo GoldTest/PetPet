@@ -831,6 +831,10 @@
         "harvest_nutrient": {
           "name": "Harvest nutrient",
           "summary": "Use in the garden to add an extra drop to the next harvest."
+        },
+        "withered_fragment": {
+          "name": "Withered fragment",
+          "summary": "Obtained from clearing withered trees. Compost to reclaim resources."
         }
       },
       "categories": {
@@ -1629,7 +1633,7 @@
       "harvestSuccess": "Harvested {count} item(s).",
       "harvestWithered": "Harvested {count} item(s). The tree has withered.",
       "cannotClear": "There is no withered tree to clear.",
-      "clearSuccess": "Cleared the withered tree for {coins} coins.",
+      "clearSuccess": "Cleared the withered tree, obtained a withered fragment. Cost: {coins} coins.",
       "removeSuccess": "Removed the tree for {coins} coins.",
       "toolMaxLevel": "This tool is already max level.",
       "toolUpgradeSuccess": "{tool} upgraded to Lv.{level} for {coins} coins.",
@@ -1638,7 +1642,10 @@
       "harvestCoinsSuccess": "Harvested +{coins} coins.",
       "harvestMixedSuccess": "Harvested {count} item(s) and +{coins} coins.",
       "harvestCoinsWithered": "Harvested +{coins} coins. The tree has withered.",
-      "harvestMixedWithered": "Harvested {count} item(s) and +{coins} coins. The tree has withered."
+      "harvestMixedWithered": "Harvested {count} item(s) and +{coins} coins. The tree has withered.",
+      "compostStart": "Composted {item}. Processing has begun.",
+      "compostCollect": "Collected {count}x {item}.",
+      "compostUpgrade": "Compost bin upgraded to Lv.{level} for {coins} coins."
     },
     "boostCards": {
       "maxDuration": "This card can only stack up to 90 days.",

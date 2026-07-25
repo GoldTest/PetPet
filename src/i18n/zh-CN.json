@@ -831,6 +831,10 @@
         "harvest_nutrient": {
           "name": "丰收营养剂",
           "summary": "种植页使用，下次收获获得额外产物"
+        },
+        "withered_fragment": {
+          "name": "枯树碎片",
+          "summary": "清理枯树获得，可投入堆肥桶回收资源"
         }
       },
       "categories": {
@@ -1629,7 +1633,7 @@
       "harvestSuccess": "收获了 {count} 件道具。",
       "harvestWithered": "收获了 {count} 件道具，这棵树寿命耗尽枯萎了。",
       "cannotClear": "这里没有需要清理的枯树。",
-      "clearSuccess": "清理了枯树，花费 {coins} 金币。",
+      "clearSuccess": "清理了枯树，获得枯树碎片，花费 {coins} 金币。",
       "removeSuccess": "移除了这棵树，花费 {coins} 金币。",
       "toolMaxLevel": "这个工具已经满级。",
       "toolUpgradeSuccess": "{tool} 升到 Lv.{level}，花费 {coins} 金币。",
@@ -1638,7 +1642,10 @@
       "harvestCoinsSuccess": "收获金币 +{coins}。",
       "harvestMixedSuccess": "收获了 {count} 件道具，金币 +{coins}。",
       "harvestCoinsWithered": "收获金币 +{coins}，这棵树寿命耗尽枯萎了。",
-      "harvestMixedWithered": "收获了 {count} 件道具，金币 +{coins}，这棵树寿命耗尽枯萎了。"
+      "harvestMixedWithered": "收获了 {count} 件道具，金币 +{coins}，这棵树寿命耗尽枯萎了。",
+      "compostStart": "投入了{item}，开始堆肥。",
+      "compostCollect": "收取了 {count} 个{item}。",
+      "compostUpgrade": "堆肥桶升到 Lv.{level}，花费 {coins} 金币。"
     },
     "boostCards": {
       "maxDuration": "这张增益卡最多只能累计 90 天。",

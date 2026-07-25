@@ -284,6 +284,16 @@ export const shopItems: readonly ShopItem[] = [
     tags: ['garden', 'nutrient'],
     usable: false,
   },
+  {
+    id: 'withered_fragment',
+    name: t('pet.shop.items.withered_fragment.name'),
+    kind: 'garden',
+    price: 0,
+    effect: {},
+    summary: t('pet.shop.items.withered_fragment.summary'),
+    tags: ['garden', 'compost'],
+    usable: false,
+  },
 ] as const;
 
 export const specialItems: readonly ShopItem[] = [
