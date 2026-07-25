@@ -98,7 +98,7 @@ const nonWatermelonFruitIds: readonly ItemId[] = ['orange', 'apple', 'banana'];
 const careKitIds: readonly ItemId[] = ['wet_wipes', 'shampoo', 'vitamin_tablet'];
 const gentleCareKeys: readonly YearlyCareActionKey[] = ['feed', 'clean', 'play', 'touch'];
 const workPlayKeys: readonly YearlyCareActionKey[] = ['work', 'play'];
-const achievementGardenTreeIds: readonly GardenTreeId[] = ['fruit_tree', 'care_tree', 'gift_tree', 'money_tree', 'golden_apple_tree'];
+const achievementGardenTreeIds: readonly GardenTreeId[] = ['fruit_tree', 'care_tree', 'gift_tree', 'herb_tree', 'money_tree', 'golden_apple_tree'];
 const achievementPartnerScheduleCategories: readonly PartnerScheduleCategory[] = ['study', 'cooking', 'garden', 'exercise'];
 const usableShopItems = shopItems.filter((item) => item.usable !== false);
 const shopItemIds: readonly ItemId[] = usableShopItems.map((item) => item.id);

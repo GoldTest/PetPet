@@ -553,6 +553,7 @@
       "costCoins": "{coins} coins",
       "costHearts": "{hearts} hearts",
       "dropTitle": "{count} item(s)",
+      "dropWithName": "{name} × {count}",
       "dailyLimit": "Daily limit reached",
       "toolsAria": "Garden tools",
       "openTools": "Open tool upgrades",
@@ -605,6 +606,9 @@
         },
         "gift_tree": {
           "name": "Gift tree"
+        },
+        "herb_tree": {
+          "name": "Vitality tree"
         },
         "money_tree": {
           "name": "Money tree"
@@ -840,13 +844,17 @@
           "name": "Gift tree sapling",
           "summary": "Plant in a garden slot to grow gift items."
         },
+        "herb_tree_sapling": {
+          "name": "Vitality tree sapling",
+          "summary": "Plant in a garden slot to grow vitality fruits and premium items."
+        },
         "money_tree_sapling": {
           "name": "Money tree sapling",
           "summary": "A premium sapling that yields coins directly."
         },
         "golden_apple_tree_sapling": {
           "name": "Golden apple tree sapling",
-          "summary": "A rare sapling with a chance to grow golden apples."
+          "summary": "Extremely rare sapling with a tiny chance to drop on harvest."
         },
         "normal_fertilizer": {
           "name": "Fertilizer",
@@ -873,8 +881,8 @@
           "summary": "Restores 25 energy when used."
         },
         "skill_fruit": {
-          "name": "Skill fruit",
-          "summary": "Grants skill XP to Partner Schedule when used."
+          "name": "Vitality fruit",
+          "summary": "Restores all stats by +5 when used."
         },
         "wish_fragment": {
           "name": "Wish fragment",

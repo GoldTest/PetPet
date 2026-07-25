@@ -398,6 +398,11 @@ export const consumeInventoryItem = (
     const usedSkillFruit = recordYearlyItemUse(recordYearlyCareAction({
       ...withActivity(current, 'happy', now),
       isSleeping: false,
+      hunger: clampPetStat(current, current.hunger + 5),
+      mood: clampPetStat(current, current.mood + 5 - (wokePet ? 2 : 0)),
+      cleanliness: clampPetStat(current, current.cleanliness + 5),
+      energy: clampPetStat(current, current.energy + 5),
+      health: clampPetHealth(current, current.health + 5),
       inventory: removeInventoryItem(current.inventory, itemId),
       recentEvent: t(wokePet ? 'pet.item.use.skillFruitWoke' : 'pet.item.use.skillFruit', { name: current.name, item: displayItemName }),
     }, 'touch', now), now);

@@ -39,6 +39,20 @@ export const synergyRules: readonly SynergyRule[] = [
     effect: { growSpeedBonusPercent: 10 },
   },
   {
+    id: 'herb_fruit',
+    treeA: 'herb_tree',
+    treeB: 'fruit_tree',
+    description: 'Herb + Fruit: extra drop +50%',
+    effect: { extraDropChancePercent: 50 },
+  },
+  {
+    id: 'herb_care',
+    treeA: 'herb_tree',
+    treeB: 'care_tree',
+    description: 'Herb + Care: herb grows 10% faster',
+    effect: { growSpeedBonusPercent: 10 },
+  },
+  {
     id: 'money_any',
     treeA: 'money_tree',
     treeB: 'money_tree',

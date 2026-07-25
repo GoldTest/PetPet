@@ -29,6 +29,7 @@ export type BuiltinItemId =
   | 'fruit_tree_sapling'
   | 'care_tree_sapling'
   | 'gift_tree_sapling'
+  | 'herb_tree_sapling'
   | 'money_tree_sapling'
   | 'golden_apple_tree_sapling'
   | 'normal_fertilizer'
@@ -47,7 +48,7 @@ export type ItemId = BuiltinItemId | ModItemId;
 
 export type Inventory = Record<string, number>;
 
-export type GardenTreeId = 'fruit_tree' | 'care_tree' | 'gift_tree' | 'money_tree' | 'golden_apple_tree';
+export type GardenTreeId = 'fruit_tree' | 'care_tree' | 'gift_tree' | 'herb_tree' | 'money_tree' | 'golden_apple_tree';
 
 export type GardenFertilizerId = 'normal' | 'heart';
 

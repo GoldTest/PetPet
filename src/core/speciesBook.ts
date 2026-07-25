@@ -5,6 +5,7 @@ export const allGardenTreeIds: readonly GardenTreeId[] = [
   'fruit_tree',
   'care_tree',
   'gift_tree',
+  'herb_tree',
   'money_tree',
   'golden_apple_tree',
 ];

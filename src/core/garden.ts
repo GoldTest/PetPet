@@ -16,7 +16,7 @@ export const gardenSlotCount = 9;
 export const maxGardenToolLevel = 3;
 export const dailyGardenSlotHarvestLimit = 12;
 export const dailyGardenHarvestLimit = 30;
-export const gardenTreeIds: readonly GardenTreeId[] = ['fruit_tree', 'care_tree', 'gift_tree', 'money_tree', 'golden_apple_tree'];
+export const gardenTreeIds: readonly GardenTreeId[] = ['fruit_tree', 'care_tree', 'gift_tree', 'herb_tree', 'money_tree', 'golden_apple_tree'];
 export const gardenFertilizerIds: readonly GardenFertilizerId[] = ['normal', 'heart'];
 export const gardenToolIds: readonly GardenToolId[] = ['watering_can', 'shovel', 'fertilizer_box'];
 export const gardenSlotStates: readonly GardenSlotState[] = ['empty', 'growing', 'ready', 'withered'];
@@ -31,6 +31,7 @@ export const gardenTreeSaplingItemIds: Record<GardenTreeId, BuiltinItemId> = {
   fruit_tree: 'fruit_tree_sapling',
   care_tree: 'care_tree_sapling',
   gift_tree: 'gift_tree_sapling',
+  herb_tree: 'herb_tree_sapling',
   money_tree: 'money_tree_sapling',
   golden_apple_tree: 'golden_apple_tree_sapling',
 };
@@ -57,11 +58,12 @@ export interface GardenTreeDefinition {
 }
 
 export const gardenTreeDefinitions: Record<GardenTreeId, GardenTreeDefinition> = {
-  fruit_tree: { id: 'fruit_tree', price: 30, growDurationMs: 30 * 60 * 1000, harvestCooldownMs: 30 * 60 * 1000, maxHarvests: 10, dropPool: [{ itemId: 'orange', weight: 24 }, { itemId: 'apple', weight: 22 }, { itemId: 'banana', weight: 20 }, { itemId: 'watermelon', weight: 14 }, { itemId: 'bento', weight: 8 }, { itemId: 'strawberry_milk', weight: 6, rare: true }, { itemId: 'nutri_meal', weight: 4, rare: true }, { itemId: 'strawberry_cake', weight: 2, rare: true }] },
-  care_tree: { id: 'care_tree', price: 30, growDurationMs: 30 * 60 * 1000, harvestCooldownMs: 30 * 60 * 1000, maxHarvests: 10, dropPool: [{ itemId: 'wet_wipes', weight: 26 }, { itemId: 'vitamin_tablet', weight: 20 }, { itemId: 'shampoo', weight: 14 }, { itemId: 'energy_drink', weight: 14 }, { itemId: 'blanket', weight: 10 }, { itemId: 'medicine', weight: 6, rare: true }, { itemId: 'apple', weight: 6 }, { itemId: 'watermelon', weight: 4, rare: true }] },
-  gift_tree: { id: 'gift_tree', price: 30, growDurationMs: 30 * 60 * 1000, harvestCooldownMs: 30 * 60 * 1000, maxHarvests: 10, dropPool: [{ itemId: 'small_bouquet', weight: 24 }, { itemId: 'shiny_sticker', weight: 22 }, { itemId: 'ribbon_bell', weight: 18 }, { itemId: 'toy_ball', weight: 14 }, { itemId: 'picture_book', weight: 8, rare: true }, { itemId: 'soft_cloud_doll', weight: 5, rare: true }, { itemId: 'strawberry_cake', weight: 5, rare: true }, { itemId: 'strawberry_milk', weight: 4, rare: true }] },
+  fruit_tree: { id: 'fruit_tree', price: 30, growDurationMs: 60 * 60 * 1000, harvestCooldownMs: 60 * 60 * 1000, maxHarvests: 8, dropPool: [{ itemId: 'orange', weight: 24 }, { itemId: 'apple', weight: 22 }, { itemId: 'banana', weight: 20 }, { itemId: 'watermelon', weight: 14 }, { itemId: 'bento', weight: 8 }, { itemId: 'strawberry_milk', weight: 6, rare: true }, { itemId: 'nutri_meal', weight: 4, rare: true }, { itemId: 'strawberry_cake', weight: 2, rare: true }] },
+  care_tree: { id: 'care_tree', price: 30, growDurationMs: 60 * 60 * 1000, harvestCooldownMs: 60 * 60 * 1000, maxHarvests: 8, dropPool: [{ itemId: 'wet_wipes', weight: 26 }, { itemId: 'vitamin_tablet', weight: 20 }, { itemId: 'shampoo', weight: 14 }, { itemId: 'energy_drink', weight: 14 }, { itemId: 'blanket', weight: 10 }, { itemId: 'medicine', weight: 6, rare: true }, { itemId: 'apple', weight: 6 }, { itemId: 'watermelon', weight: 4, rare: true }] },
+  gift_tree: { id: 'gift_tree', price: 30, growDurationMs: 60 * 60 * 1000, harvestCooldownMs: 60 * 60 * 1000, maxHarvests: 8, dropPool: [{ itemId: 'small_bouquet', weight: 24 }, { itemId: 'shiny_sticker', weight: 22 }, { itemId: 'ribbon_bell', weight: 18 }, { itemId: 'toy_ball', weight: 14 }, { itemId: 'picture_book', weight: 8, rare: true }, { itemId: 'soft_cloud_doll', weight: 5, rare: true }, { itemId: 'strawberry_cake', weight: 5, rare: true }, { itemId: 'strawberry_milk', weight: 4, rare: true }] },
+  herb_tree: { id: 'herb_tree', price: 600, growDurationMs: 1 * hourMs, harvestCooldownMs: 1 * hourMs, maxHarvests: 6, dropPool: [{ itemId: 'skill_fruit', weight: 25 }, { itemId: 'nutri_meal', weight: 20 }, { itemId: 'blanket', weight: 15 }, { itemId: 'pig_trotter', weight: 15 }, { itemId: 'strawberry_cake', weight: 10 }, { itemId: 'soft_cloud_doll', weight: 10 }, { itemId: 'energy_drink', weight: 5 }] },
   money_tree: { id: 'money_tree', price: 3000, growDurationMs: 2 * hourMs, harvestCooldownMs: 2 * hourMs, maxHarvests: 8, dropPool: [] },
-  golden_apple_tree: { id: 'golden_apple_tree', price: 8888, growDurationMs: 4 * hourMs, harvestCooldownMs: 4 * hourMs, maxHarvests: 8, dropPool: [] },
+  golden_apple_tree: { id: 'golden_apple_tree', price: 0, growDurationMs: 4 * hourMs, harvestCooldownMs: 4 * hourMs, maxHarvests: 8, dropPool: [] },
 };
 
 export const gardenTreeMaxHarvests: Record<GardenTreeId, number> = Object.fromEntries(gardenTreeIds.map((treeId) => [treeId, gardenTreeDefinitions[treeId].maxHarvests])) as Record<GardenTreeId, number>;
@@ -239,7 +241,7 @@ const getHarvestCooldown = (pet: PetState, treeId: GardenTreeId, now: number, sl
   const bonus = slotIndex !== undefined && synergies ? getSynergyGrowSpeedBonus(slotIndex, synergies) : 0;
   return applyGrowMultiplier(pet, gardenTreeDefinitions[treeId].harvestCooldownMs, now, bonus);
 };
-const fertilizerReductionConfigs: Record<GardenFertilizerId, { percent: number; maxMs: number }> = { normal: { percent: 20, maxMs: 5 * 60 * 1000 }, heart: { percent: 35, maxMs: 10 * 60 * 1000 } };
+const fertilizerReductionConfigs: Record<GardenFertilizerId, { percent: number; baseMaxMs: number; scaleFactor: number }> = { normal: { percent: 20, baseMaxMs: 5 * 60 * 1000, scaleFactor: 0.1 }, heart: { percent: 35, baseMaxMs: 10 * 60 * 1000, scaleFactor: 0.15 } };
 
 const pickWeightedDrop = (pool: readonly DropPoolEntry[], seed: string, rareWeightBonusPercent: number) => {
   const weightedPool = pool.map((entry) => ({ ...entry, weight: entry.rare ? entry.weight * (1 + rareWeightBonusPercent / 100) : entry.weight }));
@@ -288,13 +290,18 @@ const resolveExtraDrops = (pet: PetState, slot: GardenSlot, seed: string, now: n
   }
   return { extraDropCount, boostCards };
 };
+const maybeDropGoldenAppleSapling = (seed: string, drops: GardenDrop[]) => {
+  if (Math.abs(hashString(seed + ':sapling')) % 100 < 2) {
+    drops.push({ itemId: 'golden_apple_tree_sapling', amount: 1 });
+  }
+};
 const generateGardenDrops = (pet: PetState, slot: GardenSlot, now: number, synergies: readonly ActiveSynergy[]): { drops: GardenDrop[]; boostCards: BoostCardState } => {
   if (!slot.treeId) return { drops: [], boostCards: normalizeBoostCardState(pet.boostCards, now) };
   const seed = [slot.slotIndex, slot.treeId, slot.plantedAt, slot.nextReadyAt, slot.harvestsUsed].join(':');
   const extra = resolveExtraDrops(pet, slot, seed, now, synergies);
   const synergyCoinBonus = getSynergyCoinBonus(slot.slotIndex, synergies);
-  if (slot.treeId === 'money_tree') { const baseCoins = pickMoneyTreeCoins(seed); const coins = Math.floor(baseCoins * (1 + extra.extraDropCount * 0.25) * (1 + synergyCoinBonus / 100)); return { drops: [{ kind: 'coins', amount: coins }], boostCards: extra.boostCards }; }
-  if (slot.treeId === 'golden_apple_tree') { const drops: GardenDrop[] = pickGoldenAppleTreeDrops(slot, seed); for (let index = 0; index < extra.extraDropCount; index += 1) drops.push({ itemId: getExtraDropItem(slot.treeId, seed + ':common:' + index), amount: 1 }); return { drops: mergeDrops(drops).slice(0, 4), boostCards: extra.boostCards }; }
+  if (slot.treeId === 'money_tree') { const baseCoins = pickMoneyTreeCoins(seed); const coins = Math.floor(baseCoins * (1 + extra.extraDropCount * 0.25) * (1 + synergyCoinBonus / 100)); const drops: GardenDrop[] = [{ kind: 'coins', amount: coins }]; maybeDropGoldenAppleSapling(seed, drops); return { drops, boostCards: extra.boostCards }; }
+  if (slot.treeId === 'golden_apple_tree') { const drops: GardenDrop[] = pickGoldenAppleTreeDrops(slot, seed); for (let index = 0; index < extra.extraDropCount; index += 1) drops.push({ itemId: getExtraDropItem(slot.treeId, seed + ':common:' + index), amount: 1 }); const merged = mergeDrops(drops).slice(0, 4); maybeDropGoldenAppleSapling(seed, merged); return { drops: merged, boostCards: extra.boostCards }; }
   const baseRareBonus = slot.fertilizerType === 'heart' ? getHeartRareWeightBonusPercent(pet.garden.tools) : 0;
   const rareWeightBonusPercent = baseRareBonus + getSynergyRareWeightBonus(slot.slotIndex, synergies);
   const drops: GardenDrop[] = [{ itemId: pickWeightedDrop(gardenTreeDefinitions[slot.treeId].dropPool, seed, rareWeightBonusPercent), amount: 1 }];
@@ -302,6 +309,7 @@ const generateGardenDrops = (pet: PetState, slot: GardenSlot, now: number, syner
   const witheredHash = seed.split('').reduce((h, c) => ((h << 5) - h + c.charCodeAt(0)) | 0, 0);
   const witheredChance = Math.abs(witheredHash) % 100;
   if (witheredChance < 12) drops.push({ itemId: 'withered_fragment', amount: 1 });
+  maybeDropGoldenAppleSapling(seed, drops);
   return { drops: mergeDrops(drops).slice(0, 5), boostCards: extra.boostCards };
 };
 const resetRoundBoosts = (slot: GardenSlot): GardenSlot => ({ ...slot, fertilizerType: undefined, hasNutrientBoost: false });
@@ -360,7 +368,9 @@ export const fertilizeTree = (pet: PetState, slotIndex: number, fertilizerId: Ga
   const itemId = gardenFertilizerItemIds[fertilizerId];
   if (getInventoryCount(current.inventory, itemId) <= 0) return failGardenAction(current, 'pet.garden.missingGardenItem', { item: getItemName(itemId) });
   const config = fertilizerReductionConfigs[fertilizerId];
-  const reductionMs = Math.min(config.maxMs, Math.floor(Math.max(0, slot.nextReadyAt - now) * (config.percent / 100)));
+  const baseDuration = gardenTreeDefinitions[slot.treeId]?.growDurationMs ?? 0;
+  const dynamicMaxMs = Math.max(config.baseMaxMs, baseDuration * config.scaleFactor);
+  const reductionMs = Math.min(dynamicMaxMs, Math.floor(Math.max(0, slot.nextReadyAt - now) * (config.percent / 100)));
   return {
     ...current,
     inventory: removeInventoryItem(current.inventory, itemId),

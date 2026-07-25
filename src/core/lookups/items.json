@@ -30,7 +30,8 @@
     { "id": "care_tree_sapling", "category": "garden", "price": 30, "effects": {}, "tags": ["garden", "sapling"] },
     { "id": "gift_tree_sapling", "category": "garden", "price": 30, "effects": {}, "tags": ["garden", "sapling"] },
     { "id": "money_tree_sapling", "category": "garden", "price": 3000, "effects": {}, "tags": ["garden", "sapling"] },
-    { "id": "golden_apple_tree_sapling", "category": "garden", "price": 8888, "effects": {}, "tags": ["garden", "sapling"] },
+    { "id": "golden_apple_tree_sapling", "category": "garden", "price": 0, "effects": {}, "tags": ["garden", "sapling"] },
+    { "id": "herb_tree_sapling", "category": "garden", "price": 600, "effects": {}, "tags": ["garden", "sapling"] },
     { "id": "normal_fertilizer", "category": "garden", "price": 300, "effects": {}, "tags": ["garden", "fertilizer"] },
     { "id": "heart_fertilizer", "category": "garden", "price": 900, "effects": {}, "tags": ["garden", "fertilizer"] },
     { "id": "harvest_nutrient", "category": "garden", "price": 300, "effects": {}, "tags": ["garden", "nutrient"] }

@@ -100,6 +100,7 @@ export const itemIcons: Record<BuiltinItemId, string> = {
   care_tree_sapling: itemCareTreeSapling,
   gift_tree_sapling: itemGiftTreeSapling,
   money_tree_sapling: itemMoneyTreeSapling,
+  herb_tree_sapling: itemCareTreeSapling,
   golden_apple_tree_sapling: itemGoldenAppleTreeSapling,
   normal_fertilizer: itemNormalFertilizer,
   heart_fertilizer: itemHeartFertilizer,

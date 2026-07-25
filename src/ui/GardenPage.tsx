@@ -227,17 +227,20 @@ export const GardenPage = ({ pet, itemIconMap, onBack, onUnlockSlot, onPlantTree
             <span className="garden-plot-detail__state">{slot.unlocked ? t(`ui.garden.states.${slot.state}`) : t('ui.garden.states.locked')}</span>
             {slot.treeId && <small className="garden-plot-detail__tree">{t('ui.garden.treeLife', { tree: t(`ui.garden.trees.${slot.treeId}.name`), used: slot.harvestsUsed, max: slot.maxHarvests })}</small>}
             {slot.state === 'growing' && slot.treeId && <small className="garden-plot-detail__remaining">{t('ui.garden.remaining', { time: formatGardenCountdown(slotView?.remainingMs ?? 0) })}</small>}
-            {slot.pendingDrops.length > 0 && slot.state === 'ready' && (
-              <div className="garden-plot-detail__drops">
-                {slot.pendingDrops.map((drop) => (
-                  <span className="garden-drop" key={drop.kind === 'coins' ? 'coins' : drop.itemId} title={drop.kind === 'coins' ? t('ui.garden.coinDropTitle', { coins: drop.amount }) : t('ui.garden.dropTitle', { count: drop.amount })}>
-                    {drop.kind === 'coins' ? <img src={currencyIcon} alt="" aria-hidden="true" /> : drop.itemId && itemIconMap[drop.itemId] ? <img src={itemIconMap[drop.itemId]} alt="" aria-hidden="true" /> : <Sparkles size={16} />}
-                    {drop.kind === 'coins' ? <strong>+{drop.amount}</strong> : drop.amount > 1 && <strong>x{drop.amount}</strong>}
-                  </span>
-                ))}
-              </div>
-            )}
           </div>
+          {slot.pendingDrops.length > 0 && slot.state === 'ready' && (
+            <div className="garden-plot-detail__drops">
+              {slot.pendingDrops.map((drop) => (
+                <span className="garden-drop" key={drop.kind === 'coins' ? 'coins' : drop.itemId}
+                  title={drop.kind === 'coins'
+                    ? t('ui.garden.coinDropTitle', { coins: drop.amount })
+                    : t('ui.garden.dropWithName', { name: t('pet.shop.items.' + drop.itemId + '.name'), count: drop.amount })}>
+                  {drop.kind === 'coins' ? <img src={currencyIcon} alt="" aria-hidden="true" /> : drop.itemId && itemIconMap[drop.itemId] ? <img src={itemIconMap[drop.itemId]} alt="" aria-hidden="true" /> : <Sparkles size={16} />}
+                  {drop.kind === 'coins' ? <strong>+{drop.amount}</strong> : drop.amount > 1 && <strong>x{drop.amount}</strong>}
+                </span>
+              ))}
+            </div>
+          )}
         </div>
 
         <div className="garden-action-grid">

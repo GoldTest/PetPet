@@ -565,23 +565,27 @@
 
 .garden-plot-detail__drops {
   display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
   gap: 6px;
+  width: 100%;
 }
 
 .garden-drop {
   display: inline-flex;
   align-items: center;
+  justify-content: center;
   gap: 4px;
   border: 1px solid rgba(66, 124, 70, 0.12);
-  border-radius: 6px;
-  padding: 3px 7px;
+  border-radius: 8px;
+  padding: 4px 8px;
   background: var(--surface-soft);
   font-size: 0.75rem;
 }
 
 .garden-drop img {
-  width: 20px;
-  height: 20px;
+  width: 28px;
+  height: 28px;
   object-fit: contain;
 }
 

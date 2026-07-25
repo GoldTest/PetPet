@@ -247,7 +247,7 @@
       "boostCardsHint": "每日收益加成",
       "boostCardsActive": "{card}生效中",
       "weatherAria": "今日天气：{weather}",
-      "garden": "花园",
+      "garden": "种植园",
       "gardenHint": "种下与收获",
       "gardenReady": "有树可收获",
       "gardenWithered": "有枯树待清理",
@@ -553,6 +553,7 @@
       "costCoins": "{coins} 金币",
       "costHearts": "{hearts} 心心",
       "dropTitle": "收获 {count} 件",
+      "dropWithName": "{name} × {count}",
       "dailyLimit": "今日达到上限",
       "toolsAria": "种植工具",
       "openTools": "打开工具升级",
@@ -608,6 +609,10 @@
         "gift_tree": {
           "name": "神奇礼物树",
           "summary": "种植获得的果树，成熟后产出礼物道具"
+        },
+        "herb_tree": {
+          "name": "活力树",
+          "summary": "稀有的魔法草药，产出活力果实和高级道具"
         },
         "money_tree": {
           "name": "摇钱树",
@@ -845,13 +850,17 @@
           "name": "神奇礼物树树苗",
           "summary": "可在种植栏位种下，成熟后产出礼物道具"
         },
+        "herb_tree_sapling": {
+          "name": "活力树树苗",
+          "summary": "可在种植栏位种下，成熟后产出活力果实和高级道具"
+        },
         "money_tree_sapling": {
           "name": "摇钱树树苗",
           "summary": "高价树苗，成熟后直接收获金币"
         },
         "golden_apple_tree_sapling": {
           "name": "金苹果树树苗",
-          "summary": "稀有树苗，成熟后有机会产出金苹果"
+          "summary": "极其稀有的树苗，收获时极小概率掉落"
         },
         "normal_fertilizer": {
           "name": "普通肥料",
@@ -878,16 +887,16 @@
           "summary": "使用后恢复25点体力"
         },
         "skill_fruit": {
-          "name": "技能果实",
-          "summary": "使用后Partner Schedule技能获得经验"
+          "name": "活力果实",
+          "summary": "使用后全属性小幅恢复 +5"
         },
         "wish_fragment": {
           "name": "许愿碎片",
           "summary": "收集后可兑换花园装饰（预留）"
         },
         "garden_token": {
-          "name": "花园代币",
-          "summary": "花园专属货币，可用于花园装饰"
+          "name": "种植园代币",
+          "summary": "种植园专属货币，可用于种植园装饰"
         }
       },
       "categories": {
