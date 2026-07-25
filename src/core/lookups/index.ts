@@ -22,3 +22,5 @@ export { default as weather } from './weather.json';
 
 /** 季节表为 JSON 格式，直接 import */
 export { default as seasons } from './season.json';
+
+export { synergyRulesTable } from './synergy';

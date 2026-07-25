@@ -8,6 +8,7 @@ import { getSeasonForDate, type Season } from './season';
 import type { BoostCardState, BuiltinItemId, GardenDrop, GardenFertilizerId, GardenSlot, GardenSlotState, GardenState, GardenToolId, GardenTools, GardenTreeId, ItemId, PetState, WeatherType } from './petTypes';
 import { hashString, isNumber } from './utils';
 import { defaultCompostBinState, normalizeCompostBinState } from './compostBin';
+import { findActiveSynergies, getSynergyGrowSpeedBonus, getSynergyExtraDropChance, getSynergyRareWeightBonus, getSynergyCoinBonus, type ActiveSynergy } from './gardenSynergy';
 
 export const gardenSchemaVersion = 3;
 export const gardenSlotCount = 9;
@@ -222,14 +223,21 @@ export const getGardenEnvironmentEffects = (pet: PetState, now = Date.now()): Ga
   };
 };
 
-const applyGrowMultiplier = (pet: PetState, durationMs: number, now: number) => {
+const applyGrowMultiplier = (pet: PetState, durationMs: number, now: number, synergyGrowBonusPercent = 0) => {
   const environmentMultiplier = getGardenEnvironmentEffects(pet, now).growTimeMultiplier;
   const boostMultiplier = getBoostCardEffects(pet, now).gardenGrowTimeMultiplier;
   const masteryMultiplier = getPartnerScheduleCrossSystemEffects(pet).gardenTimeMultiplier;
-  return Math.max(60 * 1000, Math.round(durationMs * environmentMultiplier * boostMultiplier * masteryMultiplier));
+  const synergyMultiplier = Math.max(0, 1 - synergyGrowBonusPercent / 100);
+  return Math.max(60 * 1000, Math.round(durationMs * environmentMultiplier * boostMultiplier * masteryMultiplier * synergyMultiplier));
 };
-const getGrowDuration = (pet: PetState, treeId: GardenTreeId, now: number) => applyGrowMultiplier(pet, gardenTreeDefinitions[treeId].growDurationMs, now);
-const getHarvestCooldown = (pet: PetState, treeId: GardenTreeId, now: number) => applyGrowMultiplier(pet, gardenTreeDefinitions[treeId].harvestCooldownMs, now);
+const getGrowDuration = (pet: PetState, treeId: GardenTreeId, now: number, slotIndex?: number, synergies?: ActiveSynergy[]) => {
+  const bonus = slotIndex !== undefined && synergies ? getSynergyGrowSpeedBonus(slotIndex, synergies) : 0;
+  return applyGrowMultiplier(pet, gardenTreeDefinitions[treeId].growDurationMs, now, bonus);
+};
+const getHarvestCooldown = (pet: PetState, treeId: GardenTreeId, now: number, slotIndex?: number, synergies?: ActiveSynergy[]) => {
+  const bonus = slotIndex !== undefined && synergies ? getSynergyGrowSpeedBonus(slotIndex, synergies) : 0;
+  return applyGrowMultiplier(pet, gardenTreeDefinitions[treeId].harvestCooldownMs, now, bonus);
+};
 const fertilizerReductionConfigs: Record<GardenFertilizerId, { percent: number; maxMs: number }> = { normal: { percent: 20, maxMs: 5 * 60 * 1000 }, heart: { percent: 35, maxMs: 10 * 60 * 1000 } };
 
 const pickWeightedDrop = (pool: readonly DropPoolEntry[], seed: string, rareWeightBonusPercent: number) => {
@@ -263,10 +271,11 @@ const pickGoldenAppleTreeDrops = (slot: GardenSlot, seed: string): GardenDrop[] 
   }
   return drops;
 };
-const resolveExtraDrops = (pet: PetState, slot: GardenSlot, seed: string, now: number) => {
+const resolveExtraDrops = (pet: PetState, slot: GardenSlot, seed: string, now: number, synergies: readonly ActiveSynergy[]) => {
   const environmentChance = getGardenEnvironmentEffects(pet, now).extraDropChancePercent;
   const achievementChance = getAchievementEffects(pet).gardenExtraDropChancePercent;
-  const totalChance = Math.max(0, getExtraDropChance(slot, pet.garden) + environmentChance + achievementChance);
+  const synergyChance = getSynergyExtraDropChance(slot.slotIndex, synergies);
+  const totalChance = Math.max(0, getExtraDropChance(slot, pet.garden) + environmentChance + achievementChance + synergyChance);
   const remainderChance = totalChance % 100;
   let extraDropCount = Math.floor(totalChance / 100) + (remainderChance > 0 && (hashString(seed + ':extra') % 100) < remainderChance ? 1 : 0);
   let boostCards = normalizeBoostCardState(pet.boostCards, now);
@@ -278,13 +287,15 @@ const resolveExtraDrops = (pet: PetState, slot: GardenSlot, seed: string, now: n
   }
   return { extraDropCount, boostCards };
 };
-const generateGardenDrops = (pet: PetState, slot: GardenSlot, now: number): { drops: GardenDrop[]; boostCards: BoostCardState } => {
+const generateGardenDrops = (pet: PetState, slot: GardenSlot, now: number, synergies: readonly ActiveSynergy[]): { drops: GardenDrop[]; boostCards: BoostCardState } => {
   if (!slot.treeId) return { drops: [], boostCards: normalizeBoostCardState(pet.boostCards, now) };
   const seed = [slot.slotIndex, slot.treeId, slot.plantedAt, slot.nextReadyAt, slot.harvestsUsed].join(':');
-  const extra = resolveExtraDrops(pet, slot, seed, now);
-  if (slot.treeId === 'money_tree') { const baseCoins = pickMoneyTreeCoins(seed); const coins = Math.floor(baseCoins * (1 + extra.extraDropCount * 0.25)); return { drops: [{ kind: 'coins', amount: coins }], boostCards: extra.boostCards }; }
+  const extra = resolveExtraDrops(pet, slot, seed, now, synergies);
+  const synergyCoinBonus = getSynergyCoinBonus(slot.slotIndex, synergies);
+  if (slot.treeId === 'money_tree') { const baseCoins = pickMoneyTreeCoins(seed); const coins = Math.floor(baseCoins * (1 + extra.extraDropCount * 0.25) * (1 + synergyCoinBonus / 100)); return { drops: [{ kind: 'coins', amount: coins }], boostCards: extra.boostCards }; }
   if (slot.treeId === 'golden_apple_tree') { const drops: GardenDrop[] = pickGoldenAppleTreeDrops(slot, seed); for (let index = 0; index < extra.extraDropCount; index += 1) drops.push({ itemId: getExtraDropItem(slot.treeId, seed + ':common:' + index), amount: 1 }); return { drops: mergeDrops(drops).slice(0, 4), boostCards: extra.boostCards }; }
-  const rareWeightBonusPercent = slot.fertilizerType === 'heart' ? getHeartRareWeightBonusPercent(pet.garden.tools) : 0;
+  const baseRareBonus = slot.fertilizerType === 'heart' ? getHeartRareWeightBonusPercent(pet.garden.tools) : 0;
+  const rareWeightBonusPercent = baseRareBonus + getSynergyRareWeightBonus(slot.slotIndex, synergies);
   const drops: GardenDrop[] = [{ itemId: pickWeightedDrop(gardenTreeDefinitions[slot.treeId].dropPool, seed, rareWeightBonusPercent), amount: 1 }];
   for (let index = 0; index < extra.extraDropCount; index += 1) drops.push({ itemId: getExtraDropItem(slot.treeId, seed + ':common:' + index), amount: 1 });
   return { drops: mergeDrops(drops).slice(0, 4), boostCards: extra.boostCards };
@@ -293,7 +304,8 @@ const resetRoundBoosts = (slot: GardenSlot): GardenSlot => ({ ...slot, fertilize
 export const advanceGarden = (pet: PetState, now = Date.now()): PetState => {
   let boostCards = normalizeBoostCardState(pet.boostCards, now);
   const garden = normalizeGardenState(pet.garden, now);
-  const slots = garden.slots.map((slot) => { if (slot.state !== 'growing' || !slot.treeId || slot.nextReadyAt > now) return slot; const generated = generateGardenDrops({ ...pet, garden, boostCards }, slot, now); boostCards = generated.boostCards; return { ...slot, state: 'ready' as const, pendingDrops: generated.drops }; });
+  const synergies = findActiveSynergies(garden);
+  const slots = garden.slots.map((slot) => { if (slot.state !== 'growing' || !slot.treeId || slot.nextReadyAt > now) return slot; const generated = generateGardenDrops({ ...pet, garden, boostCards }, slot, now, synergies); boostCards = generated.boostCards; return { ...slot, state: 'ready' as const, pendingDrops: generated.drops }; });
   return { ...pet, boostCards, garden: { ...garden, slots } };
 };
 const updateGardenSlot = (garden: GardenState, slotIndex: number, updater: (slot: GardenSlot) => GardenSlot): GardenState => ({ ...garden, slots: garden.slots.map((slot) => slot.slotIndex === slotIndex ? updater(slot) : slot) });
@@ -311,10 +323,11 @@ export const plantTree = (pet: PetState, slotIndex: number, treeId: GardenTreeId
   if (slot.state !== 'empty') return failGardenAction(current, 'pet.garden.slotNotEmpty');
   if (getInventoryCount(current.inventory, saplingItemId) <= 0) return failGardenAction(current, 'pet.garden.missingGardenItem', { item: getItemName(saplingItemId) });
   const environment = getGardenEnvironmentEffects(current, now);
+  const synergies = findActiveSynergies(current.garden);
   return incrementAchievementGardenPlant({
     ...current,
     inventory: removeInventoryItem(current.inventory, saplingItemId),
-    garden: updateGardenSlot(current.garden, slotIndex, (target) => ({ ...resetRoundBoosts(target), treeId, plantedAt: now, nextReadyAt: now + getGrowDuration(current, treeId, now), harvestsUsed: 0, maxHarvests: definition.maxHarvests + environment.maxHarvestBonus, pendingDrops: [], state: 'growing' })),
+    garden: updateGardenSlot(current.garden, slotIndex, (target) => ({ ...resetRoundBoosts(target), treeId, plantedAt: now, nextReadyAt: now + getGrowDuration(current, treeId, now, slotIndex, synergies), harvestsUsed: 0, maxHarvests: definition.maxHarvests + environment.maxHarvestBonus, pendingDrops: [], state: 'growing' })),
     recentEvent: t('pet.garden.plantSuccess', { tree: t('ui.garden.trees.' + treeId + '.name'), item: getItemName(saplingItemId) }),
     lastInteractionAt: now,
   });
@@ -346,9 +359,10 @@ export const harvestTree = (pet: PetState, slotIndex: number, now = Date.now()):
   if (!slot || slot.state !== 'ready' || !slot.treeId || slot.pendingDrops.length === 0) return failGardenAction(current, 'pet.garden.cannotHarvest');
   const harvestsUsed = slot.harvestsUsed + 1;
   const isWithered = harvestsUsed >= slot.maxHarvests;
+  const synergies = findActiveSynergies(current.garden);
   const nextSlot: GardenSlot = isWithered
     ? { ...resetRoundBoosts(slot), harvestsUsed, pendingDrops: [], state: 'withered', dailyHarvestDateKey: getSixAmResetDateKey(now), dailyHarvestCount: slot.dailyHarvestCount + 1 }
-    : { ...resetRoundBoosts(slot), plantedAt: now, lastWateredAt: 0, nextReadyAt: now + getHarvestCooldown(current, slot.treeId, now), harvestsUsed, pendingDrops: [], state: 'growing', dailyHarvestDateKey: getSixAmResetDateKey(now), dailyHarvestCount: slot.dailyHarvestCount + 1 };
+    : { ...resetRoundBoosts(slot), plantedAt: now, lastWateredAt: 0, nextReadyAt: now + getHarvestCooldown(current, slot.treeId, now, slotIndex, synergies), harvestsUsed, pendingDrops: [], state: 'growing', dailyHarvestDateKey: getSixAmResetDateKey(now), dailyHarvestCount: slot.dailyHarvestCount + 1 };
   const itemCount = getDropItemCount(slot.pendingDrops);
   const coinAmount = getDropCoinAmount(slot.pendingDrops);
   const eventKey = getHarvestEventKey(itemCount, coinAmount, isWithered);
