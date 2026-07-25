@@ -1,5 +1,5 @@
 ---
-status: planned
+status: complete
 created: 2026-07-25
 priority: medium
 tags:
@@ -9,7 +9,7 @@ tags:
 depends_on: []
 parent: 011-garden-entertainment-overhaul
 created_at: 2026-07-25T13:25:59.110393100Z
-updated_at: 2026-07-25T13:25:59.110393100Z
+updated_at: 2026-07-25T16:00:00.000000000Z
 ---
 # 花园共生系统
 

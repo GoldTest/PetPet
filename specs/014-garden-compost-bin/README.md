@@ -1,5 +1,5 @@
 ---
-status: planned
+status: complete
 created: 2026-07-25
 priority: high
 tags:
@@ -9,7 +9,7 @@ tags:
 depends_on: []
 parent: 011-garden-entertainment-overhaul
 created_at: 2026-07-25T13:25:38.374563300Z
-updated_at: 2026-07-25T13:25:38.374563300Z
+updated_at: 2026-07-25T16:00:00.000000000Z
 ---
 # 堆肥桶资源回收系统
 

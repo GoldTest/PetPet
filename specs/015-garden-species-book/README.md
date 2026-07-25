@@ -1,5 +1,5 @@
 ---
-status: planned
+status: complete
 created: 2026-07-25
 priority: high
 tags:
@@ -10,7 +10,7 @@ depends_on:
 - garden-time-rhythm
 parent: 011-garden-entertainment-overhaul
 created_at: 2026-07-25T13:25:48.594392200Z
-updated_at: 2026-07-25T13:25:48.594392200Z
+updated_at: 2026-07-25T16:00:00.000000000Z
 ---
 # 全树种图鉴收集系统
 
