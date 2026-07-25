@@ -55,7 +55,7 @@
       "unavailable": "不可使用",
       "partnerScheduleBusy": "伙伴正在进行日程，暂时不能使用这件道具。",
       "partnerScheduleBusyShort": "日程进行中",
-      "goGarden": "前往种植园",
+      "goGarden": "前往植物园",
       "emptyCategory": "这一分类暂时没有道具。",
       "openCategoryShop": "去商店看看",
       "shop": "商店",
@@ -514,7 +514,7 @@
         "schedule": "日程",
         "care": "照顾",
         "daily": "日常",
-        "garden": "种植园",
+        "garden": "植物园",
         "shop": "商店",
         "inventory": "背包",
         "pomodoro": "番茄钟",
@@ -541,7 +541,7 @@
       "aria": "种植页面",
       "back": "返回",
       "kicker": "Garden",
-      "title": "种植园",
+      "title": "植物园",
       "prevSlot": "上一块地",
       "nextSlot": "下一块地",
       "slotsAria": "地块",
@@ -653,7 +653,7 @@
       "itemOwned": "背包 x{count}",
       "waterFree": "免费 · 缩短 {percent}%",
       "coinDropTitle": "收获 {coins} 金币",
-      "compensationGiftLabel": "领取种植园补偿 {coins} 金币",
+      "compensationGiftLabel": "领取植物园补偿 {coins} 金币",
       "compensationGiftCoins": "+{coins}",
       "compostTitle": "堆肥桶",
       "compostLevel": "Lv.{level}",
@@ -1159,7 +1159,7 @@
       "dailyCoins": "每日登录礼物：金币 +{coins}。",
       "dailyItem": "每日登录礼物：背包里多了一件惊喜道具。",
       "helpPageGift": "已领取玩法说明赠礼，金币 +{coins}。",
-      "gardenCompensation": "已领取种植园补偿，金币 +{coins}。",
+      "gardenCompensation": "已领取植物园补偿，金币 +{coins}。",
       "anniversary": "今天是和 {name} 相遇的日子，纪念日奖励：金币 +{coins}，小心心 +{hearts}，闪亮贴纸 +1。",
       "monthlyGift": "新的月份开始了，月初礼物：金币 +{coins}，还有一份水果。",
       "dailyWithStipend": "每日登录礼物：金币 +{coins}（含成就津贴 +{stipend}）。",
@@ -1348,23 +1348,23 @@
         },
         "garden_first_plant": {
           "title": "初次播种",
-          "description": "在种植园成功种下 1 棵树。"
+          "description": "在植物园成功种下 1 棵树。"
         },
         "garden_first_harvest": {
           "title": "第一篮收获",
-          "description": "在种植园完成第 1 次收获。"
+          "description": "在植物园完成第 1 次收获。"
         },
         "garden_water_20": {
           "title": "勤快浇水",
-          "description": "在种植园成功浇水 20 次。"
+          "description": "在植物园成功浇水 20 次。"
         },
         "garden_harvest_30": {
           "title": "大丰收",
-          "description": "在种植园累计收获 30 次。"
+          "description": "在植物园累计收获 30 次。"
         },
         "garden_harvest_100": {
           "title": "百次丰收",
-          "description": "在种植园累计收获 100 次。"
+          "description": "在植物园累计收获 100 次。"
         },
         "garden_tree_catalogue": {
           "title": "园艺大师",
@@ -1372,7 +1372,7 @@
         },
         "garden_all_slots": {
           "title": "花园之主",
-          "description": "解锁种植园的全部 5 个栏位。"
+          "description": "解锁植物园的全部 5 个栏位。"
         },
         "garden_tools_max": {
           "title": "工具专家",

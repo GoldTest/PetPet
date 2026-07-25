@@ -150,6 +150,7 @@ export const collectCompost = (pet: PetState, slotIndex: number, now = Date.now(
 
   const outputItemId = slot.outputItemId as BuiltinItemId;
   const outputAmount = slot.outputAmount;
+  if (!outputItemId || outputAmount <= 0) return pet;
 
   const emptySlot: CompostBinSlot = defaultCompostBinSlot(slotIndex);
   const newSlots = bin.slots.map((s) => s.slotIndex === slotIndex ? emptySlot : s);

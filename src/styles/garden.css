@@ -461,6 +461,28 @@
   background: rgba(140, 120, 100, 0.4);
 }
 
+.garden-plot__water-hint {
+  position: absolute;
+  bottom: 4px;
+  left: 6px;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  color: #4a8ec4;
+  background: rgba(200, 230, 255, 0.7);
+  box-shadow: 0 1px 4px rgba(60, 140, 200, 0.2);
+  pointer-events: none;
+  z-index: 3;
+  animation: garden-water-pulse 2s ease-in-out infinite;
+}
+
+@keyframes garden-water-pulse {
+  0%, 100% { transform: scale(1); opacity: 0.7; }
+  50% { transform: scale(1.12); opacity: 1; }
+}
+
 @keyframes garden-pulse {
   0%, 100% { transform: scale(1); }
   50% { transform: scale(1.1); }
@@ -750,165 +772,493 @@
   }
 }
 
-/* Compost Bin Panel */
+/* Compost Bin — Left Sidebar Barrels */
 .compost-bin-panel {
-  background: var(--surface-green);
-  border: 1px solid rgba(67, 111, 48, 0.18);
+  position: absolute;
+  left: 10px;
+  top: 200px;
+  z-index: 5;
+  width: 106px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 8px 6px;
+  background: rgba(255, 255, 255, 0.7);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(80, 60, 40, 0.12);
   border-radius: 12px;
-  padding: 12px;
-  margin-top: 12px;
+  box-shadow: 0 4px 20px rgba(40, 30, 20, 0.1);
 }
 
 .compost-bin-panel__header {
   display: flex;
   align-items: center;
-  gap: 8px;
-  margin-bottom: 10px;
+  justify-content: center;
+  gap: 4px;
   flex-wrap: wrap;
+  text-align: center;
+  padding-bottom: 4px;
+  border-bottom: 1px solid rgba(80, 60, 40, 0.1);
 }
 
 .compost-bin-panel__header > strong {
-  color: #41602f;
-  font-size: 0.9rem;
+  font-size: 0.72rem;
+  color: #5a4a38;
+  letter-spacing: 0.3px;
 }
 
 .compost-bin-panel__level {
-  color: #6b8c50;
-  font-size: 0.8rem;
-  background: rgba(67, 111, 48, 0.1);
-  padding: 2px 6px;
-  border-radius: 4px;
+  font-size: 0.6rem;
+  color: #7a6a58;
+  background: rgba(80, 60, 40, 0.1);
+  padding: 1px 5px;
+  border-radius: 3px;
+  line-height: 1.4;
 }
 
 .compost-bin-panel__upgrade {
   display: inline-flex;
   align-items: center;
-  gap: 4px;
-  margin-left: auto;
-  padding: 4px 8px;
-  border: 1px solid rgba(67, 111, 48, 0.3);
-  border-radius: 6px;
-  background: rgba(255, 255, 255, 0.6);
-  color: #41602f;
-  font-size: 0.75rem;
+  gap: 3px;
+  padding: 2px 6px;
+  border: 1px solid rgba(80, 60, 40, 0.2);
+  border-radius: 4px;
+  background: rgba(255, 255, 255, 0.5);
+  color: #5a4a38;
+  font-size: 0.6rem;
   cursor: pointer;
   transition: background 0.15s;
 }
 
 .compost-bin-panel__upgrade:hover:not(:disabled) {
-  background: rgba(255, 255, 255, 0.9);
+  background: rgba(255, 255, 255, 0.85);
 }
 
 .compost-bin-panel__upgrade:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-}
-
-.compost-bin-panel__max {
-  margin-left: auto;
-  color: #6b8c50;
-  font-size: 0.75rem;
-  font-style: italic;
-}
-
-.compost-bin-panel__slots {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 8px;
-}
-
-.compost-bin-slot {
-  background: rgba(255, 255, 255, 0.5);
-  border: 1px solid rgba(67, 111, 48, 0.15);
-  border-radius: 8px;
-  padding: 10px 8px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  min-height: 80px;
-  text-align: center;
-  transition: border-color 0.2s, background 0.2s;
-}
-
-.compost-bin-slot--empty {
-  border-style: dashed;
-}
-
-.compost-bin-slot--active {
-  background: rgba(200, 230, 180, 0.4);
-  border-color: rgba(67, 111, 48, 0.3);
-}
-
-.compost-bin-slot--ready {
-  background: rgba(255, 230, 150, 0.4);
-  border-color: rgba(200, 170, 50, 0.4);
-}
-
-.compost-bin-slot__add {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 6px;
-  background: none;
-  border: none;
-  color: #6b8c50;
-  font-size: 0.75rem;
-  cursor: pointer;
-  padding: 4px;
-  width: 100%;
-}
-
-.compost-bin-slot__add:disabled {
   opacity: 0.4;
   cursor: not-allowed;
 }
 
-.compost-bin-slot__add:hover:not(:disabled) {
-  color: #41602f;
+.compost-bin-panel__max {
+  font-size: 0.6rem;
+  color: #7a6a58;
+  font-style: italic;
 }
 
-.compost-bin-slot__content {
+.compost-bin-panel__barrels {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  align-items: center;
+}
+
+/* ----- Barrel shape ----- */
+.compost-barrel {
+  position: relative;
+  width: 88px;
+  height: 112px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  border-radius: 5px 5px 18px 18px;
+  background: linear-gradient(155deg, #d9af7c 0%, #c59864 40%, #b8844c 60%, #c09058 100%);
+  box-shadow:
+    0 3px 10px rgba(80, 60, 40, 0.18),
+    inset 0 1px 3px rgba(255, 255, 255, 0.35),
+    inset 0 -2px 4px rgba(0, 0, 0, 0.08);
+  overflow: hidden;
+  cursor: pointer;
+  transition: transform 0.2s, box-shadow 0.2s;
+  user-select: none;
+}
+
+.compost-barrel:hover {
+  transform: translateY(-2px);
+}
+
+.compost-barrel:active {
+  transform: translateY(0);
+}
+
+/* Barrel rim (wider top) */
+.compost-barrel::before {
+  content: '';
+  position: absolute;
+  top: -3px;
+  left: -5px;
+  right: -5px;
+  height: 9px;
+  background: linear-gradient(180deg, #a87c4c, #bf925c);
+  border-radius: 5px 5px 3px 3px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.12);
+  z-index: 4;
+}
+
+/* Barrel bottom shadow */
+.compost-barrel::after {
+  content: '';
+  position: absolute;
+  bottom: -1px;
+  left: 4px;
+  right: 4px;
+  height: 4px;
+  background: rgba(0, 0, 0, 0.08);
+  border-radius: 50%;
+  z-index: 0;
+}
+
+/* Metal bands */
+.compost-barrel__band {
+  position: absolute;
+  left: -3px;
+  right: -3px;
+  height: 5px;
+  background: linear-gradient(180deg, #8a8a8a 0%, #6a6a6a 40%, #7a7a7a 60%, #5e5e5e 100%);
+  border-radius: 2px;
+  z-index: 2;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.15);
+}
+
+.compost-barrel__band--top {
+  top: 24px;
+}
+
+.compost-barrel__band--bottom {
+  bottom: 24px;
+}
+
+/* Barrel inner content zone */
+.compost-barrel__inner {
+  position: relative;
+  z-index: 3;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  flex: 1;
+  width: 100%;
+  padding: 16px 4px 14px;
+  text-align: center;
+  gap: 3px;
+}
+
+/* ----- Empty barrel ----- */
+.compost-barrel--empty {
+  opacity: 0.75;
+}
+
+.compost-barrel--empty .compost-barrel__rim-line {
+  position: absolute;
+  top: -1px;
+  left: -3px;
+  right: -3px;
+  height: 5px;
+  border: 1.5px dashed rgba(120, 90, 60, 0.3);
+  border-radius: 4px 4px 0 0;
+  background: transparent;
+  z-index: 5;
+}
+
+.compost-barrel--empty .compost-barrel__add-btn {
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: 4px;
-  width: 100%;
-}
-
-.compost-bin-slot__type {
-  font-size: 0.7rem;
-  color: #6b8c50;
-}
-
-.compost-bin-slot__time {
-  font-size: 0.7rem;
-  color: #8a7a5a;
-  display: flex;
-  align-items: center;
-  gap: 3px;
-}
-
-.compost-bin-slot__output {
-  font-size: 0.75rem;
-  color: #41602f;
-  font-weight: 500;
-}
-
-.compost-bin-slot__collect {
-  margin-top: 4px;
-  padding: 4px 10px;
-  border: 1px solid rgba(200, 170, 50, 0.5);
-  border-radius: 6px;
-  background: rgba(255, 230, 150, 0.6);
-  color: #6b5a20;
-  font-size: 0.75rem;
+  background: none;
+  border: none;
+  color: #7a6a58;
+  font-size: 0.65rem;
   cursor: pointer;
-  transition: background 0.15s;
+  padding: 0;
+  width: 100%;
+  transition: color 0.15s;
 }
 
-.compost-bin-slot__collect:hover {
-  background: rgba(255, 230, 150, 0.9);
+.compost-barrel--empty .compost-barrel__add-btn:hover:not(:disabled) {
+  color: #4a7a38;
+}
+
+.compost-barrel--empty .compost-barrel__add-btn:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+
+.compost-barrel--empty .compost-barrel__add-icon {
+  width: 24px;
+  height: 24px;
+  border: 2px dashed rgba(120, 90, 60, 0.35);
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  font-size: 1rem;
+  line-height: 1;
+  color: rgba(120, 90, 60, 0.45);
+  transition: border-color 0.15s, color 0.15s;
+}
+
+.compost-barrel--empty .compost-barrel__add-btn:hover:not(:disabled) .compost-barrel__add-icon {
+  border-color: #5a8a48;
+  color: #4a7a38;
+}
+
+.compost-barrel__add-label {
+  line-height: 1.2;
+}
+
+/* ----- Active barrel (composting) ----- */
+.compost-barrel--active .compost-barrel__fill {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 1;
+  border-radius: 0 0 16px 16px;
+  background: linear-gradient(180deg, #7d5a2e 0%, #5a3d1e 50%, #4a3018 100%);
+  transition: height 0.6s ease;
+  pointer-events: none;
+}
+
+/* Compost texture overlay */
+.compost-barrel--active .compost-barrel__fill::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(circle at 30% 40%, rgba(120, 80, 40, 0.4) 0 4px, transparent 5px),
+    radial-gradient(circle at 70% 60%, rgba(100, 65, 30, 0.3) 0 3px, transparent 4px),
+    radial-gradient(circle at 50% 80%, rgba(130, 90, 50, 0.2) 0 5px, transparent 6px);
+  border-radius: inherit;
+}
+
+/* Bubbles animation */
+.compost-barrel--active .compost-barrel__bubbles {
+  position: absolute;
+  bottom: 30%;
+  left: 0;
+  right: 0;
+  z-index: 3;
+  pointer-events: none;
+}
+
+.compost-barrel--active .compost-barrel__bubble {
+  position: absolute;
+  width: 4px;
+  height: 4px;
+  background: rgba(200, 220, 180, 0.3);
+  border-radius: 50%;
+  animation: compost-bubble 2.5s ease-in-out infinite;
+}
+
+.compost-barrel--active .compost-barrel__bubble:nth-child(1) {
+  left: 20%;
+  animation-delay: 0s;
+  width: 3px;
+  height: 3px;
+}
+
+.compost-barrel--active .compost-barrel__bubble:nth-child(2) {
+  left: 50%;
+  animation-delay: 0.8s;
+}
+
+.compost-barrel--active .compost-barrel__bubble:nth-child(3) {
+  left: 72%;
+  animation-delay: 1.6s;
+  width: 3px;
+  height: 3px;
+}
+
+@keyframes compost-bubble {
+  0% {
+    transform: translateY(0) scale(1);
+    opacity: 0;
+  }
+  20% {
+    opacity: 0.6;
+  }
+  80% {
+    opacity: 0.4;
+  }
+  100% {
+    transform: translateY(-28px) scale(0.6);
+    opacity: 0;
+  }
+}
+
+.compost-barrel--active .compost-barrel__input-icon {
+  width: 22px;
+  height: 22px;
+  object-fit: contain;
+  border-radius: 4px;
+  background: rgba(255, 255, 255, 0.3);
+  padding: 2px;
+}
+
+.compost-barrel--active .compost-barrel__input-label {
+  font-size: 0.6rem;
+  color: #5a4a38;
+  font-weight: 600;
+  line-height: 1.2;
+}
+
+.compost-barrel--active .compost-barrel__timer {
+  font-size: 0.6rem;
+  color: #3d2e1a;
+  font-weight: 750;
+  background: rgba(255, 255, 255, 0.35);
+  padding: 1px 6px;
+  border-radius: 4px;
+  margin-top: 2px;
+}
+
+/* ----- Ready barrel ----- */
+.compost-barrel--ready {
+  box-shadow:
+    0 0 12px rgba(200, 170, 50, 0.35),
+    0 0 24px rgba(200, 170, 50, 0.12),
+    0 3px 10px rgba(80, 60, 40, 0.18),
+    inset 0 1px 3px rgba(255, 255, 255, 0.35);
+  animation: compost-ready-glow 2s ease-in-out infinite;
+}
+
+@keyframes compost-ready-glow {
+  0%, 100% { box-shadow: 0 0 12px rgba(200, 170, 50, 0.35), 0 0 24px rgba(200, 170, 50, 0.12), 0 3px 10px rgba(80, 60, 40, 0.18), inset 0 1px 3px rgba(255, 255, 255, 0.35); }
+  50% { box-shadow: 0 0 18px rgba(200, 170, 50, 0.5), 0 0 32px rgba(200, 170, 50, 0.2), 0 3px 10px rgba(80, 60, 40, 0.18), inset 0 1px 3px rgba(255, 255, 255, 0.35); }
+}
+
+.compost-barrel--ready .compost-barrel__fill {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 1;
+  height: 100%;
+  border-radius: 0 0 16px 16px;
+  background: linear-gradient(180deg, #9a7a3e 0%, #7a5e2e 50%, #5a4420 100%);
+  pointer-events: none;
+}
+
+.compost-barrel--ready .compost-barrel__fill::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(circle at 30% 40%, rgba(200, 180, 80, 0.3) 0 4px, transparent 5px),
+    radial-gradient(circle at 70% 60%, rgba(180, 160, 60, 0.2) 0 3px, transparent 4px);
+  border-radius: inherit;
+}
+
+.compost-barrel--ready .compost-barrel__sparkle {
+  position: absolute;
+  top: 10px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 5;
+  color: #f5c842;
+  animation: compost-sparkle 1.2s ease-in-out infinite;
+  pointer-events: none;
+}
+
+@keyframes compost-sparkle {
+  0%, 100% { transform: translateX(-50%) scale(1); opacity: 0.8; }
+  50% { transform: translateX(-50%) scale(1.3); opacity: 1; }
+}
+
+.compost-barrel--ready .compost-barrel__output-label {
+  font-size: 0.65rem;
+  font-weight: 700;
+  color: #5a4420;
+  line-height: 1.2;
+  position: relative;
+  z-index: 4;
+}
+
+.compost-barrel--ready .compost-barrel__collect-btn {
+  position: relative;
+  z-index: 5;
+  margin-top: 3px;
+  padding: 3px 10px;
+  border: 1.5px solid rgba(180, 150, 40, 0.5);
+  border-radius: 6px;
+  background: linear-gradient(180deg, #fae68a, #f0d460);
+  color: #5a4420;
+  font-size: 0.65rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.15s, transform 0.12s;
+  box-shadow: 0 2px 6px rgba(180, 150, 40, 0.25);
+}
+
+.compost-barrel--ready .compost-barrel__collect-btn:hover {
+  background: linear-gradient(180deg, #fff0a0, #f5dc70);
+  transform: scale(1.05);
+}
+
+.compost-barrel--ready .compost-barrel__collect-btn:active {
+  transform: scale(0.95);
+}
+
+/* ----- Responsive: stack on top on narrow screens ----- */
+@media (max-width: 720px) {
+  .compost-bin-panel {
+    position: relative;
+    left: auto;
+    top: auto;
+    width: 100%;
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px;
+    padding: 10px;
+    backdrop-filter: none;
+    background: rgba(255, 255, 255, 0.45);
+  }
+
+  .compost-bin-panel__header {
+    border-bottom: none;
+    padding-bottom: 0;
+    flex: 1;
+    min-width: 80px;
+    text-align: left;
+    justify-content: flex-start;
+  }
+
+  .compost-bin-panel__barrels {
+    flex-direction: row;
+    gap: 6px;
+    flex: 3;
+    justify-content: center;
+  }
+
+  .compost-barrel {
+    width: 78px;
+    height: 98px;
+  }
+}
+
+@media (max-width: 480px) {
+  .compost-barrel {
+    width: 68px;
+    height: 86px;
+  }
+
+  .compost-barrel__band--top {
+    top: 18px;
+  }
+
+  .compost-barrel__band--bottom {
+    bottom: 18px;
+  }
+
+  .compost-barrel__inner {
+    padding: 12px 3px 10px;
+  }
+
+  .compost-barrel--active .compost-barrel__input-icon {
+    width: 18px;
+    height: 18px;
+  }
 }
 
 .compost-input-picker__empty {

@@ -1,5 +1,6 @@
 import { useState } from 'react';
-import { ArrowUp, Clock, Leaf, Recycle, Sparkles, X } from 'lucide-react';
+import { createPortal } from 'react-dom';
+import { ArrowUp, Leaf, Recycle, Sparkles, X } from 'lucide-react';
 import { currencyIcon } from '../assets';
 import {
   compostBinMaxLevel,
@@ -61,10 +62,15 @@ export const CompostBinPanel = ({ pet, itemIconMap, onCompost, onCollect, onUpgr
     { id: 'withered_fragment', type: 'withered_fragment' as const },
   ].filter(item => (pet.inventory[item.id] ?? 0) > 0);
 
+  const calcProgress = (startedAt: number, completesAt: number) => {
+    if (completesAt <= startedAt) return 0;
+    return Math.min(100, Math.max(0, ((now - startedAt) / (completesAt - startedAt)) * 100));
+  };
+
   return (
     <div className="compost-bin-panel">
       <div className="compost-bin-panel__header">
-        <Recycle size={16} aria-hidden="true" />
+        <Recycle size={12} aria-hidden="true" />
         <strong>{t('ui.garden.compostTitle')}</strong>
         <span className="compost-bin-panel__level">{t('ui.garden.compostLevel', { level: bin.level })}</span>
         {bin.level < compostBinMaxLevel ? (
@@ -73,66 +79,102 @@ export const CompostBinPanel = ({ pet, itemIconMap, onCompost, onCollect, onUpgr
             className="compost-bin-panel__upgrade"
             disabled={pet.coins < upgradeCost}
             onClick={onUpgrade}
+            title={t('ui.garden.compostUpgradeCost', { coins: upgradeCost })}
           >
-            <ArrowUp size={14} aria-hidden="true" />
-            {t('ui.garden.compostUpgradeCost', { coins: upgradeCost })}
+            <ArrowUp size={10} aria-hidden="true" />
+            {upgradeCost}
           </button>
         ) : (
           <span className="compost-bin-panel__max">{t('ui.garden.compostMaxLevel')}</span>
         )}
       </div>
 
-      <div className="compost-bin-panel__slots">
+      <div className="compost-bin-panel__barrels">
         {Array.from({ length: compostBinSlotCount }, (_, i) => {
           const slot = bin.slots[i];
           const isActive = slot.inputType && slot.completesAt > now;
           const isReady = slot.inputType && slot.completesAt > 0 && now >= slot.completesAt;
           const isEmpty = !slot.inputType;
+          const progress = isActive ? calcProgress(slot.startedAt, slot.completesAt) : isReady ? 100 : 0;
+          const icon = slot.inputItemId ? itemIconMap[slot.inputItemId] : undefined;
 
           return (
             <div
               key={i}
-              className={`compost-bin-slot${isActive ? ' compost-bin-slot--active' : ''}${isReady ? ' compost-bin-slot--ready' : ''}${isEmpty ? ' compost-bin-slot--empty' : ''}`}
+              className={`compost-barrel${isActive ? ' compost-barrel--active' : ''}${isReady ? ' compost-barrel--ready' : ''}${isEmpty ? ' compost-barrel--empty' : ''}`}
             >
-              {isEmpty ? (
-                <button
-                  type="button"
-                  className="compost-bin-slot__add"
-                  onClick={() => setShowInputPicker(i)}
-                  disabled={availableItems.length === 0}
-                >
-                  <Leaf size={20} aria-hidden="true" />
-                  <span>{t('ui.garden.compostAddItem')}</span>
-                </button>
-              ) : isReady ? (
-                <div className="compost-bin-slot__content">
-                  <Sparkles size={18} aria-hidden="true" />
-                  <span className="compost-bin-slot__output">
-                    {getOutputItemName(slot.outputItemId)} x{slot.outputAmount}
-                  </span>
-                  <button
-                    type="button"
-                    className="compost-bin-slot__collect"
-                    onClick={() => onCollect(i)}
-                  >
-                    {t('ui.garden.compostCollectBtn')}
-                  </button>
-                </div>
-              ) : (
-                <div className="compost-bin-slot__content">
-                  <Clock size={16} aria-hidden="true" />
-                  <span className="compost-bin-slot__type">{getInputTypeLabel(slot.inputType!)}</span>
-                  <span className="compost-bin-slot__time">
-                    {t('ui.garden.compostTimeRemaining', { time: formatCountdown(slot.completesAt - now) })}
-                  </span>
+              {/* Rim line for empty state */}
+              {isEmpty && <div className="compost-barrel__rim-line" />}
+
+              {/* Metal bands */}
+              <div className="compost-barrel__band compost-barrel__band--top" />
+              <div className="compost-barrel__band compost-barrel__band--bottom" />
+
+              {/* Fill level for active/ready */}
+              {(isActive || isReady) && (
+                <div className="compost-barrel__fill" style={{ height: `${progress}%` }} />
+              )}
+
+              {/* Bubbles for active */}
+              {isActive && (
+                <div className="compost-barrel__bubbles" aria-hidden="true">
+                  <div className="compost-barrel__bubble" />
+                  <div className="compost-barrel__bubble" />
+                  <div className="compost-barrel__bubble" />
                 </div>
               )}
+
+              {/* Sparkle for ready */}
+              {isReady && (
+                <span className="compost-barrel__sparkle" aria-hidden="true">
+                  <Sparkles size={16} />
+                </span>
+              )}
+
+              <div className="compost-barrel__inner">
+                {isEmpty ? (
+                  <button
+                    type="button"
+                    className="compost-barrel__add-btn"
+                    onClick={() => setShowInputPicker(i)}
+                    disabled={availableItems.length === 0}
+                  >
+                    <span className="compost-barrel__add-icon">+</span>
+                    <span className="compost-barrel__add-label">{t('ui.garden.compostAddItem')}</span>
+                  </button>
+                ) : isReady ? (
+                  <>
+                    <span className="compost-barrel__output-label">
+                      {getOutputItemName(slot.outputItemId)} x{slot.outputAmount}
+                    </span>
+                    <button
+                      type="button"
+                      className="compost-barrel__collect-btn"
+                      onClick={() => onCollect(i)}
+                    >
+                      {t('ui.garden.compostCollectBtn')}
+                    </button>
+                  </>
+                ) : (
+                  <>
+                    {icon ? (
+                      <img src={icon} alt="" className="compost-barrel__input-icon" />
+                    ) : (
+                      <Leaf size={18} className="compost-barrel__input-icon" style={{ padding: 1, color: '#5a4a38' }} />
+                    )}
+                    <span className="compost-barrel__input-label">{getInputTypeLabel(slot.inputType!)}</span>
+                    <span className="compost-barrel__timer">
+                      {formatCountdown(slot.completesAt - now)}
+                    </span>
+                  </>
+                )}
+              </div>
             </div>
           );
         })}
       </div>
 
-      {showInputPicker !== null && (
+      {showInputPicker !== null && createPortal(
         <DialogShell className="compost-input-picker" labelId="compost-input-title" onClose={() => setShowInputPicker(null)}>
           <header className="dialog-header">
             <div className="dialog-title-group">
@@ -173,7 +215,8 @@ export const CompostBinPanel = ({ pet, itemIconMap, onCompost, onCollect, onUpgr
               })
             )}
           </div>
-        </DialogShell>
+        </DialogShell>,
+        document.body
       )}
     </div>
   );

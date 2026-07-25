@@ -184,6 +184,11 @@ export const GardenPage = ({ pet, itemIconMap, onBack, onUnlockSlot, onPlantTree
                         {formatGardenCountdown(slotVw?.remainingMs ?? 0)}
                       </span>
                     )}
+                    {slotItem.state === 'growing' && slotItem.unlocked && !sameGardenDate(slotItem.lastWateredAt) && (
+                      <span className="garden-plot__water-hint" title={t('ui.garden.actions.water')}>
+                        <Droplets size={12} aria-hidden="true" />
+                      </span>
+                    )}
                     {slotItem.state === 'ready' && (
                       <span className="garden-plot__badge garden-plot__badge--ready">
                         <Sparkles size={12} aria-hidden="true" />
@@ -206,6 +211,14 @@ export const GardenPage = ({ pet, itemIconMap, onBack, onUnlockSlot, onPlantTree
           </button>
         )}
       </div>
+
+      <CompostBinPanel
+        pet={pet}
+        itemIconMap={itemIconMap}
+        onCompost={onCompost}
+        onCollect={onCollectCompost}
+        onUpgrade={onUpgradeCompostBin}
+      />
 
       <div className="garden-floating-panel">
         <div className="garden-plot-detail">
@@ -246,14 +259,6 @@ export const GardenPage = ({ pet, itemIconMap, onBack, onUnlockSlot, onPlantTree
           {slot.state === 'withered' && <button type="button" className="danger-button garden-clear-button" disabled={pet.coins < clearCost} onClick={() => onClear(slot.slotIndex)}>{t('ui.garden.actions.clear', { coins: clearCost })}</button>}
         </div>
       </div>
-
-      <CompostBinPanel
-        pet={pet}
-        itemIconMap={itemIconMap}
-        onCompost={onCompost}
-        onCollect={onCollectCompost}
-        onUpgrade={onUpgradeCompostBin}
-      />
 
       {actionDialog && (
         <DialogShell className="garden-action-modal" labelId="garden-action-title" onClose={() => setActionDialog(null)}>
