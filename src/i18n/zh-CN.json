@@ -835,6 +835,26 @@
         "withered_fragment": {
           "name": "枯树碎片",
           "summary": "清理枯树获得，可投入堆肥桶回收资源"
+        },
+        "exp_potion": {
+          "name": "经验药水",
+          "summary": "使用后宠物获得经验值"
+        },
+        "energy_concentrate": {
+          "name": "能量浓缩",
+          "summary": "使用后恢复25点体力"
+        },
+        "skill_fruit": {
+          "name": "技能果实",
+          "summary": "使用后Partner Schedule技能获得经验"
+        },
+        "wish_fragment": {
+          "name": "许愿碎片",
+          "summary": "收集后可兑换花园装饰（预留）"
+        },
+        "garden_token": {
+          "name": "花园代币",
+          "summary": "花园专属货币，可用于花园装饰"
         }
       },
       "categories": {
@@ -1062,7 +1082,11 @@
         "birthdayCake": "{name} 吃下了{item}，全属性回满。",
         "birthdayCakeWoke": "{name} 醒来吃下了{item}，全属性回满。",
         "goldenApple": "{name} 吃下了{item}，全属性恢复 30，并获得 {hearts} 个小心心。",
-        "goldenAppleWoke": "{name} 醒来吃下了{item}，全属性恢复 30，并获得 {hearts} 个小心心。"
+        "goldenAppleWoke": "{name} 醒来吃下了{item}，全属性恢复 30，并获得 {hearts} 个小心心。",
+        "expPotion": "{name} 使用了{item}，获得 {amount} 点经验。",
+        "expPotionWoke": "{name} 醒来使用了{item}，获得 {amount} 点经验。",
+        "skillFruit": "{name} 使用了{item}，Partner Schedule 技能获得经验。",
+        "skillFruitWoke": "{name} 醒来使用了{item}，Partner Schedule 技能获得经验。"
       },
       "unknown": {
         "name": "未知 Mod 道具",

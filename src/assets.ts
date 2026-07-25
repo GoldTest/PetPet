@@ -22,6 +22,11 @@ import itemNormalFertilizer from './assets/icon/item_normal_fertilizer.png';
 import itemHeartFertilizer from './assets/icon/item_heart_fertilizer.png';
 import itemHarvestNutrient from './assets/icon/item_harvest_nutrient.png';
 import itemWitheredFragment from './assets/icon/item_harvest_nutrient.png';
+import itemExpPotion from './assets/icon/item_harvest_nutrient.png';
+import itemEnergyConcentrate from './assets/icon/item_energy_drink.png';
+import itemSkillFruit from './assets/icon/item_golden_apple.png';
+import itemWishFragment from './assets/icon/icon_shiny_stickers.png';
+import itemGardenToken from './assets/icon/item_normal_fertilizer.png';
 import itemMedicine from './assets/icon/item_medicine.png';
 import itemNutriMeal from './assets/icon/item_nutri_meal.png';
 import itemOrange from './assets/icon/item_orange.png';
@@ -100,6 +105,11 @@ export const itemIcons: Record<BuiltinItemId, string> = {
   heart_fertilizer: itemHeartFertilizer,
   harvest_nutrient: itemHarvestNutrient,
   withered_fragment: itemWitheredFragment,
+  exp_potion: itemExpPotion,
+  energy_concentrate: itemEnergyConcentrate,
+  skill_fruit: itemSkillFruit,
+  wish_fragment: itemWishFragment,
+  garden_token: itemGardenToken,
 };
 
 export const petStatusImages: Record<PetStatus, string> = {

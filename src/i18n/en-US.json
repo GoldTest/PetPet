@@ -835,6 +835,26 @@
         "withered_fragment": {
           "name": "Withered fragment",
           "summary": "Obtained from clearing withered trees. Compost to reclaim resources."
+        },
+        "exp_potion": {
+          "name": "Exp potion",
+          "summary": "Grants experience points when used."
+        },
+        "energy_concentrate": {
+          "name": "Energy concentrate",
+          "summary": "Restores 25 energy when used."
+        },
+        "skill_fruit": {
+          "name": "Skill fruit",
+          "summary": "Grants skill XP to Partner Schedule when used."
+        },
+        "wish_fragment": {
+          "name": "Wish fragment",
+          "summary": "Collect to unlock garden decorations (reserved)."
+        },
+        "garden_token": {
+          "name": "Garden token",
+          "summary": "Garden-specific currency for decorations."
         }
       },
       "categories": {
@@ -1062,7 +1082,11 @@
         "birthdayCake": "{name} enjoyed {item}. All stats are full.",
         "birthdayCakeWoke": "{name} woke up and enjoyed {item}. All stats are full.",
         "goldenApple": "{name} enjoyed {item}. All stats +30, hearts +{hearts}.",
-        "goldenAppleWoke": "{name} woke up and enjoyed {item}. All stats +30, hearts +{hearts}."
+        "goldenAppleWoke": "{name} woke up and enjoyed {item}. All stats +30, hearts +{hearts}.",
+        "expPotion": "{name} used {item}. Gained {amount} experience.",
+        "expPotionWoke": "{name} woke up and used {item}. Gained {amount} experience.",
+        "skillFruit": "{name} used {item}. Partner Schedule skill gained experience.",
+        "skillFruitWoke": "{name} woke up and used {item}. Partner Schedule skill gained experience."
       },
       "unknown": {
         "name": "Unknown mod item",

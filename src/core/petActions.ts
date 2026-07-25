@@ -377,6 +377,33 @@ export const consumeInventoryItem = (
     return recordWishProgress(recordEarnedHearts(withWakeRecord, heartGain.amount), 'feed', now);
   }
 
+  if (itemId === 'exp_potion') {
+    const heartAmount = 5;
+    const heartGain = applyHeartGain(current, heartAmount);
+    const usedExpPotion = recordYearlyItemUse(recordYearlyCareAction({
+      ...withActivity(current, 'happy', now),
+      isSleeping: false,
+      hearts: heartGain.hearts,
+      boostCards: heartGain.boostCards,
+      inventory: removeInventoryItem(current.inventory, itemId),
+      recentEvent: t(wokePet ? 'pet.item.use.expPotionWoke' : 'pet.item.use.expPotion', { name: current.name, item: displayItemName, amount: heartAmount }),
+    }, 'touch', now), now);
+    const withAchievementUse = incrementAchievementItemUse(incrementAchievementCareAction(usedExpPotion, 'touch'), itemId);
+    const withWakeRecord = wokePet ? incrementManualWake(withAchievementUse) : withAchievementUse;
+    return recordWishProgress(recordEarnedHearts(withWakeRecord, heartGain.amount), 'touch', now);
+  }
+
+  if (itemId === 'skill_fruit') {
+    const usedSkillFruit = recordYearlyItemUse(recordYearlyCareAction({
+      ...withActivity(current, 'happy', now),
+      isSleeping: false,
+      inventory: removeInventoryItem(current.inventory, itemId),
+      recentEvent: t(wokePet ? 'pet.item.use.skillFruitWoke' : 'pet.item.use.skillFruit', { name: current.name, item: displayItemName }),
+    }, 'touch', now), now);
+    const withAchievementUse = incrementAchievementItemUse(incrementAchievementCareAction(usedSkillFruit, 'touch'), itemId);
+    return wokePet ? incrementManualWake(withAchievementUse) : withAchievementUse;
+  }
+
   const foodEffectMultiplier = item.kind === 'food'
     ? getPartnerScheduleCrossSystemEffects(current).foodEffectMultiplier
     : 1;

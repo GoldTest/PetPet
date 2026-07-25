@@ -34,7 +34,12 @@ export type BuiltinItemId =
   | 'normal_fertilizer'
   | 'heart_fertilizer'
   | 'harvest_nutrient'
-  | 'withered_fragment';
+  | 'withered_fragment'
+  | 'exp_potion'
+  | 'energy_concentrate'
+  | 'skill_fruit'
+  | 'wish_fragment'
+  | 'garden_token';
 
 export type ModItemId = `${string}:${string}`;
 
