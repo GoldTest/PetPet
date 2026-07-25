@@ -4,6 +4,7 @@ import { defaultAchievementState, normalizeAchievementState } from './achievemen
 import { defaultPetBirthday, normalizePetBirthday } from './dateRewards';
 import { createDailyWish, normalizeDailyWishState, normalizeReturnWelcomeState } from './dailyWishes';
 import { defaultGardenState, normalizeGardenState } from './garden';
+import { defaultSpeciesBookState, normalizeSpeciesBookState } from './speciesBook';
 import { addInventoryItem } from './items';
 import { dailyBiscuitClaimLimit, dailyHeartExchangeLimit, isBuiltinItemId } from './items';
 import { clampCoins, clampCount, clampHealth, clampLevel, clampStat, defaultPetName, getPetStatCap, lowCleanlinessSleepConfirmClicks } from './petStats';
@@ -148,6 +149,7 @@ export const createDefaultPet = (now = Date.now()): PetState => ({
     health: 90,
     isSleeping: false,
   }, now),
+  speciesBook: defaultSpeciesBookState(),
 });
 
 export const getPrimaryStatus = (pet: PetState): PetStatus => {
@@ -427,6 +429,7 @@ export const normalizePet = (value: unknown, now = Date.now(), options: Normaliz
     garden,
     boostCards: normalizeBoostCardState(raw.boostCards, now),
     partnerSchedule,
+    speciesBook: normalizeSpeciesBookState(raw.speciesBook),
   };
 };
 

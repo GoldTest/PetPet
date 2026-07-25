@@ -116,6 +116,17 @@ export interface CompostBinState {
   slots: CompostBinSlot[];
 }
 
+export interface SpeciesBookEntry {
+  unlocked: boolean;
+  harvestCount: number;
+  firstHarvestAt: number;
+}
+
+export interface SpeciesBookState {
+  entries: Record<string, SpeciesBookEntry>;
+  allCollected: boolean;
+}
+
 export type BoostCardId = 'friend_pass' | 'best_friend_pass';
 
 export interface BoostCardState {
@@ -400,6 +411,7 @@ export interface PetState {
   neighborGiftDateKey?: string;
   neighborGiftCount?: number;
   neighbor?: NeighborReference;
+  speciesBook: SpeciesBookState;
 }
 
 export type PetAction = 'play' | 'clean' | 'sleep' | 'work';

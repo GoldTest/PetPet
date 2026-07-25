@@ -8,6 +8,7 @@ import { getSeasonForDate, type Season } from './season';
 import type { BoostCardState, BuiltinItemId, GardenDrop, GardenFertilizerId, GardenSlot, GardenSlotState, GardenState, GardenToolId, GardenTools, GardenTreeId, ItemId, PetState, WeatherType } from './petTypes';
 import { hashString, isNumber } from './utils';
 import { defaultCompostBinState, normalizeCompostBinState } from './compostBin';
+import { unlockSpecies, incrementSpeciesHarvest } from './speciesBook';
 import { findActiveSynergies, getSynergyGrowSpeedBonus, getSynergyExtraDropChance, getSynergyRareWeightBonus, getSynergyCoinBonus, type ActiveSynergy } from './gardenSynergy';
 
 export const gardenSchemaVersion = 3;
@@ -366,7 +367,7 @@ export const harvestTree = (pet: PetState, slotIndex: number, now = Date.now()):
   const itemCount = getDropItemCount(slot.pendingDrops);
   const coinAmount = getDropCoinAmount(slot.pendingDrops);
   const eventKey = getHarvestEventKey(itemCount, coinAmount, isWithered);
-  const nextPet = incrementAchievementGardenHarvest({
+  let nextPet = incrementAchievementGardenHarvest({
     ...current,
     coins: clampCoins(current.coins + coinAmount),
     inventory: addDropsToInventory(current.inventory, slot.pendingDrops),
@@ -374,6 +375,8 @@ export const harvestTree = (pet: PetState, slotIndex: number, now = Date.now()):
     recentEvent: t(eventKey, { count: itemCount, coins: coinAmount }),
     lastInteractionAt: now,
   }, slot.treeId);
+  nextPet = unlockSpecies(nextPet, slot.treeId, now);
+  nextPet = incrementSpeciesHarvest(nextPet, slot.treeId);
   return coinAmount > 0 ? recordEarnedCoins(nextPet, coinAmount) : nextPet;
 };
 export const clearWitheredTree = (pet: PetState, slotIndex: number, now = Date.now()): PetState => { const current = advanceGarden(pet, now); const slot = current.garden.slots[slotIndex]; if (!slot || !slot.treeId || slot.state === 'empty') return failGardenAction(current, 'pet.garden.cannotClear'); const cost = getGardenClearCost(current.garden.tools); if (current.coins < cost) return failGardenAction(current, 'pet.garden.notEnoughCoins', { coins: cost }); const isWithered = slot.state === 'withered'; const eventKey = isWithered ? 'pet.garden.clearSuccess' : 'pet.garden.removeSuccess'; const inventory = isWithered ? addInventoryItem(current.inventory, 'withered_fragment', 1) : current.inventory; return { ...current, coins: clampCoins(current.coins - cost), inventory, garden: updateGardenSlot(current.garden, slotIndex, () => ({ ...defaultGardenSlot(slotIndex, now), unlocked: true })), recentEvent: t(eventKey, { coins: cost }), lastInteractionAt: now }; };

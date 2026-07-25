@@ -351,6 +351,9 @@ const PetApp = ({ initialPet, initialActiveMod, onResetToPicker }: PetAppProps) 
     cancelClear: handleCancelGardenClear,
     confirmClear: handleConfirmGardenClear,
     upgradeTool: handleUpgradeGardenTool,
+    compostItem: handleCompostItem,
+    collectCompost: handleCollectCompost,
+    upgradeCompostBin: handleUpgradeCompostBin,
     commitAction: commitGardenAction,
   } = gardenController;
   const {
@@ -1111,6 +1114,9 @@ const PetApp = ({ initialPet, initialActiveMod, onResetToPicker }: PetAppProps) 
           onClear={handleRequestClearGardenSlot}
           onUpgradeTool={handleUpgradeGardenTool}
           onOpenShop={() => handleOpenShop('garden')}
+          onCompost={handleCompostItem}
+          onCollectCompost={handleCollectCompost}
+          onUpgradeCompostBin={handleUpgradeCompostBin}
           compensationCoins={gardenCompensationCoins}
           onClaimCompensation={hasClaimedGardenCompensation ? undefined : handleClaimGardenCompensation}
         />
