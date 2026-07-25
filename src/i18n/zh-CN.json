@@ -643,7 +643,46 @@
       "waterFree": "免费 · 缩短 {percent}%",
       "coinDropTitle": "收获 {coins} 金币",
       "compensationGiftLabel": "领取种植园补偿 {coins} 金币",
-      "compensationGiftCoins": "+{coins}"
+      "compensationGiftCoins": "+{coins}",
+      "compostTitle": "堆肥桶",
+      "compostLevel": "Lv.{level}",
+      "compostUpgradeCost": "升级：{coins} 金币",
+      "compostMaxLevel": "已满级",
+      "compostSlotEmpty": "空闲",
+      "compostSlotReady": "可收取",
+      "compostSlotComposting": "堆肥中",
+      "compostAddItem": "投入道具",
+      "compostCollectBtn": "收取",
+      "compostInputFruitCare": "水果/护理道具",
+      "compostInputWithered": "枯树碎片",
+      "compostOutputNormal": "普通肥料",
+      "compostOutputNutrient": "成长营养液",
+      "compostOutputHeart": "爱心肥料",
+      "compostTimeRemaining": "剩余 {time}",
+      "speciesBook": {
+        "title": "图鉴",
+        "progress": "已收集 {unlocked}/{total}",
+        "complete": "全树种收集完成！",
+        "harvests": "收获 {count} 次",
+        "locked": "未解锁"
+      },
+      "miniGame": {
+        "water": {
+          "title": "浇水小游戏",
+          "click": "点击"
+        },
+        "fertilize": {
+          "title": "施肥小游戏"
+        },
+        "harvest": {
+          "title": "收获小游戏"
+        },
+        "plant": {
+          "title": "种植小游戏",
+          "hold": "按住"
+        },
+        "skip": "跳过"
+      }
     },
     "boostCards": {
       "kicker": "Boost Card",
@@ -1669,46 +1708,7 @@
       "harvestMixedWithered": "收获了 {count} 件道具，金币 +{coins}，这棵树寿命耗尽枯萎了。",
       "compostStart": "投入了{item}，开始堆肥。",
       "compostCollect": "收取了 {count} 个{item}。",
-      "compostUpgrade": "堆肥桶升到 Lv.{level}，花费 {coins} 金币。",
-      "compostTitle": "堆肥桶",
-      "compostLevel": "Lv.{level}",
-      "compostUpgradeCost": "升级：{coins} 金币",
-      "compostMaxLevel": "已满级",
-      "compostSlotEmpty": "空闲",
-      "compostSlotReady": "可收取",
-      "compostSlotComposting": "堆肥中",
-      "compostAddItem": "投入道具",
-      "compostCollectBtn": "收取",
-      "compostInputFruitCare": "水果/护理道具",
-      "compostInputWithered": "枯树碎片",
-      "compostOutputNormal": "普通肥料",
-      "compostOutputNutrient": "成长营养液",
-      "compostOutputHeart": "爱心肥料",
-      "compostTimeRemaining": "剩余 {time}"
-    },
-    "miniGame": {
-      "water": {
-        "title": "浇水小游戏",
-        "click": "点击"
-      },
-      "fertilize": {
-        "title": "施肥小游戏"
-      },
-      "harvest": {
-        "title": "收获小游戏"
-      },
-      "plant": {
-        "title": "种植小游戏",
-        "hold": "按住"
-      },
-      "skip": "跳过"
-    },
-    "speciesBook": {
-      "title": "图鉴",
-      "progress": "已收集 {unlocked}/{total}",
-      "complete": "全树种收集完成！",
-      "harvests": "收获 {count} 次",
-      "locked": "未解锁"
+      "compostUpgrade": "堆肥桶升到 Lv.{level}，花费 {coins} 金币。"
     },
     "boostCards": {
       "maxDuration": "这张增益卡最多只能累计 90 天。",

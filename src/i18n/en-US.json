@@ -643,7 +643,46 @@
       "waterFree": "Free · -{percent}%",
       "coinDropTitle": "Harvest {coins} coins",
       "compensationGiftLabel": "Claim garden compensation: {coins} coins",
-      "compensationGiftCoins": "+{coins}"
+      "compensationGiftCoins": "+{coins}",
+      "compostTitle": "Compost Bin",
+      "compostLevel": "Lv.{level}",
+      "compostUpgradeCost": "Upgrade: {coins} coins",
+      "compostMaxLevel": "Max Level",
+      "compostSlotEmpty": "Empty",
+      "compostSlotReady": "Ready",
+      "compostSlotComposting": "Composting",
+      "compostAddItem": "Add Item",
+      "compostCollectBtn": "Collect",
+      "compostInputFruitCare": "Fruit/Care Items",
+      "compostInputWithered": "Withered Fragment",
+      "compostOutputNormal": "Normal Fertilizer",
+      "compostOutputNutrient": "Growth Nutrient",
+      "compostOutputHeart": "Heart Fertilizer",
+      "compostTimeRemaining": "Remaining: {time}",
+      "speciesBook": {
+        "title": "Species Book",
+        "progress": "Collected {unlocked}/{total}",
+        "complete": "All species collected!",
+        "harvests": "Harvested {count} times",
+        "locked": "Locked"
+      },
+      "miniGame": {
+        "water": {
+          "title": "Watering Mini-Game",
+          "click": "Tap"
+        },
+        "fertilize": {
+          "title": "Fertilizing Mini-Game"
+        },
+        "harvest": {
+          "title": "Harvesting Mini-Game"
+        },
+        "plant": {
+          "title": "Planting Mini-Game",
+          "hold": "Hold"
+        },
+        "skip": "Skip"
+      }
     },
     "boostCards": {
       "kicker": "Boost Card",
@@ -1669,46 +1708,7 @@
       "harvestMixedWithered": "Harvested {count} item(s) and +{coins} coins. The tree has withered.",
       "compostStart": "Composted {item}. Processing has begun.",
       "compostCollect": "Collected {count}x {item}.",
-      "compostUpgrade": "Compost bin upgraded to Lv.{level} for {coins} coins.",
-      "compostTitle": "Compost Bin",
-      "compostLevel": "Lv.{level}",
-      "compostUpgradeCost": "Upgrade: {coins} coins",
-      "compostMaxLevel": "Max Level",
-      "compostSlotEmpty": "Empty",
-      "compostSlotReady": "Ready",
-      "compostSlotComposting": "Composting",
-      "compostAddItem": "Add Item",
-      "compostCollectBtn": "Collect",
-      "compostInputFruitCare": "Fruit/Care Items",
-      "compostInputWithered": "Withered Fragment",
-      "compostOutputNormal": "Normal Fertilizer",
-      "compostOutputNutrient": "Growth Nutrient",
-      "compostOutputHeart": "Heart Fertilizer",
-      "compostTimeRemaining": "Remaining: {time}"
-    },
-    "miniGame": {
-      "water": {
-        "title": "Watering Mini-Game",
-        "click": "Tap"
-      },
-      "fertilize": {
-        "title": "Fertilizing Mini-Game"
-      },
-      "harvest": {
-        "title": "Harvesting Mini-Game"
-      },
-      "plant": {
-        "title": "Planting Mini-Game",
-        "hold": "Hold"
-      },
-      "skip": "Skip"
-    },
-    "speciesBook": {
-      "title": "Species Book",
-      "progress": "Collected {unlocked}/{total}",
-      "complete": "All species collected!",
-      "harvests": "Harvested {count} times",
-      "locked": "Locked"
+      "compostUpgrade": "Compost bin upgraded to Lv.{level} for {coins} coins."
     },
     "boostCards": {
       "maxDuration": "This card can only stack up to 90 days.",
