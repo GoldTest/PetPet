@@ -191,6 +191,16 @@ export const GardenPage = ({ pet, itemIconMap, onBack, onUnlockSlot, onPlantTree
                         <Droplets size={12} aria-hidden="true" />
                       </span>
                     )}
+                    {slotItem.state === 'growing' && slotItem.unlocked && (
+                      <span className="garden-plot__boosts">
+                        {slotItem.hasNutrientBoost && (
+                          <img src={itemIconMap['harvest_nutrient']} alt="" className="garden-plot__boost-icon" title={t('ui.garden.actions.nutrient')} />
+                        )}
+                        {slotItem.fertilizerType && (
+                          <img src={itemIconMap[gardenFertilizerItemIds[slotItem.fertilizerType]]} alt="" className="garden-plot__boost-icon" title={t('ui.garden.actions.' + slotItem.fertilizerType + 'Fertilizer')} />
+                        )}
+                      </span>
+                    )}
                     {slotItem.state === 'ready' && (
                       <span className="garden-plot__badge garden-plot__badge--ready">
                         <Sparkles size={12} aria-hidden="true" />

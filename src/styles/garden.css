@@ -483,6 +483,22 @@
   50% { transform: scale(1.12); opacity: 1; }
 }
 
+.garden-plot__boosts {
+  position: absolute;
+  bottom: 4px;
+  left: 6px;
+  display: flex;
+  gap: 1px;
+  pointer-events: none;
+  z-index: 3;
+}
+
+.garden-plot__boost-icon {
+  width: 12px;
+  height: 12px;
+  object-fit: contain;
+}
+
 @keyframes garden-pulse {
   0%, 100% { transform: scale(1); }
   50% { transform: scale(1.1); }
@@ -1014,6 +1030,29 @@
   color: #4a7a38;
 }
 
+.compost-barrel__add-btn--loading {
+  display: block;
+  background: none;
+  border: 1px solid rgba(120, 90, 60, 0.25);
+  border-radius: 3px;
+  cursor: pointer;
+  padding: 0 6px;
+  color: #7a6a58;
+  font-size: 0.7rem;
+  line-height: 1.4;
+  transition: color 0.15s, border-color 0.15s;
+}
+
+.compost-barrel__add-btn--loading:hover:not(:disabled) {
+  color: #4a7a38;
+  border-color: #5a8a48;
+}
+
+.compost-barrel__add-btn--loading:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+
 .compost-barrel__add-label {
   line-height: 1.2;
 }
@@ -1108,6 +1147,14 @@
 }
 
 .compost-barrel--active .compost-barrel__input-label {
+  font-size: 0.6rem;
+  color: #f5e8d0;
+  font-weight: 600;
+  line-height: 1.2;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+}
+
+.compost-barrel--ready .compost-barrel__input-label {
   font-size: 0.6rem;
   color: #f5e8d0;
   font-weight: 600;
@@ -1343,6 +1390,26 @@
   animation: catalyst-bob 2s ease-in-out infinite;
 }
 
+.compost-barrel__catalyst-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+}
+
+.compost-barrel__catalyst-count {
+  font-size: 9px;
+  line-height: 1;
+  color: #999;
+  font-weight: 600;
+}
+
+.compost-barrel__catalyst-count--active {
+  color: #5a8a48;
+  font-size: 8px;
+  letter-spacing: 0.5px;
+}
+
 .compost-barrel__output-row {
   display: flex;
   align-items: center;
@@ -1352,23 +1419,24 @@
 }
 
 .compost-barrel__output-row--upgraded .compost-barrel__output-icon {
-  filter: hue-rotate(80deg) saturate(1.4);
   border: 1.5px solid #5a8a48;
   border-radius: 4px;
   padding: 1px;
 }
 
 .compost-barrel__output-icon--extra {
-  margin-left: -6px;
+  margin-left: 2px;
   opacity: 0.85;
 }
 
 .compost-barrel__speed-icon {
   position: absolute;
-  top: -4px;
-  right: -4px;
+  top: -12px;
+  right: -10px;
   color: #e8a020;
-  filter: drop-shadow(0 0 2px rgba(232, 160, 32, 0.6));
+  filter: drop-shadow(0 0 3px rgba(232, 160, 32, 0.7));
+  width: 16px;
+  height: 16px;
 }
 
 /* ----- Locked barrel ----- */

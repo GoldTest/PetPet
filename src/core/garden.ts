@@ -403,7 +403,7 @@ export const harvestTree = (pet: PetState, slotIndex: number, now = Date.now()):
   const synergies = findActiveSynergies(current.garden);
   const nextSlot: GardenSlot = isWithered
     ? { ...resetRoundBoosts(slot), harvestsUsed, pendingDrops: [], state: 'withered', dailyHarvestDateKey: getSixAmResetDateKey(now), dailyHarvestCount: slot.dailyHarvestCount + 1 }
-    : { ...resetRoundBoosts(slot), plantedAt: now, lastWateredAt: 0, nextReadyAt: now + getHarvestCooldown(current, slot.treeId, now, slotIndex, synergies), harvestsUsed, pendingDrops: [], state: 'growing', dailyHarvestDateKey: getSixAmResetDateKey(now), dailyHarvestCount: slot.dailyHarvestCount + 1 };
+    : { ...resetRoundBoosts(slot), plantedAt: now, lastWateredAt: 0, lastFertilizedAt: 0, lastBoostedAt: 0, nextReadyAt: now + getHarvestCooldown(current, slot.treeId, now, slotIndex, synergies), harvestsUsed, pendingDrops: [], state: 'growing', dailyHarvestDateKey: getSixAmResetDateKey(now), dailyHarvestCount: slot.dailyHarvestCount + 1 };
   const itemCount = getDropItemCount(slot.pendingDrops);
   const coinAmount = getDropCoinAmount(slot.pendingDrops);
   const eventKey = getHarvestEventKey(itemCount, coinAmount, isWithered);

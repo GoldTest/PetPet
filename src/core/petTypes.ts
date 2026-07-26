@@ -113,6 +113,7 @@ export interface CompostBinSlot {
   outputAmount: number;
   catalystType?: CompostBinCatalystType;
   catalystItemId?: string;
+  catalystCount?: number;
   guaranteedTokenDrop?: boolean;
 }
 

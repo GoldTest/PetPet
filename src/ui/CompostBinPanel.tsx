@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { createPortal } from 'react-dom';
 import { ArrowUp, FlaskConical, Leaf, Lock, Recycle, Sparkles, Unlock, X, Zap } from 'lucide-react';
 import {
+  CATALYST_REQUIRED_COUNT,
   compostBinBaseSlotCount,
   compostBinMaxLevel,
   fruitCareItemIds,
@@ -10,7 +11,6 @@ import {
   getCompostBinSlotDurationMs,
   getCompostBinUnlockCost,
   getCompostBinUpgradeCost,
-  getPairedAttachmentSlot,
   isAttachmentSlot,
   isCompostBinSlotUnlocked,
   normalizeCompostBinState,
@@ -54,7 +54,7 @@ const CATALYST_LABELS: Record<string, string> = {
 
 const baseOutputMap: Record<string, { itemId: string; amount: number }> = {
   fruit_care: { itemId: 'normal_fertilizer', amount: 1 },
-  withered_fragment: { itemId: 'harvest_nutrient', amount: 1 },
+  withered_fragment: { itemId: 'heart_fertilizer', amount: 1 },
   rare_combo: { itemId: 'heart_fertilizer', amount: 1 },
 };
 
@@ -99,23 +99,25 @@ export const CompostBinPanel = ({ pet, itemIconMap, onCompost, onCollect, onLoad
     const isAttachment = isAttachmentSlot(i);
     const isActive = unlocked && slot.inputType && slot.completesAt > now;
     const isReady = unlocked && slot.inputType && slot.completesAt > 0 && now >= slot.completesAt;
+    const catCount = slot.catalystCount ?? 0;
     const isEmpty = unlocked && !slot.inputType && !(isAttachment && slot.catalystType && slot.catalystItemId);
-    const hasCatalyst = unlocked && isAttachment && slot.catalystType && slot.catalystItemId;
+    const hasCatalyst = unlocked && isAttachment && slot.catalystType && slot.catalystItemId && catCount >= CATALYST_REQUIRED_COUNT;
+    const isLoadingCatalyst = unlocked && isAttachment && slot.catalystType && slot.catalystItemId && catCount < CATALYST_REQUIRED_COUNT;
     const progress = isActive ? calcProgress(slot.startedAt, slot.completesAt) : isReady ? 100 : 0;
+
+    const hasWitheredCatalyst = !isAttachment && bin.slots[4]?.catalystType === 'withered_catalyst' && (bin.slots[4]?.catalystCount ?? 0) >= CATALYST_REQUIRED_COUNT;
+    const hasFertilizerCatalyst = !isAttachment && bin.slots[5]?.catalystType === 'fertilizer_catalyst' && (bin.slots[5]?.catalystCount ?? 0) >= CATALYST_REQUIRED_COUNT;
+    const hasFruitCatalyst = !isAttachment && bin.slots[3]?.catalystType === 'fruit_catalyst' && (bin.slots[3]?.catalystCount ?? 0) >= CATALYST_REQUIRED_COUNT;
 
     const outputItemId = slot.outputItemId || (slot.inputType ? getBaseOutputItemId(slot.inputType) : '');
     const outputAmount = slot.outputAmount || (slot.inputType ? getBaseOutputAmount(slot.inputType) : 0);
     const baseAmount = slot.inputType ? getBaseOutputAmount(slot.inputType) : 0;
     const isAmountBoosted = outputAmount > baseAmount;
 
-    const attachSlotIndex = !isAttachment ? getPairedAttachmentSlot(i) : undefined;
-    const attachSlot = attachSlotIndex !== undefined ? bin.slots[attachSlotIndex] : undefined;
-    const catalystType = attachSlot?.catalystType;
-
     return (
       <div
         key={i}
-        className={`compost-barrel${isAttachment ? ' compost-barrel--attachment' : ''}${isActive ? ' compost-barrel--active' : ''}${isReady ? ' compost-barrel--ready' : ''}${isEmpty ? ' compost-barrel--empty' : ''}${hasCatalyst ? ' compost-barrel--catalyst' : ''}`}
+        className={`compost-barrel${isAttachment ? ' compost-barrel--attachment' : ''}${isActive ? ' compost-barrel--active' : ''}${isReady ? ' compost-barrel--ready' : ''}${isEmpty ? ' compost-barrel--empty' : ''}${(hasCatalyst || isLoadingCatalyst) ? ' compost-barrel--catalyst' : ''}`}
       >
         {isEmpty && <div className="compost-barrel__rim-line" />}
 
@@ -146,11 +148,31 @@ export const CompostBinPanel = ({ pet, itemIconMap, onCompost, onCollect, onLoad
               <Lock size={18} />
             </span>
           ) : hasCatalyst ? (
-            <img
-              src={itemIconMap[slot.catalystItemId!]}
-              alt=""
-              className="compost-barrel__catalyst-icon"
-            />
+            <div className="compost-barrel__catalyst-content">
+              <img
+                src={itemIconMap[slot.catalystItemId!]}
+                alt=""
+                className="compost-barrel__catalyst-icon"
+              />
+              <span className="compost-barrel__catalyst-count compost-barrel__catalyst-count--active">ACTIVE</span>
+            </div>
+          ) : isLoadingCatalyst ? (
+            <div className="compost-barrel__catalyst-content">
+              <img
+                src={itemIconMap[slot.catalystItemId!]}
+                alt=""
+                className="compost-barrel__catalyst-icon"
+              />
+              <span className="compost-barrel__catalyst-count">{catCount}/{CATALYST_REQUIRED_COUNT}</span>
+              <button
+                type="button"
+                className="compost-barrel__add-btn--loading"
+                onClick={() => setShowInputPicker(i)}
+                disabled={availableItemsForSlot(i).length === 0}
+              >
+                +
+              </button>
+            </div>
           ) : isEmpty && isAttachment ? (
             <button
               type="button"
@@ -177,29 +199,36 @@ export const CompostBinPanel = ({ pet, itemIconMap, onCompost, onCollect, onLoad
             </button>
           ) : isReady || isActive ? (
             <>
-              <div className={`compost-barrel__output-row${catalystType === 'withered_catalyst' ? ' compost-barrel__output-row--upgraded' : ''}`}>
+              <div className={`compost-barrel__output-row${hasWitheredCatalyst ? ' compost-barrel__output-row--upgraded' : ''}`}>
                 <img
                   src={itemIconMap[outputItemId]}
                   alt=""
                   className="compost-barrel__output-icon"
                   title={`${getOutputItemName(outputItemId)} x${outputAmount}`}
                 />
-                {isAmountBoosted && (
+                {isAmountBoosted && !hasFruitCatalyst && (
                   <img
                     src={itemIconMap[outputItemId]}
                     alt=""
                     className="compost-barrel__output-icon compost-barrel__output-icon--extra"
                   />
                 )}
-                {catalystType === 'fertilizer_catalyst' && (
-                  <Zap size={10} className="compost-barrel__speed-icon" />
+                {hasFruitCatalyst && (
+                  <img
+                    src={itemIconMap[outputItemId]}
+                    alt=""
+                    className="compost-barrel__output-icon compost-barrel__output-icon--extra"
+                  />
+                )}
+                {hasFertilizerCatalyst && (
+                  <Zap size={14} className="compost-barrel__speed-icon" />
                 )}
               </div>
-              {isActive && (
-                <span className="compost-barrel__input-label">
-                  {t('pet.shop.items.' + (slot.inputItemId ?? '') + '.name')}
-                </span>
-              )}
+               {(isActive || isReady) && slot.inputItemId && (
+                 <span className="compost-barrel__input-label">
+                   {t('pet.shop.items.' + slot.inputItemId + '.name')}
+                 </span>
+               )}
               {isReady && (
                 <button
                   type="button"

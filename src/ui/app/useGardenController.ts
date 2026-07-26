@@ -15,7 +15,7 @@ import {
   type PetState,
 } from '../../core/pet';
 import { compostItem, collectCompost, loadCatalyst, unlockCompostBinSlot, upgradeCompostBin } from '../../core/compostBin';
-import { playSfx, type SfxId } from '../../core/audio';
+import { playSfx, unlockAudio, type SfxId } from '../../core/audio';
 
 export type GardenClearConfirm = { slotIndex: number; kind: 'clear' | 'remove'; treeId: GardenTreeId; coins: number };
 
@@ -30,11 +30,11 @@ export const useGardenController = ({ petRef, setPet, commitPet, playAfterUnlock
   const [clearConfirm, setClearConfirm] = useState<GardenClearConfirm | null>(null);
 
   const commitAction = (action: (current: PetState) => PetState, successSfx: SfxId = 'coin') => {
-    playAfterUnlock('tap');
+    void unlockAudio();
+    const previousInteraction = petRef.current.lastInteractionAt;
     setPet((current) => {
-      const previousEvent = current.recentEvent;
       const next = action(current);
-      playSfx(next.recentEvent === previousEvent ? 'error' : successSfx);
+      playSfx(next.lastInteractionAt === previousInteraction ? 'error' : successSfx);
       return commitPet(next);
     });
   };
@@ -74,9 +74,9 @@ export const useGardenController = ({ petRef, setPet, commitPet, playAfterUnlock
     resetClearConfirm: () => setClearConfirm(null),
     unlockSlot: (slotIndex: number) => commitAction((current) => unlockGardenSlot(current, slotIndex), 'purchase'),
     plantTree: (slotIndex: number, treeId: GardenTreeId) => commitAction((current) => plantTree(current, slotIndex, treeId, Date.now()), 'purchase'),
-    waterTree: (slotIndex: number) => commitAction((current) => waterTree(current, slotIndex, Date.now()), 'tap'),
+    waterTree: (slotIndex: number) => commitAction((current) => waterTree(current, slotIndex, Date.now()), 'coin'),
     fertilizeTree: (slotIndex: number, fertilizerId: GardenFertilizerId) => commitAction((current) => fertilizeTree(current, slotIndex, fertilizerId, Date.now()), fertilizerId === 'heart' ? 'pet_heart' : 'purchase'),
-    useNutrient: (slotIndex: number) => commitAction((current) => applyGardenNutrient(current, slotIndex), 'purchase'),
+    useNutrient: (slotIndex: number) => commitAction((current) => applyGardenNutrient(current, slotIndex), 'coin'),
     harvestTree: (slotIndex: number) => commitAction((current) => harvestTree(current, slotIndex, Date.now()), 'coin'),
     requestClear,
     cancelClear,
