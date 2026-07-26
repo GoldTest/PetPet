@@ -61,7 +61,8 @@ const toolLevel = (pet: PetState, toolId: GardenToolId) => {
 const formatGardenCountdown = (milliseconds: number) => {
   const totalSeconds = Math.max(0, Math.ceil(milliseconds / 1000));
   const hours = Math.floor(totalSeconds / 3600);
-  const minutes = Math.floor((totalSeconds % 3600) / 60);
+  let minutes = Math.floor((totalSeconds % 3600) / 60);
+  if (totalSeconds > 0 && minutes === 0) minutes = 1;
   return hours > 0 ? `${hours}h ${String(minutes).padStart(2, '0')}m` : `${minutes}m`;
 };
 

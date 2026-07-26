@@ -33,7 +33,8 @@ interface CompostBinPanelProps {
 const formatCountdown = (milliseconds: number) => {
   const totalSeconds = Math.max(0, Math.ceil(milliseconds / 1000));
   const hours = Math.floor(totalSeconds / 3600);
-  const minutes = Math.floor((totalSeconds % 3600) / 60);
+  let minutes = Math.floor((totalSeconds % 3600) / 60);
+  if (totalSeconds > 0 && minutes === 0) minutes = 1;
   return hours > 0 ? `${hours}h ${String(minutes).padStart(2, '0')}m` : `${minutes}m`;
 };
 
@@ -158,19 +159,18 @@ export const CompostBinPanel = ({ pet, itemIconMap, onCompost, onCollect, onLoad
             </div>
           ) : isLoadingCatalyst ? (
             <div className="compost-barrel__catalyst-content">
-              <img
-                src={itemIconMap[slot.catalystItemId!]}
-                alt=""
-                className="compost-barrel__catalyst-icon"
-              />
-              <span className="compost-barrel__catalyst-count">{catCount}/{CATALYST_REQUIRED_COUNT}</span>
               <button
                 type="button"
-                className="compost-barrel__add-btn--loading"
+                className="compost-barrel__catalyst-body"
                 onClick={() => setShowInputPicker(i)}
                 disabled={availableItemsForSlot(i).length === 0}
               >
-                +
+                <img
+                  src={itemIconMap[slot.catalystItemId!]}
+                  alt=""
+                  className="compost-barrel__catalyst-icon"
+                />
+                <span className="compost-barrel__catalyst-count">{catCount}/{CATALYST_REQUIRED_COUNT}</span>
               </button>
             </div>
           ) : isEmpty && isAttachment ? (
@@ -211,6 +211,7 @@ export const CompostBinPanel = ({ pet, itemIconMap, onCompost, onCollect, onLoad
                     src={itemIconMap[outputItemId]}
                     alt=""
                     className="compost-barrel__output-icon compost-barrel__output-icon--extra"
+                    title={`${getOutputItemName(outputItemId)} x${outputAmount}`}
                   />
                 )}
                 {hasFruitCatalyst && (
@@ -218,6 +219,7 @@ export const CompostBinPanel = ({ pet, itemIconMap, onCompost, onCollect, onLoad
                     src={itemIconMap[outputItemId]}
                     alt=""
                     className="compost-barrel__output-icon compost-barrel__output-icon--extra"
+                    title={`${getOutputItemName(outputItemId)} x${outputAmount}`}
                   />
                 )}
                 {hasFertilizerCatalyst && (
