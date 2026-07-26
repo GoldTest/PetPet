@@ -154,7 +154,7 @@ export const CompostBinPanel = ({ pet, itemIconMap, onCompost, onCollect, onLoad
                 alt=""
                 className="compost-barrel__catalyst-icon"
               />
-              <span className="compost-barrel__catalyst-count compost-barrel__catalyst-count--active">ACTIVE</span>
+              <span className="compost-barrel__catalyst-count compost-barrel__catalyst-count--active">{t('ui.garden.compostCatalystActive')}</span>
             </div>
           ) : isLoadingCatalyst ? (
             <div className="compost-barrel__catalyst-content">

@@ -686,6 +686,7 @@
       "compostCatalystFertilizer": "肥料催化",
       "compostCatalystUpgrade": "品质升级",
       "compostCatalystFast": "加速",
+      "compostCatalystActive": "催化中",
       "speciesBook": {
         "title": "图鉴",
         "progress": "已收集 {unlocked}/{total}",

@@ -680,6 +680,7 @@
       "compostCatalystFertilizer": "Fertilizer Catalyst",
       "compostCatalystUpgrade": "Upgrade",
       "compostCatalystFast": "Fast",
+      "compostCatalystActive": "Active",
       "speciesBook": {
         "title": "Species Book",
         "progress": "Collected {unlocked}/{total}",
