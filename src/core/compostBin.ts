@@ -25,10 +25,8 @@ const compostBinOutputs: Record<CompostBinInputType, { itemId: BuiltinItemId; am
 
 const compostBinLevelSpeedBonusPercent = [0, 10, 20, 30] as const;
 
-const fruitCareItemIds: readonly BuiltinItemId[] = [
-  'orange', 'apple', 'banana', 'watermelon', 'bento',
-  'wet_wipes', 'vitamin_tablet', 'shampoo', 'energy_drink', 'blanket',
-  'strawberry_milk', 'nutri_meal', 'strawberry_cake',
+export const fruitCareItemIds: readonly BuiltinItemId[] = [
+  'orange', 'apple', 'banana', 'watermelon',
 ];
 
 const isFruitCareItem = (itemId: string): itemId is BuiltinItemId =>

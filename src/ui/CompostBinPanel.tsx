@@ -5,6 +5,7 @@ import { currencyIcon } from '../assets';
 import {
   compostBinMaxLevel,
   compostBinSlotCount,
+  fruitCareItemIds,
   getCompostBinSlotDurationMs,
   getCompostBinUpgradeCost,
   normalizeCompostBinState,
@@ -58,7 +59,7 @@ export const CompostBinPanel = ({ pet, itemIconMap, onCompost, onCollect, onUpgr
   };
 
   const availableItems = [
-    ...Object.values(gardenFertilizerItemIds).map(id => ({ id, type: 'fruit_care' as const })),
+    ...fruitCareItemIds.map(id => ({ id, type: 'fruit_care' as const })),
     { id: 'withered_fragment', type: 'withered_fragment' as const },
   ].filter(item => (pet.inventory[item.id] ?? 0) > 0);
 

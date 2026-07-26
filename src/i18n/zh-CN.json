@@ -670,7 +670,7 @@
       "compostAddItem": "投入道具",
       "compostCollectBtn": "收取",
       "compostInputFruitCare": "水果/护理道具",
-      "compostInputWithered": "枯树碎片",
+      "compostInputWithered": "枯树树枝",
       "compostOutputNormal": "普通肥料",
       "compostOutputNutrient": "成长营养液",
       "compostOutputHeart": "爱心肥料",
@@ -875,7 +875,7 @@
           "summary": "种植页使用，下次收获获得额外产物"
         },
         "withered_fragment": {
-          "name": "枯树碎片",
+          "name": "枯树树枝",
           "summary": "清理枯树获得，可投入堆肥桶回收资源"
         },
         "exp_potion": {
@@ -1104,7 +1104,7 @@
     "buy": {
       "missing": "这个商品不存在。",
       "biscuitClaimedOut": "今天的苏打饼干已经领完了，明天再来吧。",
-      "witheredFragmentClaimedOut": "今天的枯树碎片已经领完了，明天再来吧。",
+      "witheredFragmentClaimedOut": "今天的枯树树枝已经领完了，明天再来吧。",
       "freeClaim": "拿到一份免费的{item}（{claimed}/{limit}）。",
       "notEnoughCoins": "金币不够，{item} 需要 {price} 金币。",
       "discount": "今日特价购买了{item}，花费 {price} 金币。",
@@ -1700,7 +1700,7 @@
       "harvestSuccess": "收获了 {count} 件道具。",
       "harvestWithered": "收获了 {count} 件道具，这棵树寿命耗尽枯萎了。",
       "cannotClear": "这里没有需要清理的枯树。",
-      "clearSuccess": "清理了枯树，获得枯树碎片，花费 {coins} 金币。",
+      "clearSuccess": "清理了枯树，获得枯树树枝，花费 {coins} 金币。",
       "removeSuccess": "移除了这棵树，花费 {coins} 金币。",
       "toolMaxLevel": "这个工具已经满级。",
       "toolUpgradeSuccess": "{tool} 升到 Lv.{level}，花费 {coins} 金币。",

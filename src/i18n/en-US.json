@@ -664,7 +664,7 @@
       "compostAddItem": "Add Item",
       "compostCollectBtn": "Collect",
       "compostInputFruitCare": "Fruit/Care Items",
-      "compostInputWithered": "Withered Fragment",
+      "compostInputWithered": "Withered Branch",
       "compostOutputNormal": "Normal Fertilizer",
       "compostOutputNutrient": "Growth Nutrient",
       "compostOutputHeart": "Heart Fertilizer",
@@ -869,7 +869,7 @@
           "summary": "Use in the garden to add an extra drop to the next harvest."
         },
         "withered_fragment": {
-          "name": "Withered fragment",
+          "name": "Withered Branch",
           "summary": "Obtained from clearing withered trees. Compost to reclaim resources."
         },
         "exp_potion": {
@@ -1098,7 +1098,7 @@
     "buy": {
       "missing": "This shop item does not exist.",
       "biscuitClaimedOut": "Today's soda biscuits are all claimed. Come back tomorrow.",
-      "witheredFragmentClaimedOut": "Today's withered fragments are all claimed. Come back tomorrow.",
+      "witheredFragmentClaimedOut": "Today's withered branches are all claimed. Come back tomorrow.",
       "freeClaim": "Got a free {item} ({claimed}/{limit}).",
       "notEnoughCoins": "Not enough coins. {item} costs {price} coins.",
       "discount": "Bought {item} at today's discount for {price} coins.",
@@ -1694,7 +1694,7 @@
       "harvestSuccess": "Harvested {count} item(s).",
       "harvestWithered": "Harvested {count} item(s). The tree has withered.",
       "cannotClear": "There is no withered tree to clear.",
-      "clearSuccess": "Cleared the withered tree, obtained a withered fragment. Cost: {coins} coins.",
+      "clearSuccess": "Cleared the withered tree, obtained a withered branch. Cost: {coins} coins.",
       "removeSuccess": "Removed the tree for {coins} coins.",
       "toolMaxLevel": "This tool is already max level.",
       "toolUpgradeSuccess": "{tool} upgraded to Lv.{level} for {coins} coins.",
