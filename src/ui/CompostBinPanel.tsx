@@ -6,12 +6,12 @@ import {
   compostBinMaxLevel,
   compostBinSlotCount,
   fruitCareItemIds,
+  getCompostBinOutput,
   getCompostBinSlotDurationMs,
   getCompostBinUpgradeCost,
   normalizeCompostBinState,
 } from '../core/compostBin';
 import { gardenFertilizerItemIds, gardenNutrientItemId, type PetState } from '../core/pet';
-import type { CompostBinInputType } from '../core/petTypes';
 import { t } from '../i18n';
 import { DialogShell } from './DialogShell';
 
@@ -28,14 +28,6 @@ const formatCountdown = (milliseconds: number) => {
   const hours = Math.floor(totalSeconds / 3600);
   const minutes = Math.floor((totalSeconds % 3600) / 60);
   return hours > 0 ? `${hours}h ${String(minutes).padStart(2, '0')}m` : `${minutes}m`;
-};
-
-const getInputTypeLabel = (inputType: CompostBinInputType) => {
-  switch (inputType) {
-    case 'fruit_care': return t('ui.garden.compostInputFruitCare');
-    case 'withered_fragment': return t('ui.garden.compostInputWithered');
-    case 'rare_combo': return t('ui.garden.compostInputFruitCare');
-  }
 };
 
 const getOutputItemName = (outputItemId: string) => {
@@ -97,7 +89,7 @@ export const CompostBinPanel = ({ pet, itemIconMap, onCompost, onCollect, onUpgr
           const isReady = slot.inputType && slot.completesAt > 0 && now >= slot.completesAt;
           const isEmpty = !slot.inputType;
           const progress = isActive ? calcProgress(slot.startedAt, slot.completesAt) : isReady ? 100 : 0;
-          const icon = slot.inputItemId ? itemIconMap[slot.inputItemId] : undefined;
+          const output = slot.inputType ? getCompostBinOutput(slot.inputType) : undefined;
 
           return (
             <div
@@ -145,9 +137,12 @@ export const CompostBinPanel = ({ pet, itemIconMap, onCompost, onCollect, onUpgr
                   </button>
                 ) : isReady ? (
                   <>
-                    <span className="compost-barrel__output-label">
-                      {getOutputItemName(slot.outputItemId)} x{slot.outputAmount}
-                    </span>
+                    <img
+                      src={itemIconMap[output!.itemId]}
+                      alt=""
+                      className="compost-barrel__output-icon"
+                      title={`${getOutputItemName(output!.itemId)} x${output!.amount}`}
+                    />
                     <button
                       type="button"
                       className="compost-barrel__collect-btn"
@@ -158,12 +153,13 @@ export const CompostBinPanel = ({ pet, itemIconMap, onCompost, onCollect, onUpgr
                   </>
                 ) : (
                   <>
-                    {icon ? (
-                      <img src={icon} alt="" className="compost-barrel__input-icon" />
-                    ) : (
-                      <Leaf size={18} className="compost-barrel__input-icon" style={{ padding: 1, color: '#5a4a38' }} />
-                    )}
-                    <span className="compost-barrel__input-label">{getInputTypeLabel(slot.inputType!)}</span>
+                    <img
+                      src={itemIconMap[output!.itemId]}
+                      alt=""
+                      className="compost-barrel__input-icon"
+                      title={`${getOutputItemName(output!.itemId)} x${output!.amount}`}
+                    />
+                    <span className="compost-barrel__input-label">{t('pet.shop.items.' + slot.inputItemId + '.name')}</span>
                     <span className="compost-barrel__timer">
                       {formatCountdown(slot.completesAt - now)}
                     </span>

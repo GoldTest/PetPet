@@ -23,6 +23,9 @@ const compostBinOutputs: Record<CompostBinInputType, { itemId: BuiltinItemId; am
   rare_combo: { itemId: 'heart_fertilizer', amount: 1 },
 };
 
+export const getCompostBinOutput = (inputType: CompostBinInputType): { itemId: BuiltinItemId; amount: number } | undefined =>
+  compostBinOutputs[inputType];
+
 const compostBinLevelSpeedBonusPercent = [0, 10, 20, 30] as const;
 
 export const fruitCareItemIds: readonly BuiltinItemId[] = [
@@ -146,9 +149,8 @@ export const collectCompost = (pet: PetState, slotIndex: number, now = Date.now(
   const slot = bin.slots[slotIndex];
   if (!slot || !slot.inputType || now < slot.completesAt) return pet;
 
-  const outputItemId = slot.outputItemId as BuiltinItemId;
-  const outputAmount = slot.outputAmount;
-  if (!outputItemId || outputAmount <= 0) return pet;
+  const output = compostBinOutputs[slot.inputType];
+  if (!output) return pet;
 
   const emptySlot: CompostBinSlot = defaultCompostBinSlot(slotIndex);
   const newSlots = bin.slots.map((s) => s.slotIndex === slotIndex ? emptySlot : s);
@@ -156,9 +158,9 @@ export const collectCompost = (pet: PetState, slotIndex: number, now = Date.now(
 
   return {
     ...pet,
-    inventory: addInventoryItem(pet.inventory, outputItemId, outputAmount),
+    inventory: addInventoryItem(pet.inventory, output.itemId, output.amount),
     garden: { ...garden, compostBin: newBin },
-    recentEvent: t('pet.garden.compostCollect', { item: getItemName(outputItemId), count: outputAmount }),
+    recentEvent: t('pet.garden.compostCollect', { item: getItemName(output.itemId), count: output.amount }),
     lastInteractionAt: now,
   };
 };
