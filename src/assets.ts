@@ -21,12 +21,12 @@ import itemGoldenAppleTreeSapling from './assets/icon/item_golden_apple_tree_sap
 import itemNormalFertilizer from './assets/icon/item_normal_fertilizer.png';
 import itemHeartFertilizer from './assets/icon/item_heart_fertilizer.png';
 import itemHarvestNutrient from './assets/icon/item_harvest_nutrient.png';
-import itemWitheredFragment from './assets/icon/item_harvest_nutrient.png';
+import itemWitheredFragment from './assets/icon/item_withered_fragment.png';
 import itemExpPotion from './assets/icon/item_harvest_nutrient.png';
 import itemEnergyConcentrate from './assets/icon/item_energy_drink.png';
 import itemSkillFruit from './assets/icon/item_golden_apple.png';
 import itemWishFragment from './assets/icon/icon_shiny_stickers.png';
-import itemGardenToken from './assets/icon/item_normal_fertilizer.png';
+import itemGardenToken from './assets/icon/item_garden_token.png';
 import itemMedicine from './assets/icon/item_medicine.png';
 import itemNutriMeal from './assets/icon/item_nutri_meal.png';
 import itemOrange from './assets/icon/item_orange.png';

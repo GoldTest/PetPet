@@ -12,7 +12,7 @@ export const compostBinMaxLevel = 3;
 export const compostBinBaseSlotCount = 3;
 export const compostBinTotalSlotCount = 6;
 export const compostBinUpgradeCosts = [0, 500, 1500] as const;
-export const compostBinExtraSlotUnlockCosts = [1, 1, 1] as const;
+export const compostBinExtraSlotUnlockCosts = [10, 20, 40] as const;
 
 export const CATALYST_SLOT_OFFSET = 3;
 export const CATALYST_REQUIRED_COUNT = 3;
