@@ -14,7 +14,21 @@ export const synergyRulesTable = [
     description: '礼物树与果树相邻，果树生长速度+10%',
   },
   {
-    id: 'money_adjacent',
+    id: 'herb_fruit',
+    treeA: 'herb_tree',
+    treeB: 'fruit_tree',
+    effect: 'extra drop +50%',
+    description: '药草树与果树相邻，果树额外掉落+50%',
+  },
+  {
+    id: 'herb_care',
+    treeA: 'herb_tree',
+    treeB: 'care_tree',
+    effect: 'grow speed +10%',
+    description: '药草树与关怀树相邻，药草树生长速度+10%',
+  },
+  {
+    id: 'money_any',
     treeA: 'money_tree',
     treeB: 'any',
     effect: 'coin bonus +15%',

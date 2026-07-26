@@ -1,17 +1,21 @@
 import { useState } from 'react';
 import { createPortal } from 'react-dom';
-import { ArrowUp, Leaf, Recycle, Sparkles, X } from 'lucide-react';
+import { ArrowUp, Leaf, Lock, Recycle, Sparkles, Unlock, X } from 'lucide-react';
 import { currencyIcon } from '../assets';
 import {
+  compostBinBaseSlotCount,
   compostBinMaxLevel,
-  compostBinSlotCount,
+  compostBinTotalSlotCount,
   fruitCareItemIds,
   getCompostBinOutput,
   getCompostBinSlotDurationMs,
+  getCompostBinUnlockCost,
   getCompostBinUpgradeCost,
+  isCompostBinSlotUnlocked,
   normalizeCompostBinState,
 } from '../core/compostBin';
 import { gardenFertilizerItemIds, gardenNutrientItemId, type PetState } from '../core/pet';
+import { getInventoryCount } from '../core/items';
 import { t } from '../i18n';
 import { DialogShell } from './DialogShell';
 
@@ -21,6 +25,7 @@ interface CompostBinPanelProps {
   onCompost: (slotIndex: number, itemId: string) => void;
   onCollect: (slotIndex: number) => void;
   onUpgrade: () => void;
+  onUnlockSlot: () => void;
 }
 
 const formatCountdown = (milliseconds: number) => {
@@ -39,11 +44,13 @@ const getOutputItemName = (outputItemId: string) => {
   }
 };
 
-export const CompostBinPanel = ({ pet, itemIconMap, onCompost, onCollect, onUpgrade }: CompostBinPanelProps) => {
+export const CompostBinPanel = ({ pet, itemIconMap, onCompost, onCollect, onUpgrade, onUnlockSlot }: CompostBinPanelProps) => {
   const [showInputPicker, setShowInputPicker] = useState<number | null>(null);
   const now = Date.now();
   const bin = normalizeCompostBinState(pet.garden.compostBin, now);
   const upgradeCost = getCompostBinUpgradeCost(bin.level);
+  const unlockCost = getCompostBinUnlockCost(bin.unlockedExtraSlots);
+  const tokenCount = getInventoryCount(pet.inventory, 'garden_token');
 
   const handleSelectInput = (slotIndex: number, itemId: string) => {
     onCompost(slotIndex, itemId);
@@ -83,19 +90,23 @@ export const CompostBinPanel = ({ pet, itemIconMap, onCompost, onCollect, onUpgr
       </div>
 
       <div className="compost-bin-panel__barrels">
-        {Array.from({ length: compostBinSlotCount }, (_, i) => {
-          const slot = bin.slots[i];
-          const isActive = slot.inputType && slot.completesAt > now;
-          const isReady = slot.inputType && slot.completesAt > 0 && now >= slot.completesAt;
-          const isEmpty = !slot.inputType;
-          const progress = isActive ? calcProgress(slot.startedAt, slot.completesAt) : isReady ? 100 : 0;
-          const output = slot.inputType ? getCompostBinOutput(slot.inputType) : undefined;
+        {[[0, 3], [1, 4], [2, 5]].map(([baseIdx, attachIdx]) => (
+          <div key={baseIdx} className="compost-barrel-pair">
+            {[baseIdx, attachIdx].map((i) => {
+              const slot = bin.slots[i];
+              const unlocked = isCompostBinSlotUnlocked(i, bin.unlockedExtraSlots);
+              const isAttachment = i >= compostBinBaseSlotCount;
+              const isActive = unlocked && slot.inputType && slot.completesAt > now;
+              const isReady = unlocked && slot.inputType && slot.completesAt > 0 && now >= slot.completesAt;
+              const isEmpty = unlocked && !slot.inputType;
+              const progress = isActive ? calcProgress(slot.startedAt, slot.completesAt) : isReady ? 100 : 0;
+              const output = slot.inputType ? getCompostBinOutput(slot.inputType) : undefined;
 
-          return (
-            <div
-              key={i}
-              className={`compost-barrel${isActive ? ' compost-barrel--active' : ''}${isReady ? ' compost-barrel--ready' : ''}${isEmpty ? ' compost-barrel--empty' : ''}`}
-            >
+              return (
+                <div
+                  key={i}
+                  className={`compost-barrel${isAttachment ? ' compost-barrel--attachment' : ''}${isActive ? ' compost-barrel--active' : ''}${isReady ? ' compost-barrel--ready' : ''}${isEmpty ? ' compost-barrel--empty' : ''}`}
+                >
               {/* Rim line for empty state */}
               {isEmpty && <div className="compost-barrel__rim-line" />}
 
@@ -125,7 +136,11 @@ export const CompostBinPanel = ({ pet, itemIconMap, onCompost, onCollect, onUpgr
               )}
 
               <div className="compost-barrel__inner">
-                {isEmpty ? (
+                {!unlocked ? (
+                  <span className="compost-barrel__locked-icon">
+                    <Lock size={18} />
+                  </span>
+                ) : isEmpty ? (
                   <button
                     type="button"
                     className="compost-barrel__add-btn"
@@ -154,12 +169,12 @@ export const CompostBinPanel = ({ pet, itemIconMap, onCompost, onCollect, onUpgr
                 ) : (
                   <>
                     <img
-                      src={itemIconMap[output!.itemId]}
+                      src={itemIconMap[slot.inputItemId ?? '']}
                       alt=""
                       className="compost-barrel__input-icon"
-                      title={`${getOutputItemName(output!.itemId)} x${output!.amount}`}
+                      title={t('pet.shop.items.' + (slot.inputItemId ?? '') + '.name')}
                     />
-                    <span className="compost-barrel__input-label">{t('pet.shop.items.' + slot.inputItemId + '.name')}</span>
+                    <span className="compost-barrel__input-label">{t('pet.shop.items.' + (slot.inputItemId ?? '') + '.name')}</span>
                     <span className="compost-barrel__timer">
                       {formatCountdown(slot.completesAt - now)}
                     </span>
@@ -167,9 +182,25 @@ export const CompostBinPanel = ({ pet, itemIconMap, onCompost, onCollect, onUpgr
                 )}
               </div>
             </div>
-          );
-        })}
+            );
+          })}
+          </div>
+        ))}
       </div>
+
+      {unlockCost > 0 && (
+        <div className="compost-bin-panel__unlock-row">
+          <button
+            type="button"
+            className="compost-bin-panel__unlock-btn"
+            disabled={tokenCount < unlockCost}
+            onClick={onUnlockSlot}
+          >
+            <Unlock size={12} aria-hidden="true" />
+            {t('ui.garden.compostUnlockSlot', { cost: unlockCost, tokens: tokenCount })}
+          </button>
+        </div>
+      )}
 
       {showInputPicker !== null && createPortal(
         <DialogShell className="compost-input-picker" labelId="compost-input-title" onClose={() => setShowInputPicker(null)}>

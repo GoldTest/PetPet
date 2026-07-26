@@ -1,5 +1,6 @@
 import { t } from '../i18n';
 import { applyBoostCardHeartBonus } from './boostCards';
+import { compostBinExtraSlotUnlockCosts, compostBinMaxLevel } from './compostBin';
 import { addInventoryItem, getInventoryItem, shopItems } from './items';
 import { clampCoins, clampCount } from './petStats';
 import type { AchievementCounters, AchievementId, AchievementState, CareActionKey, GardenTreeId, ItemId, PartnerScheduleCategory, PartnerScheduleRewardChoice, PartnerScheduleSize, PetState, YearlyCareActionKey, YearlyStats } from './petTypes';
@@ -137,6 +138,8 @@ export const defaultAchievementCounters = (): AchievementCounters => ({
   gardenPlantCount: 0,
   gardenWaterCount: 0,
   gardenHarvestCountsByTreeId: {},
+  compostStartCount: 0,
+  compostCollectCount: 0,
   partnerScheduleClaimCount: 0,
   partnerScheduleClaimCountsByCategory: {},
   partnerScheduleLongClaimCountsByCategory: {},
@@ -306,6 +309,8 @@ export const normalizeAchievementState = (
       partnerScheduleCategoryRewardClaimCount: clampCount(isNumber(rawCounters.partnerScheduleCategoryRewardClaimCount) ? rawCounters.partnerScheduleCategoryRewardClaimCount : 0),
       companionYearActiveDateKeysByYear,
       modSwitchCount: clampCount(isNumber(rawCounters.modSwitchCount) ? rawCounters.modSwitchCount : 0),
+      compostStartCount: clampCount(isNumber(rawCounters.compostStartCount) ? rawCounters.compostStartCount : 0),
+      compostCollectCount: clampCount(isNumber(rawCounters.compostCollectCount) ? rawCounters.compostCollectCount : 0),
     },
   };
 };
@@ -373,6 +378,12 @@ const baseAchievementDefinitionConfigs: readonly Omit<AchievementDefinition, 'ti
   { id: 'garden_tree_catalogue', category: 'garden', rarity: 'rare', target: achievementGardenTreeIds.length, progress: getHarvestedGardenTreeKindCount, reward: { coins: 300, items: [{ itemId: 'heart_fertilizer', amount: 2 }], gardenExtraDropChancePercent: 10 } },
   { id: 'garden_all_slots', category: 'garden', rarity: 'rare', target: 9, progress: getUnlockedGardenSlotCount, reward: { coins: 500, gardenExtraDropChancePercent: 20 } },
   { id: 'garden_tools_max', category: 'garden', rarity: 'rare', target: 3, progress: getMaxedGardenToolCount, reward: { coins: 300, gardenExtraDropChancePercent: 10 } },
+  { id: 'compost_first', category: 'garden', rarity: 'normal', target: 1, progress: (pet) => pet.achievements.counters.compostStartCount, reward: { coins: 30 } },
+  { id: 'compost_10', category: 'garden', rarity: 'normal', target: 10, progress: (pet) => pet.achievements.counters.compostStartCount, reward: { coins: 80 } },
+  { id: 'compost_50', category: 'garden', rarity: 'rare', target: 50, progress: (pet) => pet.achievements.counters.compostStartCount, reward: { coins: 200, items: [{ itemId: 'normal_fertilizer', amount: 1 }] } },
+  { id: 'compost_200', category: 'garden', rarity: 'rare', target: 200, progress: (pet) => pet.achievements.counters.compostStartCount, reward: { coins: 500, items: [{ itemId: 'heart_fertilizer', amount: 1 }] } },
+  { id: 'compost_bin_upgrade', category: 'garden', rarity: 'normal', target: compostBinMaxLevel, progress: (pet) => pet.garden.compostBin.level, reward: { coins: 100 } },
+  { id: 'compost_unlock_slots', category: 'garden', rarity: 'normal', target: compostBinExtraSlotUnlockCosts.length, progress: (pet) => pet.garden.compostBin.unlockedExtraSlots, reward: { coins: 150, items: [{ itemId: 'harvest_nutrient', amount: 1 }] } },
   { id: 'schedule_first', category: 'schedule', rarity: 'normal', target: 1, progress: (pet) => pet.achievements.counters.partnerScheduleClaimCount, reward: { coins: 80 } },
   { id: 'schedule_10', category: 'schedule', rarity: 'normal', target: 10, progress: (pet) => pet.achievements.counters.partnerScheduleClaimCount, reward: { coins: 200 } },
   { id: 'schedule_50', category: 'schedule', rarity: 'rare', target: 50, progress: (pet) => pet.achievements.counters.partnerScheduleClaimCount, reward: { coins: 500, items: [{ itemId: 'golden_apple', amount: 1 }] } },
@@ -712,6 +723,22 @@ export const incrementAchievementGardenHarvest = (pet: PetState, treeId: GardenT
         [treeId]: (pet.achievements.counters.gardenHarvestCountsByTreeId[treeId] ?? 0) + 1,
       },
     },
+  },
+});
+
+export const incrementAchievementCompostStart = (pet: PetState): PetState => ({
+  ...pet,
+  achievements: {
+    ...pet.achievements,
+    counters: { ...pet.achievements.counters, compostStartCount: pet.achievements.counters.compostStartCount + 1 },
+  },
+});
+
+export const incrementAchievementCompostCollect = (pet: PetState): PetState => ({
+  ...pet,
+  achievements: {
+    ...pet.achievements,
+    counters: { ...pet.achievements.counters, compostCollectCount: pet.achievements.counters.compostCollectCount + 1 },
   },
 });
 

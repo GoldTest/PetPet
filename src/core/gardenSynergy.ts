@@ -68,6 +68,9 @@ export const synergyRules: readonly SynergyRule[] = [
   },
 ];
 
+const isSameAdjacent = (ruleId: string, treeIdA: string, treeIdB: string): boolean =>
+  ruleId === 'same_adjacent' && treeIdA === treeIdB;
+
 const adjacencyMap: readonly (readonly number[])[] = [
   [1, 3],
   [0, 2, 4],
@@ -99,7 +102,7 @@ export const findActiveSynergies = (garden: GardenState): ActiveSynergy[] => {
       for (const rule of synergyRules) {
         const matchForward = slot.treeId === rule.treeA && neighbor.treeId === rule.treeB;
         const matchReverse = slot.treeId === rule.treeB && neighbor.treeId === rule.treeA;
-        if (matchForward || matchReverse) {
+        if (matchForward || matchReverse || isSameAdjacent(rule.id, slot.treeId, neighbor.treeId)) {
           synergies.push({ rule, slotA: i, slotB: neighborIndex });
         }
       }

@@ -115,6 +115,7 @@ export interface CompostBinSlot {
 export interface CompostBinState {
   level: number;
   slots: CompostBinSlot[];
+  unlockedExtraSlots: number;
 }
 
 export interface SpeciesBookEntry {
@@ -333,6 +334,8 @@ export interface AchievementCounters {
   gardenPlantCount: number;
   gardenWaterCount: number;
   gardenHarvestCountsByTreeId: Partial<Record<GardenTreeId, number>>;
+  compostStartCount: number;
+  compostCollectCount: number;
   partnerScheduleClaimCount: number;
   partnerScheduleClaimCountsByCategory: Partial<Record<PartnerScheduleCategory, number>>;
   partnerScheduleLongClaimCountsByCategory: Partial<Record<PartnerScheduleCategory, number>>;

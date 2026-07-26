@@ -574,8 +574,11 @@
         "winter": "New trees can be harvested +1 time"
       },
       "synergy": {
+        "title": "Synergies",
         "fruit_care": "Fruit + Care: extra drops +1",
         "gift_fruit": "Gift + Fruit: grow speed +10%",
+        "herb_fruit": "Herb + Fruit: extra drop +50%",
+        "herb_care": "Herb + Care: grow speed +10%",
         "money_any": "Money tree adjacent: coins +15%",
         "same_adjacent": "Same species adjacent: rare weight +5%"
       },
@@ -665,10 +668,13 @@
       "compostCollectBtn": "Collect",
       "compostInputFruitCare": "Fruit/Care Items",
       "compostInputWithered": "Withered Branch",
+      "compostInputRareCombo": "Rare Combo",
       "compostOutputNormal": "Normal Fertilizer",
       "compostOutputNutrient": "Growth Nutrient",
       "compostOutputHeart": "Heart Fertilizer",
       "compostTimeRemaining": "Remaining: {time}",
+      "compostUnlockSlot": "Unlock ({tokens}/{cost} tokens)",
+      "compostLockedSlot": "Locked",
       "speciesBook": {
         "title": "Species Book",
         "progress": "Collected {unlocked}/{total}",
@@ -1381,6 +1387,30 @@
           "title": "Tool Expert",
           "description": "Upgrade the watering can, shovel, and fertilizer box to level 3."
         },
+        "compost_first": {
+          "title": "First Compost",
+          "description": "Start 1 compost."
+        },
+        "compost_10": {
+          "title": "Getting Started",
+          "description": "Start 10 composts in total."
+        },
+        "compost_50": {
+          "title": "Compost Enthusiast",
+          "description": "Start 50 composts in total."
+        },
+        "compost_200": {
+          "title": "Compost Master",
+          "description": "Start 200 composts in total."
+        },
+        "compost_bin_upgrade": {
+          "title": "Bin Upgrade",
+          "description": "Upgrade the compost bin to the max level."
+        },
+        "compost_unlock_slots": {
+          "title": "Expanded Composting",
+          "description": "Unlock all 3 extra compost slots."
+        },
         "schedule_first": {
           "title": "First Trip",
           "description": "Claim 1 partner schedule reward."
@@ -1706,7 +1736,8 @@
       "harvestMixedWithered": "Harvested {count} item(s) and +{coins} coins. The tree has withered.",
       "compostStart": "Composted {item}. Processing has begun.",
       "compostCollect": "Collected {count}x {item}.",
-      "compostUpgrade": "Compost bin upgraded to Lv.{level} for {coins} coins."
+      "compostUpgrade": "Compost bin upgraded to Lv.{level} for {coins} coins.",
+      "compostUnlockSlot": "Unlocked compost slot {slot} for {tokens} garden tokens."
     },
     "boostCards": {
       "maxDuration": "This card can only stack up to 90 days.",

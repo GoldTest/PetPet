@@ -574,10 +574,13 @@
         "winter": "新种树木可收获次数 +1"
       },
       "synergy": {
+        "title": "连携效果",
         "fruit_care": "果树 + 关怀树：额外掉落 +1",
         "gift_fruit": "礼物树 + 果树：生长速度 +10%",
+        "herb_fruit": "药草树 + 果树：额外掉落 +50%",
+        "herb_care": "药草树 + 关怀树：生长速度 +10%",
         "money_any": "摇钱树相邻：金币 +15%",
-        "same_adjacent": "同种果树相邻：稀有权重 +5%"
+        "same_adjacent": "同种树相邻：稀有权重 +5%"
       },
       "chooseSapling": "选择树苗",
       "plantDialogTitle": "选择树苗",
@@ -671,10 +674,13 @@
       "compostCollectBtn": "收取",
       "compostInputFruitCare": "水果/护理道具",
       "compostInputWithered": "枯树树枝",
+      "compostInputRareCombo": "稀有组合",
       "compostOutputNormal": "普通肥料",
       "compostOutputNutrient": "成长营养液",
       "compostOutputHeart": "爱心肥料",
       "compostTimeRemaining": "剩余 {time}",
+      "compostUnlockSlot": "解锁 ({tokens}/{cost} 代币)",
+      "compostLockedSlot": "未解锁",
       "speciesBook": {
         "title": "图鉴",
         "progress": "已收集 {unlocked}/{total}",
@@ -1387,6 +1393,30 @@
           "title": "工具专家",
           "description": "将水壶、铲子和肥料箱全部升级到 3 级。"
         },
+        "compost_first": {
+          "title": "初次堆肥",
+          "description": "进行 1 次堆肥。"
+        },
+        "compost_10": {
+          "title": "堆肥新手",
+          "description": "累计进行 10 次堆肥。"
+        },
+        "compost_50": {
+          "title": "堆肥能手",
+          "description": "累计进行 50 次堆肥。"
+        },
+        "compost_200": {
+          "title": "堆肥大师",
+          "description": "累计进行 200 次堆肥。"
+        },
+        "compost_bin_upgrade": {
+          "title": "堆肥升级",
+          "description": "将堆肥桶升到最高级。"
+        },
+        "compost_unlock_slots": {
+          "title": "扩展堆肥",
+          "description": "解锁全部 3 个额外堆肥槽位。"
+        },
         "schedule_first": {
           "title": "初次出发",
           "description": "领取 1 次伙伴日程奖励。"
@@ -1712,7 +1742,8 @@
       "harvestMixedWithered": "收获了 {count} 件道具，金币 +{coins}，这棵树寿命耗尽枯萎了。",
       "compostStart": "投入了{item}，开始堆肥。",
       "compostCollect": "收取了 {count} 个{item}。",
-      "compostUpgrade": "堆肥桶升到 Lv.{level}，花费 {coins} 金币。"
+      "compostUpgrade": "堆肥桶升到 Lv.{level}，花费 {coins} 金币。",
+      "compostUnlockSlot": "解锁了第 {slot} 个堆肥槽，花费 {tokens} 个花园代币。"
     },
     "boostCards": {
       "maxDuration": "这张增益卡最多只能累计 90 天。",

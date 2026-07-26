@@ -300,11 +300,11 @@ const generateGardenDrops = (pet: PetState, slot: GardenSlot, now: number, syner
   const seed = [slot.slotIndex, slot.treeId, slot.plantedAt, slot.nextReadyAt, slot.harvestsUsed].join(':');
   const extra = resolveExtraDrops(pet, slot, seed, now, synergies);
   const synergyCoinBonus = getSynergyCoinBonus(slot.slotIndex, synergies);
-  if (slot.treeId === 'money_tree') { const baseCoins = pickMoneyTreeCoins(seed); const coins = Math.floor(baseCoins * (1 + extra.extraDropCount * 0.25) * (1 + synergyCoinBonus / 100)); const drops: GardenDrop[] = [{ kind: 'coins', amount: coins }]; maybeDropGoldenAppleSapling(seed, drops); return { drops, boostCards: extra.boostCards }; }
-  if (slot.treeId === 'golden_apple_tree') { const drops: GardenDrop[] = pickGoldenAppleTreeDrops(slot, seed); for (let index = 0; index < extra.extraDropCount; index += 1) drops.push({ itemId: getExtraDropItem(slot.treeId, seed + ':common:' + index), amount: 1 }); const merged = mergeDrops(drops).slice(0, 4); maybeDropGoldenAppleSapling(seed, merged); return { drops: merged, boostCards: extra.boostCards }; }
+  if (slot.treeId === 'money_tree') { const baseCoins = pickMoneyTreeCoins(seed); const coins = Math.floor(baseCoins * (1 + extra.extraDropCount * 0.25) * (1 + synergyCoinBonus / 100)); const drops: GardenDrop[] = [{ kind: 'coins', amount: coins }, { itemId: 'garden_token', amount: 1 }]; maybeDropGoldenAppleSapling(seed, drops); return { drops, boostCards: extra.boostCards }; }
+  if (slot.treeId === 'golden_apple_tree') { const drops: GardenDrop[] = pickGoldenAppleTreeDrops(slot, seed); for (let index = 0; index < extra.extraDropCount; index += 1) drops.push({ itemId: getExtraDropItem(slot.treeId, seed + ':common:' + index), amount: 1 }); drops.push({ itemId: 'garden_token', amount: 1 }); const merged = mergeDrops(drops).slice(0, 4); maybeDropGoldenAppleSapling(seed, merged); return { drops: merged, boostCards: extra.boostCards }; }
   const baseRareBonus = slot.fertilizerType === 'heart' ? getHeartRareWeightBonusPercent(pet.garden.tools) : 0;
   const rareWeightBonusPercent = baseRareBonus + getSynergyRareWeightBonus(slot.slotIndex, synergies);
-  const drops: GardenDrop[] = [{ itemId: pickWeightedDrop(gardenTreeDefinitions[slot.treeId].dropPool, seed, rareWeightBonusPercent), amount: 1 }];
+  const drops: GardenDrop[] = [{ itemId: pickWeightedDrop(gardenTreeDefinitions[slot.treeId].dropPool, seed, rareWeightBonusPercent), amount: 1 }, { itemId: 'garden_token', amount: 1 }];
   for (let index = 0; index < extra.extraDropCount; index += 1) drops.push({ itemId: getExtraDropItem(slot.treeId, seed + ':common:' + index), amount: 1 });
   const witheredHash = seed.split('').reduce((h, c) => ((h << 5) - h + c.charCodeAt(0)) | 0, 0);
   const witheredChance = Math.abs(witheredHash) % 100;
@@ -353,8 +353,13 @@ export const waterTree = (pet: PetState, slotIndex: number, now = Date.now()): P
   const environment = getGardenEnvironmentEffects(current, now);
   const percent = getGardenWaterReductionPercent(current.garden.tools, environment.waterReductionBonusPercent);
   const reductionMs = Math.floor(Math.max(0, slot.nextReadyAt - now) * (percent / 100));
+  let inventory = current.inventory;
+  if (Math.random() < 0.2) {
+    inventory = addInventoryItem(inventory, 'garden_token', 1);
+  }
   return incrementAchievementGardenWater({
     ...current,
+    inventory,
     garden: updateGardenSlot({ ...current.garden, dailyCareDateKey: getSixAmResetDateKey(now), dailyWaterCount: current.garden.dailyWaterCount + 1 }, slotIndex, (target) => ({ ...target, lastWateredAt: now, nextReadyAt: Math.max(now, target.nextReadyAt - reductionMs) })),
     recentEvent: t('pet.garden.waterSuccess', { percent }),
     lastInteractionAt: now,
@@ -371,9 +376,14 @@ export const fertilizeTree = (pet: PetState, slotIndex: number, fertilizerId: Ga
   const baseDuration = gardenTreeDefinitions[slot.treeId]?.growDurationMs ?? 0;
   const dynamicMaxMs = Math.max(config.baseMaxMs, baseDuration * config.scaleFactor);
   const reductionMs = Math.min(dynamicMaxMs, Math.floor(Math.max(0, slot.nextReadyAt - now) * (config.percent / 100)));
+  let inventory = current.inventory;
+  inventory = removeInventoryItem(inventory, itemId);
+  if (Math.random() < 0.3) {
+    inventory = addInventoryItem(inventory, 'garden_token', 1);
+  }
   return {
     ...current,
-    inventory: removeInventoryItem(current.inventory, itemId),
+    inventory,
     garden: updateGardenSlot({ ...current.garden, dailyCareDateKey: getSixAmResetDateKey(now), dailyFertilizeCount: current.garden.dailyFertilizeCount + 1 }, slotIndex, (target) => ({ ...target, fertilizerType: fertilizerId, lastFertilizedAt: now, nextReadyAt: Math.max(now, target.nextReadyAt - reductionMs) })),
     recentEvent: t('pet.garden.fertilizeSuccess', { item: getItemName(itemId), percent: config.percent }),
     lastInteractionAt: now,

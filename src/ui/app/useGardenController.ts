@@ -14,7 +14,7 @@ import {
   type GardenTreeId,
   type PetState,
 } from '../../core/pet';
-import { compostItem, collectCompost, upgradeCompostBin } from '../../core/compostBin';
+import { compostItem, collectCompost, unlockCompostBinSlot, upgradeCompostBin } from '../../core/compostBin';
 import { playSfx, type SfxId } from '../../core/audio';
 
 export type GardenClearConfirm = { slotIndex: number; kind: 'clear' | 'remove'; treeId: GardenTreeId; coins: number };
@@ -85,6 +85,7 @@ export const useGardenController = ({ petRef, setPet, commitPet, playAfterUnlock
     compostItem: (slotIndex: number, itemId: string) => commitAction((current) => compostItem(current, slotIndex, itemId), 'purchase'),
     collectCompost: (slotIndex: number) => commitAction((current) => collectCompost(current, slotIndex), 'coin'),
     upgradeCompostBin: () => commitAction((current) => upgradeCompostBin(current), 'purchase'),
+    unlockCompostBinSlot: () => commitAction((current) => unlockCompostBinSlot(current), 'purchase'),
     commitAction,
   };
 };
