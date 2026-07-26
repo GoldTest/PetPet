@@ -675,6 +675,11 @@
       "compostTimeRemaining": "Remaining: {time}",
       "compostUnlockSlot": "Unlock ({tokens}/{cost} tokens)",
       "compostLockedSlot": "Locked",
+      "compostCatalystFruit": "Fruit Catalyst",
+      "compostCatalystWithered": "Branch Catalyst",
+      "compostCatalystFertilizer": "Fertilizer Catalyst",
+      "compostCatalystUpgrade": "Upgrade",
+      "compostCatalystFast": "Fast",
       "speciesBook": {
         "title": "Species Book",
         "progress": "Collected {unlocked}/{total}",

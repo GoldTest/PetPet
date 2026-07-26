@@ -45,6 +45,7 @@ interface GardenPageProps {
   onOpenShop: () => void;
   onCompost: (slotIndex: number, itemId: string) => void;
   onCollectCompost: (slotIndex: number) => void;
+  onLoadCatalyst: (slotIndex: number, itemId: string) => void;
   onUpgradeCompostBin: () => void;
   onUnlockCompostBinSlot: () => void;
   compensationCoins?: number;
@@ -75,7 +76,7 @@ const weatherIcons: Record<WeatherType, LucideIcon> = {
 
 type GardenActionDialog = 'plant' | 'tools' | null;
 
-export const GardenPage = ({ pet, itemIconMap, onBack, onUnlockSlot, onPlantTree, onWater, onFertilize, onNutrient, onHarvest, onClear, onUpgradeTool, onOpenShop, onCompost, onCollectCompost, onUpgradeCompostBin, onUnlockCompostBinSlot, compensationCoins = 0, onClaimCompensation }: GardenPageProps) => {
+export const GardenPage = ({ pet, itemIconMap, onBack, onUnlockSlot, onPlantTree, onWater, onFertilize, onNutrient, onHarvest, onClear, onUpgradeTool, onOpenShop, onCompost, onCollectCompost, onLoadCatalyst, onUpgradeCompostBin, onUnlockCompostBinSlot, compensationCoins = 0, onClaimCompensation }: GardenPageProps) => {
   const [actionDialog, setActionDialog] = useState<GardenActionDialog>(null);
   const [selectedSlot, setSelectedSlot] = useState<number | null>(null);
   const [envExpanded, setEnvExpanded] = useState(false);
@@ -218,6 +219,7 @@ export const GardenPage = ({ pet, itemIconMap, onBack, onUnlockSlot, onPlantTree
         itemIconMap={itemIconMap}
         onCompost={onCompost}
         onCollect={onCollectCompost}
+        onLoadCatalyst={onLoadCatalyst}
         onUpgrade={onUpgradeCompostBin}
         onUnlockSlot={onUnlockCompostBinSlot}
       />

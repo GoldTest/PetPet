@@ -1,20 +1,21 @@
 import { useState } from 'react';
 import { createPortal } from 'react-dom';
-import { ArrowUp, Leaf, Lock, Recycle, Sparkles, Unlock, X } from 'lucide-react';
-import { currencyIcon } from '../assets';
+import { ArrowUp, FlaskConical, Leaf, Lock, Recycle, Sparkles, Unlock, X, Zap } from 'lucide-react';
 import {
   compostBinBaseSlotCount,
   compostBinMaxLevel,
-  compostBinTotalSlotCount,
   fruitCareItemIds,
-  getCompostBinOutput,
+  getAllowedCatalystItems,
+  getCatalystTypeForSlot,
   getCompostBinSlotDurationMs,
   getCompostBinUnlockCost,
   getCompostBinUpgradeCost,
+  getPairedAttachmentSlot,
+  isAttachmentSlot,
   isCompostBinSlotUnlocked,
   normalizeCompostBinState,
 } from '../core/compostBin';
-import { gardenFertilizerItemIds, gardenNutrientItemId, type PetState } from '../core/pet';
+import type { PetState } from '../core/petTypes';
 import { getInventoryCount } from '../core/items';
 import { t } from '../i18n';
 import { DialogShell } from './DialogShell';
@@ -24,6 +25,7 @@ interface CompostBinPanelProps {
   itemIconMap: Partial<Record<string, string>>;
   onCompost: (slotIndex: number, itemId: string) => void;
   onCollect: (slotIndex: number) => void;
+  onLoadCatalyst: (slotIndex: number, itemId: string) => void;
   onUpgrade: () => void;
   onUnlockSlot: () => void;
 }
@@ -37,14 +39,29 @@ const formatCountdown = (milliseconds: number) => {
 
 const getOutputItemName = (outputItemId: string) => {
   switch (outputItemId) {
-    case gardenFertilizerItemIds.normal: return t('ui.garden.compostOutputNormal');
-    case gardenNutrientItemId: return t('ui.garden.compostOutputNutrient');
-    case gardenFertilizerItemIds.heart: return t('ui.garden.compostOutputHeart');
+    case 'normal_fertilizer': return t('ui.garden.compostOutputNormal');
+    case 'harvest_nutrient': return t('ui.garden.compostOutputNutrient');
+    case 'heart_fertilizer': return t('ui.garden.compostOutputHeart');
     default: return outputItemId;
   }
 };
 
-export const CompostBinPanel = ({ pet, itemIconMap, onCompost, onCollect, onUpgrade, onUnlockSlot }: CompostBinPanelProps) => {
+const CATALYST_LABELS: Record<string, string> = {
+  fruit_catalyst: 'ui.garden.compostCatalystFruit',
+  withered_catalyst: 'ui.garden.compostCatalystWithered',
+  fertilizer_catalyst: 'ui.garden.compostCatalystFertilizer',
+};
+
+const baseOutputMap: Record<string, { itemId: string; amount: number }> = {
+  fruit_care: { itemId: 'normal_fertilizer', amount: 1 },
+  withered_fragment: { itemId: 'harvest_nutrient', amount: 1 },
+  rare_combo: { itemId: 'heart_fertilizer', amount: 1 },
+};
+
+const getBaseOutputItemId = (inputType: string): string => baseOutputMap[inputType]?.itemId ?? '';
+const getBaseOutputAmount = (inputType: string): number => baseOutputMap[inputType]?.amount ?? 0;
+
+export const CompostBinPanel = ({ pet, itemIconMap, onCompost, onCollect, onLoadCatalyst, onUpgrade, onUnlockSlot }: CompostBinPanelProps) => {
   const [showInputPicker, setShowInputPicker] = useState<number | null>(null);
   const now = Date.now();
   const bin = normalizeCompostBinState(pet.garden.compostBin, now);
@@ -53,18 +70,155 @@ export const CompostBinPanel = ({ pet, itemIconMap, onCompost, onCollect, onUpgr
   const tokenCount = getInventoryCount(pet.inventory, 'garden_token');
 
   const handleSelectInput = (slotIndex: number, itemId: string) => {
-    onCompost(slotIndex, itemId);
+    if (isAttachmentSlot(slotIndex)) {
+      onLoadCatalyst(slotIndex, itemId);
+    } else {
+      onCompost(slotIndex, itemId);
+    }
     setShowInputPicker(null);
   };
 
-  const availableItems = [
-    ...fruitCareItemIds.map(id => ({ id, type: 'fruit_care' as const })),
-    { id: 'withered_fragment', type: 'withered_fragment' as const },
-  ].filter(item => (pet.inventory[item.id] ?? 0) > 0);
+  const availableItemsForSlot = (slotIndex: number) => {
+    if (isAttachmentSlot(slotIndex)) {
+      return getAllowedCatalystItems(slotIndex).filter(id => (pet.inventory[id] ?? 0) > 0);
+    }
+    return [
+      ...fruitCareItemIds.map(id => ({ id, type: 'fruit_care' as const })),
+      { id: 'withered_fragment', type: 'withered_fragment' as const },
+    ].filter(item => (pet.inventory[item.id] ?? 0) > 0);
+  };
 
   const calcProgress = (startedAt: number, completesAt: number) => {
     if (completesAt <= startedAt) return 0;
     return Math.min(100, Math.max(0, ((now - startedAt) / (completesAt - startedAt)) * 100));
+  };
+
+  const renderBarrel = (i: number) => {
+    const slot = bin.slots[i];
+    const unlocked = isCompostBinSlotUnlocked(i, bin.unlockedExtraSlots);
+    const isAttachment = isAttachmentSlot(i);
+    const isActive = unlocked && slot.inputType && slot.completesAt > now;
+    const isReady = unlocked && slot.inputType && slot.completesAt > 0 && now >= slot.completesAt;
+    const isEmpty = unlocked && !slot.inputType && !(isAttachment && slot.catalystType && slot.catalystItemId);
+    const hasCatalyst = unlocked && isAttachment && slot.catalystType && slot.catalystItemId;
+    const progress = isActive ? calcProgress(slot.startedAt, slot.completesAt) : isReady ? 100 : 0;
+
+    const outputItemId = slot.outputItemId || (slot.inputType ? getBaseOutputItemId(slot.inputType) : '');
+    const outputAmount = slot.outputAmount || (slot.inputType ? getBaseOutputAmount(slot.inputType) : 0);
+    const baseAmount = slot.inputType ? getBaseOutputAmount(slot.inputType) : 0;
+    const isAmountBoosted = outputAmount > baseAmount;
+
+    const attachSlotIndex = !isAttachment ? getPairedAttachmentSlot(i) : undefined;
+    const attachSlot = attachSlotIndex !== undefined ? bin.slots[attachSlotIndex] : undefined;
+    const catalystType = attachSlot?.catalystType;
+
+    return (
+      <div
+        key={i}
+        className={`compost-barrel${isAttachment ? ' compost-barrel--attachment' : ''}${isActive ? ' compost-barrel--active' : ''}${isReady ? ' compost-barrel--ready' : ''}${isEmpty ? ' compost-barrel--empty' : ''}${hasCatalyst ? ' compost-barrel--catalyst' : ''}`}
+      >
+        {isEmpty && <div className="compost-barrel__rim-line" />}
+
+        <div className="compost-barrel__band compost-barrel__band--top" />
+        <div className="compost-barrel__band compost-barrel__band--bottom" />
+
+        {(isActive || isReady) && (
+          <div className="compost-barrel__fill" style={{ height: `${progress}%` }} />
+        )}
+
+        {isActive && (
+          <div className="compost-barrel__bubbles" aria-hidden="true">
+            <div className="compost-barrel__bubble" />
+            <div className="compost-barrel__bubble" />
+            <div className="compost-barrel__bubble" />
+          </div>
+        )}
+
+        {isReady && (
+          <span className="compost-barrel__sparkle" aria-hidden="true">
+            <Sparkles size={16} />
+          </span>
+        )}
+
+        <div className="compost-barrel__inner">
+          {!unlocked ? (
+            <span className="compost-barrel__locked-icon">
+              <Lock size={18} />
+            </span>
+          ) : hasCatalyst ? (
+            <img
+              src={itemIconMap[slot.catalystItemId!]}
+              alt=""
+              className="compost-barrel__catalyst-icon"
+            />
+          ) : isEmpty && isAttachment ? (
+            <button
+              type="button"
+              className="compost-barrel__add-btn"
+              onClick={() => setShowInputPicker(i)}
+              disabled={availableItemsForSlot(i).length === 0}
+            >
+              <span className="compost-barrel__add-icon">
+                <FlaskConical size={14} />
+              </span>
+              <span className="compost-barrel__add-label">
+                {t(CATALYST_LABELS[getCatalystTypeForSlot(i)!] ?? 'ui.garden.compostAddItem')}
+              </span>
+            </button>
+          ) : isEmpty ? (
+            <button
+              type="button"
+              className="compost-barrel__add-btn"
+              onClick={() => setShowInputPicker(i)}
+              disabled={availableItemsForSlot(i).length === 0}
+            >
+              <span className="compost-barrel__add-icon">+</span>
+              <span className="compost-barrel__add-label">{t('ui.garden.compostAddItem')}</span>
+            </button>
+          ) : isReady || isActive ? (
+            <>
+              <div className={`compost-barrel__output-row${catalystType === 'withered_catalyst' ? ' compost-barrel__output-row--upgraded' : ''}`}>
+                <img
+                  src={itemIconMap[outputItemId]}
+                  alt=""
+                  className="compost-barrel__output-icon"
+                  title={`${getOutputItemName(outputItemId)} x${outputAmount}`}
+                />
+                {isAmountBoosted && (
+                  <img
+                    src={itemIconMap[outputItemId]}
+                    alt=""
+                    className="compost-barrel__output-icon compost-barrel__output-icon--extra"
+                  />
+                )}
+                {catalystType === 'fertilizer_catalyst' && (
+                  <Zap size={10} className="compost-barrel__speed-icon" />
+                )}
+              </div>
+              {isActive && (
+                <span className="compost-barrel__input-label">
+                  {t('pet.shop.items.' + (slot.inputItemId ?? '') + '.name')}
+                </span>
+              )}
+              {isReady && (
+                <button
+                  type="button"
+                  className="compost-barrel__collect-btn"
+                  onClick={() => onCollect(i)}
+                >
+                  {t('ui.garden.compostCollectBtn')}
+                </button>
+              )}
+              {isActive && (
+                <span className="compost-barrel__timer">
+                  {formatCountdown(slot.completesAt - now)}
+                </span>
+              )}
+            </>
+          ) : null}
+        </div>
+      </div>
+    );
   };
 
   return (
@@ -92,98 +246,8 @@ export const CompostBinPanel = ({ pet, itemIconMap, onCompost, onCollect, onUpgr
       <div className="compost-bin-panel__barrels">
         {[[0, 3], [1, 4], [2, 5]].map(([baseIdx, attachIdx]) => (
           <div key={baseIdx} className="compost-barrel-pair">
-            {[baseIdx, attachIdx].map((i) => {
-              const slot = bin.slots[i];
-              const unlocked = isCompostBinSlotUnlocked(i, bin.unlockedExtraSlots);
-              const isAttachment = i >= compostBinBaseSlotCount;
-              const isActive = unlocked && slot.inputType && slot.completesAt > now;
-              const isReady = unlocked && slot.inputType && slot.completesAt > 0 && now >= slot.completesAt;
-              const isEmpty = unlocked && !slot.inputType;
-              const progress = isActive ? calcProgress(slot.startedAt, slot.completesAt) : isReady ? 100 : 0;
-              const output = slot.inputType ? getCompostBinOutput(slot.inputType) : undefined;
-
-              return (
-                <div
-                  key={i}
-                  className={`compost-barrel${isAttachment ? ' compost-barrel--attachment' : ''}${isActive ? ' compost-barrel--active' : ''}${isReady ? ' compost-barrel--ready' : ''}${isEmpty ? ' compost-barrel--empty' : ''}`}
-                >
-              {/* Rim line for empty state */}
-              {isEmpty && <div className="compost-barrel__rim-line" />}
-
-              {/* Metal bands */}
-              <div className="compost-barrel__band compost-barrel__band--top" />
-              <div className="compost-barrel__band compost-barrel__band--bottom" />
-
-              {/* Fill level for active/ready */}
-              {(isActive || isReady) && (
-                <div className="compost-barrel__fill" style={{ height: `${progress}%` }} />
-              )}
-
-              {/* Bubbles for active */}
-              {isActive && (
-                <div className="compost-barrel__bubbles" aria-hidden="true">
-                  <div className="compost-barrel__bubble" />
-                  <div className="compost-barrel__bubble" />
-                  <div className="compost-barrel__bubble" />
-                </div>
-              )}
-
-              {/* Sparkle for ready */}
-              {isReady && (
-                <span className="compost-barrel__sparkle" aria-hidden="true">
-                  <Sparkles size={16} />
-                </span>
-              )}
-
-              <div className="compost-barrel__inner">
-                {!unlocked ? (
-                  <span className="compost-barrel__locked-icon">
-                    <Lock size={18} />
-                  </span>
-                ) : isEmpty ? (
-                  <button
-                    type="button"
-                    className="compost-barrel__add-btn"
-                    onClick={() => setShowInputPicker(i)}
-                    disabled={availableItems.length === 0}
-                  >
-                    <span className="compost-barrel__add-icon">+</span>
-                    <span className="compost-barrel__add-label">{t('ui.garden.compostAddItem')}</span>
-                  </button>
-                ) : isReady ? (
-                  <>
-                    <img
-                      src={itemIconMap[output!.itemId]}
-                      alt=""
-                      className="compost-barrel__output-icon"
-                      title={`${getOutputItemName(output!.itemId)} x${output!.amount}`}
-                    />
-                    <button
-                      type="button"
-                      className="compost-barrel__collect-btn"
-                      onClick={() => onCollect(i)}
-                    >
-                      {t('ui.garden.compostCollectBtn')}
-                    </button>
-                  </>
-                ) : (
-                  <>
-                    <img
-                      src={itemIconMap[slot.inputItemId ?? '']}
-                      alt=""
-                      className="compost-barrel__input-icon"
-                      title={t('pet.shop.items.' + (slot.inputItemId ?? '') + '.name')}
-                    />
-                    <span className="compost-barrel__input-label">{t('pet.shop.items.' + (slot.inputItemId ?? '') + '.name')}</span>
-                    <span className="compost-barrel__timer">
-                      {formatCountdown(slot.completesAt - now)}
-                    </span>
-                  </>
-                )}
-              </div>
-            </div>
-            );
-          })}
+            {renderBarrel(baseIdx)}
+            {renderBarrel(attachIdx)}
           </div>
         ))}
       </div>
@@ -216,25 +280,26 @@ export const CompostBinPanel = ({ pet, itemIconMap, onCompost, onCollect, onUpgr
             </button>
           </header>
           <div className="garden-dialog-list">
-            {availableItems.length === 0 ? (
-              <p className="compost-input-picker__empty">No items available for composting.</p>
+            {availableItemsForSlot(showInputPicker).length === 0 ? (
+              <p className="compost-input-picker__empty">No items available.</p>
             ) : (
-              availableItems.map((item) => {
-                const icon = itemIconMap[item.id];
-                const count = pet.inventory[item.id] ?? 0;
+              availableItemsForSlot(showInputPicker).map((item: string | { id: string; type: string }) => {
+                const itemId = typeof item === 'string' ? item : item.id;
+                const icon = itemIconMap[itemId];
+                const count = pet.inventory[itemId] ?? 0;
                 return (
-                  <article className="garden-dialog-item" key={item.id}>
+                  <article className="garden-dialog-item" key={itemId}>
                     <span className="garden-dialog-item__icon">
                       {icon ? <img src={icon} alt="" aria-hidden="true" /> : <Leaf size={24} aria-hidden="true" />}
                     </span>
                     <div>
-                      <strong>{t(`pet.shop.items.${item.id}.name`)}</strong>
+                      <strong>{t(`pet.shop.items.${itemId}.name`)}</strong>
                       <small>x{count}</small>
                     </div>
                     <button
                       type="button"
                       className="primary-button"
-                      onClick={() => handleSelectInput(showInputPicker, item.id)}
+                      onClick={() => handleSelectInput(showInputPicker, itemId)}
                     >
                       {t('ui.garden.compostAddItem')}
                     </button>

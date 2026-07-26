@@ -353,6 +353,7 @@ const PetApp = ({ initialPet, initialActiveMod, onResetToPicker }: PetAppProps) 
     upgradeTool: handleUpgradeGardenTool,
     compostItem: handleCompostItem,
     collectCompost: handleCollectCompost,
+    loadCatalyst: handleLoadCatalyst,
     upgradeCompostBin: handleUpgradeCompostBin,
     unlockCompostBinSlot: handleUnlockCompostBinSlot,
     commitAction: commitGardenAction,
@@ -1117,6 +1118,7 @@ const PetApp = ({ initialPet, initialActiveMod, onResetToPicker }: PetAppProps) 
           onOpenShop={() => handleOpenShop('garden')}
           onCompost={handleCompostItem}
           onCollectCompost={handleCollectCompost}
+          onLoadCatalyst={handleLoadCatalyst}
           onUpgradeCompostBin={handleUpgradeCompostBin}
           onUnlockCompostBinSlot={handleUnlockCompostBinSlot}
           compensationCoins={gardenCompensationCoins}

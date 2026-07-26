@@ -2,7 +2,7 @@ import { t } from '../i18n';
 import { incrementAchievementCompostCollect, incrementAchievementCompostStart } from './achievements';
 import { addInventoryItem, getInventoryCount, isBuiltinItemId, removeInventoryItem } from './items';
 import { clampCoins } from './petStats';
-import type { BuiltinItemId, CompostBinInputType, CompostBinSlot, CompostBinState, GardenState, ItemId, PetState } from './petTypes';
+import type { BuiltinItemId, CompostBinCatalystType, CompostBinInputType, CompostBinSlot, CompostBinState, PetState } from './petTypes';
 import { isNumber } from './utils';
 
 const minuteMs = 60 * 1000;
@@ -12,7 +12,9 @@ export const compostBinMaxLevel = 3;
 export const compostBinBaseSlotCount = 3;
 export const compostBinTotalSlotCount = 6;
 export const compostBinUpgradeCosts = [0, 500, 1500] as const;
-export const compostBinExtraSlotUnlockCosts = [10, 20, 40] as const;
+export const compostBinExtraSlotUnlockCosts = [1, 1, 1] as const;
+
+export const CATALYST_SLOT_OFFSET = 3;
 
 const compostBinBaseTimesMs: Record<CompostBinInputType, number> = {
   fruit_care: 30 * minuteMs,
@@ -40,6 +42,9 @@ const isFruitCareItem = (itemId: string): itemId is BuiltinItemId =>
 
 const isWitheredFragment = (itemId: string): boolean => itemId === 'withered_fragment';
 
+const isFertilizerItem = (itemId: string): boolean =>
+  itemId === 'normal_fertilizer' || itemId === 'harvest_nutrient' || itemId === 'heart_fertilizer';
+
 export const getCompostBinSlotDurationMs = (inputType: CompostBinInputType, level: number): number => {
   const base = compostBinBaseTimesMs[inputType];
   const bonus = compostBinLevelSpeedBonusPercent[Math.min(compostBinMaxLevel, Math.max(0, level))] ?? 0;
@@ -55,6 +60,43 @@ export const getCompostBinUnlockCost = (unlockedExtraSlots: number): number =>
 export const isCompostBinSlotUnlocked = (slotIndex: number, unlockedExtraSlots: number): boolean =>
   slotIndex < compostBinBaseSlotCount || slotIndex < compostBinBaseSlotCount + unlockedExtraSlots;
 
+export const isAttachmentSlot = (slotIndex: number): boolean => slotIndex >= compostBinBaseSlotCount;
+
+export const getPairedBaseSlot = (attachSlotIndex: number): number | undefined =>
+  isAttachmentSlot(attachSlotIndex) ? attachSlotIndex - CATALYST_SLOT_OFFSET : undefined;
+
+export const getPairedAttachmentSlot = (baseSlotIndex: number): number | undefined =>
+  baseSlotIndex < compostBinBaseSlotCount ? baseSlotIndex + CATALYST_SLOT_OFFSET : undefined;
+
+const fertilizerTimeReductionPct: Record<string, number> = {
+  normal_fertilizer: 30,
+  harvest_nutrient: 40,
+  heart_fertilizer: 50,
+};
+
+const qualityUpgradeChain: Record<string, BuiltinItemId | undefined> = {
+  normal_fertilizer: 'harvest_nutrient',
+  harvest_nutrient: 'heart_fertilizer',
+  heart_fertilizer: undefined,
+};
+
+export const getCatalystTypeForSlot = (slotIndex: number): CompostBinCatalystType | undefined => {
+  if (!isAttachmentSlot(slotIndex)) return undefined;
+  const idx = slotIndex - CATALYST_SLOT_OFFSET;
+  if (idx === 0) return 'fruit_catalyst';
+  if (idx === 1) return 'withered_catalyst';
+  if (idx === 2) return 'fertilizer_catalyst';
+  return undefined;
+};
+
+export const getAllowedCatalystItems = (slotIndex: number): readonly string[] => {
+  const type = getCatalystTypeForSlot(slotIndex);
+  if (type === 'fruit_catalyst') return fruitCareItemIds;
+  if (type === 'withered_catalyst') return ['withered_fragment'];
+  if (type === 'fertilizer_catalyst') return ['normal_fertilizer', 'harvest_nutrient', 'heart_fertilizer'];
+  return [];
+};
+
 export const defaultCompostBinSlot = (slotIndex: number): CompostBinSlot => ({
   slotIndex,
   inputType: undefined,
@@ -63,6 +105,8 @@ export const defaultCompostBinSlot = (slotIndex: number): CompostBinSlot => ({
   completesAt: 0,
   outputItemId: '',
   outputAmount: 0,
+  catalystType: undefined,
+  catalystItemId: undefined,
 });
 
 export const defaultCompostBinState = (): CompostBinState => ({
@@ -74,6 +118,9 @@ export const defaultCompostBinState = (): CompostBinState => ({
 const isCompostBinInputType = (value: unknown): value is CompostBinInputType =>
   value === 'fruit_care' || value === 'withered_fragment' || value === 'rare_combo';
 
+const isCompostBinCatalystType = (value: unknown): value is CompostBinCatalystType =>
+  value === 'fruit_catalyst' || value === 'withered_catalyst' || value === 'fertilizer_catalyst';
+
 const normalizeCompostBinSlot = (value: unknown, slotIndex: number, now: number): CompostBinSlot => {
   const fallback = defaultCompostBinSlot(slotIndex);
   if (!value || typeof value !== 'object' || Array.isArray(value)) return fallback;
@@ -84,7 +131,14 @@ const normalizeCompostBinSlot = (value: unknown, slotIndex: number, now: number)
   const completesAt = isNumber(raw.completesAt) ? Math.max(0, Math.floor(raw.completesAt)) : 0;
   const outputItemId = typeof raw.outputItemId === 'string' ? raw.outputItemId : '';
   const outputAmount = isNumber(raw.outputAmount) ? Math.max(0, Math.floor(raw.outputAmount)) : 0;
-  if (!inputType || startedAt <= 0 || completesAt <= 0) return fallback;
+  const catalystType = isCompostBinCatalystType(raw.catalystType) ? raw.catalystType : undefined;
+  const catalystItemId = typeof raw.catalystItemId === 'string' ? raw.catalystItemId : '';
+  if (!inputType || startedAt <= 0 || completesAt <= 0) {
+    if (isAttachmentSlot(slotIndex) && catalystType && catalystItemId) {
+      return { ...fallback, catalystType, catalystItemId };
+    }
+    return fallback;
+  }
   const isComplete = now >= completesAt;
   return {
     slotIndex,
@@ -92,8 +146,9 @@ const normalizeCompostBinSlot = (value: unknown, slotIndex: number, now: number)
     inputItemId,
     startedAt,
     completesAt: isComplete ? completesAt : completesAt,
-    outputItemId: isComplete ? outputItemId : '',
-    outputAmount: isComplete ? outputAmount : 0,
+    outputItemId,
+    outputAmount,
+    guaranteedTokenDrop: raw.guaranteedTokenDrop === true ? true : undefined,
   };
 };
 
@@ -111,6 +166,41 @@ export const normalizeCompostBinState = (value: unknown, now = Date.now()): Comp
 };
 
 const getItemName = (itemId: string) => t('pet.shop.items.' + itemId + '.name');
+
+export const loadCatalyst = (pet: PetState, slotIndex: number, itemId: string, now = Date.now()): PetState => {
+  const garden = pet.garden;
+  const bin = normalizeCompostBinState(garden.compostBin, now);
+  if (!isAttachmentSlot(slotIndex)) return pet;
+  if (!isCompostBinSlotUnlocked(slotIndex, bin.unlockedExtraSlots)) return pet;
+
+  const slot = bin.slots[slotIndex];
+  if (!slot) return pet;
+  if (slot.inputType && slot.completesAt > now) return pet;
+  if (slot.catalystType && slot.catalystItemId) return pet;
+
+  const allowedItems = getAllowedCatalystItems(slotIndex);
+  if (!allowedItems.includes(itemId)) return pet;
+
+  if (getInventoryCount(pet.inventory, itemId as BuiltinItemId) <= 0) return pet;
+
+  const catalystType = getCatalystTypeForSlot(slotIndex);
+
+  const newSlot: CompostBinSlot = {
+    ...defaultCompostBinSlot(slotIndex),
+    catalystType,
+    catalystItemId: itemId,
+  };
+
+  const newSlots = bin.slots.map((s) => s.slotIndex === slotIndex ? newSlot : s);
+  const newBin: CompostBinState = { ...bin, slots: newSlots };
+
+  return {
+    ...pet,
+    inventory: removeInventoryItem(pet.inventory, itemId as BuiltinItemId),
+    garden: { ...garden, compostBin: newBin },
+    lastInteractionAt: now,
+  };
+};
 
 export const compostItem = (pet: PetState, slotIndex: number, itemId: string, now = Date.now()): PetState => {
   const garden = pet.garden;
@@ -131,7 +221,34 @@ export const compostItem = (pet: PetState, slotIndex: number, itemId: string, no
   if (getInventoryCount(pet.inventory, itemId as BuiltinItemId) <= 0) return pet;
 
   const output = compostBinOutputs[inputType];
-  const durationMs = getCompostBinSlotDurationMs(inputType, bin.level);
+  let durationMs = getCompostBinSlotDurationMs(inputType, bin.level);
+  let finalItemId = output.itemId;
+  let finalAmount = output.amount;
+  let guaranteedToken = false;
+
+  const attachSlotIndex = getPairedAttachmentSlot(slotIndex);
+  if (attachSlotIndex !== undefined) {
+    const attachSlot = bin.slots[attachSlotIndex];
+    if (attachSlot && attachSlot.catalystType && attachSlot.catalystItemId) {
+      const catalystType = attachSlot.catalystType;
+      const catalystItemId = attachSlot.catalystItemId;
+
+      if (catalystType === 'fruit_catalyst') {
+        finalAmount = Math.floor(output.amount * (2 + (bin.level - 1) * 0.5));
+      } else if (catalystType === 'withered_catalyst') {
+        const upgraded = qualityUpgradeChain[finalItemId];
+        if (upgraded) {
+          finalItemId = upgraded;
+        } else {
+          finalAmount = output.amount * 2;
+        }
+      } else if (catalystType === 'fertilizer_catalyst') {
+        const reductionPct = fertilizerTimeReductionPct[catalystItemId] ?? 0;
+        durationMs = Math.max(60 * 1000, Math.round(durationMs * (1 - reductionPct / 100)));
+        guaranteedToken = true;
+      }
+    }
+  }
 
   const newSlot: CompostBinSlot = {
     slotIndex,
@@ -139,11 +256,16 @@ export const compostItem = (pet: PetState, slotIndex: number, itemId: string, no
     inputItemId: itemId,
     startedAt: now,
     completesAt: now + durationMs,
-    outputItemId: output.itemId,
-    outputAmount: output.amount,
+    outputItemId: finalItemId,
+    outputAmount: finalAmount,
+    guaranteedTokenDrop: guaranteedToken || undefined,
   };
 
-  const newSlots = bin.slots.map((s) => s.slotIndex === slotIndex ? newSlot : s);
+  const newSlots = bin.slots.map((s) => {
+    if (s.slotIndex === slotIndex) return newSlot;
+    if (s.slotIndex === attachSlotIndex) return defaultCompostBinSlot(attachSlotIndex);
+    return s;
+  });
   const newBin: CompostBinState = { ...bin, slots: newSlots };
 
   return incrementAchievementCompostStart({
@@ -161,16 +283,23 @@ export const collectCompost = (pet: PetState, slotIndex: number, now = Date.now(
   const slot = bin.slots[slotIndex];
   if (!slot || !slot.inputType || now < slot.completesAt) return pet;
 
-  const output = compostBinOutputs[slot.inputType];
-  if (!output) return pet;
+  const outputItemId = slot.outputItemId || compostBinOutputs[slot.inputType]?.itemId || '';
+  const outputAmount = slot.outputAmount || compostBinOutputs[slot.inputType]?.amount || 0;
+  if (!outputItemId || outputAmount <= 0) return pet;
 
   const emptySlot: CompostBinSlot = defaultCompostBinSlot(slotIndex);
-  const newSlots = bin.slots.map((s) => s.slotIndex === slotIndex ? emptySlot : s);
+  const attachSlotIndex = getPairedAttachmentSlot(slotIndex);
+  const newSlots = bin.slots.map((s) => {
+    if (s.slotIndex === slotIndex) return emptySlot;
+    if (attachSlotIndex !== undefined && s.slotIndex === attachSlotIndex) return defaultCompostBinSlot(attachSlotIndex);
+    return s;
+  });
   const newBin: CompostBinState = { ...bin, slots: newSlots };
 
-  let inventory = addInventoryItem(pet.inventory, output.itemId, output.amount);
-  const tokenDropChance = 0.3;
-  if (Math.random() < tokenDropChance) {
+  let inventory = addInventoryItem(pet.inventory, outputItemId as BuiltinItemId, outputAmount);
+
+  const tokenDrop = slot.guaranteedTokenDrop || Math.random() < 0.3;
+  if (tokenDrop) {
     inventory = addInventoryItem(inventory, 'garden_token', 1);
   }
 
@@ -178,7 +307,7 @@ export const collectCompost = (pet: PetState, slotIndex: number, now = Date.now(
     ...pet,
     inventory,
     garden: { ...garden, compostBin: newBin },
-    recentEvent: t('pet.garden.compostCollect', { item: getItemName(output.itemId), count: output.amount }),
+    recentEvent: t('pet.garden.compostCollect', { item: getItemName(outputItemId), count: outputAmount }),
     lastInteractionAt: now,
   });
 };

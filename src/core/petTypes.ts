@@ -101,6 +101,7 @@ export interface GardenState {
 }
 
 export type CompostBinInputType = 'fruit_care' | 'withered_fragment' | 'rare_combo';
+export type CompostBinCatalystType = 'fruit_catalyst' | 'withered_catalyst' | 'fertilizer_catalyst';
 
 export interface CompostBinSlot {
   slotIndex: number;
@@ -110,6 +111,9 @@ export interface CompostBinSlot {
   completesAt: number;
   outputItemId: string;
   outputAmount: number;
+  catalystType?: CompostBinCatalystType;
+  catalystItemId?: string;
+  guaranteedTokenDrop?: boolean;
 }
 
 export interface CompostBinState {

@@ -1115,6 +1115,15 @@
   text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
 }
 
+.compost-barrel--active .compost-barrel__output-icon {
+  width: 32px;
+  height: 32px;
+  object-fit: contain;
+  border-radius: 5px;
+  background: rgba(255, 255, 255, 0.3);
+  padding: 2px;
+}
+
 .compost-barrel--active .compost-barrel__timer {
   font-size: 0.6rem;
   color: #f5e8d0;
@@ -1307,6 +1316,59 @@
 .compost-barrel--attachment .compost-barrel__output-icon {
   width: 22px;
   height: 22px;
+}
+
+/* ----- Catalyst barrel (attachment with catalyst loaded) ----- */
+@keyframes catalyst-pulse {
+  0%, 100% { box-shadow: 0 0 4px rgba(80, 160, 60, 0.15); }
+  50% { box-shadow: 0 0 10px rgba(80, 160, 60, 0.4); }
+}
+
+@keyframes catalyst-bob {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-2px); }
+}
+
+.compost-barrel--catalyst {
+  border-color: #8ab87a;
+  animation: catalyst-pulse 2s ease-in-out infinite;
+}
+
+.compost-barrel--catalyst .compost-barrel__catalyst-icon {
+  width: 28px;
+  height: 28px;
+  object-fit: contain;
+  display: block;
+  margin: 0 auto;
+  animation: catalyst-bob 2s ease-in-out infinite;
+}
+
+.compost-barrel__output-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1px;
+  position: relative;
+}
+
+.compost-barrel__output-row--upgraded .compost-barrel__output-icon {
+  filter: hue-rotate(80deg) saturate(1.4);
+  border: 1.5px solid #5a8a48;
+  border-radius: 4px;
+  padding: 1px;
+}
+
+.compost-barrel__output-icon--extra {
+  margin-left: -6px;
+  opacity: 0.85;
+}
+
+.compost-barrel__speed-icon {
+  position: absolute;
+  top: -4px;
+  right: -4px;
+  color: #e8a020;
+  filter: drop-shadow(0 0 2px rgba(232, 160, 32, 0.6));
 }
 
 /* ----- Locked barrel ----- */

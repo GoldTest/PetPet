@@ -43,6 +43,11 @@ Desktop.ini
 .npm/
 .yarn/
 .pnpm-store/
+
+# .opencode local cache and deps
+.opencode/node_modules/
+.opencode/package-lock.json
+.opencode/cache/
 # Test / coverage output
 coverage/
 playwright-report/

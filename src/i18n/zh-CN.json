@@ -681,6 +681,11 @@
       "compostTimeRemaining": "剩余 {time}",
       "compostUnlockSlot": "解锁 ({tokens}/{cost} 代币)",
       "compostLockedSlot": "未解锁",
+      "compostCatalystFruit": "水果催化",
+      "compostCatalystWithered": "枯枝催化",
+      "compostCatalystFertilizer": "肥料催化",
+      "compostCatalystUpgrade": "品质升级",
+      "compostCatalystFast": "加速",
       "speciesBook": {
         "title": "图鉴",
         "progress": "已收集 {unlocked}/{total}",
