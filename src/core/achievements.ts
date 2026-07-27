@@ -138,6 +138,9 @@ export const defaultAchievementCounters = (): AchievementCounters => ({
   gardenPlantCount: 0,
   gardenWaterCount: 0,
   gardenHarvestCountsByTreeId: {},
+  vegGardenPlantCount: 0,
+  vegGardenWaterCount: 0,
+  vegGardenHarvestCountsByCropId: {},
   compostStartCount: 0,
   compostCollectCount: 0,
   partnerScheduleClaimCount: 0,
@@ -311,6 +314,9 @@ export const normalizeAchievementState = (
       modSwitchCount: clampCount(isNumber(rawCounters.modSwitchCount) ? rawCounters.modSwitchCount : 0),
       compostStartCount: clampCount(isNumber(rawCounters.compostStartCount) ? rawCounters.compostStartCount : 0),
       compostCollectCount: clampCount(isNumber(rawCounters.compostCollectCount) ? rawCounters.compostCollectCount : 0),
+      vegGardenPlantCount: clampCount(isNumber(rawCounters.vegGardenPlantCount) ? rawCounters.vegGardenPlantCount : 0),
+      vegGardenWaterCount: clampCount(isNumber(rawCounters.vegGardenWaterCount) ? rawCounters.vegGardenWaterCount : 0),
+      vegGardenHarvestCountsByCropId: {},
     },
   };
 };

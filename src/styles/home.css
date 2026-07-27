@@ -314,7 +314,16 @@
 .feature-button--pomodoro { background: var(--surface-blue); }
 .feature-button--boost-card { background: var(--surface-pink); }
 .feature-button--garden { background: var(--surface-green); }
+.feature-button--veg-garden { background: #e8f5e0; }
 .feature-button--shop { background: #eaf5ff; }
+
+.feature-button__icon {
+  width: 28px;
+  height: 28px;
+  object-fit: contain;
+  image-rendering: pixelated;
+  flex-shrink: 0;
+}
 
 .event-panel {
   grid-template-columns: auto minmax(0, 1fr);

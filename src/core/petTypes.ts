@@ -40,7 +40,19 @@ export type BuiltinItemId =
   | 'energy_concentrate'
   | 'skill_fruit'
   | 'wish_fragment'
-  | 'garden_token';
+  | 'garden_token'
+  | 'tomato'
+  | 'carrot'
+  | 'cabbage'
+  | 'onion'
+  | 'potato'
+  | 'chili'
+  | 'tomato_seed'
+  | 'carrot_seed'
+  | 'cabbage_seed'
+  | 'onion_seed'
+  | 'potato_seed'
+  | 'chili_seed';
 
 export type ModItemId = `${string}:${string}`;
 
@@ -49,6 +61,38 @@ export type ItemId = BuiltinItemId | ModItemId;
 export type Inventory = Record<string, number>;
 
 export type GardenTreeId = 'fruit_tree' | 'care_tree' | 'gift_tree' | 'herb_tree' | 'money_tree' | 'golden_apple_tree';
+
+export type VegetableCropId = 'tomato' | 'carrot' | 'cabbage' | 'onion' | 'potato' | 'chili';
+
+export type VegetableSlotState = 'empty' | 'growing' | 'ready' | 'withered' | 'pest';
+
+export interface VegetableSlot {
+  slotIndex: number;
+  unlocked: boolean;
+  cropId?: VegetableCropId;
+  plantedAt: number;
+  lastWateredAt: number;
+  lastFertilizedAt: number;
+  nextReadyAt: number;
+  harvestsUsed: number;
+  maxHarvests: number;
+  state: VegetableSlotState;
+  lastCropId?: VegetableCropId;
+  sameCropPlantCount: number;
+  hasPest: boolean;
+  dailyHarvestDateKey: string;
+  dailyHarvestCount: number;
+}
+
+export interface VegetableGardenState {
+  schemaVersion: number;
+  slots: VegetableSlot[];
+  dailyWaterDateKey: string;
+  dailyWaterCount: number;
+  dailyFertilizeDateKey: string;
+  dailyFertilizeCount: number;
+  lifetimeHarvestCount: number;
+}
 
 export type GardenFertilizerId = 'normal' | 'heart';
 
@@ -339,6 +383,9 @@ export interface AchievementCounters {
   gardenPlantCount: number;
   gardenWaterCount: number;
   gardenHarvestCountsByTreeId: Partial<Record<GardenTreeId, number>>;
+  vegGardenPlantCount: number;
+  vegGardenWaterCount: number;
+  vegGardenHarvestCountsByCropId: Partial<Record<VegetableCropId, number>>;
   compostStartCount: number;
   compostCollectCount: number;
   partnerScheduleClaimCount: number;
@@ -417,6 +464,7 @@ export interface PetState {
   achievements: AchievementState;
   lastCleanActionAt: number;
   garden: GardenState;
+  vegetableGarden: VegetableGardenState;
   boostCards: BoostCardState;
   partnerSchedule: PartnerScheduleState;
   neighborGiftDateKey?: string;

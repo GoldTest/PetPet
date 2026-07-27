@@ -39,6 +39,18 @@ import itemShampoo from './assets/icon/item_shampoo.png';
 import itemToyBall from './assets/icon/item_toy_ball.png';
 import itemVitaminTablet from './assets/icon/item_vitamin_tablet.png';
 import itemWetWipes from './assets/icon/item_wet_wipes.png';
+import iconTomato from './assets/icon_tomato.png';
+import iconCarrot from './assets/icon_carrot.png';
+import iconCabbage from './assets/icon_cabbage.png';
+import iconOnion from './assets/icon_onion.png';
+import iconPotato from './assets/icon_potato.png';
+import iconChili from './assets/icon_chili.png';
+import iconTomatoSeed from './assets/icon_tomato_seed.png';
+import iconCarrotSeed from './assets/icon_carrot_seed.png';
+import iconCabbageSeed from './assets/icon_cabbage_seed.png';
+import iconOnionSeed from './assets/icon_onion_seed.png';
+import iconPotatoSeed from './assets/icon_potato_seed.png';
+import iconChiliSeed from './assets/icon_chili_seed.png';
 import petBath from './assets/pet/pet_bath.png';
 import petDirtySad from './assets/pet/pet_dirty_sad.png';
 import petEatCookie from './assets/pet/pet_eat_cookie.png';
@@ -111,6 +123,18 @@ export const itemIcons: Record<BuiltinItemId, string> = {
   skill_fruit: itemSkillFruit,
   wish_fragment: itemWishFragment,
   garden_token: itemGardenToken,
+  tomato: iconTomato,
+  carrot: iconCarrot,
+  cabbage: iconCabbage,
+  onion: iconOnion,
+  potato: iconPotato,
+  chili: iconChili,
+  tomato_seed: iconTomatoSeed,
+  carrot_seed: iconCarrotSeed,
+  cabbage_seed: iconCabbageSeed,
+  onion_seed: iconOnionSeed,
+  potato_seed: iconPotatoSeed,
+  chili_seed: iconChiliSeed,
 };
 
 export const petStatusImages: Record<PetStatus, string> = {

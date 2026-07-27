@@ -1630,3 +1630,421 @@
   color: #6b8c50;
   font-size: 0.75rem;
 }
+
+/* ===== Vegetable Garden ===== */
+.veg-garden-page {
+  padding-top: 4px;
+  position: relative;
+}
+
+.veg-garden-page__header {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+}
+
+.veg-garden-page__heading {
+  display: grid;
+  min-width: 0;
+  gap: 2px;
+}
+
+.veg-garden-page__title-row {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  gap: 12px;
+}
+
+.veg-garden-page__title-row > strong {
+  display: inline-flex;
+  align-items: center;
+  min-height: 28px;
+  border: 1px solid rgba(67, 111, 48, 0.18);
+  border-radius: 8px;
+  padding: 4px 9px;
+  color: #41602f;
+  background: var(--surface-green);
+  font-size: 0.8rem;
+  white-space: nowrap;
+}
+
+.veg-garden-plot-grid {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 8px;
+  padding: 16px 10px;
+  margin-top: 8px;
+  border: 2px solid rgba(140, 100, 60, 0.16);
+  border-radius: 14px;
+  background: linear-gradient(180deg, #d4b896 0%, #c4a880 30%, #b89c74 100%);
+  box-shadow: 0 14px 34px rgba(40, 67, 91, 0.08);
+}
+
+.veg-garden-plot {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  aspect-ratio: 1 / 1;
+  min-height: 90px;
+  border: 2px solid rgba(80, 60, 40, 0.15);
+  border-radius: 10px;
+  padding: 8px 4px;
+  background: #dabf96;
+  box-shadow: inset 0 2px 4px rgba(80, 60, 40, 0.08), 0 3px 10px rgba(46, 93, 57, 0.06);
+  cursor: pointer;
+  transition: transform 0.15s, box-shadow 0.15s, border-color 0.15s;
+  overflow: hidden;
+}
+
+.veg-garden-plot:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 18px rgba(46, 93, 57, 0.12);
+  border-color: rgba(140, 100, 60, 0.35);
+}
+
+.veg-garden-plot:active {
+  transform: translateY(0);
+}
+
+.veg-garden-plot--selected {
+  border-color: #5a9e4a;
+  box-shadow: 0 0 0 2px rgba(90, 158, 74, 0.2), 0 4px 14px rgba(46, 93, 57, 0.1);
+  background: #d4b98e;
+}
+
+.veg-garden-plot--locked {
+  background: #c1b7a4;
+  border-color: rgba(110, 100, 85, 0.2);
+  box-shadow: inset 0 2px 4px rgba(80, 70, 55, 0.06);
+  cursor: pointer;
+}
+
+.veg-garden-plot--locked .veg-garden-plot__number {
+  color: rgba(110, 100, 85, 0.5);
+}
+
+.veg-garden-plot--ready {
+  border-color: #c8a030;
+  background: #f5e8b8;
+}
+
+.veg-garden-plot--pest {
+  border-color: #c84030;
+  background: #f5d8d0;
+  animation: veg-pest-pulse 1.5s ease-in-out infinite;
+}
+
+@keyframes veg-pest-pulse {
+  0%, 100% { border-color: #c84030; }
+  50% { border-color: #e86040; }
+}
+
+.veg-garden-plot--withered {
+  border-color: rgba(140, 120, 100, 0.35);
+  background: #d1c7b8;
+  opacity: 0.7;
+}
+
+.veg-garden-plot--growing {
+  background: #d4b98e;
+}
+
+.veg-garden-plot--empty {
+  background: #dcc4a0;
+}
+
+.veg-garden-plot__number {
+  position: absolute;
+  top: 2px;
+  left: 4px;
+  font-size: 0.6rem;
+  font-weight: 800;
+  color: rgba(60, 100, 50, 0.5);
+  line-height: 1;
+}
+
+.veg-garden-plot__lock {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  width: 100%;
+  height: 100%;
+  color: rgba(120, 110, 95, 0.7);
+}
+
+.veg-garden-plot__lock svg {
+  width: 28px;
+  height: 28px;
+}
+
+.veg-garden-plot__lock-cost {
+  font-size: 0.7rem;
+  font-weight: 800;
+  color: rgba(120, 110, 95, 0.8);
+}
+
+.veg-garden-plot__unlock-btn {
+  display: grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  border: 2px solid rgba(80, 140, 60, 0.4);
+  border-radius: 50%;
+  color: #fff;
+  background: #5a9e4a;
+  font-size: 1.1rem;
+  font-weight: 700;
+  line-height: 1;
+  cursor: pointer;
+  box-shadow: 0 2px 8px rgba(60, 120, 40, 0.25);
+  transition: transform 0.12s, box-shadow 0.12s;
+}
+
+.veg-garden-plot__unlock-btn:hover {
+  transform: scale(1.08);
+  box-shadow: 0 3px 12px rgba(60, 120, 40, 0.35);
+}
+
+.veg-garden-plot__unlock-btn--disabled {
+  background: rgba(160, 160, 160, 0.5);
+  border-color: rgba(160, 160, 160, 0.3);
+  box-shadow: none;
+  cursor: not-allowed;
+}
+
+.veg-garden-plot__empty-icon {
+  width: 36px;
+  height: 36px;
+  color: rgba(80, 130, 60, 0.35);
+}
+
+.veg-garden-plot__crop-icon {
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.veg-garden-plot__crop-icon img {
+  width: 36px;
+  height: 36px;
+  object-fit: contain;
+  image-rendering: pixelated;
+}
+
+.veg-garden-plot__crop-icon svg {
+  width: 28px;
+  height: 28px;
+  color: rgba(60, 100, 50, 0.5);
+}
+
+.veg-garden-plot__progress {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  height: 3px;
+  background: rgba(0, 0, 0, 0.06);
+  border-radius: 0 0 10px 10px;
+  overflow: hidden;
+}
+
+.veg-garden-plot__progress i {
+  display: block;
+  height: 100%;
+  background: linear-gradient(90deg, #7bc06f, #4a9e3a);
+  border-radius: 0 0 0 10px;
+  transition: width 1s linear;
+}
+
+.veg-garden-plot__time {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  font-size: 0.55rem;
+  font-weight: 750;
+  color: rgba(60, 100, 50, 0.7);
+}
+
+.veg-garden-plot__pest-badge {
+  position: absolute;
+  top: 2px;
+  right: 4px;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  color: #c84030;
+  background: rgba(255, 200, 180, 0.8);
+  box-shadow: 0 1px 4px rgba(200, 60, 40, 0.3);
+  animation: veg-pest-bounce 1s ease-in-out infinite;
+}
+
+@keyframes veg-pest-bounce {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.2); }
+}
+
+.veg-garden-plot__badge {
+  position: absolute;
+  bottom: 2px;
+  right: 4px;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+}
+
+.veg-garden-plot__badge--ready {
+  background: #f5c842;
+  color: #7a5e10;
+  box-shadow: 0 2px 6px rgba(200, 150, 40, 0.35);
+  animation: garden-pulse 2s ease-in-out infinite;
+}
+
+.veg-garden-plot__badge--withered {
+  background: rgba(140, 120, 100, 0.4);
+}
+
+.veg-garden-floating-panel {
+  position: absolute;
+  top: 165px;
+  right: 16px;
+  width: 260px;
+  z-index: 10;
+  display: grid;
+  gap: 10px;
+  pointer-events: auto;
+}
+
+.veg-garden-plot-detail {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 10px;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+}
+
+.veg-garden-plot-detail__info {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 6px 12px;
+  min-width: 0;
+}
+
+.veg-garden-plot-detail__title {
+  font-size: 0.9rem;
+  color: var(--text);
+}
+
+.veg-garden-plot-detail__state {
+  font-size: 0.78rem;
+  color: var(--text-muted);
+  font-weight: 750;
+}
+
+.veg-garden-plot-detail__crop,
+.veg-garden-plot-detail__remaining {
+  font-size: 0.72rem;
+  color: var(--text-muted);
+  font-weight: 750;
+}
+
+.veg-garden-plot-detail__pest-note {
+  font-size: 0.7rem;
+  color: #c84030;
+  font-weight: 750;
+}
+
+.veg-garden-action-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 10px;
+  padding: 10px;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+}
+
+.veg-garden-plant-button {
+  grid-column: 1 / -1;
+  min-height: 46px;
+}
+
+.veg-garden-harvest-button {
+  grid-column: 1 / -1;
+  min-height: 46px;
+}
+
+.veg-garden-clear-button {
+  grid-column: 1 / -1;
+}
+
+.veg-garden-action-modal {
+  display: grid;
+  width: min(620px, calc(100vw - 32px));
+  gap: 14px;
+  padding: 18px;
+}
+
+.veg-garden-dialog-list {
+  display: grid;
+  max-height: min(520px, 58dvh);
+  gap: 8px;
+  overflow: auto;
+}
+
+.veg-garden-dialog-shop {
+  justify-self: start;
+}
+
+@media (max-width: 720px) {
+  .veg-garden-plot-grid {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 6px;
+  }
+
+  .veg-garden-plot {
+    min-height: 80px;
+  }
+
+  .veg-garden-floating-panel {
+    position: relative;
+    top: auto;
+    right: auto;
+    width: 100%;
+  }
+
+  .veg-garden-action-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .veg-garden-action-modal {
+    width: 100%;
+    padding: 14px;
+  }
+}
+
+@media (max-width: 480px) {
+  .veg-garden-plot-grid {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 4px;
+  }
+
+  .veg-garden-plot {
+    min-height: 70px;
+    padding: 4px 2px;
+  }
+}

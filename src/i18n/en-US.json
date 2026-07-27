@@ -251,6 +251,8 @@
       "gardenHint": "Grow trees",
       "gardenReady": "Ready to harvest",
       "gardenWithered": "Withered tree",
+      "vegGarden": "Veg Garden",
+      "vegGardenHint": "Plant & harvest",
       "shop": "Shop",
       "shopHint": "Daily deals",
       "partnerSchedule": "Partner Schedule",
@@ -287,10 +289,22 @@
         "complete": "Master legacy complete · {count} lifetime"
       },
       "masterPassives": {
-        "study": { "base": "Daily wish coins +10%", "advanced": "Daily wish coins +20%" },
-        "cooking": { "base": "Normal food effects +10%", "advanced": "Normal food effects +15%" },
-        "garden": { "base": "New garden cycle time -5%", "advanced": "New garden cycle time -8%" },
-        "exercise": { "base": "Awake energy recovery interval -8%", "advanced": "Awake energy recovery interval -12%" }
+        "study": {
+          "base": "Daily wish coins +10%",
+          "advanced": "Daily wish coins +20%"
+        },
+        "cooking": {
+          "base": "Normal food effects +10%",
+          "advanced": "Normal food effects +15%"
+        },
+        "garden": {
+          "base": "New garden cycle time -5%",
+          "advanced": "New garden cycle time -8%"
+        },
+        "exercise": {
+          "base": "Awake energy recovery interval -8%",
+          "advanced": "Awake energy recovery interval -12%"
+        }
       },
       "milestones": {
         "aria": "All-skill progression milestones",
@@ -369,18 +383,54 @@
         "confirm": "End early"
       },
       "activities": {
-        "study_notes": { "title": "Organize Notes", "summary": "Sort loose notes and review what was learned today." },
-        "study_archive": { "title": "Archive Old Books", "summary": "Check pages and labels, then build a useful catalog." },
-        "study_research": { "title": "Focused Research", "summary": "Complete a deeper reading session and record the findings." },
-        "cooking_snack": { "title": "Make a Snack", "summary": "Prepare something simple and practice timing the heat." },
-        "cooking_lunch": { "title": "Prepare Lunch", "summary": "Plan and make a balanced bento for the day." },
-        "cooking_feast": { "title": "Prepare a Feast", "summary": "Handle several ingredients in a more demanding meal." },
-        "garden_seedlings": { "title": "Tend Seedlings", "summary": "Check fresh shoots and keep the soil in good condition." },
-        "garden_orchard": { "title": "Organize the Orchard", "summary": "Inspect every tree and plan the next care cycle." },
-        "garden_field_day": { "title": "Full Garden Day", "summary": "Handle pruning, watering, and soil care in one long session." },
-        "exercise_walk": { "title": "Brisk Walk", "summary": "Move at a comfortable pace and explore the neighborhood." },
-        "exercise_training": { "title": "Fitness Training", "summary": "Complete a steady set of progressive exercises." },
-        "exercise_challenge": { "title": "Endurance Challenge", "summary": "Budget energy carefully and stay with a longer goal." }
+        "study_notes": {
+          "title": "Organize Notes",
+          "summary": "Sort loose notes and review what was learned today."
+        },
+        "study_archive": {
+          "title": "Archive Old Books",
+          "summary": "Check pages and labels, then build a useful catalog."
+        },
+        "study_research": {
+          "title": "Focused Research",
+          "summary": "Complete a deeper reading session and record the findings."
+        },
+        "cooking_snack": {
+          "title": "Make a Snack",
+          "summary": "Prepare something simple and practice timing the heat."
+        },
+        "cooking_lunch": {
+          "title": "Prepare Lunch",
+          "summary": "Plan and make a balanced bento for the day."
+        },
+        "cooking_feast": {
+          "title": "Prepare a Feast",
+          "summary": "Handle several ingredients in a more demanding meal."
+        },
+        "garden_seedlings": {
+          "title": "Tend Seedlings",
+          "summary": "Check fresh shoots and keep the soil in good condition."
+        },
+        "garden_orchard": {
+          "title": "Organize the Orchard",
+          "summary": "Inspect every tree and plan the next care cycle."
+        },
+        "garden_field_day": {
+          "title": "Full Garden Day",
+          "summary": "Handle pruning, watering, and soil care in one long session."
+        },
+        "exercise_walk": {
+          "title": "Brisk Walk",
+          "summary": "Move at a comfortable pace and explore the neighborhood."
+        },
+        "exercise_training": {
+          "title": "Fitness Training",
+          "summary": "Complete a steady set of progressive exercises."
+        },
+        "exercise_challenge": {
+          "title": "Endurance Challenge",
+          "summary": "Budget energy carefully and stay with a longer goal."
+        }
       }
     },
     "rewards": {
@@ -739,6 +789,77 @@
       "deleteMod": "Delete {name}",
       "confirmDelete": "Confirm delete?",
       "switchSuccess": "Switched to {name}."
+    },
+    "vegGarden": {
+      "aria": "Vegetable Garden",
+      "title": "Vegetable Garden",
+      "kicker": "Vegetable Farming",
+      "back": "Back",
+      "lifetimeHarvest": "Total harvested: {count}",
+      "environmentAria": "Environment info",
+      "slotsAria": "Garden plots",
+      "slotTitle": "Plot {slot}",
+      "states": {
+        "empty": "Empty",
+        "growing": "Growing",
+        "ready": "Ready",
+        "withered": "Withered",
+        "pest": "Pest!"
+      },
+      "crops": {
+        "tomato": {
+          "name": "Tomato"
+        },
+        "carrot": {
+          "name": "Carrot"
+        },
+        "cabbage": {
+          "name": "Cabbage"
+        },
+        "onion": {
+          "name": "Onion"
+        },
+        "potato": {
+          "name": "Potato"
+        },
+        "chili": {
+          "name": "Chili"
+        }
+      },
+      "cropLife": "{crop} · Harvested {used}/{max}",
+      "remaining": "{time} remaining",
+      "chooseSeed": "Choose seed",
+      "seedOwned": "Owned: {count}",
+      "needSeed": "Seed {coins} coins",
+      "plantAction": "Plant",
+      "buySeeds": "Buy seeds from shop",
+      "plantDialogTitle": "Choose seed",
+      "plantDialogSummary": "Select a vegetable seed to plant",
+      "closeDialog": "Close",
+      "actions": {
+        "water": "Water",
+        "fertilize": "Fertilize",
+        "harvest": "Harvest",
+        "clear": "Clear",
+        "remove": "Remove"
+      },
+      "waterFree": "Shorten {percent}%",
+      "fertilizeWith": "Fertilize · Shorten {percent}%",
+      "itemOwned": "Owned: {count}",
+      "unlockSlot": "Unlock {coins} coins",
+      "pestAlert": "Pest!",
+      "pestHint": "Water or fertilize to remove pests",
+      "rotationPenalty": "Rotation penalty: -{percent}% yield",
+      "seasonBonus": "In-season crop · 20% faster growth"
+    },
+    "vegGardenConfirm": {
+      "clearTitle": "Clear withered crop",
+      "clearMessage": "Clear the withered crop in plot {slot}?",
+      "removeTitle": "Remove crop",
+      "removeMessage": "Remove the {crop} in plot {slot}?",
+      "cancel": "Cancel",
+      "clearConfirm": "Clear",
+      "removeConfirm": "Remove"
     }
   },
   "pet": {
@@ -903,6 +1024,54 @@
         "garden_token": {
           "name": "Garden token",
           "summary": "Garden-specific currency for decorations."
+        },
+        "tomato": {
+          "name": "Tomato",
+          "summary": "A juicy and tasty vegetable."
+        },
+        "carrot": {
+          "name": "Carrot",
+          "summary": "A crisp and sweet vegetable."
+        },
+        "cabbage": {
+          "name": "Cabbage",
+          "summary": "A fresh and crunchy vegetable."
+        },
+        "onion": {
+          "name": "Onion",
+          "summary": "A pungent and flavorful vegetable."
+        },
+        "potato": {
+          "name": "Potato",
+          "summary": "A starchy and filling vegetable."
+        },
+        "chili": {
+          "name": "Chili",
+          "summary": "A spicy and stimulating vegetable."
+        },
+        "tomato_seed": {
+          "name": "Tomato seed",
+          "summary": "Plant to grow tomatoes."
+        },
+        "carrot_seed": {
+          "name": "Carrot seed",
+          "summary": "Plant to grow carrots."
+        },
+        "cabbage_seed": {
+          "name": "Cabbage seed",
+          "summary": "Plant to grow cabbages."
+        },
+        "onion_seed": {
+          "name": "Onion seed",
+          "summary": "Plant to grow onions."
+        },
+        "potato_seed": {
+          "name": "Potato seed",
+          "summary": "Plant to grow potatoes."
+        },
+        "chili_seed": {
+          "name": "Chili seed",
+          "summary": "Plant to grow chilies."
         }
       },
       "categories": {
@@ -1029,10 +1198,11 @@
       "heart": "{name} received a small sticker, hearts +{hearts}."
     },
     "scaled": {
-      "bento": "A neighbor shared a bento box, inventory +1.",
-      "goodDay": "{name} had a wonderful day playing, mood +12, energy +5.",
-      "cake": "A friend left a strawberry cake, inventory +1.",
-      "wonderful": "{name} had a fantastic day, mood +16, hunger +8, energy +8."
+      "fruit": "A small fruit was left by the window, inventory +1.",
+      "stroll": "{name} went for a quiet stroll and returned relaxed, mood +8, energy +4.",
+      "meal": "A nutritious meal was delivered, inventory +1.",
+      "adventure": "{name} found a little adventure, mood +12, health +2.",
+      "heart": "{name} received hearts from a passerby, hearts +{hearts}."
     },
     "offlineDiary": {
       "sunny": [
@@ -1061,13 +1231,6 @@
       "hungryHappy": "{name} got a little hungry waiting, but was happy to see you, hunger -4, mood +4.",
       "rest": "{name} rested calmly for a while, energy +8.",
       "mess": "{name} turned the corner into a mess, cleanliness -5."
-    },
-    "scaled": {
-      "fruit": "A small fruit was left by the window, inventory +1.",
-      "stroll": "{name} went for a quiet stroll and returned relaxed, mood +8, energy +4.",
-      "meal": "A nutritious meal was delivered, inventory +1.",
-      "adventure": "{name} found a little adventure, mood +12, health +2.",
-      "heart": "{name} received hearts from a passerby, hearts +{hearts}."
     },
     "sleepSettlement": {
       "tooShort": "{name} woke soon after lying down, a little groggy, mood -1.",
@@ -1754,6 +1917,28 @@
       "dailyCoinsClaimed": "Boost card coins were already claimed today.",
       "claimDailyCoins": "Claimed {coins} daily boost-card coins.",
       "workBonus": " Boost card +{coins} coins."
+    },
+    "vegGarden": {
+      "invalidSlot": "That plot does not exist.",
+      "slotAlreadyUnlocked": "That plot is already unlocked.",
+      "unlockInOrder": "Unlock plots in order.",
+      "notEnoughCoins": "Not enough coins. Need {coins}.",
+      "slotLocked": "This plot is locked.",
+      "slotNotEmpty": "This plot already has a crop.",
+      "unlockSlotSuccess": "Unlocked plot {slot} for {coins} coins.",
+      "missingSeed": "No {item} in the bag.",
+      "plantSuccess": "Planted {crop} and used {item}.",
+      "cannotWater": "This crop cannot be watered now.",
+      "wateredToday": "This plot was already watered today.",
+      "waterSuccess": "Watered. Growth time shortened by {percent}%.",
+      "cannotFertilize": "This crop cannot be fertilized now.",
+      "fertilizedToday": "This plot was already fertilized today.",
+      "cannotHarvest": "Nothing is ready to harvest.",
+      "harvestSuccess": "Harvested {count} {crop}(s).",
+      "cannotClear": "There is no crop to clear.",
+      "clearSuccess": "Cleared. Cost: {coins} coins.",
+      "missingFertilizer": "No {item} in the bag.",
+      "fertilizeSuccess": "Used {item}. Growth sped up by {percent}%."
     }
   }
 }

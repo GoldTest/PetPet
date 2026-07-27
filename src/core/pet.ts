@@ -51,6 +51,10 @@ export type {
   YearReview,
   YearlyCareActionKey,
   YearlyStats,
+  VegetableCropId,
+  VegetableSlot,
+  VegetableSlotState,
+  VegetableGardenState,
 } from './petTypes';
 export {
   createBuiltinItemRegistry,
@@ -118,6 +122,29 @@ export {
   applyGardenNutrient,
   waterTree,
 } from './garden';
+export {
+  advanceVegGarden,
+  clearVegSlot,
+  defaultVegGardenState,
+  fertilizeVegCrop,
+  getVegGardenReminder,
+  getVegGardenStage,
+  getVegGardenView,
+  harvestVegCrop,
+  isVegSlotFertilizedToday,
+  isVegSlotWateredToday,
+  normalizeVegGardenState,
+  plantVegCrop,
+  unlockVegSlot,
+  vegCropDefinitions,
+  vegCropIds,
+  vegCropProduceItemIds,
+  vegCropSeedItemIds,
+  vegGardenColumns,
+  vegGardenSlotCount,
+  vegSlotUnlockCosts,
+  waterVegCrop,
+} from './vegetableGarden';
 export {
   applyBoostCardHeartBonus,
   applyBoostCardWorkBonus,

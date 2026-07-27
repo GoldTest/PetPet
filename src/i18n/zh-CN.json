@@ -247,10 +247,12 @@
       "boostCardsHint": "每日收益加成",
       "boostCardsActive": "{card}生效中",
       "weatherAria": "今日天气：{weather}",
-      "garden": "种植园",
+      "garden": "树园",
       "gardenHint": "种下与收获",
       "gardenReady": "有树可收获",
       "gardenWithered": "有枯树待清理",
+      "vegGarden": "菜园",
+      "vegGardenHint": "种菜收获",
       "shop": "商店",
       "shopHint": "每日特价",
       "partnerSchedule": "伙伴日程",
@@ -287,10 +289,22 @@
         "complete": "大师传承已完成 · 生涯 {count} 次"
       },
       "masterPassives": {
-        "study": { "base": "每日愿望金币 +10%", "advanced": "每日愿望金币 +20%" },
-        "cooking": { "base": "普通食物正面效果 +10%", "advanced": "普通食物正面效果 +15%" },
-        "garden": { "base": "新花园周期时间 -5%", "advanced": "新花园周期时间 -8%" },
-        "exercise": { "base": "清醒体力恢复间隔 -8%", "advanced": "清醒体力恢复间隔 -12%" }
+        "study": {
+          "base": "每日愿望金币 +10%",
+          "advanced": "每日愿望金币 +20%"
+        },
+        "cooking": {
+          "base": "普通食物正面效果 +10%",
+          "advanced": "普通食物正面效果 +15%"
+        },
+        "garden": {
+          "base": "新花园周期时间 -5%",
+          "advanced": "新花园周期时间 -8%"
+        },
+        "exercise": {
+          "base": "清醒体力恢复间隔 -8%",
+          "advanced": "清醒体力恢复间隔 -12%"
+        }
       },
       "milestones": {
         "aria": "全技能成长里程碑",
@@ -369,18 +383,54 @@
         "confirm": "提前结束"
       },
       "activities": {
-        "study_notes": { "title": "整理随手笔记", "summary": "把零散记录重新分类，顺便复习今天学到的内容。" },
-        "study_archive": { "title": "整理旧书", "summary": "清点书页和标签，完成一份可以长期使用的目录。" },
-        "study_research": { "title": "专题研究", "summary": "安静地完成一段深入阅读，并整理完整结论。" },
-        "cooking_snack": { "title": "准备小点心", "summary": "用现有食材做一份简单点心，练习掌握火候。" },
-        "cooking_lunch": { "title": "准备午餐", "summary": "规划搭配并完成一份营养均衡的便当。" },
-        "cooking_feast": { "title": "筹备丰盛餐点", "summary": "处理多种食材，完成一次更有挑战的料理。" },
-        "garden_seedlings": { "title": "照看果苗", "summary": "检查新芽和土壤，让幼苗保持良好状态。" },
-        "garden_orchard": { "title": "整理果园", "summary": "逐一检查树木并记录下一轮养护安排。" },
-        "garden_field_day": { "title": "全天园艺计划", "summary": "集中完成修整、浇水和土壤管理。" },
-        "exercise_walk": { "title": "轻快散步", "summary": "用舒服的节奏活动身体，顺便熟悉周围环境。" },
-        "exercise_training": { "title": "体能训练", "summary": "完成一组循序渐进的练习，保持稳定节奏。" },
-        "exercise_challenge": { "title": "耐力挑战", "summary": "为一个更长的目标分配体力并坚持到底。" }
+        "study_notes": {
+          "title": "整理随手笔记",
+          "summary": "把零散记录重新分类，顺便复习今天学到的内容。"
+        },
+        "study_archive": {
+          "title": "整理旧书",
+          "summary": "清点书页和标签，完成一份可以长期使用的目录。"
+        },
+        "study_research": {
+          "title": "专题研究",
+          "summary": "安静地完成一段深入阅读，并整理完整结论。"
+        },
+        "cooking_snack": {
+          "title": "准备小点心",
+          "summary": "用现有食材做一份简单点心，练习掌握火候。"
+        },
+        "cooking_lunch": {
+          "title": "准备午餐",
+          "summary": "规划搭配并完成一份营养均衡的便当。"
+        },
+        "cooking_feast": {
+          "title": "筹备丰盛餐点",
+          "summary": "处理多种食材，完成一次更有挑战的料理。"
+        },
+        "garden_seedlings": {
+          "title": "照看果苗",
+          "summary": "检查新芽和土壤，让幼苗保持良好状态。"
+        },
+        "garden_orchard": {
+          "title": "整理果园",
+          "summary": "逐一检查树木并记录下一轮养护安排。"
+        },
+        "garden_field_day": {
+          "title": "全天园艺计划",
+          "summary": "集中完成修整、浇水和土壤管理。"
+        },
+        "exercise_walk": {
+          "title": "轻快散步",
+          "summary": "用舒服的节奏活动身体，顺便熟悉周围环境。"
+        },
+        "exercise_training": {
+          "title": "体能训练",
+          "summary": "完成一组循序渐进的练习，保持稳定节奏。"
+        },
+        "exercise_challenge": {
+          "title": "耐力挑战",
+          "summary": "为一个更长的目标分配体力并坚持到底。"
+        }
       }
     },
     "rewards": {
@@ -745,6 +795,77 @@
       "deleteMod": "删除 {name}",
       "confirmDelete": "确认删除？",
       "switchSuccess": "已切换到 {name}。"
+    },
+    "vegGarden": {
+      "aria": "菜园",
+      "title": "菜园",
+      "kicker": "蔬菜种植",
+      "back": "返回",
+      "lifetimeHarvest": "总收获：{count}",
+      "environmentAria": "环境信息",
+      "slotsAria": "菜园地块",
+      "slotTitle": "地块 {slot}",
+      "states": {
+        "empty": "空闲",
+        "growing": "生长中",
+        "ready": "可收获",
+        "withered": "枯萎",
+        "pest": "虫害！"
+      },
+      "crops": {
+        "tomato": {
+          "name": "番茄"
+        },
+        "carrot": {
+          "name": "胡萝卜"
+        },
+        "cabbage": {
+          "name": "卷心菜"
+        },
+        "onion": {
+          "name": "洋葱"
+        },
+        "potato": {
+          "name": "土豆"
+        },
+        "chili": {
+          "name": "辣椒"
+        }
+      },
+      "cropLife": "{crop} · 已收获 {used}/{max} 次",
+      "remaining": "剩余 {time}",
+      "chooseSeed": "选择种子",
+      "seedOwned": "拥有 {count} 个",
+      "needSeed": "种子 {coins} 金币",
+      "plantAction": "种植",
+      "buySeeds": "去商店购买种子",
+      "plantDialogTitle": "选择种子",
+      "plantDialogSummary": "选择你要种植的蔬菜种子",
+      "closeDialog": "关闭",
+      "actions": {
+        "water": "浇水",
+        "fertilize": "施肥",
+        "harvest": "收获",
+        "clear": "清理",
+        "remove": "移除"
+      },
+      "waterFree": "缩短 {percent}%",
+      "fertilizeWith": "施肥 · 缩短 {percent}%",
+      "itemOwned": "拥有 {count} 个",
+      "unlockSlot": "解锁 {coins} 金币",
+      "pestAlert": "虫害！",
+      "pestHint": "浇水或施肥可清除虫害",
+      "rotationPenalty": "轮作惩罚：减产 {percent}%",
+      "seasonBonus": "当季作物 · 生长加快 20%"
+    },
+    "vegGardenConfirm": {
+      "clearTitle": "清理枯萎作物",
+      "clearMessage": "确定要清理地块 {slot} 的枯萎作物吗？",
+      "removeTitle": "移除作物",
+      "removeMessage": "确定要移除地块 {slot} 的 {crop} 吗？",
+      "cancel": "取消",
+      "clearConfirm": "清理",
+      "removeConfirm": "移除"
     }
   },
   "pet": {
@@ -907,8 +1028,56 @@
           "summary": "收集后可兑换花园装饰（预留）"
         },
         "garden_token": {
-          "name": "种植园代币",
-          "summary": "种植园专属货币，可用于种植园装饰"
+          "name": "树园代币",
+          "summary": "树园专属货币，可用于树园装饰"
+        },
+        "tomato": {
+          "name": "番茄",
+          "summary": "多汁可口的蔬菜"
+        },
+        "carrot": {
+          "name": "胡萝卜",
+          "summary": "清脆甘甜的蔬菜"
+        },
+        "cabbage": {
+          "name": "卷心菜",
+          "summary": "新鲜脆嫩的蔬菜"
+        },
+        "onion": {
+          "name": "洋葱",
+          "summary": "气味浓郁的蔬菜"
+        },
+        "potato": {
+          "name": "土豆",
+          "summary": "淀粉丰富的蔬菜"
+        },
+        "chili": {
+          "name": "辣椒",
+          "summary": "辛辣刺激的蔬菜"
+        },
+        "tomato_seed": {
+          "name": "番茄种子",
+          "summary": "种下后可收获番茄"
+        },
+        "carrot_seed": {
+          "name": "胡萝卜种子",
+          "summary": "种下后可收获胡萝卜"
+        },
+        "cabbage_seed": {
+          "name": "卷心菜种子",
+          "summary": "种下后可收获卷心菜"
+        },
+        "onion_seed": {
+          "name": "洋葱种子",
+          "summary": "种下后可收获洋葱"
+        },
+        "potato_seed": {
+          "name": "土豆种子",
+          "summary": "种下后可收获土豆"
+        },
+        "chili_seed": {
+          "name": "辣椒种子",
+          "summary": "种下后可收获辣椒"
         }
       },
       "categories": {
@@ -1035,10 +1204,11 @@
       "heart": "{name} 收到一张小贴纸，小心心 +{hearts}。"
     },
     "scaled": {
-      "bento": "邻居分享了一盒便当，背包 +1。",
-      "goodDay": "{name} 度过了一个开心的日子，心情 +12，体力 +5。",
-      "cake": "朋友留下了一块草莓蛋糕，背包 +1。",
-      "wonderful": "{name} 度过了非常美妙的一天，心情 +16，饱腹 +8，体力 +8。"
+      "fruit": "窗边留下了一颗水果，背包 +1。",
+      "stroll": "{name} 安静地散了个步，回来时心情很好，心情 +8，体力 +4。",
+      "meal": "一份营养餐被送到了门口，背包 +1。",
+      "adventure": "{name} 进行了一场小冒险，心情 +12，健康 +2。",
+      "heart": "{name} 收到了路人的小心心，小心心 +{hearts}。"
     },
     "offlineDiary": {
       "sunny": [
@@ -1067,13 +1237,6 @@
       "hungryHappy": "{name} 等你等得有点饿，但看到你回来很开心，饱腹 -4，心情 +4。",
       "rest": "{name} 安稳地休息了一会儿，体力 +8。",
       "mess": "{name} 把角落翻得乱糟糟，清洁 -5。"
-    },
-    "scaled": {
-      "fruit": "窗边留下了一颗水果，背包 +1。",
-      "stroll": "{name} 安静地散了个步，回来时心情很好，心情 +8，体力 +4。",
-      "meal": "一份营养餐被送到了门口，背包 +1。",
-      "adventure": "{name} 进行了一场小冒险，心情 +12，健康 +2。",
-      "heart": "{name} 收到了路人的小心心，小心心 +{hearts}。"
     },
     "sleepSettlement": {
       "tooShort": "{name} 刚躺下没多久就醒了，有点迷迷糊糊，心情 -1。",
@@ -1760,6 +1923,28 @@
       "dailyCoinsClaimed": "今天已经领取过增益卡金币了。",
       "claimDailyCoins": "领取了增益卡每日 {coins} 金币。",
       "workBonus": " 增益卡 +{coins} 金币。"
+    },
+    "vegGarden": {
+      "invalidSlot": "这个地块不存在。",
+      "slotAlreadyUnlocked": "这个地块已经解锁了。",
+      "unlockInOrder": "需要按顺序解锁地块。",
+      "notEnoughCoins": "金币不足，需要 {coins} 金币。",
+      "slotLocked": "这个地块还没有解锁。",
+      "slotNotEmpty": "这个地块已经有作物了。",
+      "unlockSlotSuccess": "解锁了第 {slot} 个地块，花费 {coins} 金币。",
+      "missingSeed": "背包里没有{item}。",
+      "plantSuccess": "种下了{crop}，消耗 {item}。",
+      "cannotWater": "这个作物现在不能浇水。",
+      "wateredToday": "这个地块今天已经浇过水了。",
+      "waterSuccess": "浇水完成，生长时间缩短 {percent}%。",
+      "cannotFertilize": "这个作物现在不能施肥。",
+      "fertilizedToday": "这个地块今天已经施肥了。",
+      "cannotHarvest": "这里还没有可以收获的作物。",
+      "harvestSuccess": "收获了 {count} 个{crop}。",
+      "cannotClear": "这里没有需要清理的作物。",
+      "clearSuccess": "清理完成，花费 {coins} 金币。",
+      "missingFertilizer": "背包里没有{item}。",
+      "fertilizeSuccess": "使用了{item}，生长加快 {percent}%。"
     }
   }
 }

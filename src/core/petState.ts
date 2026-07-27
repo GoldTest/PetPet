@@ -4,6 +4,7 @@ import { defaultAchievementState, normalizeAchievementState } from './achievemen
 import { defaultPetBirthday, normalizePetBirthday } from './dateRewards';
 import { createDailyWish, normalizeDailyWishState, normalizeReturnWelcomeState } from './dailyWishes';
 import { defaultGardenState, normalizeGardenState } from './garden';
+import { defaultVegGardenState, normalizeVegGardenState } from './vegetableGarden';
 import { defaultSpeciesBookState, normalizeSpeciesBookState } from './speciesBook';
 import { addInventoryItem } from './items';
 import { dailyBiscuitClaimLimit, dailyWitheredFragmentLimit, dailyHeartExchangeLimit, isBuiltinItemId } from './items';
@@ -142,6 +143,7 @@ export const createDefaultPet = (now = Date.now()): PetState => ({
   achievements: defaultAchievementState(now, now, false, 30),
   lastCleanActionAt: 0,
   garden: defaultGardenState(now),
+  vegetableGarden: defaultVegGardenState(now),
   boostCards: defaultBoostCardState(now),
   partnerSchedule: defaultPartnerScheduleState({ level: 1, createdAt: now }, now),
   dailyWish: createDailyWish({
@@ -435,6 +437,7 @@ export const normalizePet = (value: unknown, now = Date.now(), options: Normaliz
     achievements: normalizedAchievements,
     lastCleanActionAt: isNumber(raw.lastCleanActionAt) ? Math.max(0, Math.floor(raw.lastCleanActionAt)) : 0,
     garden,
+    vegetableGarden: normalizeVegGardenState(raw.vegetableGarden, now),
     boostCards: normalizeBoostCardState(raw.boostCards, now),
     partnerSchedule,
     speciesBook: normalizeSpeciesBookState(raw.speciesBook),
