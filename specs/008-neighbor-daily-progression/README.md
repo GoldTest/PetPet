@@ -1,13 +1,17 @@
 ---
-status: in-progress
+status: complete
 created: 2026-07-24
 priority: high
 tags:
-  - neighbor
-  - daily-progression
-  - inherit
+- neighbor
+- daily-progression
+- inherit
 created_at: 2026-07-24T21:00:00Z
-updated_at: 2026-07-24T22:30:00Z
+updated_at: 2026-07-27T14:12:09.606589600Z
+completed_at: 2026-07-27T14:12:09.606589600Z
+transitions:
+- status: complete
+  at: 2026-07-27T14:12:09.606589600Z
 ---
 
 # Neighbor 事件系统与每日进度继承

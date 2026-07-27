@@ -1,5 +1,5 @@
 ---
-status: in-progress
+status: complete
 created: 2026-07-24
 priority: medium
 tags:
@@ -8,11 +8,15 @@ tags:
 - reference-approach
 - stability
 created_at: 2026-07-24T21:00:00Z
-updated_at: 2026-07-24T13:06:24.057731800Z
+updated_at: 2026-07-27T14:12:10.089466400Z
+completed_at: 2026-07-27T14:12:10.089466400Z
 transitions:
 - status: in-progress
   at: 2026-07-24T13:05:27.016804600Z
+- status: complete
+  at: 2026-07-27T14:12:10.089466400Z
 ---
+
 # Lifecycle 加固（参考上游思路）
 
 ## Overview
