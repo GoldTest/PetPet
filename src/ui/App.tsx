@@ -1531,52 +1531,6 @@ const AppContent = () => {
     }
   };
 
-  const skipAuth = !isSupabaseConfigured;
-
-  if (!skipAuth) {
-    if (authLoading || initPhase === 'auth') {
-      return (
-        <main className="app-shell">
-          <div className="auth-loading">{t('ui.auth.loading')}</div>
-        </main>
-      );
-    }
-    if (!user) return <LoginPage />;
-  }
-
-  const startWithMod = (mod: ActivePetMod | null) => {
-    const nextPet = createPetForMod(mod);
-    setInstalledMod(mod);
-    setInitialPet(nextPet);
-    setModMessage(mod ? t('ui.settings.mod.active', { name: mod.manifest.name, version: mod.manifest.version }) : '');
-  };
-
-  const handleUseBuiltin = async () => {
-    try {
-      await clearActivePetMod();
-      startWithMod(null);
-    } catch (error) {
-      setModMessage(error instanceof Error ? error.message : t('ui.settings.mod.restoreFailed'));
-    }
-  };
-
-  const handleImportMod = async (event: ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    event.target.value = '';
-    if (!file) return;
-    try {
-      const parsed = await parsePetModZip(file);
-      await saveActivePetMod(parsed);
-      const loaded = await loadActivePetMod();
-      if (!loaded) throw new Error(t('ui.settings.mod.loadFailed'));
-      startWithMod(loaded);
-      setModMessage(parsed.warnings.length > 0 ? t('ui.settings.mod.importedWithFallback', { name: parsed.manifest.name, count: parsed.warnings.length }) : t('ui.settings.mod.imported', { name: parsed.manifest.name }));
-    } catch (error) {
-      setModMessage(error instanceof Error ? error.message : t('ui.settings.mod.importFailed'));
-      playSfx('error');
-    }
-  };
-
   const handleSyncFromCloud = useCallback(async () => {
     if (!user) return;
     const cloud = await syncFromCloud(user.id);
@@ -1627,6 +1581,52 @@ const AppContent = () => {
       setModMessage(t('ui.settings.cloud.synced'));
     }
   }, [user, tryRestoreCloudMod]);
+
+  const skipAuth = !isSupabaseConfigured;
+
+  if (!skipAuth) {
+    if (authLoading || initPhase === 'auth') {
+      return (
+        <main className="app-shell">
+          <div className="auth-loading">{t('ui.auth.loading')}</div>
+        </main>
+      );
+    }
+    if (!user) return <LoginPage />;
+  }
+
+  const startWithMod = (mod: ActivePetMod | null) => {
+    const nextPet = createPetForMod(mod);
+    setInstalledMod(mod);
+    setInitialPet(nextPet);
+    setModMessage(mod ? t('ui.settings.mod.active', { name: mod.manifest.name, version: mod.manifest.version }) : '');
+  };
+
+  const handleUseBuiltin = async () => {
+    try {
+      await clearActivePetMod();
+      startWithMod(null);
+    } catch (error) {
+      setModMessage(error instanceof Error ? error.message : t('ui.settings.mod.restoreFailed'));
+    }
+  };
+
+  const handleImportMod = async (event: ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    event.target.value = '';
+    if (!file) return;
+    try {
+      const parsed = await parsePetModZip(file);
+      await saveActivePetMod(parsed);
+      const loaded = await loadActivePetMod();
+      if (!loaded) throw new Error(t('ui.settings.mod.loadFailed'));
+      startWithMod(loaded);
+      setModMessage(parsed.warnings.length > 0 ? t('ui.settings.mod.importedWithFallback', { name: parsed.manifest.name, count: parsed.warnings.length }) : t('ui.settings.mod.imported', { name: parsed.manifest.name }));
+    } catch (error) {
+      setModMessage(error instanceof Error ? error.message : t('ui.settings.mod.importFailed'));
+      playSfx('error');
+    }
+  };
 
   const handleCloudModChoice = async (modId: string | null) => {
     if (!pendingCloudModChoice) return;
