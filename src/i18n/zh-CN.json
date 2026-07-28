@@ -158,6 +158,18 @@
         "manage": "存档管理"
       },
       "freeNotice": "本软件为免费软件，不应通过付费方式获得。",
+      "cloud": {
+        "title": "云存档",
+        "summary": "从云端同步存档，覆盖当前本地数据。",
+        "syncFromCloud": "从云端同步",
+        "synced": "云存档已同步。",
+        "noData": "云端没有存档数据。",
+        "uploaded": "本地存档已上传到云端。",
+        "modMissing": "云端存档引用了模组 {name} v{version}，但本地未安装该模组，已使用默认外观。",
+        "syncedModMissing": "已同步云存档，但它引用了模组 {name} v{version}，请导入对应 Mod zip。",
+        "modChoiceTitle": "模组缺失",
+        "modChoiceDesc": "云端存档引用了 {name} v{version}，但本地未安装。请选择一个模组替换，或使用默认外观。"
+      },
       "help": {
         "open": "打开玩法说明",
         "title": "玩法说明",

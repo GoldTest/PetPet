@@ -158,6 +158,18 @@
         "manage": "Save management"
       },
       "freeNotice": "This app is free software and should not be obtained through paid access.",
+      "cloud": {
+        "title": "Cloud Save",
+        "summary": "Sync save from cloud, overwriting current local data.",
+        "syncFromCloud": "Sync from Cloud",
+        "synced": "Cloud save synced.",
+        "noData": "No cloud save data found.",
+        "uploaded": "Local save uploaded to cloud.",
+        "modMissing": "Cloud save references mod {name} v{version}, but it's not installed locally. Using default appearance.",
+        "syncedModMissing": "Cloud save synced, but it references {name} v{version}. Import the matching mod zip for the same appearance.",
+        "modChoiceTitle": "Mod Missing",
+        "modChoiceDesc": "Cloud save references {name} v{version}, which is not installed locally. Choose a mod to use instead, or use the default appearance."
+      },
       "help": {
         "open": "Open gameplay help",
         "title": "Gameplay Help",

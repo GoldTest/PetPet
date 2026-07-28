@@ -70,10 +70,10 @@ import {
   type BgmMode,
   type SfxId,
 } from '../core/audio';
-import { clearPet, loadPetOrNull, tryLoadCloudPet } from '../core/storage';
+import { clearPet, getCloudActiveMod, loadPetOrNull, setCloudActiveMod, syncFromCloud, tryLoadCloudPet, uploadLocalToCloud } from '../core/storage';
 import { AuthProvider, useAuth } from './auth/AuthContext';
 import { LoginPage } from './auth/LoginPage';
-import { isSupabaseConfigured } from '../core/supabase';
+import { isSupabaseConfigured, type CloudActiveModInfo } from '../core/supabase';
 import {
   formatFavoriteFoodText,
   getModFavoriteFoodIds,
@@ -135,7 +135,7 @@ type RewardPopup = ClaimedDateReward;
 type RewardDisplayItem = { key: string; icon?: string; label: string; title?: string };
 type WishQuickAction = PetState['dailyWish']['action'] | NonNullable<PetState['returnWelcome']>['action'];
 type AchievementCgPopup = { title: string; description: string; image: string; fileName: string };
-type PetAppProps = { initialPet: PetState; initialActiveMod: ActivePetMod | null; onResetToPicker: (storedMod: ActivePetMod | null) => void };
+type PetAppProps = { initialPet: PetState; initialActiveMod: ActivePetMod | null; onResetToPicker: (storedMod: ActivePetMod | null) => void; onSyncFromCloud: () => void };
 const achievementToastLabels = {
   single: t('ui.achievements.toast.single'),
   review: t('ui.achievements.toast.review'),
@@ -195,7 +195,7 @@ const createPetForMod = (mod: ActivePetMod | null) => {
   };
 };
 
-const PetApp = ({ initialPet, initialActiveMod, onResetToPicker }: PetAppProps) => {
+const PetApp = ({ initialPet, initialActiveMod, onResetToPicker, onSyncFromCloud }: PetAppProps) => {
   const {
     activePage,
     isHomeRef,
@@ -284,6 +284,16 @@ const PetApp = ({ initialPet, initialActiveMod, onResetToPicker }: PetAppProps) 
   useEffect(() => {
     setActiveMod(initialActiveMod);
     applyModEventDefs(initialActiveMod);
+    setCloudActiveMod(
+      initialActiveMod
+        ? {
+            type: 'custom',
+            id: initialActiveMod.manifest.id,
+            name: initialActiveMod.manifest.name,
+            version: initialActiveMod.manifest.version,
+          }
+        : null,
+    );
     setPet((current) => {
       if (!initialActiveMod) return withBackfilledBirthday(current, defaultPetBirthday);
       const next = withPetIdentityBirthday(current, initialActiveMod.manifest.birthday);
@@ -304,6 +314,19 @@ const PetApp = ({ initialPet, initialActiveMod, onResetToPicker }: PetAppProps) 
 
   useEffect(() => {
     refreshStoredMods();
+  }, [activeMod]);
+
+  useEffect(() => {
+    setCloudActiveMod(
+      activeMod
+        ? {
+            type: 'custom',
+            id: activeMod.manifest.id,
+            name: activeMod.manifest.name,
+            version: activeMod.manifest.version,
+          }
+        : null,
+    );
   }, [activeMod]);
 
   const itemIconMap = useMemo(() => resolveItemIcons(activeMod), [activeMod]);
@@ -926,10 +949,10 @@ const PetApp = ({ initialPet, initialActiveMod, onResetToPicker }: PetAppProps) 
       if (result === 'saved') setModMessage(t('ui.settings.save.saved'));
       if (result === 'downloaded') setModMessage(t('ui.settings.save.downloadStarted'));
       if (result === 'cancelled') setModMessage(t('ui.settings.save.saveCancelled'));
-    } catch (error) {
-      setModMessage(error instanceof Error ? error.message : t('ui.settings.save.saveFailed'));
+} catch (error) {
+      setModMessage(error instanceof Error ? error.message : t('ui.settings.mod.importFailed'));
       playSfx('error');
-    }
+}
   };
 
   const importSaveFromText = (text: string) => {
@@ -1313,6 +1336,7 @@ const PetApp = ({ initialPet, initialActiveMod, onResetToPicker }: PetAppProps) 
           onImportPastedSave={() => importSaveFromText(importSaveText)}
           onModFileChange={handleModFileChange}
           onImportSaveFileChange={handleImportSaveFileChange}
+          onSyncFromCloud={onSyncFromCloud}
         />
       )}
       {isResetConfirmOpen && (
@@ -1376,14 +1400,39 @@ const AppContent = () => {
   const [hasLoadedInitialMod, setHasLoadedInitialMod] = useState(false);
   const [modMessage, setModMessage] = useState('');
   const [isAudioEnabled, setAudioEnabledState] = useState(() => getAudioEnabled());
+  const [pendingCloudModChoice, setPendingCloudModChoice] = useState<{
+    cloudMod: CloudActiveModInfo;
+    availableMods: StoredModInfo[];
+  } | null>(null);
 
   useEffect(() => {
     if (!authLoading && !user) setInitPhase('ready');
   }, [authLoading, user]);
 
   const initPet = useCallback(async (userId: string) => {
-    const cloudPet = await tryLoadCloudPet(userId);
-    return cloudPet ?? loadPetOrNull();
+    const cloud = await tryLoadCloudPet(userId);
+    return cloud;
+  }, []);
+
+  const tryRestoreCloudMod = useCallback(async (cloudMod: CloudActiveModInfo) => {
+    const storedMod = await loadActivePetMod();
+    if (storedMod && storedMod.manifest.id === cloudMod.id) {
+      return storedMod;
+    }
+    const builtinId = getActiveBuiltinId();
+    if (builtinId === cloudMod.id) {
+      const builtinMods = getBuiltinMods();
+      const builtin = builtinMods.find((m) => m.manifest.id === cloudMod.id);
+      if (builtin) {
+        return buildActivePetModFromBuiltin(builtin);
+      }
+    }
+    const storedMods = listStoredMods();
+    const found = storedMods.find((m) => m.manifest.id === cloudMod.id);
+    if (found) {
+      return loadPetMod(found.manifest.id);
+    }
+    return null;
   }, []);
 
   useEffect(() => {
@@ -1393,11 +1442,58 @@ const AppContent = () => {
       setInitPhase('ready');
       return;
     }
-    void initPet(user.id).then((pet) => {
-      setInitialPet(pet);
+    void initPet(user.id).then((cloud) => {
+      if (cloud) {
+        setInitialPet(cloud.pet);
+        setCloudActiveMod(cloud.activeMod);
+        if (cloud.activeMod) {
+          void tryRestoreCloudMod(cloud.activeMod).then((mod) => {
+            if (mod) {
+              setInstalledMod(mod);
+            } else {
+              const entries = listStoredMods();
+              const builtinMods = getBuiltinMods();
+              const availableMods: StoredModInfo[] = [];
+              for (const bm of builtinMods) {
+                availableMods.push({
+                  id: bm.manifest.id,
+                  name: bm.manifest.name,
+                  version: bm.manifest.version,
+                  importedAt: 0,
+                  isBuiltin: true,
+                });
+              }
+              for (const e of entries) {
+                availableMods.push({
+                  id: e.manifest.id,
+                  name: e.manifest.name,
+                  version: e.manifest.version,
+                  fileName: e.fileName,
+                  importedAt: e.importedAt,
+                  isBuiltin: false,
+                });
+              }
+              availableMods.sort((a, b) => {
+                if (a.isBuiltin && !b.isBuiltin) return -1;
+                if (!a.isBuiltin && b.isBuiltin) return 1;
+                return b.importedAt - a.importedAt;
+              });
+              setPendingCloudModChoice({ cloudMod: cloud.activeMod!, availableMods });
+            }
+          });
+        }
+      } else {
+        const local = loadPetOrNull();
+        setInitialPet(local);
+        if (local && user) {
+          void uploadLocalToCloud(user.id, local, null).then(() => {
+            setModMessage(t('ui.settings.cloud.uploaded'));
+          }).catch(() => {});
+        }
+      }
       setInitPhase('pet');
     });
-  }, [initPhase, authLoading, user, initPet]);
+  }, [initPhase, authLoading, user, initPet, tryRestoreCloudMod]);
 
   useEffect(() => {
     void (async () => {
@@ -1481,44 +1577,163 @@ const AppContent = () => {
     }
   };
 
+  const handleSyncFromCloud = useCallback(async () => {
+    if (!user) return;
+    const cloud = await syncFromCloud(user.id);
+    if (!cloud) {
+      setModMessage(t('ui.settings.cloud.noData'));
+      return;
+    }
+    setInitialPet(cloud.pet);
+    if (cloud.activeMod) {
+      setCloudActiveMod(cloud.activeMod);
+      void tryRestoreCloudMod(cloud.activeMod).then((mod) => {
+        if (mod) {
+          setInstalledMod(mod);
+          setModMessage(t('ui.settings.cloud.synced'));
+        } else {
+          const entries = listStoredMods();
+          const builtinMods = getBuiltinMods();
+          const availableMods: StoredModInfo[] = [];
+          for (const bm of builtinMods) {
+            availableMods.push({
+              id: bm.manifest.id,
+              name: bm.manifest.name,
+              version: bm.manifest.version,
+              importedAt: 0,
+              isBuiltin: true,
+            });
+          }
+          for (const e of entries) {
+            availableMods.push({
+              id: e.manifest.id,
+              name: e.manifest.name,
+              version: e.manifest.version,
+              fileName: e.fileName,
+              importedAt: e.importedAt,
+              isBuiltin: false,
+            });
+          }
+          availableMods.sort((a, b) => {
+            if (a.isBuiltin && !b.isBuiltin) return -1;
+            if (!a.isBuiltin && b.isBuiltin) return 1;
+            return b.importedAt - a.importedAt;
+          });
+          setPendingCloudModChoice({ cloudMod: cloud.activeMod!, availableMods });
+        }
+      });
+    } else {
+      setInstalledMod(null);
+      setModMessage(t('ui.settings.cloud.synced'));
+    }
+  }, [user, tryRestoreCloudMod]);
+
+  const handleCloudModChoice = async (modId: string | null) => {
+    if (!pendingCloudModChoice) return;
+    const { cloudMod } = pendingCloudModChoice;
+    setPendingCloudModChoice(null);
+    if (modId === null) {
+      setInstalledMod(null);
+      setModMessage(t('ui.settings.cloud.modMissing', { name: cloudMod.name, version: cloudMod.version }));
+      return;
+    }
+    const builtinMods = getBuiltinMods();
+    const builtin = builtinMods.find((m) => m.manifest.id === modId);
+    if (builtin) {
+      setInstalledMod(buildActivePetModFromBuiltin(builtin));
+      setModMessage(t('ui.settings.cloud.modMissing', { name: cloudMod.name, version: cloudMod.version }));
+      return;
+    }
+    const mod = await loadPetMod(modId);
+    if (mod) {
+      setInstalledMod(mod);
+      setModMessage(t('ui.settings.cloud.modMissing', { name: cloudMod.name, version: cloudMod.version }));
+    }
+  };
+
+  const defaultPetImage = resolvePetStatusImages(null).content;
+
+  const cloudModChoiceDialog = pendingCloudModChoice && (
+    <div className="modal-backdrop modal-backdrop--confirm" role="presentation">
+      <section className="confirm-modal" role="alertdialog" aria-modal="true" aria-labelledby="cloud-mod-choice-title">
+        <div className="confirm-modal__copy">
+          <h2 id="cloud-mod-choice-title">{t('ui.settings.cloud.modChoiceTitle')}</h2>
+          <p>{t('ui.settings.cloud.modChoiceDesc', { name: pendingCloudModChoice.cloudMod.name, version: pendingCloudModChoice.cloudMod.version })}</p>
+        </div>
+        <div className="cloud-mod-list">
+          <button type="button" className="cloud-mod-card" onClick={() => handleCloudModChoice(null)}>
+            <img src={defaultPetImage} alt="" aria-hidden="true" className="cloud-mod-card__thumb" />
+            <div className="cloud-mod-card__info">
+              <strong>{t('ui.modSwitch.defaultTitle')}</strong>
+              <span>{t('ui.modSwitch.defaultSummary')}</span>
+            </div>
+          </button>
+          {pendingCloudModChoice.availableMods.map((mod) => (
+            <button
+              key={mod.id}
+              type="button"
+              className="cloud-mod-card"
+              onClick={() => handleCloudModChoice(mod.id)}
+            >
+              <div className="cloud-mod-card__info">
+                <strong>{mod.name}</strong>
+                <span>v{mod.version}</span>
+              </div>
+            </button>
+          ))}
+        </div>
+      </section>
+    </div>
+  );
+
   if (!hasLoadedInitialMod) {
     return (
-      <RolePicker
-        installedMod={null}
-        modMessage={modMessage}
-        isAudioEnabled={isAudioEnabled}
-        isLoading
-        onUseBuiltin={handleUseBuiltin}
-        onUseInstalledMod={() => undefined}
-        onImportMod={handleImportMod}
-        onAudioToggle={handleAudioToggle}
-      />
+      <>
+        <RolePicker
+          installedMod={null}
+          modMessage={modMessage}
+          isAudioEnabled={isAudioEnabled}
+          isLoading
+          onUseBuiltin={handleUseBuiltin}
+          onUseInstalledMod={() => undefined}
+          onImportMod={handleImportMod}
+          onAudioToggle={handleAudioToggle}
+        />
+        {cloudModChoiceDialog}
+      </>
     );
   }
 
   if (!initialPet) {
     return (
-      <RolePicker
-        installedMod={installedMod}
-        modMessage={modMessage}
-        isAudioEnabled={isAudioEnabled}
-        onUseBuiltin={handleUseBuiltin}
-        onUseInstalledMod={() => installedMod && startWithMod(installedMod)}
-        onImportMod={handleImportMod}
-        onAudioToggle={handleAudioToggle}
-      />
+      <>
+        <RolePicker
+          installedMod={installedMod}
+          modMessage={modMessage}
+          isAudioEnabled={isAudioEnabled}
+          onUseBuiltin={handleUseBuiltin}
+          onUseInstalledMod={() => installedMod && startWithMod(installedMod)}
+          onImportMod={handleImportMod}
+          onAudioToggle={handleAudioToggle}
+        />
+        {cloudModChoiceDialog}
+      </>
     );
   }
 
   return (
-    <PetApp
-      key={initialPet.createdAt}
-      initialPet={initialPet}
-      initialActiveMod={installedMod}
-      onResetToPicker={(storedMod) => {
-        setInstalledMod(storedMod);
-        setInitialPet(null);
-      }}
-    />
+    <>
+      <PetApp
+        key={initialPet.createdAt}
+        initialPet={initialPet}
+        initialActiveMod={installedMod}
+        onResetToPicker={(storedMod) => {
+          setInstalledMod(storedMod);
+          setInitialPet(null);
+        }}
+        onSyncFromCloud={handleSyncFromCloud}
+      />
+      {cloudModChoiceDialog}
+    </>
   );
 };

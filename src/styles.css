@@ -2712,6 +2712,60 @@ h1 {
   }
 }
 
+.cloud-mod-list {
+  display: grid;
+  gap: 8px;
+  max-height: 320px;
+  overflow-y: auto;
+}
+
+.cloud-mod-card {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid rgba(44, 58, 78, 0.12);
+  border-radius: 8px;
+  background: #f7faff;
+  cursor: pointer;
+  text-align: left;
+  font: inherit;
+  transition: background 0.15s, border-color 0.15s;
+}
+
+.cloud-mod-card:hover {
+  background: #eef4ff;
+  border-color: rgba(44, 58, 78, 0.2);
+}
+
+.cloud-mod-card__thumb {
+  width: 40px;
+  height: 40px;
+  object-fit: contain;
+  border-radius: 6px;
+  flex-shrink: 0;
+}
+
+.cloud-mod-card__info {
+  display: grid;
+  gap: 2px;
+  min-width: 0;
+}
+
+.cloud-mod-card__info strong {
+  color: #172034;
+  font-size: 0.92rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.cloud-mod-card__info span {
+  color: #64728a;
+  font-size: 0.82rem;
+}
+
 
 .year-review-modal {
   width: min(520px, 100%);

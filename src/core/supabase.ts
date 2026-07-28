@@ -12,6 +12,19 @@ export const isSupabaseConfigured = !!supabase;
 
 export type AuthUser = User;
 
+export interface CloudActiveModInfo {
+  type: 'builtin' | 'custom';
+  id: string;
+  name: string;
+  version: string;
+}
+
+export interface CloudSaveData {
+  pet: PetState;
+  activeMod: CloudActiveModInfo | null;
+  updatedAt: string;
+}
+
 export const getCurrentSession = async () => {
   if (!supabase) return null;
   const { data } = await supabase.auth.getSession();
@@ -36,25 +49,31 @@ export const signOut = async () => {
   if (error) throw error;
 };
 
-export const saveCloudSave = async (userId: string, pet: PetState) => {
+const getCloudUserId = (rawUserId: string): string => {
+  const env = import.meta.env.VITE_APP_ENV ?? (import.meta.env.DEV ? 'dev' : 'production');
+  if (env === 'production') return rawUserId;
+  return `${env}:${rawUserId}`;
+};
+
+export const saveCloudSave = async (userId: string, data: CloudSaveData) => {
   if (!supabase) return;
   const { data: { session } } = await supabase.auth.getSession();
   if (!session) return;
   const { error } = await supabase.rpc('upsert_pet_save', {
-    p_user_id: userId,
-    p_save_data: pet,
-    p_updated_at: new Date().toISOString(),
+    p_user_id: getCloudUserId(userId),
+    p_save_data: data,
+    p_updated_at: data.updatedAt,
   });
   if (error) throw error;
 };
 
-export const loadCloudSave = async (userId: string): Promise<PetState | null> => {
+export const loadCloudSave = async (userId: string): Promise<CloudSaveData | null> => {
   if (!supabase) return null;
   const { data: { session } } = await supabase.auth.getSession();
   if (!session) return null;
-  const { data, error } = await supabase.rpc('get_pet_save', { p_user_id: userId });
+  const { data, error } = await supabase.rpc('get_pet_save', { p_user_id: getCloudUserId(userId) });
   if (error || !data) return null;
-  return data as unknown as PetState;
+  return data as unknown as CloudSaveData;
 };
 
 export const diagnoseCloudSave = async () => {
@@ -71,10 +90,18 @@ export const diagnoseCloudSave = async () => {
     console.log('说明: 无 session，请先登录');
     return;
   }
+  const cloudUserId = getCloudUserId(session.user.id);
   console.log('user_id:', session.user.id);
+  console.log('cloud_user_id:', cloudUserId);
 
-  const { data, error } = await supabase.rpc('get_pet_save', { p_user_id: session.user.id });
+  const { data, error } = await supabase.rpc('get_pet_save', { p_user_id: cloudUserId });
   console.log('RPC get_pet_save 结果:', error ? `失败: ${error.message}` : '成功', data);
+  if (data) {
+    const cloud = data as unknown as CloudSaveData;
+    console.log('云端存档宠物名:', cloud.pet?.name);
+    console.log('云端存档模组:', cloud.activeMod ?? '无');
+    console.log('云端存档时间:', cloud.updatedAt);
+  }
   if (error) {
     console.log('诊断: RPC 也失败，请在 Supabase SQL Editor 检查 upsert_pet_save / get_pet_save 函数是否存在');
   } else {

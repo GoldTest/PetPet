@@ -1,4 +1,4 @@
-﻿import { ArrowLeft, CircleHelp, Download, FileText, LogOut, RotateCcw, Upload } from 'lucide-react';
+﻿import { ArrowLeft, CircleHelp, CloudDownload, Download, FileText, LogOut, RotateCcw, Upload } from 'lucide-react';
 import { useRef, useState, type ChangeEvent, type MouseEvent } from 'react';
 import { openUrl } from '@tauri-apps/plugin-opener';
 import { defaultPetBirthday, getPetBirthdayMaxDay, type PetBirthday } from '../core/pet';
@@ -33,6 +33,7 @@ interface SettingsModalProps {
   onImportPastedSave: () => void;
   onModFileChange: (event: ChangeEvent<HTMLInputElement>) => void;
   onImportSaveFileChange: (event: ChangeEvent<HTMLInputElement>) => void;
+  onSyncFromCloud: () => void;
 }
 
 type SettingsPage = 'main' | 'mod' | 'save';
@@ -65,6 +66,7 @@ export const SettingsModal = ({
   onImportPastedSave,
   onModFileChange,
   onImportSaveFileChange,
+  onSyncFromCloud,
 }: SettingsModalProps) => {
   const modFileInputRef = useRef<HTMLInputElement>(null);
   const saveFileInputRef = useRef<HTMLInputElement>(null);
@@ -249,6 +251,14 @@ export const SettingsModal = ({
                 </button>
                 <button type="button" className="text-button settings-action" onClick={() => saveFileInputRef.current?.click()}>
                   {t('ui.settings.save.importFile')}
+                </button>
+              </div>
+              <div className="settings-cloud-section">
+                <strong>{t('ui.settings.cloud.title')}</strong>
+                <span>{t('ui.settings.cloud.summary')}</span>
+                <button type="button" className="primary-button" onClick={onSyncFromCloud}>
+                  <CloudDownload size={18} aria-hidden="true" />
+                  {t('ui.settings.cloud.syncFromCloud')}
                 </button>
               </div>
               <input ref={saveFileInputRef} className="file-input" type="file" accept=".petpet,.json,.txt,application/json,text/plain" onChange={onImportSaveFileChange} />
