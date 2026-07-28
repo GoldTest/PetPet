@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState, type ChangeEvent } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState, type ChangeEvent } from 'react';
 import { Heart, Layers, Settings, Trophy, Volume2, VolumeX } from 'lucide-react';
 import {
   buyBoostCard,
@@ -70,7 +70,9 @@ import {
   type BgmMode,
   type SfxId,
 } from '../core/audio';
-import { clearPet, loadPetOrNull } from '../core/storage';
+import { clearPet, loadPetOrNull, tryLoadCloudPet } from '../core/storage';
+import { AuthProvider, useAuth } from './auth/AuthContext';
+import { LoginPage } from './auth/LoginPage';
 import {
   formatFavoriteFoodText,
   getModFavoriteFoodIds,
@@ -1387,12 +1389,42 @@ const applyModEventDefs = (mod: ActivePetMod | null) => {
   }
 };
 
-export const App = () => {
-  const [initialPet, setInitialPet] = useState<PetState | null>(() => loadPetOrNull());
+export const App = () => (
+  <AuthProvider>
+    <AppContent />
+  </AuthProvider>
+);
+
+const AppContent = () => {
+  const { user, loading: authLoading } = useAuth();
+  const [initPhase, setInitPhase] = useState<'auth' | 'pet' | 'ready'>('auth');
+  const [initialPet, setInitialPet] = useState<PetState | null>(null);
   const [installedMod, setInstalledMod] = useState<ActivePetMod | null>(null);
   const [hasLoadedInitialMod, setHasLoadedInitialMod] = useState(false);
   const [modMessage, setModMessage] = useState('');
   const [isAudioEnabled, setAudioEnabledState] = useState(() => getAudioEnabled());
+
+  useEffect(() => {
+    if (!authLoading && !user) setInitPhase('ready');
+  }, [authLoading, user]);
+
+  const initPet = useCallback(async (userId: string) => {
+    const cloudPet = await tryLoadCloudPet(userId);
+    return cloudPet ?? loadPetOrNull();
+  }, []);
+
+  useEffect(() => {
+    if (initPhase !== 'auth' || authLoading) return;
+    if (!user) {
+      setInitialPet(loadPetOrNull());
+      setInitPhase('ready');
+      return;
+    }
+    void initPet(user.id).then((pet) => {
+      setInitialPet(pet);
+      setInitPhase('pet');
+    });
+  }, [initPhase, authLoading, user, initPet]);
 
   useEffect(() => {
     void (async () => {
@@ -1429,6 +1461,16 @@ export const App = () => {
       });
     }
   };
+
+  if (authLoading || initPhase === 'auth') {
+    return (
+      <main className="app-shell">
+        <div className="auth-loading">{t('ui.auth.loading')}</div>
+      </main>
+    );
+  }
+
+  if (!user) return <LoginPage />;
 
   const startWithMod = (mod: ActivePetMod | null) => {
     const nextPet = createPetForMod(mod);

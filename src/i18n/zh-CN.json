@@ -43,6 +43,22 @@
       "active": "活动中",
       "season": "季节：{season}"
     },
+    "auth": {
+      "subtitle": "登录以同步你的云端存档",
+      "emailPlaceholder": "邮箱",
+      "passwordPlaceholder": "密码",
+      "signIn": "登录",
+      "signUp": "注册",
+      "submitting": "处理中...",
+      "haveAccount": "已有账号？去登录",
+      "noAccount": "没有账号？去注册",
+      "loading": "加载中...",
+      "signOut": "退出登录",
+      "confirmEmail": "注册成功，请检查邮箱收件箱并点击确认链接。",
+      "emailNotConfirmed": "邮箱尚未确认，请先查收确认邮件并点击链接。",
+      "rateLimited": "操作过于频繁，请等待一段时间后再试（429 限流）。",
+      "alreadyRegistered": "该账号已注册，请直接登录。"
+    },
     "inventory": {
       "aria": "背包",
       "kicker": "背包",

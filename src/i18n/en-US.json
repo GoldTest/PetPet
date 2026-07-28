@@ -43,6 +43,22 @@
       "active": "Active",
       "season": "Season: {season}"
     },
+    "auth": {
+      "subtitle": "Sign in to sync your cloud save",
+      "emailPlaceholder": "Email",
+      "passwordPlaceholder": "Password",
+      "signIn": "Sign In",
+      "signUp": "Sign Up",
+      "submitting": "Please wait...",
+      "haveAccount": "Already have an account? Sign in",
+      "noAccount": "No account? Sign up",
+      "loading": "Loading...",
+      "signOut": "Sign Out",
+      "confirmEmail": "Registration successful. Check your email inbox and click the confirmation link.",
+      "emailNotConfirmed": "Email not confirmed yet. Please check your inbox for the confirmation link.",
+      "rateLimited": "Too many requests. Please wait a while before trying again (429 rate limit).",
+      "alreadyRegistered": "This account is already registered. Please sign in instead."
+    },
     "inventory": {
       "aria": "Inventory",
       "kicker": "Inventory",
