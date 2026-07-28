@@ -1,4 +1,4 @@
-﻿import { ArrowLeft, CircleHelp, Download, FileText, RotateCcw, Upload } from 'lucide-react';
+﻿import { ArrowLeft, CircleHelp, Download, FileText, LogOut, RotateCcw, Upload } from 'lucide-react';
 import { useRef, useState, type ChangeEvent, type MouseEvent } from 'react';
 import { openUrl } from '@tauri-apps/plugin-opener';
 import { defaultPetBirthday, getPetBirthdayMaxDay, type PetBirthday } from '../core/pet';
@@ -6,6 +6,7 @@ import type { ActivePetMod } from '../core/mod';
 import { giftBoxIcon } from '../assets';
 import { languages, list, t, type LanguageCode } from '../i18n';
 import { DialogShell } from './DialogShell';
+import { useAuth } from './auth/AuthContext';
 
 interface SettingsModalProps {
   activeMod: ActivePetMod | null;
@@ -97,6 +98,8 @@ export const SettingsModal = ({
     onOpenHelp();
     setHelpOpen(true);
   };
+
+  const { signOut } = useAuth();
 
   const handleAuthorLinkClick = (event: MouseEvent<HTMLAnchorElement>) => {
     if (!('__TAURI_INTERNALS__' in window)) return;
@@ -267,6 +270,10 @@ export const SettingsModal = ({
             <button type="button" className="danger-button" onClick={onReset}>
               <RotateCcw size={18} aria-hidden="true" />
               {t('ui.settings.resetSave')}
+            </button>
+            <button type="button" className="text-button" onClick={signOut}>
+              <LogOut size={16} aria-hidden="true" />
+              {t('ui.auth.signOut')}
             </button>
           </div>
         )}

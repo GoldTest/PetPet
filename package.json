@@ -23,6 +23,7 @@
     "package:win:portable:x64": "npm.cmd run package:win:portable"
   },
   "dependencies": {
+    "@supabase/supabase-js": "^2.110.9",
     "@tauri-apps/plugin-dialog": "^2.7.1",
     "@tauri-apps/plugin-fs": "^2.5.1",
     "@tauri-apps/plugin-opener": "^2.5.4",
