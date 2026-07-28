@@ -73,6 +73,7 @@ import {
 import { clearPet, loadPetOrNull, tryLoadCloudPet } from '../core/storage';
 import { AuthProvider, useAuth } from './auth/AuthContext';
 import { LoginPage } from './auth/LoginPage';
+import { isSupabaseConfigured } from '../core/supabase';
 import {
   formatFavoriteFoodText,
   getModFavoriteFoodIds,
@@ -1415,7 +1416,7 @@ const AppContent = () => {
 
   useEffect(() => {
     if (initPhase !== 'auth' || authLoading) return;
-    if (!user) {
+    if (!user || !isSupabaseConfigured) {
       setInitialPet(loadPetOrNull());
       setInitPhase('ready');
       return;
@@ -1462,15 +1463,18 @@ const AppContent = () => {
     }
   };
 
-  if (authLoading || initPhase === 'auth') {
-    return (
-      <main className="app-shell">
-        <div className="auth-loading">{t('ui.auth.loading')}</div>
-      </main>
-    );
-  }
+  const skipAuth = !isSupabaseConfigured;
 
-  if (!user) return <LoginPage />;
+  if (!skipAuth) {
+    if (authLoading || initPhase === 'auth') {
+      return (
+        <main className="app-shell">
+          <div className="auth-loading">{t('ui.auth.loading')}</div>
+        </main>
+      );
+    }
+    if (!user) return <LoginPage />;
+  }
 
   const startWithMod = (mod: ActivePetMod | null) => {
     const nextPet = createPetForMod(mod);
