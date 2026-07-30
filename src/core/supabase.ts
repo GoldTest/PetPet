@@ -65,6 +65,7 @@ export const saveCloudSave = async (userId: string, data: CloudSaveData) => {
     p_user_id: getCloudUserId(userId),
     p_save_data: data,
     p_updated_at: data.updatedAt,
+    p_session_id: data.sessionId,
   });
   if (error) throw error;
 };

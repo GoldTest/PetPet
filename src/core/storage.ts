@@ -88,8 +88,10 @@ export const savePet = (pet: PetState) => {
         sessionId: currentSessionId,
       };
       await saveCloudSave(currentUserId!, cloudData);
-    } catch {
-      // ignore
+    } catch (err) {
+      if (err instanceof Error && err.message?.includes('SESSION_EXPIRED')) {
+        sessionExpired = true;
+      }
     }
   })();
 };
