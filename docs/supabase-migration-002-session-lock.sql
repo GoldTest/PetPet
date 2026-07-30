@@ -11,6 +11,7 @@ CREATE OR REPLACE FUNCTION upsert_pet_save(
 )
 RETURNS VOID
 LANGUAGE plpgsql
+SECURITY DEFINER
 AS $$
 DECLARE
   existing_session_id TEXT;
@@ -46,6 +47,7 @@ $$;
 CREATE OR REPLACE FUNCTION get_pet_save(p_user_id TEXT)
 RETURNS JSONB
 LANGUAGE plpgsql
+SECURITY DEFINER
 AS $$
 DECLARE
   result JSONB;
@@ -56,3 +58,7 @@ BEGIN
   RETURN result;
 END;
 $$;
+
+-- 3. 确保 authenticated 角色有执行权限
+GRANT EXECUTE ON FUNCTION upsert_pet_save(TEXT, JSONB, TEXT, TEXT) TO authenticated;
+GRANT EXECUTE ON FUNCTION get_pet_save(TEXT) TO authenticated;
