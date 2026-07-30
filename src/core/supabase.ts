@@ -23,6 +23,8 @@ export interface CloudSaveData {
   pet: PetState;
   activeMod: CloudActiveModInfo | null;
   updatedAt: string;
+  /** 登录会话 ID，用于多设备互斥：新设备登录后，旧设备无法再同步 */
+  sessionId: string;
 }
 
 export const getCurrentSession = async () => {

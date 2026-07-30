@@ -70,7 +70,7 @@ import {
   type BgmMode,
   type SfxId,
 } from '../core/audio';
-import { clearPet, getCloudActiveMod, loadPetOrNull, setCloudActiveMod, syncFromCloud, tryLoadCloudPet, uploadLocalToCloud } from '../core/storage';
+import { clearPet, getCloudActiveMod, isCloudSessionExpired, loadPetOrNull, setCloudActiveMod, syncFromCloud, tryLoadCloudPet, uploadLocalToCloud } from '../core/storage';
 import { AuthProvider, useAuth } from './auth/AuthContext';
 import { LoginPage } from './auth/LoginPage';
 import { isSupabaseConfigured, type CloudActiveModInfo } from '../core/supabase';
@@ -213,6 +213,7 @@ const PetApp = ({ initialPet, initialActiveMod, onResetToPicker, onSyncFromCloud
   const [draftBirthday, setDraftBirthday] = useState<PetBirthday | undefined>(initialPet.birthday);
   const [activeMod, setActiveMod] = useState<ActivePetMod | null>(initialActiveMod);
   const [modMessage, setModMessage] = useState('');
+  const [sessionExpired, setSessionExpired] = useState(false);
   const [saveText, setSaveText] = useState('');
   const [importSaveText, setImportSaveText] = useState('');
   const [isResetConfirmOpen, setResetConfirmOpen] = useState(false);
@@ -417,6 +418,13 @@ const PetApp = ({ initialPet, initialActiveMod, onResetToPicker, onSyncFromCloud
       setAchievementToast({ kind: 'review' });
     }
   }, [activePage, achievementToast, pet.achievements.pendingReviewNotice]);
+
+  useEffect(() => {
+    const check = () => setSessionExpired(isCloudSessionExpired());
+    check();
+    const id = window.setInterval(check, 5000);
+    return () => window.clearInterval(id);
+  }, []);
 
   const handleAudioToggle = () => {
     const nextEnabled = !isAudioEnabled;
@@ -1050,6 +1058,11 @@ const PetApp = ({ initialPet, initialActiveMod, onResetToPicker, onSyncFromCloud
   ) : undefined;
   return (
     <main className="app-shell">
+      {sessionExpired && (
+        <div className="session-expired-banner" role="alert">
+          {t('ui.cloud.sessionExpired')}
+        </div>
+      )}
       <header className="top-bar">
         <div>
           <p className="eyebrow">{t('ui.brand.eyebrow')}</p>

@@ -168,7 +168,8 @@
         "modMissing": "Cloud save references mod {name} v{version}, but it's not installed locally. Using default appearance.",
         "syncedModMissing": "Cloud save synced, but it references {name} v{version}. Import the matching mod zip for the same appearance.",
         "modChoiceTitle": "Mod Missing",
-        "modChoiceDesc": "Cloud save references {name} v{version}, which is not installed locally. Choose a mod to use instead, or use the default appearance."
+        "modChoiceDesc": "Cloud save references {name} v{version}, which is not installed locally. Choose a mod to use instead, or use the default appearance.",
+        "sessionExpired": "Cloud save taken over by another device. This device will no longer sync to cloud. Local save is still available."
       },
       "help": {
         "open": "Open gameplay help",
