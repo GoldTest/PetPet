@@ -20,10 +20,10 @@ BEGIN
     RAISE EXCEPTION 'SESSION_ID_REQUIRED: old version rejected';
   END IF;
 
-  -- 读取已有记录的 session_id
+  -- 读取已有记录的 session_id（user_id 可能是 uuid 类型，转 text 比较）
   SELECT p_save_data->>'sessionId' INTO existing_session_id
   FROM pet_saves
-  WHERE user_id = p_user_id;
+  WHERE user_id::text = p_user_id;
 
   -- 已有记录且 session_id 不匹配 → 被其他设备顶替
   IF existing_session_id IS NOT NULL AND existing_session_id != '' AND existing_session_id != p_session_id THEN
