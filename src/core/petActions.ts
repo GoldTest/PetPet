@@ -278,6 +278,7 @@ export const buyItem = (pet: PetState, itemId: ItemId, now = Date.now(), options
   const discountEntry = discountInfo?.items.find((discountItem) => discountItem.itemId === itemId);
   const isDiscountPurchase = Boolean(discountEntry && !discountEntry.used);
   const price = isDiscountPurchase ? discountEntry?.price ?? item.price : item.price;
+  const packSize = 'packSize' in item ? (item.packSize ?? 1) : 1;
   const discountDateKey = discountInfo?.dateKey ?? current.dailyDiscountDate;
   const discountItemIds = discountInfo?.items.map((discountItem) => discountItem.itemId) ?? current.dailyDiscountItemIds;
   const migratedUsedDiscountItemIds =
@@ -299,7 +300,7 @@ export const buyItem = (pet: PetState, itemId: ItemId, now = Date.now(), options
   return incrementAchievementPurchase({
     ...current,
     coins: current.coins - price,
-    inventory: addInventoryItem(current.inventory, itemId, 1),
+    inventory: addInventoryItem(current.inventory, itemId, packSize),
     dailyDiscountDate: isDiscountPurchase ? discountDateKey : current.dailyDiscountDate,
     dailyDiscountItemIds: isDiscountPurchase ? discountItemIds : current.dailyDiscountItemIds,
     dailyDiscountUsedItemIds: nextDailyDiscountUsedItemIds,

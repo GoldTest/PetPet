@@ -1,5 +1,5 @@
 import { BookOpen, Leaf, Lock, Recycle, Shuffle, X } from 'lucide-react';
-import { treeStageImages } from '../assets';
+import { gardenTreeStageImages } from '../assets';
 import { allGardenTreeIds, getSpeciesBookProgress, isSpeciesBookComplete } from '../core/speciesBook';
 import { gardenTreeDefinitions } from '../core/garden';
 import { t } from '../i18n';
@@ -12,10 +12,7 @@ interface SpeciesBookModalProps {
 }
 
 const synergyRules = [
-  { id: 'fruit_care', a: 'fruit_tree', b: 'care_tree', desc: 'care_tree 额外掉落 +100%' },
-  { id: 'gift_fruit', a: 'gift_tree', b: 'fruit_tree', desc: 'fruit_tree 生长速度 +10%' },
   { id: 'herb_fruit', a: 'herb_tree', b: 'fruit_tree', desc: '额外掉落 +50%' },
-  { id: 'herb_care', a: 'herb_tree', b: 'care_tree', desc: 'herb_tree 生长速度 +10%' },
   { id: 'money_any', a: 'money_tree', b: 'any', desc: '金币 +15%' },
   { id: 'same_adjacent', a: 'same', b: 'same', desc: '稀有权重 +5%' },
 ];
@@ -67,7 +64,7 @@ export const SpeciesBookModal = ({ pet, onClose }: SpeciesBookModalProps) => {
                 >
                   <div className="species-book__entry-icon">
                     {isUnlocked ? (
-                      <img src={treeStageImages[4]} alt="" aria-hidden="true" />
+                      <img src={gardenTreeStageImages[treeId][4]} alt="" aria-hidden="true" />
                     ) : (
                       <Lock size={24} aria-hidden="true" />
                     )}

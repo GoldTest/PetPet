@@ -654,10 +654,7 @@
       },
       "synergy": {
         "title": "连携效果",
-        "fruit_care": "果树 + 关怀树：额外掉落 +1",
-        "gift_fruit": "礼物树 + 果树：生长速度 +10%",
         "herb_fruit": "药草树 + 果树：额外掉落 +50%",
-        "herb_care": "药草树 + 关怀树：生长速度 +10%",
         "money_any": "摇钱树相邻：金币 +15%",
         "same_adjacent": "同种树相邻：稀有权重 +5%"
       },
@@ -677,20 +674,17 @@
         "empty": "空地",
         "growing": "成长中",
         "ready": "可收获",
+        "cutReady": "可砍伐",
         "withered": "枯萎"
       },
       "trees": {
+        "poplar_tree": {
+          "name": "速生杨",
+          "summary": "生长极快的普通树，成熟后可砍伐获得木板和枯枝"
+        },
         "fruit_tree": {
           "name": "神奇果树",
           "summary": "种植获得的果树，成熟后产出食物"
-        },
-        "care_tree": {
-          "name": "护理之树",
-          "summary": "种植获得的果树，成熟后产出护理道具"
-        },
-        "gift_tree": {
-          "name": "神奇礼物树",
-          "summary": "种植获得的果树，成熟后产出礼物道具"
         },
         "herb_tree": {
           "name": "活力树",
@@ -711,13 +705,13 @@
         "heartFertilizer": "爱心肥料",
         "nutrient": "丰收营养剂",
         "harvest": "收获",
-        "clear": "清理枯树 · {coins} 金币",
+        "cut": "砍伐",
         "remove": "移除树 · {coins} 金币"
       },
       "confirm": {
-        "clearTitle": "清理枯树？",
-        "clearMessage": "确定要清理第 {slot} 块地的{tree}吗？这会花费 {coins} 金币，清理后可重新种植。",
-        "clearConfirm": "确认清理",
+        "clearTitle": "砍伐枯树？",
+        "clearMessage": "确定要砍伐第 {slot} 块地的{tree}吗？砍伐可获得 1 个木板和 1-3 个枯枝，之后可重新种植。",
+        "clearConfirm": "确认砍伐",
         "removeTitle": "移除树？",
         "removeMessage": "确定要移除第 {slot} 块地的{tree}吗？这会花费 {coins} 金币，当前生长进度和待收获内容都会失去。",
         "removeConfirm": "确认移除",
@@ -828,18 +822,15 @@
     "vegGarden": {
       "aria": "菜园",
       "title": "菜园",
-      "kicker": "蔬菜种植",
+      "kicker": "VEGATIABLE",
       "back": "返回",
       "lifetimeHarvest": "总收获：{count}",
-      "environmentAria": "环境信息",
-      "slotsAria": "菜园地块",
-      "slotTitle": "地块 {slot}",
+      "slotTitle": "格子 {slot}",
+      "readyHint": "有 {count} 个作物成熟了，点击收获！",
       "states": {
-        "empty": "空闲",
+        "empty": "土地",
         "growing": "生长中",
-        "ready": "可收获",
-        "withered": "枯萎",
-        "pest": "虫害！"
+        "ready": "可收获"
       },
       "crops": {
         "tomato": {
@@ -861,40 +852,21 @@
           "name": "辣椒"
         }
       },
-      "cropLife": "{crop} · 已收获 {used}/{max} 次",
       "remaining": "剩余 {time}",
-      "chooseSeed": "选择种子",
-      "seedOwned": "拥有 {count} 个",
-      "needSeed": "种子 {coins} 金币",
-      "plantAction": "种植",
-      "buySeeds": "去商店购买种子",
-      "plantDialogTitle": "选择种子",
-      "plantDialogSummary": "选择你要种植的蔬菜种子",
-      "closeDialog": "关闭",
-      "actions": {
-        "water": "浇水",
-        "fertilize": "施肥",
-        "harvest": "收获",
-        "clear": "清理",
-        "remove": "移除"
+      "buySeedsShort": "买种子",
+      "seasonBadge": "当季 +20%",
+      "seasonBadgeTitle": "当季作物：{crops}，生长加快 20%",
+      "seasonDialogTitle": "当季作物",
+      "seasonDialogHint": "当季作物生长加快 20%",
+      "tools": {
+        "water": "浇水"
       },
-      "waterFree": "缩短 {percent}%",
-      "fertilizeWith": "施肥 · 缩短 {percent}%",
-      "itemOwned": "拥有 {count} 个",
-      "unlockSlot": "解锁 {coins} 金币",
-      "pestAlert": "虫害！",
-      "pestHint": "浇水或施肥可清除虫害",
-      "rotationPenalty": "轮作惩罚：减产 {percent}%",
+      "chooseSeedHint": "选择一种种子播种",
+      "plantHint": "已选 {crop} · 剩余 {count} 颗",
+      
+      "waterHint": "点击生长中的作物浇水，缩短 {percent}%（每日每格一次）",
+      "idleHint": "点种子开始播种，或用水壶浇水，成熟的作物点击即可收获",
       "seasonBonus": "当季作物 · 生长加快 20%"
-    },
-    "vegGardenConfirm": {
-      "clearTitle": "清理枯萎作物",
-      "clearMessage": "确定要清理地块 {slot} 的枯萎作物吗？",
-      "removeTitle": "移除作物",
-      "removeMessage": "确定要移除地块 {slot} 的 {crop} 吗？",
-      "cancel": "取消",
-      "clearConfirm": "清理",
-      "removeConfirm": "移除"
     }
   },
   "pet": {
@@ -1004,13 +976,9 @@
           "name": "神奇果树树苗",
           "summary": "可在种植栏位种下，成熟后产出食物"
         },
-        "care_tree_sapling": {
-          "name": "护理之树树苗",
-          "summary": "可在种植栏位种下，成熟后产出护理道具"
-        },
-        "gift_tree_sapling": {
-          "name": "神奇礼物树树苗",
-          "summary": "可在种植栏位种下，成熟后产出礼物道具"
+        "poplar_tree_sapling": {
+          "name": "速生杨树苗",
+          "summary": "生长极快的普通树，成熟后砍伐可获得木板和枯枝"
         },
         "herb_tree_sapling": {
           "name": "活力树树苗",
@@ -1038,7 +1006,11 @@
         },
         "withered_fragment": {
           "name": "枯树树枝",
-          "summary": "清理枯树获得，可投入堆肥桶回收资源"
+          "summary": "砍伐枯树获得，可投入堆肥桶回收资源"
+        },
+        "wood_plank": {
+          "name": "木板",
+          "summary": "砍伐树木获得的基础材料"
         },
         "exp_potion": {
           "name": "经验药水",
@@ -1086,27 +1058,27 @@
         },
         "tomato_seed": {
           "name": "番茄种子",
-          "summary": "种下后可收获番茄"
+          "summary": "种子袋（1 袋 9 颗），种下后可收获番茄"
         },
         "carrot_seed": {
           "name": "胡萝卜种子",
-          "summary": "种下后可收获胡萝卜"
+          "summary": "种子袋（1 袋 9 颗），种下后可收获胡萝卜"
         },
         "cabbage_seed": {
           "name": "卷心菜种子",
-          "summary": "种下后可收获卷心菜"
+          "summary": "种子袋（1 袋 9 颗），种下后可收获卷心菜"
         },
         "onion_seed": {
           "name": "洋葱种子",
-          "summary": "种下后可收获洋葱"
+          "summary": "种子袋（1 袋 9 颗），种下后可收获洋葱"
         },
         "potato_seed": {
           "name": "土豆种子",
-          "summary": "种下后可收获土豆"
+          "summary": "种子袋（1 袋 9 颗），种下后可收获土豆"
         },
         "chili_seed": {
           "name": "辣椒种子",
-          "summary": "种下后可收获辣椒"
+          "summary": "种子袋（1 袋 9 颗），种下后可收获辣椒"
         }
       },
       "categories": {
@@ -1927,8 +1899,9 @@
       "cannotHarvest": "这里还没有可以收获的产物。",
       "harvestSuccess": "收获了 {count} 件道具。",
       "harvestWithered": "收获了 {count} 件道具，这棵树寿命耗尽枯萎了。",
+      "cutVanishSuccess": "砍伐了{tree}，获得 {count} 件道具。",
       "cannotClear": "这里没有需要清理的枯树。",
-      "clearSuccess": "清理了枯树，获得枯树树枝，花费 {coins} 金币。",
+      "cutSuccess": "砍伐了枯树，获得 {count} 件道具。",
       "removeSuccess": "移除了这棵树，花费 {coins} 金币。",
       "toolMaxLevel": "这个工具已经满级。",
       "toolUpgradeSuccess": "{tool} 升到 Lv.{level}，花费 {coins} 金币。",
@@ -1955,25 +1928,14 @@
     },
     "vegGarden": {
       "invalidSlot": "这个地块不存在。",
-      "slotAlreadyUnlocked": "这个地块已经解锁了。",
-      "unlockInOrder": "需要按顺序解锁地块。",
-      "notEnoughCoins": "金币不足，需要 {coins} 金币。",
-      "slotLocked": "这个地块还没有解锁。",
       "slotNotEmpty": "这个地块已经有作物了。",
-      "unlockSlotSuccess": "解锁了第 {slot} 个地块，花费 {coins} 金币。",
       "missingSeed": "背包里没有{item}。",
       "plantSuccess": "种下了{crop}，消耗 {item}。",
       "cannotWater": "这个作物现在不能浇水。",
       "wateredToday": "这个地块今天已经浇过水了。",
       "waterSuccess": "浇水完成，生长时间缩短 {percent}%。",
-      "cannotFertilize": "这个作物现在不能施肥。",
-      "fertilizedToday": "这个地块今天已经施肥了。",
       "cannotHarvest": "这里还没有可以收获的作物。",
-      "harvestSuccess": "收获了 {count} 个{crop}。",
-      "cannotClear": "这里没有需要清理的作物。",
-      "clearSuccess": "清理完成，花费 {coins} 金币。",
-      "missingFertilizer": "背包里没有{item}。",
-      "fertilizeSuccess": "使用了{item}，生长加快 {percent}%。"
+      "harvestSuccess": "收获了 {count} 个{crop}。"
     }
   }
 }

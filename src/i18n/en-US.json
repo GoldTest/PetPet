@@ -654,10 +654,7 @@
       },
       "synergy": {
         "title": "Synergies",
-        "fruit_care": "Fruit + Care: extra drops +1",
-        "gift_fruit": "Gift + Fruit: grow speed +10%",
         "herb_fruit": "Herb + Fruit: extra drop +50%",
-        "herb_care": "Herb + Care: grow speed +10%",
         "money_any": "Money tree adjacent: coins +15%",
         "same_adjacent": "Same species adjacent: rare weight +5%"
       },
@@ -677,17 +674,16 @@
         "empty": "Empty",
         "growing": "Growing",
         "ready": "Ready",
+        "cutReady": "Ready to cut",
         "withered": "Withered"
       },
       "trees": {
+        "poplar_tree": {
+          "name": "Fast poplar",
+          "summary": "Grows very fast. Cut it down when mature for wood planks and dry branches."
+        },
         "fruit_tree": {
           "name": "Fruit tree"
-        },
-        "care_tree": {
-          "name": "Care tree"
-        },
-        "gift_tree": {
-          "name": "Gift tree"
         },
         "herb_tree": {
           "name": "Vitality tree"
@@ -705,13 +701,13 @@
         "heartFertilizer": "Heart fertilizer",
         "nutrient": "Harvest nutrient",
         "harvest": "Harvest",
-        "clear": "Clear · {coins} coins",
+        "cut": "Cut down",
         "remove": "Remove tree · {coins} coins"
       },
       "confirm": {
-        "clearTitle": "Clear withered tree?",
-        "clearMessage": "Clear the {tree} in slot {slot}? This costs {coins} coins and lets you plant again.",
-        "clearConfirm": "Clear tree",
+        "clearTitle": "Cut down the withered tree?",
+        "clearMessage": "Cut down the {tree} in slot {slot}? You'll get 1 wood plank and 1-3 dry branches, then you can plant again.",
+        "clearConfirm": "Cut down",
         "removeTitle": "Remove tree?",
         "removeMessage": "Remove the {tree} in slot {slot}? This costs {coins} coins, and the current growth progress and pending harvest will be lost.",
         "removeConfirm": "Remove tree",
@@ -822,18 +818,15 @@
     "vegGarden": {
       "aria": "Vegetable Garden",
       "title": "Vegetable Garden",
-      "kicker": "Vegetable Farming",
+      "kicker": "VEGATIABLE",
       "back": "Back",
       "lifetimeHarvest": "Total harvested: {count}",
-      "environmentAria": "Environment info",
-      "slotsAria": "Garden plots",
-      "slotTitle": "Plot {slot}",
+      "slotTitle": "Tile {slot}",
+      "readyHint": "{count} crops are ready to harvest! Tap to collect.",
       "states": {
-        "empty": "Empty",
+        "empty": "Soil",
         "growing": "Growing",
-        "ready": "Ready",
-        "withered": "Withered",
-        "pest": "Pest!"
+        "ready": "Ready"
       },
       "crops": {
         "tomato": {
@@ -855,40 +848,21 @@
           "name": "Chili"
         }
       },
-      "cropLife": "{crop} · Harvested {used}/{max}",
       "remaining": "{time} remaining",
-      "chooseSeed": "Choose seed",
-      "seedOwned": "Owned: {count}",
-      "needSeed": "Seed {coins} coins",
-      "plantAction": "Plant",
-      "buySeeds": "Buy seeds from shop",
-      "plantDialogTitle": "Choose seed",
-      "plantDialogSummary": "Select a vegetable seed to plant",
-      "closeDialog": "Close",
-      "actions": {
-        "water": "Water",
-        "fertilize": "Fertilize",
-        "harvest": "Harvest",
-        "clear": "Clear",
-        "remove": "Remove"
+      "buySeedsShort": "Seeds",
+      "seasonBadge": "In-season +20%",
+      "seasonBadgeTitle": "In-season crops: {crops} · 20% faster growth",
+      "seasonDialogTitle": "In-season Crops",
+      "seasonDialogHint": "In-season crops grow 20% faster",
+      "tools": {
+        "water": "Water"
       },
-      "waterFree": "Shorten {percent}%",
-      "fertilizeWith": "Fertilize · Shorten {percent}%",
-      "itemOwned": "Owned: {count}",
-      "unlockSlot": "Unlock {coins} coins",
-      "pestAlert": "Pest!",
-      "pestHint": "Water or fertilize to remove pests",
-      "rotationPenalty": "Rotation penalty: -{percent}% yield",
+      "chooseSeedHint": "Pick a seed to plant",
+      "plantHint": "{crop} selected · {count} seeds left",
+      
+      "waterHint": "Tap growing crops to water them ({percent}% faster, once per tile per day)",
+      "idleHint": "Pick a seed to plant, use the watering can, or tap ready crops to harvest",
       "seasonBonus": "In-season crop · 20% faster growth"
-    },
-    "vegGardenConfirm": {
-      "clearTitle": "Clear withered crop",
-      "clearMessage": "Clear the withered crop in plot {slot}?",
-      "removeTitle": "Remove crop",
-      "removeMessage": "Remove the {crop} in plot {slot}?",
-      "cancel": "Cancel",
-      "clearConfirm": "Clear",
-      "removeConfirm": "Remove"
     }
   },
   "pet": {
@@ -998,13 +972,9 @@
           "name": "Fruit tree sapling",
           "summary": "Plant in a garden slot to grow food items."
         },
-        "care_tree_sapling": {
-          "name": "Care tree sapling",
-          "summary": "Plant in a garden slot to grow care items."
-        },
-        "gift_tree_sapling": {
-          "name": "Gift tree sapling",
-          "summary": "Plant in a garden slot to grow gift items."
+        "poplar_tree_sapling": {
+          "name": "Fast poplar sapling",
+          "summary": "Grows very fast. Cut it down when mature for wood planks and dry branches."
         },
         "herb_tree_sapling": {
           "name": "Vitality tree sapling",
@@ -1032,7 +1002,11 @@
         },
         "withered_fragment": {
           "name": "Withered Branch",
-          "summary": "Obtained from clearing withered trees. Compost to reclaim resources."
+          "summary": "Obtained from cutting down withered trees. Compost to reclaim resources."
+        },
+        "wood_plank": {
+          "name": "Wood Plank",
+          "summary": "Basic material obtained by cutting down trees."
         },
         "exp_potion": {
           "name": "Exp potion",
@@ -1080,27 +1054,27 @@
         },
         "tomato_seed": {
           "name": "Tomato seed",
-          "summary": "Plant to grow tomatoes."
+          "summary": "Seed pack (9 seeds). Plant to grow tomatoes."
         },
         "carrot_seed": {
           "name": "Carrot seed",
-          "summary": "Plant to grow carrots."
+          "summary": "Seed pack (9 seeds). Plant to grow carrots."
         },
         "cabbage_seed": {
           "name": "Cabbage seed",
-          "summary": "Plant to grow cabbages."
+          "summary": "Seed pack (9 seeds). Plant to grow cabbages."
         },
         "onion_seed": {
           "name": "Onion seed",
-          "summary": "Plant to grow onions."
+          "summary": "Seed pack (9 seeds). Plant to grow onions."
         },
         "potato_seed": {
           "name": "Potato seed",
-          "summary": "Plant to grow potatoes."
+          "summary": "Seed pack (9 seeds). Plant to grow potatoes."
         },
         "chili_seed": {
           "name": "Chili seed",
-          "summary": "Plant to grow chilies."
+          "summary": "Seed pack (9 seeds). Plant to grow chilies."
         }
       },
       "categories": {
@@ -1921,8 +1895,9 @@
       "cannotHarvest": "Nothing is ready to harvest.",
       "harvestSuccess": "Harvested {count} item(s).",
       "harvestWithered": "Harvested {count} item(s). The tree has withered.",
-      "cannotClear": "There is no withered tree to clear.",
-      "clearSuccess": "Cleared the withered tree, obtained a withered branch. Cost: {coins} coins.",
+      "cutVanishSuccess": "Cut down the {tree} and got {count} item(s).",
+      "cannotClear": "There is no withered tree to cut down.",
+      "cutSuccess": "Cut down the withered tree and got {count} item(s).",
       "removeSuccess": "Removed the tree for {coins} coins.",
       "toolMaxLevel": "This tool is already max level.",
       "toolUpgradeSuccess": "{tool} upgraded to Lv.{level} for {coins} coins.",
@@ -1949,25 +1924,14 @@
     },
     "vegGarden": {
       "invalidSlot": "That plot does not exist.",
-      "slotAlreadyUnlocked": "That plot is already unlocked.",
-      "unlockInOrder": "Unlock plots in order.",
-      "notEnoughCoins": "Not enough coins. Need {coins}.",
-      "slotLocked": "This plot is locked.",
       "slotNotEmpty": "This plot already has a crop.",
-      "unlockSlotSuccess": "Unlocked plot {slot} for {coins} coins.",
       "missingSeed": "No {item} in the bag.",
       "plantSuccess": "Planted {crop} and used {item}.",
       "cannotWater": "This crop cannot be watered now.",
       "wateredToday": "This plot was already watered today.",
       "waterSuccess": "Watered. Growth time shortened by {percent}%.",
-      "cannotFertilize": "This crop cannot be fertilized now.",
-      "fertilizedToday": "This plot was already fertilized today.",
       "cannotHarvest": "Nothing is ready to harvest.",
-      "harvestSuccess": "Harvested {count} {crop}(s).",
-      "cannotClear": "There is no crop to clear.",
-      "clearSuccess": "Cleared. Cost: {coins} coins.",
-      "missingFertilizer": "No {item} in the bag.",
-      "fertilizeSuccess": "Used {item}. Growth sped up by {percent}%."
+      "harvestSuccess": "Harvested {count} {crop}(s)."
     }
   }
 }

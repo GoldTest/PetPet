@@ -27,8 +27,7 @@ export type BuiltinItemId =
   | 'energy_drink'
   | 'golden_apple'
   | 'fruit_tree_sapling'
-  | 'care_tree_sapling'
-  | 'gift_tree_sapling'
+  | 'poplar_tree_sapling'
   | 'herb_tree_sapling'
   | 'money_tree_sapling'
   | 'golden_apple_tree_sapling'
@@ -36,6 +35,7 @@ export type BuiltinItemId =
   | 'heart_fertilizer'
   | 'harvest_nutrient'
   | 'withered_fragment'
+  | 'wood_plank'
   | 'exp_potion'
   | 'energy_concentrate'
   | 'skill_fruit'
@@ -60,26 +60,19 @@ export type ItemId = BuiltinItemId | ModItemId;
 
 export type Inventory = Record<string, number>;
 
-export type GardenTreeId = 'fruit_tree' | 'care_tree' | 'gift_tree' | 'herb_tree' | 'money_tree' | 'golden_apple_tree';
+export type GardenTreeId = 'poplar_tree' | 'fruit_tree' | 'herb_tree' | 'money_tree' | 'golden_apple_tree';
 
 export type VegetableCropId = 'tomato' | 'carrot' | 'cabbage' | 'onion' | 'potato' | 'chili';
 
-export type VegetableSlotState = 'empty' | 'growing' | 'ready' | 'withered' | 'pest';
+export type VegetableSlotState = 'empty' | 'growing' | 'ready' | 'withered';
 
 export interface VegetableSlot {
   slotIndex: number;
-  unlocked: boolean;
   cropId?: VegetableCropId;
   plantedAt: number;
   lastWateredAt: number;
-  lastFertilizedAt: number;
   nextReadyAt: number;
-  harvestsUsed: number;
-  maxHarvests: number;
   state: VegetableSlotState;
-  lastCropId?: VegetableCropId;
-  sameCropPlantCount: number;
-  hasPest: boolean;
   dailyHarvestDateKey: string;
   dailyHarvestCount: number;
 }
@@ -89,8 +82,6 @@ export interface VegetableGardenState {
   slots: VegetableSlot[];
   dailyWaterDateKey: string;
   dailyWaterCount: number;
-  dailyFertilizeDateKey: string;
-  dailyFertilizeCount: number;
   lifetimeHarvestCount: number;
 }
 
@@ -492,6 +483,8 @@ export interface ShopItem {
   summary: string;
   tags?: string[];
   usable?: boolean;
+  /** 每袋数量：购买一次获得的物品数量（如种子袋 9 颗），价格即为袋价 */
+  packSize?: number;
 }
 
 export interface ItemDefinition {
@@ -506,6 +499,8 @@ export interface ItemDefinition {
   shop: boolean;
   tags: string[];
   usable: boolean;
+  /** 每袋数量：购买一次获得的物品数量（如种子袋 9 颗），价格即为袋价 */
+  packSize?: number;
 }
 
 export type ItemRegistry = ReadonlyMap<string, ItemDefinition>;

@@ -1,4 +1,4 @@
-import { BadgeCheck, CalendarClock, PackageOpen, Sprout, Store, Timer } from 'lucide-react';
+import { BadgeCheck, CalendarClock, Leaf, PackageOpen, Sprout, Store, Timer } from 'lucide-react';
 import { canClaimBoostCardDailyCoins, getActiveBoostCard, partnerScheduleUnlockLevel, type PetState } from '../core/pet';
 import { t } from '../i18n';
 import { formatPomodoroTime } from './time';
@@ -14,6 +14,7 @@ interface FeatureRowProps {
   onOpenInventory: () => void;
   onOpenPomodoro: () => void;
   onOpenGarden: () => void;
+  onOpenVegGarden: () => void;
   onOpenBoostCards: () => void;
   onOpenShop: () => void;
   onOpenPartnerSchedule: () => void;
@@ -30,6 +31,7 @@ export const FeatureRow = ({
   onOpenInventory,
   onOpenPomodoro,
   onOpenGarden,
+  onOpenVegGarden,
   onOpenBoostCards,
   onOpenShop,
   onOpenPartnerSchedule,
@@ -90,6 +92,18 @@ export const FeatureRow = ({
           <small>{gardenHint}</small>
         </span>
         {gardenReminder && <i aria-hidden="true" />}
+      </button>
+
+      <button
+        type="button"
+        className="feature-button feature-button--veg-garden"
+        onClick={onOpenVegGarden}
+      >
+        <Leaf size={20} aria-hidden="true" />
+        <span>
+          {t('ui.features.vegGarden')}
+          <small>{t('ui.features.vegGardenHint')}</small>
+        </span>
       </button>
 
       <button

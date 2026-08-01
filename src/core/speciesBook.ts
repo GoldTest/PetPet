@@ -2,9 +2,8 @@ import type { GardenTreeId, PetState, SpeciesBookEntry, SpeciesBookState } from 
 import { gardenTreeDefinitions } from './garden';
 
 export const allGardenTreeIds: readonly GardenTreeId[] = [
+  'poplar_tree',
   'fruit_tree',
-  'care_tree',
-  'gift_tree',
   'herb_tree',
   'money_tree',
   'golden_apple_tree',

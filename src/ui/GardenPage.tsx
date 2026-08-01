@@ -1,6 +1,6 @@
 import { useState, useRef } from 'react';
 import { ArrowLeft, BookOpen, CalendarDays, Cloud, CloudRain, Clock, Droplets, Flower2, Leaf, Lock, Pickaxe, ShoppingBag, Sparkles, Sprout, Sun, Wind, Wrench, X, type LucideIcon } from 'lucide-react';
-import { currencyIcon, giftBoxIcon, treeStageImages } from '../assets';
+import { currencyIcon, gardenTreeStageImages, giftBoxIcon } from '../assets';
 import { CompostBinPanel } from './CompostBinPanel';
 import { SpeciesBookModal } from './SpeciesBookModal';
 import { SynergyIndicator } from './SynergyIndicator';
@@ -164,7 +164,7 @@ export const GardenPage = ({ pet, itemIconMap, onBack, onUnlockSlot, onPlantTree
                 key={slotItem.slotIndex}
                 className={`garden-plot${isSelected ? ' garden-plot--selected' : ''}${slotItem.state === 'ready' ? ' garden-plot--ready' : ''}${slotItem.state === 'withered' ? ' garden-plot--withered' : ''}${slotItem.state === 'growing' ? ' garden-plot--growing' : ''}${slotItem.unlocked && slotItem.state === 'empty' ? ' garden-plot--empty' : ''}${!slotItem.unlocked ? ' garden-plot--locked' : ''}`}
                 onClick={() => handleSelectSlot(slotItem.slotIndex)}
-                aria-label={`${t('ui.garden.slotTitle', { slot: slotItem.slotIndex + 1 })}${slotItem.treeId ? ` · ${t(`ui.garden.trees.${slotItem.treeId}.name`)}` : ''} · ${t(`ui.garden.states.${slotItem.state}`)}`}
+                aria-label={`${t('ui.garden.slotTitle', { slot: slotItem.slotIndex + 1 })}${slotItem.treeId ? ` · ${t(`ui.garden.trees.${slotItem.treeId}.name`)}` : ''} · ${t(slotItem.treeId === 'poplar_tree' && slotItem.state === 'ready' ? 'ui.garden.states.cutReady' : `ui.garden.states.${slotItem.state}`)}`}
               >
                 <SynergyIndicator slotIndex={slotItem.slotIndex} garden={pet.garden} />
                 <span className="garden-plot__number">{slotItem.slotIndex + 1}</span>
@@ -182,7 +182,7 @@ export const GardenPage = ({ pet, itemIconMap, onBack, onUnlockSlot, onPlantTree
                   <Sprout size={28} aria-hidden="true" className="garden-plot__empty-icon" />
                 ) : (
                   <>
-                    {slotItem.treeId && <img src={treeStageImages[Math.max(0, Math.min(4, stage - 1))]} alt="" aria-hidden="true" className="garden-plot__tree" />}
+                    {slotItem.treeId && <img src={gardenTreeStageImages[slotItem.treeId][Math.max(0, Math.min(4, stage - 1))]} alt="" aria-hidden="true" className="garden-plot__tree" />}
                     {slotItem.state === 'growing' && slotItem.nextReadyAt > slotItem.plantedAt && (
                       <div className="garden-plot__progress">
                         <i style={{ width: `${Math.min(100, Math.max(0, ((now - slotItem.plantedAt) / (slotItem.nextReadyAt - slotItem.plantedAt)) * 100))}%` }} />
@@ -246,7 +246,7 @@ export const GardenPage = ({ pet, itemIconMap, onBack, onUnlockSlot, onPlantTree
         <div className="garden-plot-detail">
           <div className="garden-plot-detail__info">
             <strong className="garden-plot-detail__title">{t('ui.garden.slotTitle', { slot: slot.slotIndex + 1 })}</strong>
-            <span className="garden-plot-detail__state">{slot.unlocked ? t(`ui.garden.states.${slot.state}`) : t('ui.garden.states.locked')}</span>
+            <span className="garden-plot-detail__state">{slot.unlocked ? t(slot.treeId === 'poplar_tree' && slot.state === 'ready' ? 'ui.garden.states.cutReady' : 'ui.garden.states.' + slot.state) : t('ui.garden.states.locked')}</span>
             {slot.treeId && <small className="garden-plot-detail__tree">{t('ui.garden.treeLife', { tree: t(`ui.garden.trees.${slot.treeId}.name`), used: slot.harvestsUsed, max: slot.maxHarvests })}</small>}
             {slot.state === 'growing' && slot.treeId && <small className="garden-plot-detail__remaining">{t('ui.garden.remaining', { time: formatGardenCountdown(slotView?.remainingMs ?? 0) })}</small>}
           </div>
@@ -279,9 +279,9 @@ export const GardenPage = ({ pet, itemIconMap, onBack, onUnlockSlot, onPlantTree
             <button type="button" className="garden-choice" disabled={fertilizedToday || (pet.inventory[gardenFertilizerItemIds.heart] ?? 0) <= 0} onClick={() => onFertilize(slot.slotIndex, 'heart')} title="减少当前生长时间35%"><Sparkles size={18} /><span><strong>{t('ui.garden.actions.heartFertilizer')}</strong><small>{t('ui.garden.itemOwned', { count: pet.inventory[gardenFertilizerItemIds.heart] ?? 0 })}</small></span></button>
             <button type="button" className="garden-choice" disabled={boostedToday || (pet.inventory[gardenNutrientItemId] ?? 0) <= 0} onClick={() => onNutrient(slot.slotIndex)} title="下次收获获得额外产物"><Sparkles size={18} /><span><strong>{t('ui.garden.actions.nutrient')}</strong><small>{t('ui.garden.itemOwned', { count: pet.inventory[gardenNutrientItemId] ?? 0 })}</small></span></button>
           </>}
-          {slot.state === 'ready' && <button type="button" className="primary-button garden-harvest-button" onClick={() => onHarvest(slot.slotIndex)}>{t('ui.garden.actions.harvest')}</button>}
+          {slot.state === 'ready' && <button type="button" className="primary-button garden-harvest-button" onClick={() => onHarvest(slot.slotIndex)}>{slot.treeId === 'poplar_tree' ? t('ui.garden.actions.cut') : t('ui.garden.actions.harvest')}</button>}
           {slot.treeId && slot.state !== 'empty' && slot.state !== 'withered' && <button type="button" className="danger-button garden-clear-button" disabled={pet.coins < clearCost} onClick={() => onClear(slot.slotIndex)}>{t('ui.garden.actions.remove', { coins: clearCost })}</button>}
-          {slot.state === 'withered' && <button type="button" className="danger-button garden-clear-button" disabled={pet.coins < clearCost} onClick={() => onClear(slot.slotIndex)}>{t('ui.garden.actions.clear', { coins: clearCost })}</button>}
+          {slot.state === 'withered' && <button type="button" className="danger-button garden-clear-button" onClick={() => onClear(slot.slotIndex)}>{t('ui.garden.actions.cut')}</button>}
         </div>
       </div>
 

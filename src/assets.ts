@@ -13,18 +13,37 @@ import itemEmergencyBiscuit from './assets/icon/item_emergency_biscuit.png';
 import itemEnergyDrink from './assets/icon/item_energy_drink.png';
 import itemGiftBox from './assets/icon/item_gift_box1.png';
 import itemGoldenApple from './assets/icon/item_golden_apple.png';
-import itemFruitTreeSapling from './assets/icon/item_fruit_tree_sapling.png';
-import itemCareTreeSapling from './assets/icon/item_care_tree_sapling.png';
-import itemGiftTreeSapling from './assets/icon/item_gift_tree_sapling.png';
-import itemMoneyTreeSapling from './assets/icon/item_money_tree_sapling.png';
-import itemGoldenAppleTreeSapling from './assets/icon/item_golden_apple_tree_sapling.png';
+import itemFruitTreeSaplingStage4 from './assets/icon/icon_fruit_tree_stage_4.png';
+import itemMoneyTreeSaplingStage4 from './assets/icon/icon_money_tree_stage_4.png';
+import itemGoldenAppleTreeSaplingStage4 from './assets/icon/icon_golden_apple_tree_stage_4.png';
+import fruitTreeStage1 from './assets/icon/icon_fruit_tree_stage_1.png';
+import fruitTreeStage2 from './assets/icon/icon_fruit_tree_stage_2.png';
+import fruitTreeStage3 from './assets/icon/icon_fruit_tree_stage_3.png';
+import fruitTreeStage4 from './assets/icon/icon_fruit_tree_stage_4.png';
+import fruitTreeStage5 from './assets/icon/icon_fruit_tree_stage_5.png';
+import herbTreeStage1 from './assets/icon/icon_herb_tree_stage_1.png';
+import herbTreeStage2 from './assets/icon/icon_herb_tree_stage_2.png';
+import herbTreeStage3 from './assets/icon/icon_herb_tree_stage_3.png';
+import herbTreeStage4 from './assets/icon/icon_herb_tree_stage_4.png';
+import herbTreeStage5 from './assets/icon/icon_herb_tree_stage_5.png';
+import moneyTreeStage1 from './assets/icon/icon_money_tree_stage_1.png';
+import moneyTreeStage2 from './assets/icon/icon_money_tree_stage_2.png';
+import moneyTreeStage3 from './assets/icon/icon_money_tree_stage_3.png';
+import moneyTreeStage4 from './assets/icon/icon_money_tree_stage_4.png';
+import moneyTreeStage5 from './assets/icon/icon_money_tree_stage_5.png';
+import goldenAppleTreeStage1 from './assets/icon/icon_golden_apple_tree_stage_1.png';
+import goldenAppleTreeStage2 from './assets/icon/icon_golden_apple_tree_stage_2.png';
+import goldenAppleTreeStage3 from './assets/icon/icon_golden_apple_tree_stage_3.png';
+import goldenAppleTreeStage4 from './assets/icon/icon_golden_apple_tree_stage_4.png';
+import goldenAppleTreeStage5 from './assets/icon/icon_golden_apple_tree_stage_5.png';
 import itemNormalFertilizer from './assets/icon/item_normal_fertilizer.png';
 import itemHeartFertilizer from './assets/icon/item_heart_fertilizer.png';
 import itemHarvestNutrient from './assets/icon/item_harvest_nutrient.png';
 import itemWitheredFragment from './assets/icon/item_withered_fragment.png';
+import itemWoodPlank from './assets/icon/item_wood_plank.png';
 import itemExpPotion from './assets/icon/item_harvest_nutrient.png';
 import itemEnergyConcentrate from './assets/icon/item_energy_drink.png';
-import itemSkillFruit from './assets/icon/item_golden_apple.png';
+import itemSkillFruit from './assets/icon/item_skill_fruit.png';
 import itemWishFragment from './assets/icon/icon_shiny_stickers.png';
 import itemGardenToken from './assets/icon/item_garden_token.png';
 import itemMedicine from './assets/icon/item_medicine.png';
@@ -68,19 +87,26 @@ import petSleep from './assets/pet/pet_sleep.png';
 import petWorkout from './assets/pet/pet_workout.png';
 import petWorkMakingFood from './assets/pet/pet_work_making_food.png';
 import petWorkWateringPlants from './assets/pet/pet_work_watering_plants.png';
-import tree1 from './assets/tree1.png';
-import tree2 from './assets/tree2.png';
-import tree3 from './assets/tree3.png';
-import tree4 from './assets/tree4.png';
-import tree5 from './assets/tree5.png';
+import poplarTreeStage1 from './assets/tree1.png';
+import poplarTreeStage2 from './assets/tree2.png';
+import poplarTreeStage3 from './assets/tree3.png';
+import poplarTreeStage4 from './assets/tree4.png';
+import poplarTreeStage5 from './assets/tree5.png';
 import type { ActivePetMod } from './core/mod';
-import type { BuiltinItemId, PetStatus } from './core/petTypes';
+import type { BuiltinItemId, GardenTreeId, PetStatus } from './core/petTypes';
 
 export const currencyIcon = coin;
 export const giftBoxIcon = itemGiftBox;
 export const unknownItemIcon = itemGiftBox;
 export const goodEndingImage = goodEndingCg1;
-export const treeStageImages = [tree1, tree2, tree3, tree4, tree5] as const;
+
+export const gardenTreeStageImages: Record<GardenTreeId, readonly string[]> = {
+  poplar_tree: [poplarTreeStage1, poplarTreeStage2, poplarTreeStage3, poplarTreeStage4, poplarTreeStage5],
+  fruit_tree: [fruitTreeStage1, fruitTreeStage2, fruitTreeStage3, fruitTreeStage4, fruitTreeStage5],
+  herb_tree: [herbTreeStage1, herbTreeStage2, herbTreeStage3, herbTreeStage4, herbTreeStage5],
+  money_tree: [moneyTreeStage1, moneyTreeStage2, moneyTreeStage3, moneyTreeStage4, moneyTreeStage5],
+  golden_apple_tree: [goldenAppleTreeStage1, goldenAppleTreeStage2, goldenAppleTreeStage3, goldenAppleTreeStage4, goldenAppleTreeStage5],
+};
 
 export const itemIcons: Record<BuiltinItemId, string> = {
   emergency_biscuit: itemEmergencyBiscuit,
@@ -108,16 +134,16 @@ export const itemIcons: Record<BuiltinItemId, string> = {
   blanket: itemBlanket,
   energy_drink: itemEnergyDrink,
   golden_apple: itemGoldenApple,
-  fruit_tree_sapling: itemFruitTreeSapling,
-  care_tree_sapling: itemCareTreeSapling,
-  gift_tree_sapling: itemGiftTreeSapling,
-  money_tree_sapling: itemMoneyTreeSapling,
-  herb_tree_sapling: itemCareTreeSapling,
-  golden_apple_tree_sapling: itemGoldenAppleTreeSapling,
+  fruit_tree_sapling: itemFruitTreeSaplingStage4,
+  poplar_tree_sapling: poplarTreeStage4,
+  money_tree_sapling: itemMoneyTreeSaplingStage4,
+  herb_tree_sapling: herbTreeStage4,
+  golden_apple_tree_sapling: itemGoldenAppleTreeSaplingStage4,
   normal_fertilizer: itemNormalFertilizer,
   heart_fertilizer: itemHeartFertilizer,
   harvest_nutrient: itemHarvestNutrient,
   withered_fragment: itemWitheredFragment,
+  wood_plank: itemWoodPlank,
   exp_potion: itemExpPotion,
   energy_concentrate: itemEnergyConcentrate,
   skill_fruit: itemSkillFruit,

@@ -38,6 +38,7 @@ interface HomePageProps {
   onOpenInventory: () => void;
   onOpenPomodoro: () => void;
   onOpenGarden: () => void;
+  onOpenVegGarden: () => void;
   onOpenBoostCards: () => void;
   onOpenShop: () => void;
   onOpenPartnerSchedule: () => void;
@@ -86,6 +87,7 @@ export const HomePage = ({
   onOpenInventory,
   onOpenPomodoro,
   onOpenGarden,
+  onOpenVegGarden,
   onOpenBoostCards,
   onOpenShop,
   onOpenPartnerSchedule,
@@ -191,6 +193,7 @@ export const HomePage = ({
             onOpenInventory={onOpenInventory}
             onOpenPomodoro={onOpenPomodoro}
             onOpenGarden={onOpenGarden}
+            onOpenVegGarden={onOpenVegGarden}
             onOpenBoostCards={onOpenBoostCards}
             onOpenShop={onOpenShop}
             onOpenPartnerSchedule={onOpenPartnerSchedule}

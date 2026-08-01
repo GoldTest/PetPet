@@ -25,8 +25,7 @@ const DIRECTION_CLASS: Record<SynergyDirection, string> = {
 const getSynergyColor = (synergy: ActiveSynergy): string => {
   const id = synergy.rule.id;
   switch (id) {
-    case 'fruit_care': return '#7cb342';
-    case 'gift_fruit': return '#ff9800';
+    case 'herb_fruit': return '#7cb342';
     case 'money_any': return '#ffd54f';
     case 'same_adjacent': return '#ab47bc';
     default: return '#90a4ae';

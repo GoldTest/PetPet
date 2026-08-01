@@ -45,7 +45,17 @@ def process(input_path, output_path, output_size=None, key_color=None, tolerance
     img = chroma_key_remove(img, key_color, tolerance)
 
     if output_size:
-        img = img.resize(output_size, Image.NEAREST)
+        content_w, content_h = output_size
+        img_w, img_h = img.size
+        scale = min(content_w / img_w, content_h / img_h)
+        new_w = max(1, round(img_w * scale))
+        new_h = max(1, round(img_h * scale))
+        img = img.resize((new_w, new_h), Image.NEAREST)
+        canvas = Image.new("RGBA", (content_w, content_h), (0, 0, 0, 0))
+        offset_x = (content_w - new_w) // 2
+        offset_y = (content_h - new_h) // 2
+        canvas.paste(img, (offset_x, offset_y), img)
+        img = canvas
 
     if padding > 0:
         padded = Image.new("RGBA", (img.width + padding * 2, img.height + padding * 2), (0, 0, 0, 0))

@@ -1,10 +1,7 @@
 import { type Dispatch, type MutableRefObject, type SetStateAction } from 'react';
 import {
-  clearVegSlot,
-  fertilizeVegCrop,
   harvestVegCrop,
   plantVegCrop,
-  unlockVegSlot,
   waterVegCrop,
   type PetState,
   type VegetableCropId,
@@ -30,11 +27,8 @@ export const useVegGardenController = ({ petRef, setPet, commitPet, playAfterUnl
   };
 
   return {
-    unlockSlot: (slotIndex: number) => commitAction((current) => unlockVegSlot(current, slotIndex, Date.now()), 'purchase'),
     plant: (slotIndex: number, cropId: VegetableCropId) => commitAction((current) => plantVegCrop(current, slotIndex, cropId, Date.now()), 'purchase'),
     water: (slotIndex: number) => commitAction((current) => waterVegCrop(current, slotIndex, Date.now()), 'coin'),
-    fertilize: (slotIndex: number) => commitAction((current) => fertilizeVegCrop(current, slotIndex, Date.now()), 'purchase'),
     harvest: (slotIndex: number) => commitAction((current) => harvestVegCrop(current, slotIndex, Date.now()), 'coin'),
-    clear: (slotIndex: number) => commitAction((current) => clearVegSlot(current, slotIndex, Date.now()), 'purchase'),
   };
 };

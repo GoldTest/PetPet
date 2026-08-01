@@ -91,6 +91,7 @@ import { BoostCardModal } from './BoostCardModal';
 import { ConfirmDialog } from './ConfirmDialog';
 import { GardenPage } from './GardenPage';
 import { HomePage } from './HomePage';
+import { VegetableGardenPage } from './VegetableGardenPage';
 import { InventoryModal } from './InventoryModal';
 import { ModSwitchPanel, type StoredModInfo } from './ModSwitchPanel';
 import { PomodoroOverlay } from './PomodoroOverlay';
@@ -106,6 +107,7 @@ import { createSaveFileName, saveTextFile } from '../platform/saveTextFile';
 import { useAppNavigation } from './app/useAppNavigation';
 import { useInventoryController } from './app/useInventoryController';
 import { useGardenController } from './app/useGardenController';
+import { useVegGardenController } from './app/useVegGardenController';
 import { usePetSession } from './app/usePetSession';
 import { useRewardController } from './app/useRewardController';
 
@@ -397,6 +399,12 @@ const PetApp = ({ initialPet, initialActiveMod, onResetToPicker, onSyncFromCloud
     claimHelpGift: handleClaimHelpPageGift,
     claimGardenCompensation: handleClaimGardenCompensation,
   } = rewardController;
+  const vegGardenController = useVegGardenController({ petRef, setPet, commitPet, playAfterUnlock });
+  const {
+    plant: handlePlantVegCrop,
+    water: handleWaterVegCrop,
+    harvest: handleHarvestVegCrop,
+  } = vegGardenController;
 
   useEffect(() => {
     syncBgm(currentBgmMode);
@@ -539,6 +547,17 @@ const PetApp = ({ initialPet, initialActiveMod, onResetToPicker, onSyncFromCloud
   const handleCloseGarden = () => {
     playAfterUnlock('close');
     resetGardenClearConfirm();
+    setActivePage('home');
+  };
+
+  const handleOpenVegGarden = () => {
+    playAfterUnlock('open');
+    setActivePage('vegetableGarden');
+    setPet((current) => recordPetInteraction(current));
+  };
+
+  const handleCloseVegGarden = () => {
+    playAfterUnlock('close');
     setActivePage('home');
   };
 
@@ -1163,6 +1182,17 @@ const PetApp = ({ initialPet, initialActiveMod, onResetToPicker, onSyncFromCloud
           onUnlockCompostBinSlot={handleUnlockCompostBinSlot}
           compensationCoins={gardenCompensationCoins}
           onClaimCompensation={hasClaimedGardenCompensation ? undefined : handleClaimGardenCompensation}
+          onOpenVegGarden={handleOpenVegGarden}
+        />
+      ) : activePage === 'vegetableGarden' ? (
+        <VegetableGardenPage
+          pet={pet}
+          itemIconMap={itemIconMap}
+          onBack={handleCloseVegGarden}
+          onPlant={handlePlantVegCrop}
+          onWater={handleWaterVegCrop}
+          onHarvest={handleHarvestVegCrop}
+          onOpenShop={() => handleOpenShop('garden')}
         />
       ) : activePage === 'partnerSchedule' ? (
         <PartnerSchedulePage
@@ -1197,6 +1227,7 @@ const PetApp = ({ initialPet, initialActiveMod, onResetToPicker, onSyncFromCloud
           onOpenInventory={handleOpenInventory}
           onOpenPomodoro={handleOpenPomodoro}
           onOpenGarden={handleOpenGarden}
+          onOpenVegGarden={handleOpenVegGarden}
           onOpenBoostCards={handleOpenBoostCards}
           onOpenShop={handleOpenShop}
           onOpenPartnerSchedule={handleOpenPartnerSchedule}
