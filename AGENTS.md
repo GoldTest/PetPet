@@ -153,6 +153,7 @@
 - Edit installed skill cache paths (`.claude/skills/`, `.agents/skills/` — edit source in `.agents/` instead)
 - Overwrite `.harnspec/config.json` without understanding the impact
 - Commit `release/` directory contents
+- 禁止直接删除 `src/assets/` 下的任何图标文件。如不再使用，移至 `src/assets/back/` 并在文件名后附加 `_YYYYMMDD` 时间戳（如 `icon_foo_20260802.png`）留作备份，同时移除代码中对应引用
 
 ## Module Boundaries
 <!-- AGENTS-GENERATED:START module-boundaries -->

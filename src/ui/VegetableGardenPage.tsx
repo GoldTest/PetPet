@@ -1,18 +1,25 @@
 import { useRef, useState } from 'react';
-import { ArrowLeft, CalendarDays, Droplets, Leaf, Sprout, X } from 'lucide-react';
+import { ArrowLeft, CalendarDays, Leaf, Sprout, X } from 'lucide-react';
 import { DialogShell } from './DialogShell';
-import iconTomatoSprout from '../assets/icon_tomato_sprout.png';
-import iconCarrotSprout from '../assets/icon_carrot_sprout.png';
-import iconCabbageSprout from '../assets/icon_cabbage_sprout.png';
-import iconOnionSprout from '../assets/icon_onion_sprout.png';
-import iconPotatoSprout from '../assets/icon_potato_sprout.png';
-import iconChiliSprout from '../assets/icon_chili_sprout.png';
-import iconTomatoGrowing from '../assets/icon_tomato_growing.png';
-import iconCarrotGrowing from '../assets/icon_carrot_growing.png';
-import iconCabbageGrowing from '../assets/icon_cabbage_growing.png';
-import iconOnionGrowing from '../assets/icon_onion_growing.png';
-import iconPotatoGrowing from '../assets/icon_potato_growing.png';
-import iconChiliGrowing from '../assets/icon_chili_growing.png';
+import { WateringCanIcon } from './WateringCanIcon';
+import iconTomatoSprout from '../assets/icon/veg/icon_tomato_sprout.png';
+import iconCarrotSprout from '../assets/icon/veg/icon_carrot_sprout.png';
+import iconCabbageSprout from '../assets/icon/veg/icon_cabbage_sprout.png';
+import iconOnionSprout from '../assets/icon/veg/icon_onion_sprout.png';
+import iconPotatoSprout from '../assets/icon/veg/icon_potato_sprout.png';
+import iconChiliSprout from '../assets/icon/veg/icon_chili_sprout.png';
+import iconTomatoGrowing from '../assets/icon/veg/icon_tomato_growing.png';
+import iconCarrotGrowing from '../assets/icon/veg/icon_carrot_growing.png';
+import iconCabbageGrowing from '../assets/icon/veg/icon_cabbage_growing.png';
+import iconOnionGrowing from '../assets/icon/veg/icon_onion_growing.png';
+import iconPotatoGrowing from '../assets/icon/veg/icon_potato_growing.png';
+import iconChiliGrowing from '../assets/icon/veg/icon_chili_growing.png';
+import iconTomatoRipe from '../assets/icon/veg/icon_tomato.png';
+import iconCarrotRipe from '../assets/icon/veg/icon_carrot.png';
+import iconCabbageRipe from '../assets/icon/veg/icon_cabbage.png';
+import iconOnionRipe from '../assets/icon/veg/icon_onion.png';
+import iconPotatoRipe from '../assets/icon/veg/icon_potato.png';
+import iconChiliRipe from '../assets/icon/veg/icon_chili.png';
 import {
   vegCropDefinitions,
   vegCropIds,
@@ -22,6 +29,7 @@ import {
   vegGardenPlotCount,
   vegGardenPlotRows,
   vegGardenSlotsPerPlot,
+  getVegDropCount,
   getVegGardenStage,
   getVegGardenView,
   isVegSlotWateredToday,
@@ -49,13 +57,27 @@ const vegCropGrowingIcons: Record<string, string> = {
   chili: iconChiliGrowing,
 };
 
+const vegCropRipeIcons: Record<string, string> = {
+  tomato: iconTomatoRipe,
+  carrot: iconCarrotRipe,
+  cabbage: iconCabbageRipe,
+  onion: iconOnionRipe,
+  potato: iconPotatoRipe,
+  chili: iconChiliRipe,
+};
+
 type ToolMode = 'plant' | 'water' | null;
 
 interface HarvestFloat {
   key: number;
   slotIndex: number;
   cropId: VegetableCropId;
-  count: number;
+  offset: number;
+}
+
+interface WaterSplash {
+  key: number;
+  slotIndex: number;
 }
 
 interface VegetableGardenPageProps {
@@ -74,19 +96,34 @@ export const VegetableGardenPage = ({ pet, itemIconMap, onBack, onPlant, onWater
   const [mode, setMode] = useState<ToolMode>(null);
   const [selectedCrop, setSelectedCrop] = useState<VegetableCropId | null>(null);
   const [floats, setFloats] = useState<HarvestFloat[]>([]);
+  const [splashes, setSplashes] = useState<WaterSplash[]>([]);
   const [showSeasonDialog, setShowSeasonDialog] = useState(false);
   const floatKeyRef = useRef(0);
+  const splashKeyRef = useRef(0);
   const draggingRef = useRef(false);
   const now = Date.now();
   const view = getVegGardenView(pet, now);
   const season = getSeasonForDate(now);
 
   const spawnFloat = (slotIndex: number, cropId: VegetableCropId, count: number) => {
-    const key = ++floatKeyRef.current;
-    setFloats((prev) => [...prev.slice(-14), { key, slotIndex, cropId, count }]);
+    for (let i = 0; i < count; i++) {
+      const key = ++floatKeyRef.current;
+      const offset = (i - (count - 1) / 2) * 22;
+      window.setTimeout(() => {
+        setFloats((prev) => [...prev.slice(-14), { key, slotIndex, cropId, offset }]);
+      }, i * 160);
+      window.setTimeout(() => {
+        setFloats((prev) => prev.filter((entry) => entry.key !== key));
+      }, 1400 + i * 160);
+    }
+  };
+
+  const spawnSplash = (slotIndex: number) => {
+    const key = ++splashKeyRef.current;
+    setSplashes((prev) => [...prev.slice(-14), { key, slotIndex }]);
     window.setTimeout(() => {
-      setFloats((prev) => prev.filter((entry) => entry.key !== key));
-    }, 1400);
+      setSplashes((prev) => prev.filter((entry) => entry.key !== key));
+    }, 900);
   };
 
   const selectedSeedCount = selectedCrop ? (pet.inventory[vegCropSeedItemIds[selectedCrop]] ?? 0) : 0;
@@ -111,7 +148,7 @@ export const VegetableGardenPage = ({ pet, itemIconMap, onBack, onPlant, onWater
     if (!slot) return;
     if (slot.state === 'ready' && slot.cropId) {
       onHarvest(slotIndex);
-      spawnFloat(slotIndex, slot.cropId, vegCropDefinitions[slot.cropId].dropCount);
+      spawnFloat(slotIndex, slot.cropId, getVegDropCount(slot.cropId, slot.slotIndex, slot.plantedAt));
       return;
     }
     if (mode === 'plant' && selectedCrop && slot.state === 'empty') {
@@ -125,6 +162,7 @@ export const VegetableGardenPage = ({ pet, itemIconMap, onBack, onPlant, onWater
     }
     if (mode === 'water' && slot.state === 'growing' && !isVegSlotWateredToday(slot, now)) {
       onWater(slotIndex);
+      spawnSplash(slotIndex);
     }
   };
 
@@ -157,9 +195,6 @@ export const VegetableGardenPage = ({ pet, itemIconMap, onBack, onPlant, onWater
           <span>{t('ui.vegGarden.kicker')}</span>
           <div className="veg-garden-page__title-row">
             <h2>{t('ui.vegGarden.title')}</h2>
-            {view.readyCount > 0 && (
-              <span className="veg-garden-ready-badge">{t('ui.vegGarden.readyHint', { count: view.readyCount })}</span>
-            )}
             <strong>{t('ui.vegGarden.lifetimeHarvest', { count: pet.vegetableGarden.lifetimeHarvestCount })}</strong>
             {inSeasonCrops.length > 0 && (
               <button
@@ -181,13 +216,16 @@ export const VegetableGardenPage = ({ pet, itemIconMap, onBack, onPlant, onWater
               title={t('ui.vegGarden.tools.water')}
               aria-pressed={mode === 'water'}
             >
-              <Droplets size={17} aria-hidden="true" />
+              <WateringCanIcon size={17} active={mode === 'water'} />
               <span>{t('ui.vegGarden.tools.water')}</span>
             </button>
             <button type="button" className="garden-tools-button" onClick={onOpenShop} aria-label={t('ui.vegGarden.buySeedsShort')} title={t('ui.vegGarden.buySeedsShort')}>
               <Sprout size={17} aria-hidden="true" />
               <span>{t('ui.vegGarden.buySeedsShort')}</span>
             </button>
+            {view.readyCount > 0 && (
+              <span className="veg-garden-ready-badge">{t('ui.vegGarden.readyHint', { count: view.readyCount })}</span>
+            )}
           </div>
         </div>
       </header>
@@ -201,11 +239,13 @@ export const VegetableGardenPage = ({ pet, itemIconMap, onBack, onPlant, onWater
                 const cropId = slot.cropId;
                 const watered = slot.state === 'growing' && isVegSlotWateredToday(slot, now);
                 const slotFloats = floats.filter((entry) => entry.slotIndex === slot.slotIndex);
+                const slotSplashes = splashes.filter((entry) => entry.slotIndex === slot.slotIndex);
+                const stageName = slot.state === 'empty' || !cropId ? 'empty' : slot.state === 'ready' ? 'ready' : stage <= 2 ? 'sprout' : 'growing';
                 let plantIcon: string | undefined;
                 if (cropId && slot.state === 'growing') {
                   plantIcon = stage <= 2 ? vegCropSproutIcons[cropId] : vegCropGrowingIcons[cropId];
                 } else if (cropId && slot.state === 'ready') {
-                  plantIcon = itemIconMap[vegCropProduceItemIds[cropId]];
+                  plantIcon = vegCropRipeIcons[cropId];
                 }
                 return (
                   <button
@@ -217,18 +257,32 @@ export const VegetableGardenPage = ({ pet, itemIconMap, onBack, onPlant, onWater
                     aria-label={`${t('ui.vegGarden.slotTitle', { slot: slot.slotIndex + 1 })}${cropId ? ` · ${t(`ui.vegGarden.crops.${cropId}.name`)}` : ''} · ${t(`ui.vegGarden.states.${slot.state}`)}`}
                   >
                     {plantIcon && (
-                      <img
-                        className={`veg-garden-cell__plant${slot.state === 'ready' ? ' veg-garden-cell__plant--ready' : ''}`}
-                        src={plantIcon}
-                        alt=""
-                        aria-hidden="true"
-                        style={{ animationDuration: getSwayDuration(slot.slotIndex) }}
-                      />
+                      <>
+                        <img
+                          className={`veg-garden-cell__plant${slot.state === 'ready' ? ' veg-garden-cell__plant--ready' : ''}`}
+                          src={plantIcon}
+                          alt=""
+                          aria-hidden="true"
+                          style={{ animationDuration: getSwayDuration(slot.slotIndex) }}
+                        />
+                        <span className="veg-garden-cell__stage-tip" role="tooltip">
+                          <strong>{t(`ui.vegGarden.crops.${cropId}.name`)}</strong>
+                          <em>{t(`ui.vegGarden.states.${stageName}`)}</em>
+                        </span>
+                      </>
                     )}
+                    {slotSplashes.map((entry) => (
+                      <span className="veg-garden-cell__splash" key={entry.key} aria-hidden="true">
+                        <i className="veg-garden-cell__splash-drop" />
+                        <i className="veg-garden-cell__splash-dot" />
+                        <i className="veg-garden-cell__splash-dot" />
+                        <i className="veg-garden-cell__splash-dot" />
+                        <i className="veg-garden-cell__splash-dot" />
+                      </span>
+                    ))}
                     {slotFloats.map((entry) => (
-                      <span className="veg-garden-cell__float" key={entry.key} aria-hidden="true">
+                      <span className="veg-garden-cell__float" key={entry.key} aria-hidden="true" style={{ marginLeft: entry.offset }}>
                         <img src={itemIconMap[vegCropProduceItemIds[entry.cropId]]} alt="" />
-                        +{entry.count}
                       </span>
                     ))}
                   </button>

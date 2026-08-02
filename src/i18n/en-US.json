@@ -825,8 +825,9 @@
       "readyHint": "{count} crops are ready to harvest! Tap to collect.",
       "states": {
         "empty": "Soil",
+        "sprout": "Sprout",
         "growing": "Growing",
-        "ready": "Ready"
+        "ready": "Ready to harvest"
       },
       "crops": {
         "tomato": {

@@ -125,6 +125,7 @@ export {
 export {
   advanceVegGarden,
   defaultVegGardenState,
+  getVegDropCount,
   getVegGardenReminder,
   getVegGardenStage,
   getVegGardenView,

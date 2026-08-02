@@ -1330,7 +1330,7 @@ h1 {
 
 .shop-tabs {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 8px;
   padding: 5px;
   border-radius: 8px;
@@ -1344,6 +1344,8 @@ h1 {
   color: #5d6d83;
   background: transparent;
   font-weight: 850;
+  font-size: 0.86rem;
+  white-space: nowrap;
 }
 
 .shop-tab--active {
@@ -1923,7 +1925,7 @@ h1 {
 
   .shop-tab {
     min-height: 36px;
-    font-size: 0.84rem;
+    font-size: 0.8rem;
   }
 
   .shop-item button {

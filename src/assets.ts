@@ -43,7 +43,7 @@ import itemWitheredFragment from './assets/icon/item_withered_fragment.png';
 import itemWoodPlank from './assets/icon/item_wood_plank.png';
 import itemExpPotion from './assets/icon/item_harvest_nutrient.png';
 import itemEnergyConcentrate from './assets/icon/item_energy_drink.png';
-import itemSkillFruit from './assets/icon/item_skill_fruit.png';
+import iconSkillFruit from './assets/icon/icon_skill_fruit.png';
 import itemWishFragment from './assets/icon/icon_shiny_stickers.png';
 import itemGardenToken from './assets/icon/item_garden_token.png';
 import itemMedicine from './assets/icon/item_medicine.png';
@@ -58,18 +58,18 @@ import itemShampoo from './assets/icon/item_shampoo.png';
 import itemToyBall from './assets/icon/item_toy_ball.png';
 import itemVitaminTablet from './assets/icon/item_vitamin_tablet.png';
 import itemWetWipes from './assets/icon/item_wet_wipes.png';
-import iconTomato from './assets/icon_tomato.png';
-import iconCarrot from './assets/icon_carrot.png';
-import iconCabbage from './assets/icon_cabbage.png';
-import iconOnion from './assets/icon_onion.png';
-import iconPotato from './assets/icon_potato.png';
-import iconChili from './assets/icon_chili.png';
-import iconTomatoSeed from './assets/icon_tomato_seed.png';
-import iconCarrotSeed from './assets/icon_carrot_seed.png';
-import iconCabbageSeed from './assets/icon_cabbage_seed.png';
-import iconOnionSeed from './assets/icon_onion_seed.png';
-import iconPotatoSeed from './assets/icon_potato_seed.png';
-import iconChiliSeed from './assets/icon_chili_seed.png';
+import iconTomatoFruit from './assets/icon/veg/icon_tomato_fruit.png';
+import iconCarrotFruit from './assets/icon/veg/icon_carrot_fruit.png';
+import iconCabbageFruit from './assets/icon/veg/icon_cabbage_fruit.png';
+import iconOnionFruit from './assets/icon/veg/icon_onion_fruit.png';
+import iconPotatoFruit from './assets/icon/veg/icon_potato_fruit.png';
+import iconChiliFruit from './assets/icon/veg/icon_chili_fruit.png';
+import iconTomatoSeed from './assets/icon/veg/icon_tomato_seed.png';
+import iconCarrotSeed from './assets/icon/veg/icon_carrot_seed.png';
+import iconCabbageSeed from './assets/icon/veg/icon_cabbage_seed.png';
+import iconOnionSeed from './assets/icon/veg/icon_onion_seed.png';
+import iconPotatoSeed from './assets/icon/veg/icon_potato_seed.png';
+import iconChiliSeed from './assets/icon/veg/icon_chili_seed.png';
 import petBath from './assets/pet/pet_bath.png';
 import petDirtySad from './assets/pet/pet_dirty_sad.png';
 import petEatCookie from './assets/pet/pet_eat_cookie.png';
@@ -87,11 +87,11 @@ import petSleep from './assets/pet/pet_sleep.png';
 import petWorkout from './assets/pet/pet_workout.png';
 import petWorkMakingFood from './assets/pet/pet_work_making_food.png';
 import petWorkWateringPlants from './assets/pet/pet_work_watering_plants.png';
-import poplarTreeStage1 from './assets/tree1.png';
-import poplarTreeStage2 from './assets/tree2.png';
-import poplarTreeStage3 from './assets/tree3.png';
-import poplarTreeStage4 from './assets/tree4.png';
-import poplarTreeStage5 from './assets/tree5.png';
+import poplarTreeStage1 from './assets/icon/tree/tree1.png';
+import poplarTreeStage2 from './assets/icon/tree/tree2.png';
+import poplarTreeStage3 from './assets/icon/tree/tree3.png';
+import poplarTreeStage4 from './assets/icon/tree/tree4.png';
+import poplarTreeStage5 from './assets/icon/tree/tree5.png';
 import type { ActivePetMod } from './core/mod';
 import type { BuiltinItemId, GardenTreeId, PetStatus } from './core/petTypes';
 
@@ -146,15 +146,15 @@ export const itemIcons: Record<BuiltinItemId, string> = {
   wood_plank: itemWoodPlank,
   exp_potion: itemExpPotion,
   energy_concentrate: itemEnergyConcentrate,
-  skill_fruit: itemSkillFruit,
+  skill_fruit: iconSkillFruit,
   wish_fragment: itemWishFragment,
   garden_token: itemGardenToken,
-  tomato: iconTomato,
-  carrot: iconCarrot,
-  cabbage: iconCabbage,
-  onion: iconOnion,
-  potato: iconPotato,
-  chili: iconChili,
+  tomato: iconTomatoFruit,
+  carrot: iconCarrotFruit,
+  cabbage: iconCabbageFruit,
+  onion: iconOnionFruit,
+  potato: iconPotatoFruit,
+  chili: iconChiliFruit,
   tomato_seed: iconTomatoSeed,
   carrot_seed: iconCarrotSeed,
   cabbage_seed: iconCabbageSeed,

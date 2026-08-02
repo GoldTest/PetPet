@@ -9,7 +9,7 @@ import { hashString, isNumber } from './utils';
 export const vegGardenSchemaVersion = 2;
 export const vegGardenPlotCount = 1;
 export const vegGardenPlotRows = 6;
-export const vegGardenPlotColumns = 12;
+export const vegGardenPlotColumns = 10;
 export const vegGardenSlotsPerPlot = vegGardenPlotRows * vegGardenPlotColumns;
 export const vegGardenSlotCount = vegGardenPlotCount * vegGardenSlotsPerPlot;
 
@@ -40,18 +40,25 @@ export interface VegCropDefinition {
   seedPrice: number;
   growDurationMs: number;
   seasonBonus: Season[];
-  dropCount: number;
+  dropCountMin: number;
+  dropCountMax: number;
 }
 
 const minMs = 60 * 1000;
 
 export const vegCropDefinitions: Record<VegetableCropId, VegCropDefinition> = {
-  tomato: { id: 'tomato', seedPrice: 10, growDurationMs: 10 * minMs, seasonBonus: ['summer'], dropCount: 1 },
-  carrot: { id: 'carrot', seedPrice: 10, growDurationMs: 15 * minMs, seasonBonus: ['autumn'], dropCount: 1 },
-  cabbage: { id: 'cabbage', seedPrice: 10, growDurationMs: 20 * minMs, seasonBonus: ['spring'], dropCount: 1 },
-  onion: { id: 'onion', seedPrice: 10, growDurationMs: 25 * minMs, seasonBonus: ['spring'], dropCount: 1 },
-  potato: { id: 'potato', seedPrice: 10, growDurationMs: 30 * minMs, seasonBonus: ['autumn'], dropCount: 2 },
-  chili: { id: 'chili', seedPrice: 10, growDurationMs: 20 * minMs, seasonBonus: ['summer'], dropCount: 1 },
+  tomato: { id: 'tomato', seedPrice: 10, growDurationMs: 10 * minMs, seasonBonus: ['summer'], dropCountMin: 2, dropCountMax: 4 },
+  carrot: { id: 'carrot', seedPrice: 10, growDurationMs: 15 * minMs, seasonBonus: ['autumn'], dropCountMin: 1, dropCountMax: 1 },
+  cabbage: { id: 'cabbage', seedPrice: 10, growDurationMs: 20 * minMs, seasonBonus: ['spring'], dropCountMin: 1, dropCountMax: 1 },
+  onion: { id: 'onion', seedPrice: 10, growDurationMs: 25 * minMs, seasonBonus: ['spring'], dropCountMin: 1, dropCountMax: 1 },
+  potato: { id: 'potato', seedPrice: 10, growDurationMs: 30 * minMs, seasonBonus: ['autumn'], dropCountMin: 2, dropCountMax: 4 },
+  chili: { id: 'chili', seedPrice: 10, growDurationMs: 20 * minMs, seasonBonus: ['summer'], dropCountMin: 2, dropCountMax: 5 },
+};
+
+export const getVegDropCount = (cropId: VegetableCropId, slotIndex: number, plantedAt: number): number => {
+  const definition = vegCropDefinitions[cropId];
+  const span = definition.dropCountMax - definition.dropCountMin + 1;
+  return definition.dropCountMin + (Math.abs(hashString([cropId, slotIndex, plantedAt].join(':'))) % span);
 };
 
 export const vegWaterReductionPercent = 8;
@@ -212,7 +219,7 @@ export const harvestVegCrop = (pet: PetState, slotIndex: number, now = Date.now(
   const current = advanceVegGarden(pet, now);
   const slot = current.vegetableGarden.slots[slotIndex];
   if (!slot || slot.state !== 'ready' || !slot.cropId) return failAction(current, 'pet.vegGarden.cannotHarvest');
-  const dropCount = vegCropDefinitions[slot.cropId].dropCount;
+  const dropCount = getVegDropCount(slot.cropId, slot.slotIndex, slot.plantedAt);
   const produceItemId = vegCropProduceItemIds[slot.cropId];
   const seed = [slot.slotIndex, slot.cropId, slot.plantedAt, now].join(':');
   let inventory = current.inventory;

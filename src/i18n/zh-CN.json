@@ -829,8 +829,9 @@
       "readyHint": "有 {count} 个作物成熟了，点击收获！",
       "states": {
         "empty": "土地",
-        "growing": "生长中",
-        "ready": "可收获"
+        "sprout": "幼苗",
+        "growing": "生长期",
+        "ready": "成熟可收获"
       },
       "crops": {
         "tomato": {
