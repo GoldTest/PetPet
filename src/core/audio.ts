@@ -36,7 +36,8 @@ export type SfxId =
   | 'action_blanket'
   | 'action_work_play_medicine';
 
-const audioEnabledStorageKey = 'petpet.audio.enabled';
+const bgmEnabledStorageKey = 'petpet.audio.bgmEnabled';
+const sfxEnabledStorageKey = 'petpet.audio.sfxEnabled';
 const bgmVolume = 0.18;
 const sfxVolume = 0.48;
 
@@ -66,21 +67,45 @@ const sfxSources: Record<SfxId, string> = {
 
 const canUseAudio = () => typeof window !== 'undefined' && typeof Audio !== 'undefined';
 
-const readInitialAudioEnabled = () => {
-  if (typeof window === 'undefined') return true;
-  return window.localStorage.getItem(audioEnabledStorageKey) !== 'false';
+const migrateLegacyAudioSetting = () => {
+  if (typeof window === 'undefined') return;
+  const legacy = window.localStorage.getItem('petpet.audio.enabled');
+  if (legacy === null) return;
+  if (legacy === 'false') {
+    window.localStorage.setItem(bgmEnabledStorageKey, 'false');
+    window.localStorage.setItem(sfxEnabledStorageKey, 'false');
+  }
+  window.localStorage.removeItem('petpet.audio.enabled');
 };
 
-let audioEnabled = readInitialAudioEnabled();
+migrateLegacyAudioSetting();
+
+const readInitialBgmEnabled = () => {
+  if (typeof window === 'undefined') return true;
+  return window.localStorage.getItem(bgmEnabledStorageKey) !== 'false';
+};
+
+const readInitialSfxEnabled = () => {
+  if (typeof window === 'undefined') return true;
+  return window.localStorage.getItem(sfxEnabledStorageKey) !== 'false';
+};
+
+let bgmEnabled = readInitialBgmEnabled();
+let sfxEnabled = readInitialSfxEnabled();
 let audioUnlocked = false;
 let desiredBgmMode: BgmMode = 'room';
 let currentBgmMode: BgmMode | undefined;
 let bgmAudio: HTMLAudioElement | undefined;
 let fadeTimer: number | undefined;
 
-const writeAudioEnabled = (value: boolean) => {
+const writeBgmEnabled = (value: boolean) => {
   if (typeof window === 'undefined') return;
-  window.localStorage.setItem(audioEnabledStorageKey, String(value));
+  window.localStorage.setItem(bgmEnabledStorageKey, String(value));
+};
+
+const writeSfxEnabled = (value: boolean) => {
+  if (typeof window === 'undefined') return;
+  window.localStorage.setItem(sfxEnabledStorageKey, String(value));
 };
 
 const stopFade = () => {
@@ -109,7 +134,7 @@ const stopBgm = () => {
 const fadeInBgm = (audio: HTMLAudioElement) => {
   stopFade();
   fadeTimer = window.setInterval(() => {
-    if (!bgmAudio || bgmAudio !== audio || audioTemporarilyMuted || !audioEnabled) {
+    if (!bgmAudio || bgmAudio !== audio || audioTemporarilyMuted || !bgmEnabled) {
       stopFade();
       return;
     }
@@ -129,7 +154,7 @@ const startBgmAudio = (audio: HTMLAudioElement) => {
   if (playPromise) {
     void playPromise
       .then(() => {
-        if (!bgmAudio || bgmAudio !== audio || !audioEnabled || audioTemporarilyMuted) return;
+        if (!bgmAudio || bgmAudio !== audio || !bgmEnabled || audioTemporarilyMuted) return;
         fadeInBgm(audio);
       })
       .catch(() => {
@@ -139,7 +164,7 @@ const startBgmAudio = (audio: HTMLAudioElement) => {
 };
 
 const playDesiredBgm = () => {
-  if (!audioEnabled || !audioUnlocked || !canUseAudio() || audioTemporarilyMuted) return;
+  if (!bgmEnabled || !audioUnlocked || !canUseAudio() || audioTemporarilyMuted) return;
   if (currentBgmMode === desiredBgmMode && bgmAudio) {
     startBgmAudio(bgmAudio);
     return;
@@ -156,16 +181,23 @@ const playDesiredBgm = () => {
   startBgmAudio(nextAudio);
 };
 
-export const getAudioEnabled = () => audioEnabled;
+export const getBgmEnabled = () => bgmEnabled;
 
-export const setAudioEnabled = (value: boolean) => {
-  audioEnabled = value;
-  writeAudioEnabled(value);
+export const setBgmEnabled = (value: boolean) => {
+  bgmEnabled = value;
+  writeBgmEnabled(value);
   if (!value) {
     pauseBgm();
     return;
   }
   playDesiredBgm();
+};
+
+export const getSfxEnabled = () => sfxEnabled;
+
+export const setSfxEnabled = (value: boolean) => {
+  sfxEnabled = value;
+  writeSfxEnabled(value);
 };
 
 export const setAudioTemporarilyMuted = (value: boolean) => {
@@ -179,7 +211,7 @@ export const setAudioTemporarilyMuted = (value: boolean) => {
 };
 
 export const unlockAudio = async () => {
-  if (!audioEnabled || !canUseAudio()) return false;
+  if (!(bgmEnabled || sfxEnabled) || !canUseAudio()) return false;
   if (audioUnlocked) {
     playDesiredBgm();
     return true;
@@ -201,7 +233,7 @@ export const unlockAudio = async () => {
 
 export const syncBgm = (mode: BgmMode) => {
   desiredBgmMode = mode;
-  if (!audioEnabled) {
+  if (!bgmEnabled) {
     pauseBgm();
     return;
   }
@@ -209,7 +241,7 @@ export const syncBgm = (mode: BgmMode) => {
 };
 
 export const playSfx = (id: SfxId) => {
-  if (!audioEnabled || audioTemporarilyMuted || !canUseAudio()) return;
+  if (!sfxEnabled || audioTemporarilyMuted || !canUseAudio()) return;
   const audio = new Audio(sfxSources[id]);
   audio.preload = 'auto';
   audio.volume = sfxVolume;

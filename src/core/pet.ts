@@ -103,6 +103,7 @@ export {
   gardenTreeMaxHarvests,
   gardenWaterCost,
   getGardenClearCost,
+  getGardenDropsPreview,
   getGardenEnvironmentEffects,
   getGardenReminder,
   getGardenStage,
@@ -284,6 +285,46 @@ export {
   consumeInventoryItem,
 } from './petActions';
 
+export type { MarketDistrictDefinition, MarketDistrictId, MerchantCategory, MerchantDefinition, MerchantId, MerchantView } from './merchant';
+export {
+  getMerchantCategoryLabel,
+  getMerchantView,
+  marketDistrictDefinitions,
+  merchantDefinitions,
+  merchantIds,
+} from './merchant';
+
+export type { MultiverseState, RandomTravelResult } from './multiverse';
+export {
+  canRandomTravel,
+  defaultMultiverseState,
+  getAnchoredWorlds,
+  getRandomTravelTicketText,
+  getUnanchoredWorlds,
+  hasWorldAnchor,
+  initialEnergy,
+  initialMinerals,
+  multiverseSchemaVersion,
+  normalizeMultiverseState,
+  performRandomTravel,
+  randomTravelEnergyCost,
+  randomTravelMineralCost,
+  worldAnchorItemIds,
+} from './multiverse';
+
+export type { WishRarity, WishReward, WishingWellState } from './wishingWell';
+export {
+  dailyFreeWishLimit,
+  dailyPaidWishLimit,
+  defaultWishingWellState,
+  getWishRarityColor,
+  getWishingWellView,
+  normalizeWishingWellState,
+  paidWishCostIncrement,
+  performWish,
+  wishingWellSchemaVersion,
+} from './wishingWell';
+
 export type { ClaimedDateReward, DateRewardItem, DateRewardKind, FestivalConfig } from './dateRewards';
 export {
   birthdayRewardCoins,
@@ -310,6 +351,61 @@ export {
   getAchievementSummary,
   getAchievementViews,
   incrementModSwitchCount,
+  incrementWishingWellWishCount,
   markAchievementReviewSeen,
   recordEarnedCoins,
 } from './achievements';
+
+export type {
+  FishingEnvironmentView,
+  FishingSkillView,
+  FishingView,
+  FishingZoneUnlockView,
+  FishingSlotView,
+  TimeOfDay,
+  FishDefinition,
+  FishingWaterZoneDefinition,
+  FishingRodDefinition,
+  FishingBaitDefinition,
+} from './fishing';
+
+export type {
+  FishId,
+  FishRarity,
+  FishingBaitId,
+  FishingRodId,
+  FishingWaterZoneId,
+  FishingSlotState,
+  FishingSlotOutcome,
+  FishingSlot,
+  FishingState,
+  FishingSkill,
+} from './petTypes';
+
+export {
+  defaultFishingState,
+  normalizeFishingState,
+  advanceFishing,
+  castFishingRod,
+  reelInFish,
+  getFishingView,
+  getFishingEnvironmentView,
+  getFishingSkillView,
+  getFishingZoneUnlocks,
+  getFishingXpForCatch,
+  fishIds,
+  fishRarityIds,
+  waterZoneIds,
+  rodIds,
+  baitIds,
+  fishDefinitions,
+  waterZoneDefinitions,
+  rodDefinitions,
+  baitDefinitions,
+  rodLevelOrder,
+  rodUpgradeCosts,
+  getZoneNameForId,
+  getTimeOfDay,
+  getTimeOfDayLabel,
+  fishingSlotStates,
+} from './fishing';

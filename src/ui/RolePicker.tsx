@@ -7,17 +7,17 @@ import { t } from '../i18n';
 interface RolePickerProps {
   installedMod: ActivePetMod | null;
   modMessage: string;
-  isAudioEnabled: boolean;
+  isSoundOn: boolean;
   isLoading?: boolean;
   onUseBuiltin: () => void;
   onUseInstalledMod: () => void;
   onImportMod: (event: ChangeEvent<HTMLInputElement>) => void;
-  onAudioToggle: () => void;
+  onOpenAudioMenu: () => void;
 }
 
 const defaultRolePetImage = resolvePetStatusImages(null).content;
 
-export const RolePicker = ({ installedMod, modMessage, isAudioEnabled, isLoading = false, onUseBuiltin, onUseInstalledMod, onImportMod, onAudioToggle }: RolePickerProps) => (
+export const RolePicker = ({ installedMod, modMessage, isSoundOn, isLoading = false, onUseBuiltin, onUseInstalledMod, onImportMod, onOpenAudioMenu }: RolePickerProps) => (
   <main className="app-shell app-shell--role-picker">
     <section className="role-picker" aria-label={t('ui.rolePicker.aria')}>
       <div className="role-picker__header">
@@ -48,8 +48,8 @@ export const RolePicker = ({ installedMod, modMessage, isAudioEnabled, isLoading
         </div>
       )}
       {modMessage && <p className="role-picker__message">{modMessage}</p>}
-      <button type="button" className="icon-button audio-button role-picker__audio" aria-label={isAudioEnabled ? t('ui.top.audioOn') : t('ui.top.audioOff')} aria-pressed={isAudioEnabled} onClick={onAudioToggle}>
-        {isAudioEnabled ? <Volume2 size={21} aria-hidden="true" /> : <VolumeX size={21} aria-hidden="true" />}
+      <button type="button" className="icon-button audio-button role-picker__audio" aria-label={t('ui.top.audioMenu')} title={t('ui.top.audioMenu')} onClick={onOpenAudioMenu}>
+        {isSoundOn ? <Volume2 size={21} aria-hidden="true" /> : <VolumeX size={21} aria-hidden="true" />}
       </button>
     </section>
   </main>

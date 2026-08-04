@@ -12,7 +12,10 @@ import { clampCoins, clampCount, clampHealth, clampLevel, clampStat, defaultPetN
 import type { AchievementState, ActionStreak, BuiltinItemId, BuiltinActivity, Inventory, PartnerScheduleCategory, PetState, PetStatus, RecentActivity, WeatherType } from './petTypes';
 import { defaultPomodoroState, normalizePomodoroState } from './pomodoro';
 import { defaultPartnerScheduleState, normalizePartnerScheduleState } from './partnerSchedule';
+import { defaultWishingWellState, normalizeWishingWellState } from './wishingWell';
 import { getWeatherForDate, weatherTypeSet } from './weather';
+import { defaultMultiverseState, normalizeMultiverseState } from './multiverse';
+import { defaultFishingState, normalizeFishingState } from './fishing';
 import { getLocalDateKey, isNumber } from './utils';
 import { defaultYearlyStats, normalizeYearReview, normalizeYearlyStats } from './yearlyStats';
 
@@ -154,6 +157,9 @@ export const createDefaultPet = (now = Date.now()): PetState => ({
     isSleeping: false,
   }, now),
   speciesBook: defaultSpeciesBookState(),
+  multiverse: defaultMultiverseState(),
+  wishingWell: defaultWishingWellState(now),
+  fishing: defaultFishingState(now),
 });
 
 export const getPrimaryStatus = (pet: PetState): PetStatus => {
@@ -441,6 +447,9 @@ export const normalizePet = (value: unknown, now = Date.now(), options: Normaliz
     boostCards: normalizeBoostCardState(raw.boostCards, now),
     partnerSchedule,
     speciesBook: normalizeSpeciesBookState(raw.speciesBook),
+    multiverse: normalizeMultiverseState(raw.multiverse),
+    wishingWell: normalizeWishingWellState(raw.wishingWell, now),
+    fishing: normalizeFishingState(raw.fishing, now),
   };
 };
 

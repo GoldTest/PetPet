@@ -14,6 +14,7 @@ import { FeatureRow } from './FeatureRow';
 import { PartnerScheduleDock } from './PartnerScheduleDock';
 import { PetDisplay } from './PetDisplay';
 import { StatusBar } from './StatusBar';
+import { portalImage } from '../assets';
 
 interface HomePageProps {
   pet: PetState;
@@ -26,6 +27,7 @@ interface HomePageProps {
   pomodoroRemainingMs: number;
   pomodoroStartTitle?: string;
   gardenReminder?: 'ready' | 'withered';
+  vegGardenReminder?: 'ready';
   pomodoroOverlay?: ReactNode;
   petStatusImages: Record<PetStatus, string>;
   petActivityImages: Record<string, string | undefined>;
@@ -39,10 +41,16 @@ interface HomePageProps {
   onOpenPomodoro: () => void;
   onOpenGarden: () => void;
   onOpenVegGarden: () => void;
-  onOpenBoostCards: () => void;
+  onOpenMarket: () => void;
+  onOpenMarketTrade: () => void;
   onOpenShop: () => void;
   onOpenPartnerSchedule: () => void;
+  onOpenWishingWell: () => void;
+  onOpenFishing: () => void;
   onAction: (action: PetAction) => void;
+  portalSummoned: boolean;
+  onPortalEnter: () => void;
+  onPortalCancel: () => void;
 }
 
 const formatSharedTime = (seconds: number) => {
@@ -71,10 +79,8 @@ export const HomePage = ({
   isCriticallyHungry,
   canUpgrade,
   nextUpgradeCost,
-  isPomodoroOpen,
-  pomodoroRemainingMs,
-  pomodoroStartTitle,
   gardenReminder,
+  vegGardenReminder,
   pomodoroOverlay,
   petStatusImages,
   petActivityImages,
@@ -85,13 +91,18 @@ export const HomePage = ({
   onDailyWish,
   onReturnWelcome,
   onOpenInventory,
-  onOpenPomodoro,
   onOpenGarden,
   onOpenVegGarden,
-  onOpenBoostCards,
+  onOpenMarket,
+  onOpenMarketTrade,
   onOpenShop,
   onOpenPartnerSchedule,
+  onOpenWishingWell,
+  onOpenFishing,
   onAction,
+  portalSummoned,
+  onPortalEnter,
+  onPortalCancel,
 }: HomePageProps) => {
   const statCap = getPetStatCap(pet);
   const isPetBusy = Boolean(pet.partnerSchedule.active);
@@ -141,6 +152,7 @@ export const HomePage = ({
             <p>{pet.recentEvent}</p>
           </div>
 
+          {(returnWelcomeView || !dailyWishView.claimed) && (
           <div className="wish-stack">
             {returnWelcomeView && (
               <section className="wish-panel wish-panel--return" aria-label={t('ui.returnWelcome.aria')}>
@@ -181,22 +193,23 @@ export const HomePage = ({
               </section>
             )}
           </div>
+          )}
 
           <FeatureRow
             pet={pet}
             inventoryKindCount={inventoryKindCount}
-            isPomodoroOpen={isPomodoroOpen}
-            pomodoroRemainingMs={pomodoroRemainingMs}
-            pomodoroStartTitle={pomodoroStartTitle}
             gardenReminder={gardenReminder}
+            vegGardenReminder={vegGardenReminder}
             hasShopDiscount={hasShopDiscount}
             onOpenInventory={onOpenInventory}
-            onOpenPomodoro={onOpenPomodoro}
             onOpenGarden={onOpenGarden}
             onOpenVegGarden={onOpenVegGarden}
-            onOpenBoostCards={onOpenBoostCards}
+            onOpenMarket={onOpenMarket}
+            onOpenMarketTrade={onOpenMarketTrade}
             onOpenShop={onOpenShop}
             onOpenPartnerSchedule={onOpenPartnerSchedule}
+            onOpenWishingWell={onOpenWishingWell}
+            onOpenFishing={onOpenFishing}
           />
 
           <div className="meta-row" aria-label={t('ui.dashboard.metaAria')}>
@@ -215,6 +228,26 @@ export const HomePage = ({
           isCriticallyHungry={isCriticallyHungry}
           onAction={onAction}
         />
+      )}
+
+      {portalSummoned && (
+        <div className="portal-summon" role="presentation" onClick={onPortalCancel}>
+          <div className="portal-summon__glow" aria-hidden="true" />
+          <button
+            type="button"
+            className="portal-summon__ring"
+            aria-label={t('ui.market.portalEnter')}
+            title={t('ui.market.portalEnter')}
+            onClick={(event) => {
+              event.stopPropagation();
+              onPortalEnter();
+            }}
+          >
+            <span className="portal-summon__vortex portal-summon__vortex--outer" aria-hidden="true" />
+            <span className="portal-summon__vortex" aria-hidden="true" />
+            <img src={portalImage} alt="" aria-hidden="true" />
+          </button>
+        </div>
       )}
     </>
   );

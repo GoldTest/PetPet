@@ -1,6 +1,6 @@
 import { useRef, useState } from 'react';
 
-export type ActivePage = 'home' | 'achievements' | 'garden' | 'vegetableGarden' | 'partnerSchedule';
+export type ActivePage = 'home' | 'achievements' | 'garden' | 'vegetableGarden' | 'partnerSchedule' | 'market' | 'tradeHall' | 'wishingWell' | 'fishing';
 export type UtilityDialog = 'inventory' | 'shop' | 'boostCards' | 'settings' | 'modSwitch' | null;
 
 export const useAppNavigation = () => {

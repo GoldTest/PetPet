@@ -46,5 +46,5 @@ React 18 + TypeScript frontend: game logic, UI components, i18n, styles, and mod
 - **Components**: PascalCase files, one component per file
 - **Pure logic**: camelCase, placed in `core/`
 - **CSS**: CSS custom properties in `tokens.css`, module files per page
-- **i18n**: Add strings to both `zh-CN.json` and `en-US.json`
+- **i18n**: Add strings to both `zh-CN.json` and `en-US.json`; UI strings go under `ui.*`, game event strings under `pet.*` — wrong parent causes silent fallback to raw key. 核心模块 (`core/`) 中的 `t()` 调用必须用 `pet.*` 路径，UI 组件中的 `t()` 调用用 `ui.*` 路径
 - **State**: Hook-based (see `usePetSession`, `useGardenController` in `ui/app/`)

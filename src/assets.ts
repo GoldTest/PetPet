@@ -92,13 +92,37 @@ import poplarTreeStage2 from './assets/icon/tree/tree2.png';
 import poplarTreeStage3 from './assets/icon/tree/tree3.png';
 import poplarTreeStage4 from './assets/icon/tree/tree4.png';
 import poplarTreeStage5 from './assets/icon/tree/tree5.png';
+import marketGate from './assets/market/gate.png';
+import marketHub from './assets/market/hub.png';
+import marketPortal from './assets/market/portal.png';
+import marketDistrictChinese from './assets/market/district_chinese.png';
+import marketDistrictFantasy from './assets/market/district_fantasy.png';
+import marketDistrictModern from './assets/market/district_modern.png';
+import merchantResident from './assets/market/merchant_resident.png';
+import merchantGarden from './assets/market/merchant_garden.png';
+import merchantMystery from './assets/market/merchant_mystery.png';
 import type { ActivePetMod } from './core/mod';
 import type { BuiltinItemId, GardenTreeId, PetStatus } from './core/petTypes';
+import type { MarketDistrictId, MerchantId } from './core/merchant';
 
 export const currencyIcon = coin;
 export const giftBoxIcon = itemGiftBox;
 export const unknownItemIcon = itemGiftBox;
 export const goodEndingImage = goodEndingCg1;
+
+export const marketGateImage = marketGate;
+export const marketHubImage = marketHub;
+export const portalImage = marketPortal;
+export const marketDistrictImages: Record<MarketDistrictId, string> = {
+  chinese: marketDistrictChinese,
+  fantasy: marketDistrictFantasy,
+  modern: marketDistrictModern,
+};
+export const merchantCharacterImages: Record<MerchantId, string> = {
+  resident: merchantResident,
+  garden: merchantGarden,
+  mystery: merchantMystery,
+};
 
 export const gardenTreeStageImages: Record<GardenTreeId, readonly string[]> = {
   poplar_tree: [poplarTreeStage1, poplarTreeStage2, poplarTreeStage3, poplarTreeStage4, poplarTreeStage5],
@@ -161,6 +185,47 @@ export const itemIcons: Record<BuiltinItemId, string> = {
   onion_seed: iconOnionSeed,
   potato_seed: iconPotatoSeed,
   chili_seed: iconChiliSeed,
+  world_anchor_chinese: marketPortal,
+  world_anchor_fantasy: marketPortal,
+  world_anchor_modern: marketPortal,
+  lucky_charm: itemWishFragment,
+  star_shard: itemWishFragment,
+  wishing_well_coin: itemWishFragment,
+  crucian_carp: itemWishFragment,
+  grass_carp: itemWishFragment,
+  silver_carp: itemWishFragment,
+  common_carp: itemWishFragment,
+  catfish: itemWishFragment,
+  shrimp: itemWishFragment,
+  crab: itemWishFragment,
+  perch: itemWishFragment,
+  bream: itemWishFragment,
+  yellow_jacket: itemWishFragment,
+  trout: itemWishFragment,
+  salmon: itemWishFragment,
+  octopus: itemWishFragment,
+  squid: itemWishFragment,
+  tuna: itemWishFragment,
+  marlin: itemWishFragment,
+  ancient_koi: itemWishFragment,
+  star_koi: itemWishFragment,
+  mythical_fish: itemWishFragment,
+  fish_bone: itemWitheredFragment,
+  seashell: itemWitheredFragment,
+  pearl: itemWitheredFragment,
+  fish_roe: itemWitheredFragment,
+  worm: itemWishFragment,
+  rice_ball: itemWishFragment,
+  insect_bait: itemWishFragment,
+  glow_bait: itemWishFragment,
+  magic_bait: itemWishFragment,
+  bamboo_rod: itemWishFragment,
+  iron_rod: itemWishFragment,
+  fiber_rod: itemWishFragment,
+  carbon_rod: itemWishFragment,
+  titanium_rod: itemWishFragment,
+  sea_god_rod: itemWishFragment,
+  fishing_token: itemGardenToken,
 };
 
 export const petStatusImages: Record<PetStatus, string> = {

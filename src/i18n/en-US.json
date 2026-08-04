@@ -25,13 +25,21 @@
       "openShop": "Open shop",
       "heartsTitle": "Hearts",
       "heartsAria": "{hearts} hearts",
-      "audioOn": "Turn sound off",
-      "audioOff": "Turn sound on",
+      "audioMenu": "Sound settings",
       "settings": "Settings",
       "openSettings": "Open settings",
       "openAchievements": "Open achievements",
       "openBoostCards": "Open boost cards",
       "openModSwitch": "Switch mod"
+    },
+    "audio": {
+      "title": "Sound settings",
+      "summary": "Only background music and operation sound effects",
+      "bgm": "Background music",
+      "bgmDesc": "Ambient music for room, shop and sleep",
+      "sfx": "Sound effects",
+      "sfxDesc": "Taps, items, pet interactions and other cues",
+      "close": "Done"
     },
     "dashboard": {
       "aria": "Pet stats",
@@ -94,6 +102,90 @@
         "rate": "1 heart = {coins} coins",
         "progress": "Today {count}/{limit}",
         "button": "Exchange"
+      }
+    },
+    "market": {
+      "aria": "Multiverse Home",
+      "back": "Back home",
+      "kicker": "Multiverse Home",
+      "title": "Multiverse Home",
+      "portalEnter": "Enter portal",
+      "comingSoon": "In the works",
+      "closed": "{name}'s stall is still being prepared. Stay tuned!",
+      "backToStalls": "Back to home",
+      "backToFacilities": "Back to home facilities",
+      "closePanel": "Dismiss",
+      "talkTo": "Talk to {name}",
+      "facilities": {
+        "portal": "Portal",
+        "portalHint": "Travel to anchored worlds or explore unknown ones",
+        "warehouse": "Warehouse",
+        "warehouseHint": "Store and manage items across worlds",
+        "warehouseSoon": "Warehouse in the works"
+      },
+      "portal": {
+        "title": "Portal",
+        "anchored": "Anchored Worlds",
+        "none": "No anchored worlds yet — try a random travel to explore!",
+        "allAnchored": "All worlds are anchored — explore freely!",
+        "random": "Random Travel",
+        "randomHint": "Spend minerals and energy to travel to an unknown world",
+        "randomUnavailable": "Not enough minerals or energy",
+        "ticket": "Minerals {minerals} · Energy {energy}",
+        "enter": "Travel"
+      },
+      "tradehall": {
+        "title": "Trade Hall",
+        "welcome": "Welcome to the Trade Hall! See what's on offer today."
+      },
+      "districts": {
+        "chinese": {
+          "name": "Lantern District",
+          "subtitle": "An old street market under red lanterns"
+        },
+        "fantasy": {
+          "name": "Starlight Bazaar",
+          "subtitle": "A fantasy street of torches and tents"
+        },
+        "modern": {
+          "name": "Neon Night Market",
+          "subtitle": "A modern night market aglow with lights"
+        }
+      },
+      "categories": {
+        "gifts": "Gifts",
+        "cleaning": "Cleaning Supplies",
+        "food": "Simple Food"
+      },
+      "merchants": {
+        "resident": {
+          "name": "Jenny",
+          "title": "Resident Merchant"
+        },
+        "garden": {
+          "name": "Hanami",
+          "title": "Garden Merchant"
+        },
+        "mystery": {
+          "name": "Nightveil",
+          "title": "Mystery Merchant"
+        }
+      },
+      "dialogues": {
+        "resident": {
+          "welcome": "Welcome! What can I get for your little buddy today?",
+          "gifts": "A little gift will brighten their whole day!",
+          "food": "These simple snacks are great for stocking up.",
+          "farewell": "Come by anytime — good goods don't wait!"
+        },
+        "garden": {
+          "waiting": "My seeds are still on the way... please wait a bit.",
+          "hint": "I heard market trading is also being prepared. It'll be lively!"
+        },
+        "mystery": {
+          "waiting": "Hehe... good things take their time.",
+          "hint": "When you're ready, I still have quite a few secrets here."
+        }
       }
     },
     "settings": {
@@ -284,11 +376,19 @@
       "vegGardenHint": "Plant & harvest",
       "shop": "Shop",
       "shopHint": "Daily deals",
+      "market": "Multiverse Home",
+      "marketHint": "Return to your home across worlds",
+      "marketTrade": "Universal Trading House",
+      "marketTradeHint": "Trade and transact",
       "partnerSchedule": "Partner Schedule",
       "partnerScheduleHint": "Plan today's activities",
       "partnerScheduleLocked": "Unlocks at Lv.{level}",
       "partnerScheduleReady": "Activity rewards ready",
-      "partnerScheduleActive": "Schedule in progress"
+      "partnerScheduleActive": "Schedule in progress",
+      "wishingWell": "Wishing Well",
+      "wishingWellHint": "Daily wish",
+      "fishing": "Fishing",
+      "fishingHint": "Water leisure"
     },
     "partnerSchedule": {
       "aria": "Partner Schedule",
@@ -860,10 +960,123 @@
       },
       "chooseSeedHint": "Pick a seed to plant",
       "plantHint": "{crop} selected · {count} seeds left",
-      
       "waterHint": "Tap growing crops to water them ({percent}% faster, once per tile per day)",
       "idleHint": "Pick a seed to plant, use the watering can, or tap ready crops to harvest",
       "seasonBonus": "In-season crop · 20% faster growth"
+    },
+    "fishing": {
+      "title": "Fishing",
+      "kicker": "🎣 Fishing",
+      "btnCast": "Cast",
+      "btnReel": "Reel!",
+      "btnSelectZone": "Select Zone",
+      "btnSelectRod": "Select Rod",
+      "btnSelectBait": "Select Bait",
+      "btnEncyclopedia": "Fish Atlas",
+      "btnShop": "Shop",
+      "slotIdle": "Ready",
+      "slotCasting": "Casting…",
+      "slotWaiting": "Waiting…",
+      "slotBitten": "Bite! Reel now!",
+      "slotLost": "Fish escaped",
+      "slotJammed": "Line snagged",
+      "timeDawn": "Dawn",
+      "timeDay": "Day",
+      "timeDusk": "Dusk",
+      "timeNight": "Night",
+      "timeDawnBonus": "Fish are active at dawn",
+      "timeNightBonus": "Rare fish at night",
+      "timeNeutral": "No time bonus",
+      "weatherMatch": "Weather matched",
+      "weatherNeutral": "No weather effect",
+      "modalZoneTitle": "Select Water Zone",
+      "modalRodTitle": "Select Rod",
+      "modalBaitTitle": "Select Bait",
+      "modalEncyclopediaTitle": "Fish Atlas",
+      "zoneUnlock": "Unlocks at Lv.{level}",
+      "zones": {
+        "pond": {
+          "name": "Backyard Pond",
+          "desc": "Calm pond, great for beginners"
+        },
+        "river": {
+          "name": "City River",
+          "desc": "Flowing river with more variety"
+        },
+        "lake": {
+          "name": "Mountain Lake",
+          "desc": "Deep lake with rare fish"
+        },
+        "deep_sea": {
+          "name": "Deep Sea",
+          "desc": "Mysterious deep sea, home of legends"
+        }
+      },
+      "rods": {
+        "bamboo": {
+          "name": "Bamboo Rod",
+          "desc": "Basic bamboo rod, pond only"
+        },
+        "iron": {
+          "name": "Iron Rod",
+          "desc": "Iron rod, usable in rivers"
+        },
+        "fiber": {
+          "name": "Fiberglass Rod",
+          "desc": "Fiberglass rod, usable in lakes"
+        },
+        "carbon": {
+          "name": "Carbon Rod",
+          "desc": "Carbon rod, usable in deep sea"
+        },
+        "titanium": {
+          "name": "Titanium Rod",
+          "desc": "Titanium rod, all zones"
+        },
+        "sea_god": {
+          "name": "Sea God Rod",
+          "desc": "Legendary rod, all zones"
+        }
+      },
+      "biteRate": "Bite Rate",
+      "rareBonus": "Rare Bonus",
+      "activeCasts": "Active Casts",
+      "dailyCatchLimit": "Daily catch limit reached",
+      "slotBusy": "Slot is busy",
+      "invalidSlot": "Invalid slot",
+      "castSuccess": "Rod cast, waiting for a bite…",
+      "notReeling": "Nothing to reel",
+      "catchSuccess": "Caught a {fish}!",
+      "rarity": {
+        "common": "Common",
+        "rare": "Rare",
+        "epic": "Epic",
+        "legend": "Legendary"
+      }
+    },
+    "wishingWell": {
+      "title": "Wishing Well",
+      "kicker": "✨ Wishing Pool",
+      "freeWish": "Free Wish ({remaining}/{total})",
+      "paidWish": "Paid Wish ({cost} coins)",
+      "freeWishReady": "You have 1 free wish today!",
+      "freeWishDone": "Free wishes used up today",
+      "paidWishDisabled": "Not enough coins or daily limit reached",
+      "wishButton": "Toss a coin ✨",
+      "wishResult": "Wish Result",
+      "confirm": "Accept gladly",
+      "stats": "Wish Statistics",
+      "totalWishes": "Total wishes: {count}",
+      "legendaryCount": "Legendary: {count}",
+      "hiddenCount": "Hidden: {count}",
+      "pityMeter": "Luck: {pity}/{max}",
+      "pityGuaranteed": "Next wish is guaranteed legendary!",
+      "events": {
+        "freeWish": "Free wish granted: {reward}!",
+        "paidWish": "Paid {cost} coins for a wish: {reward}!",
+        "notEnoughCoins": "Not enough coins...",
+        "dailyLimit": "Wish limit reached for today. Come back tomorrow."
+      }
     }
   },
   "pet": {
@@ -1074,8 +1287,172 @@
           "summary": "Seed pack (9 seeds). Plant to grow potatoes."
         },
         "chili_seed": {
-          "name": "Chili seed",
-          "summary": "Seed pack (9 seeds). Plant to grow chilies."
+          "name": "Chili Seeds",
+          "summary": "Seed pack (9 seeds) — plant to grow chilies"
+        },
+        "world_anchor_chinese": {
+          "name": "Lantern District Anchor",
+          "summary": "A world beacon anchoring the Lantern District — unlocks direct travel"
+        },
+        "world_anchor_fantasy": {
+          "name": "Starlight Bazaar Anchor",
+          "summary": "A world beacon anchoring the Starlight Bazaar — unlocks direct travel"
+        },
+        "world_anchor_modern": {
+          "name": "Neon Night Market Anchor",
+          "summary": "A world beacon anchoring the Neon Night Market — unlocks direct travel"
+        },
+        "lucky_charm": {
+          "name": "Lucky Charm",
+          "summary": "A charm filled with good fortune. Slightly lifts mood when used."
+        },
+        "star_shard": {
+          "name": "Star Shard",
+          "summary": "A fragment of starlight fished from the wishing well. Boosts all stats when used."
+        },
+        "wishing_well_coin": {
+          "name": "Wishing Well Coin",
+          "summary": "An extremely rare commemorative coin, proof that you once earned a hidden-level reward!"
+        },
+        "crucian_carp": {
+          "name": "Crucian Carp",
+          "summary": "Common small fish from the pond"
+        },
+        "grass_carp": {
+          "name": "Grass Carp",
+          "summary": "Freshwater grass-eating fish"
+        },
+        "silver_carp": {
+          "name": "Silver Carp",
+          "summary": "Silver-colored freshwater fish"
+        },
+        "common_carp": {
+          "name": "Common Carp",
+          "summary": "Common carp"
+        },
+        "catfish": {
+          "name": "Catfish",
+          "summary": "Whiskered catfish"
+        },
+        "shrimp": {
+          "name": "Fresh Shrimp",
+          "summary": "Lively little shrimp"
+        },
+        "crab": {
+          "name": "Crab",
+          "summary": "Crab with waving claws"
+        },
+        "perch": {
+          "name": "Perch",
+          "summary": "Delicious perch"
+        },
+        "bream": {
+          "name": "Bream",
+          "summary": "Flat bream fish"
+        },
+        "yellow_jacket": {
+          "name": "Yellow Jacket",
+          "summary": "Yellow freshwater fish"
+        },
+        "trout": {
+          "name": "Trout",
+          "summary": "High-altitude lake trout"
+        },
+        "salmon": {
+          "name": "Salmon",
+          "summary": "Precious salmon"
+        },
+        "octopus": {
+          "name": "Octopus",
+          "summary": "Eight-legged deep-sea creature"
+        },
+        "squid": {
+          "name": "Squid",
+          "summary": "Long deep-sea squid"
+        },
+        "tuna": {
+          "name": "Tuna",
+          "summary": "Powerful deep-sea tuna"
+        },
+        "marlin": {
+          "name": "Marlin",
+          "summary": "Extremely fast deep-sea marlin"
+        },
+        "ancient_koi": {
+          "name": "Ancient Koi",
+          "summary": "Legendary koi, once in a century"
+        },
+        "star_koi": {
+          "name": "Star Koi",
+          "summary": "Koi glowing with starlight"
+        },
+        "mythical_fish": {
+          "name": "Mythical Fish",
+          "summary": "Fish from mythology, extremely rare"
+        },
+        "fish_bone": {
+          "name": "Fish Bone",
+          "summary": "Bones from caught fish, useful as fertilizer"
+        },
+        "seashell": {
+          "name": "Seashell",
+          "summary": "A shell from the deep sea"
+        },
+        "pearl": {
+          "name": "Pearl",
+          "summary": "Occasionally found pearl from the deep sea"
+        },
+        "fish_roe": {
+          "name": "Fish Roe",
+          "summary": "Precious fish roe, good for cooking"
+        },
+        "worm": {
+          "name": "Worm",
+          "summary": "Basic bait, usable in all zones"
+        },
+        "rice_ball": {
+          "name": "Rice Ball",
+          "summary": "Rice ball bait, slight catch rate boost"
+        },
+        "insect_bait": {
+          "name": "Insect Bait",
+          "summary": "Insect bait, attracts pond and river fish"
+        },
+        "glow_bait": {
+          "name": "Glow Bait",
+          "summary": "Glowing bait, deep sea only"
+        },
+        "magic_bait": {
+          "name": "Magic Bait",
+          "summary": "Magic bait, greatly increases rare fish rate"
+        },
+        "bamboo_rod": {
+          "name": "Bamboo Rod",
+          "summary": "Basic bamboo rod, pond only"
+        },
+        "iron_rod": {
+          "name": "Iron Rod",
+          "summary": "Iron rod, usable in rivers"
+        },
+        "fiber_rod": {
+          "name": "Fiberglass Rod",
+          "summary": "Fiberglass rod, usable in lakes"
+        },
+        "carbon_rod": {
+          "name": "Carbon Rod",
+          "summary": "Carbon rod, usable in deep sea"
+        },
+        "titanium_rod": {
+          "name": "Titanium Rod",
+          "summary": "Titanium rod, all zones"
+        },
+        "sea_god_rod": {
+          "name": "Sea God Rod",
+          "summary": "Legendary rod, all zones"
+        },
+        "fishing_token": {
+          "name": "Fishing Token",
+          "summary": "Fishing-exclusive token"
         }
       },
       "categories": {
@@ -1401,6 +1778,12 @@
       "claimed": "Return supplies claimed, coins +{coins}, and care items were added to the bag.",
       "notReady": "Finish the return recovery task before claiming supplies.",
       "alreadyClaimed": "Return supplies were already claimed."
+    },
+    "multiverse": {
+      "randomTravel": {
+        "newAnchor": "Random travel arrived in \"{world}\" — you discovered the world anchor!",
+        "visited": "Random travel arrived in \"{world}\"."
+      }
     },
     "achievements": {
       "events": {
@@ -1933,6 +2316,35 @@
       "waterSuccess": "Watered. Growth time shortened by {percent}%.",
       "cannotHarvest": "Nothing is ready to harvest.",
       "harvestSuccess": "Harvested {count} {crop}(s)."
+    },
+    "wishingWell": {
+      "rewards": {
+        "common": "Common reward",
+        "rare": "Rare reward",
+        "epic": "Epic reward",
+        "legend": "Legendary reward!",
+        "hidden": "🌟 Hidden reward!!"
+      },
+      "common": {
+        "label": "Common",
+        "color": "#9e9e9e"
+      },
+      "rare": {
+        "label": "Rare",
+        "color": "#4fc3f7"
+      },
+      "epic": {
+        "label": "Epic",
+        "color": "#ce93d8"
+      },
+      "legend": {
+        "label": "Legendary",
+        "color": "#ffd54f"
+      },
+      "hidden": {
+        "label": "Hidden",
+        "color": "#ff6f00"
+      }
     }
   }
 }

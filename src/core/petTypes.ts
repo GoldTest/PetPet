@@ -52,7 +52,48 @@ export type BuiltinItemId =
   | 'cabbage_seed'
   | 'onion_seed'
   | 'potato_seed'
-  | 'chili_seed';
+  | 'chili_seed'
+  | 'world_anchor_chinese'
+  | 'world_anchor_fantasy'
+  | 'world_anchor_modern'
+  | 'lucky_charm'
+  | 'star_shard'
+  | 'wishing_well_coin'
+  | 'crucian_carp'
+  | 'grass_carp'
+  | 'silver_carp'
+  | 'common_carp'
+  | 'catfish'
+  | 'shrimp'
+  | 'crab'
+  | 'perch'
+  | 'bream'
+  | 'yellow_jacket'
+  | 'trout'
+  | 'salmon'
+  | 'octopus'
+  | 'squid'
+  | 'tuna'
+  | 'marlin'
+  | 'ancient_koi'
+  | 'star_koi'
+  | 'mythical_fish'
+  | 'fish_bone'
+  | 'seashell'
+  | 'pearl'
+  | 'fish_roe'
+  | 'worm'
+  | 'rice_ball'
+  | 'insect_bait'
+  | 'glow_bait'
+  | 'magic_bait'
+  | 'bamboo_rod'
+  | 'iron_rod'
+  | 'fiber_rod'
+  | 'carbon_rod'
+  | 'titanium_rod'
+  | 'sea_god_rod'
+  | 'fishing_token';
 
 export type ModItemId = `${string}:${string}`;
 
@@ -61,6 +102,94 @@ export type ItemId = BuiltinItemId | ModItemId;
 export type Inventory = Record<string, number>;
 
 export type GardenTreeId = 'poplar_tree' | 'fruit_tree' | 'herb_tree' | 'money_tree' | 'golden_apple_tree';
+
+export type FishId =
+  | 'crucian_carp'
+  | 'grass_carp'
+  | 'silver_carp'
+  | 'common_carp'
+  | 'catfish'
+  | 'shrimp'
+  | 'crab'
+  | 'perch'
+  | 'bream'
+  | 'yellow_jacket'
+  | 'trout'
+  | 'salmon'
+  | 'octopus'
+  | 'squid'
+  | 'tuna'
+  | 'marlin'
+  | 'ancient_koi'
+  | 'star_koi'
+  | 'mythical_fish';
+
+export type FishingWaterZoneId = 'pond' | 'river' | 'lake' | 'deep_sea';
+export type FishingRodId = 'bamboo' | 'iron' | 'fiber' | 'carbon' | 'titanium' | 'sea_god';
+export type FishingBaitId = 'worm' | 'rice_ball' | 'insect' | 'glow' | 'magic';
+export type FishingSlotState = 'idle' | 'casting' | 'waiting' | 'reeling' | 'done';
+export type FishRarity = 'common' | 'rare' | 'epic' | 'legend';
+export type FishingSlotOutcome = 'caught' | 'lost' | 'snagged' | 'jammed';
+
+export interface FishDefinition {
+  id: FishId;
+  rarity: FishRarity;
+  zones: readonly FishingWaterZoneId[];
+  weight: number;
+  price: number;
+  effect: ItemEffect;
+  tags?: readonly string[];
+}
+
+export interface FishingWaterZoneDefinition {
+  id: FishingWaterZoneId;
+  unlockedAtSkillLevel: number;
+  fishIds: readonly FishId[];
+  baseWaitMs: number;
+  baseBiteRate: number;
+  rareBonusPercent: number;
+}
+
+export interface FishingRodDefinition {
+  id: FishingRodId;
+  catchRateBonusPercent: number;
+  waitTimeMultiplier: number;
+  qualityBonusPercent: number;
+  durability: number;
+  qualityChancePercent: number;
+  unlocksZones: readonly FishingWaterZoneId[];
+}
+
+export interface FishingSlot {
+  slotIndex: number;
+  state: FishingSlotState;
+  fishId?: FishId;
+  baitUsed?: FishingBaitId;
+  outcome?: FishingSlotOutcome;
+  castAt: number;
+  bittenAt: number;
+  reeledAt: number;
+  streak: number;
+  durabilityUsed: number;
+}
+
+export interface FishingSkill {
+  level: number;
+  xp: number;
+}
+
+export interface FishingState {
+  schemaVersion: 2;
+  activeWaterZone: FishingWaterZoneId;
+  rod: FishingRodId;
+  bait: FishingBaitId;
+  slots: FishingSlot[];
+  skill: FishingSkill;
+  dailyCatchDateKey: string;
+  dailyCatchCount: number;
+  dailyCastDateKey: string;
+  dailyCastCount: number;
+}
 
 export type VegetableCropId = 'tomato' | 'carrot' | 'cabbage' | 'onion' | 'potato' | 'chili';
 
@@ -352,6 +481,25 @@ export interface PartnerScheduleState {
   skills: Record<PartnerScheduleCategory, PartnerScheduleSkill>;
 }
 
+export interface WishingWellState {
+  schemaVersion: number;
+  dateKey: string;
+  freeWishesUsed: number;
+  paidWishesUsed: number;
+  paidWishBaseCost: number;
+  totalWishes: number;
+  legendaryCount: number;
+  hiddenCount: number;
+  pity: number;
+}
+
+export interface MultiverseState {
+  schemaVersion: number;
+  minerals: number;
+  energy: number;
+  lastRandomTravelAt: number;
+}
+
 export type AchievementId = string;
 
 export interface AchievementCounters {
@@ -383,8 +531,16 @@ export interface AchievementCounters {
   partnerScheduleClaimCountsByCategory: Partial<Record<PartnerScheduleCategory, number>>;
   partnerScheduleLongClaimCountsByCategory: Partial<Record<PartnerScheduleCategory, number>>;
   partnerScheduleCategoryRewardClaimCount: number;
+  fishingCatchCount: number;
+  fishingSpeciesCount: number;
+  fishingRareCount: number;
+  fishingDailyBest: number;
+  fishingStreakBest: number;
   companionYearActiveDateKeysByYear: Record<string, string[]>;
   modSwitchCount: number;
+  wishingWellWishCount: number;
+  wishingWellLegendaryCount: number;
+  wishingWellHiddenCount: number;
 }
 
 export interface AchievementState {
@@ -462,6 +618,9 @@ export interface PetState {
   neighborGiftCount?: number;
   neighbor?: NeighborReference;
   speciesBook: SpeciesBookState;
+  multiverse: MultiverseState;
+  fishing: FishingState;
+  wishingWell: WishingWellState;
 }
 
 export type PetAction = 'play' | 'clean' | 'sleep' | 'work';

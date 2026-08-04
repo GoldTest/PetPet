@@ -47,13 +47,17 @@ export const useGardenController = ({ petRef, setPet, commitPet, playAfterUnlock
       clearSlot(slotIndex);
       return;
     }
+    if (slot.state === 'withered') {
+      clearSlot(slotIndex);
+      return;
+    }
 
     playAfterUnlock('tap');
     setClearConfirm({
       slotIndex,
-      kind: slot.state === 'withered' ? 'clear' : 'remove',
+      kind: 'remove',
       treeId: slot.treeId,
-      coins: slot.state === 'withered' ? 0 : getGardenClearCost(current.garden.tools),
+      coins: getGardenClearCost(current.garden.tools),
     });
   };
 

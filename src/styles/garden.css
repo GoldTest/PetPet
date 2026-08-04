@@ -250,10 +250,48 @@
 }
 
 .garden-plot-grid {
+  position: relative;
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: 10px;
   margin: 20px 0 60px -58px;
+}
+
+.garden-plot__float {
+  position: absolute;
+  top: -10px;
+  left: 50%;
+  z-index: 6;
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1px;
+  pointer-events: none;
+  filter: drop-shadow(0 3px 8px rgba(0, 0, 0, 0.35));
+  animation: garden-float-up 1.4s ease-out forwards;
+}
+
+.garden-plot__float img {
+  width: 56px;
+  height: 56px;
+  object-fit: contain;
+  image-rendering: pixelated;
+}
+
+.garden-plot__float em {
+  font-style: normal;
+  font-weight: 850;
+  font-size: 0.85rem;
+  line-height: 1;
+  color: #fff;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.55);
+}
+
+@keyframes garden-float-up {
+  0% { opacity: 0; transform: translate(-50%, 8px) scale(0.7); }
+  20% { opacity: 1; transform: translate(-50%, 0) scale(1.05); }
+  70% { opacity: 1; transform: translate(-50%, -5px) scale(1); }
+  100% { opacity: 0; transform: translate(-50%, -34px) scale(1); }
 }
 
 .garden-plot {
@@ -434,9 +472,15 @@
   display: inline-flex;
   align-items: center;
   gap: 3px;
+  height: 14px;
+  white-space: nowrap;
   font-size: 0.6rem;
   font-weight: 750;
   color: rgba(60, 100, 50, 0.7);
+}
+
+.garden-plot__time--spacer {
+  visibility: hidden;
 }
 
 .garden-plot__badge {

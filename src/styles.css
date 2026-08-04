@@ -126,6 +126,7 @@ h1 {
 }
 
 .heart-pill {
+  position: relative;
   display: inline-flex;
   min-width: 78px;
   max-width: none;
@@ -138,6 +139,23 @@ h1 {
   color: #8c2c55;
   background: #ffe4ee;
   box-shadow: 0 10px 24px rgba(142, 45, 84, 0.12);
+  cursor: pointer;
+}
+
+.heart-pill:hover {
+  background: #ffd7e6;
+}
+
+.heart-pill i {
+  position: absolute;
+  top: 2px;
+  right: 2px;
+  width: 10px;
+  height: 10px;
+  border: 2px solid rgba(255, 255, 255, 0.9);
+  border-radius: 50%;
+  background: #df3d3d;
+  box-shadow: 0 0 0 2px rgba(223, 61, 61, 0.14);
 }
 
 .heart-pill svg {
@@ -180,7 +198,7 @@ h1 {
   background: rgba(224, 246, 233, 0.92);
 }
 
-.audio-button[aria-pressed="false"] {
+.audio-button--off {
   color: #6d7583;
   background: rgba(232, 237, 244, 0.92);
 }
@@ -430,6 +448,7 @@ h1 {
 
 .status-bar {
   --ring-color: #4f91df;
+  position: relative;
   display: grid;
   min-width: 0;
   justify-items: center;
@@ -489,11 +508,16 @@ h1 {
 }
 
 .status-bar__detail {
+  position: absolute;
+  top: -11px;
+  left: 50%;
+  transform: translateX(-50%);
+  max-width: 140%;
   overflow: hidden;
-  width: 100%;
   color: #647189;
   font-size: 0.62rem;
   font-weight: 800;
+  font-variant-numeric: tabular-nums;
   line-height: 1.1;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -1142,6 +1166,7 @@ h1 {
 .action-button:active,
 .icon-button:active,
 .coin-pill:active,
+.heart-pill:active,
 .primary-button:active,
 .danger-button:active,
 .text-button:active {
@@ -1665,7 +1690,7 @@ h1 {
   background: rgba(224, 246, 233, 0.92);
 }
 
-.audio-button[aria-pressed="false"] {
+.audio-button--off {
   color: #6d7583;
   background: rgba(232, 237, 244, 0.92);
 }

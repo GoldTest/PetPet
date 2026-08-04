@@ -149,6 +149,14 @@ export const defaultAchievementCounters = (): AchievementCounters => ({
   partnerScheduleCategoryRewardClaimCount: 0,
   companionYearActiveDateKeysByYear: {},
   modSwitchCount: 0,
+  wishingWellWishCount: 0,
+  wishingWellLegendaryCount: 0,
+  wishingWellHiddenCount: 0,
+  fishingCatchCount: 0,
+  fishingSpeciesCount: 0,
+  fishingRareCount: 0,
+  fishingDailyBest: 0,
+  fishingStreakBest: 0,
 });
 
 export const getCompanionYear = (createdAt: number, now = Date.now()) => {
@@ -312,6 +320,14 @@ export const normalizeAchievementState = (
       partnerScheduleCategoryRewardClaimCount: clampCount(isNumber(rawCounters.partnerScheduleCategoryRewardClaimCount) ? rawCounters.partnerScheduleCategoryRewardClaimCount : 0),
       companionYearActiveDateKeysByYear,
       modSwitchCount: clampCount(isNumber(rawCounters.modSwitchCount) ? rawCounters.modSwitchCount : 0),
+      wishingWellWishCount: clampCount(isNumber(rawCounters.wishingWellWishCount) ? rawCounters.wishingWellWishCount : 0),
+      wishingWellLegendaryCount: clampCount(isNumber(rawCounters.wishingWellLegendaryCount) ? rawCounters.wishingWellLegendaryCount : 0),
+      wishingWellHiddenCount: clampCount(isNumber(rawCounters.wishingWellHiddenCount) ? rawCounters.wishingWellHiddenCount : 0),
+      fishingCatchCount: clampCount(isNumber(rawCounters.fishingCatchCount) ? rawCounters.fishingCatchCount : 0),
+      fishingSpeciesCount: clampCount(isNumber(rawCounters.fishingSpeciesCount) ? rawCounters.fishingSpeciesCount : 0),
+      fishingRareCount: clampCount(isNumber(rawCounters.fishingRareCount) ? rawCounters.fishingRareCount : 0),
+      fishingDailyBest: clampCount(isNumber(rawCounters.fishingDailyBest) ? rawCounters.fishingDailyBest : 0),
+      fishingStreakBest: clampCount(isNumber(rawCounters.fishingStreakBest) ? rawCounters.fishingStreakBest : 0),
       compostStartCount: clampCount(isNumber(rawCounters.compostStartCount) ? rawCounters.compostStartCount : 0),
       compostCollectCount: clampCount(isNumber(rawCounters.compostCollectCount) ? rawCounters.compostCollectCount : 0),
       vegGardenPlantCount: clampCount(isNumber(rawCounters.vegGardenPlantCount) ? rawCounters.vegGardenPlantCount : 0),
@@ -700,6 +716,19 @@ export const incrementNaturalWake = (pet: PetState): PetState => ({
 export const incrementModSwitchCount = (pet: PetState): PetState => ({
   ...pet,
   achievements: { ...pet.achievements, counters: { ...pet.achievements.counters, modSwitchCount: pet.achievements.counters.modSwitchCount + 1 } },
+});
+
+export const incrementWishingWellWishCount = (pet: PetState, isLegendary: boolean, isHidden: boolean): PetState => ({
+  ...pet,
+  achievements: {
+    ...pet.achievements,
+    counters: {
+      ...pet.achievements.counters,
+      wishingWellWishCount: pet.achievements.counters.wishingWellWishCount + 1,
+      wishingWellLegendaryCount: pet.achievements.counters.wishingWellLegendaryCount + (isLegendary ? 1 : 0),
+      wishingWellHiddenCount: pet.achievements.counters.wishingWellHiddenCount + (isHidden ? 1 : 0),
+    },
+  },
 });
 
 export const incrementAchievementGardenPlant = (pet: PetState): PetState => ({

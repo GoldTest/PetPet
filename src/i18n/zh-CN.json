@@ -25,13 +25,21 @@
       "openShop": "打开商店",
       "heartsTitle": "小心心",
       "heartsAria": "小心心 {hearts} 个",
-      "audioOn": "关闭声音",
-      "audioOff": "打开声音",
+      "audioMenu": "声音设置",
       "settings": "设置",
       "openSettings": "打开设置",
       "openAchievements": "打开成就",
       "openBoostCards": "打开增益卡",
       "openModSwitch": "切换 Mod"
+    },
+    "audio": {
+      "title": "声音设置",
+      "summary": "只有背景音乐和操作音效两种声音",
+      "bgm": "背景音乐",
+      "bgmDesc": "房间、商店、睡眠时的环境音乐",
+      "sfx": "操作音效",
+      "sfxDesc": "点击、道具、宠物互动等提示音",
+      "close": "完成"
     },
     "dashboard": {
       "aria": "宠物数值",
@@ -71,7 +79,7 @@
       "unavailable": "不可使用",
       "partnerScheduleBusy": "伙伴正在进行日程，暂时不能使用这件道具。",
       "partnerScheduleBusyShort": "日程进行中",
-      "goGarden": "前往植物园",
+      "goGarden": "前往树场",
       "emptyCategory": "这一分类暂时没有道具。",
       "openCategoryShop": "去商店看看",
       "shop": "商店",
@@ -94,6 +102,90 @@
         "rate": "1 小心心 = {coins} 金币",
         "progress": "今日已兑换 {count}/{limit}",
         "button": "兑换"
+      }
+    },
+    "market": {
+      "aria": "万界之家",
+      "back": "返回首页",
+      "kicker": "万界之家",
+      "title": "万界之家",
+      "portalEnter": "点击传送",
+      "comingSoon": "筹备中",
+      "closed": "{name}的摊位还在筹备中，敬请期待～",
+      "backToStalls": "返回家",
+      "backToFacilities": "返回家中设施",
+      "closePanel": "收起",
+      "talkTo": "和{name}聊聊",
+      "facilities": {
+        "portal": "传送门",
+        "portalHint": "通往已锚点世界或随机探索未知世界",
+        "warehouse": "仓库",
+        "warehouseHint": "物品存取与跨世界管理",
+        "warehouseSoon": "仓库筹备中"
+      },
+      "portal": {
+        "title": "传送门",
+        "anchored": "已锚点世界",
+        "none": "尚未锚定任何世界，先试试随机传送去探索吧！",
+        "allAnchored": "所有世界都已被锚定，尽情探索吧！",
+        "random": "随机传送",
+        "randomHint": "消耗矿物与能量，随机前往未知世界探索",
+        "randomUnavailable": "矿物或能量不足",
+        "ticket": "矿物 {minerals} · 能量 {energy}",
+        "enter": "传送"
+      },
+      "tradehall": {
+        "title": "交易行",
+        "welcome": "欢迎来到交易行，看看今天有什么吧！"
+      },
+      "districts": {
+        "chinese": {
+          "name": "古风集市",
+          "subtitle": "灯笼高挂的古代街市"
+        },
+        "fantasy": {
+          "name": "星语集市",
+          "subtitle": "火把与帐篷的奇幻街市"
+        },
+        "modern": {
+          "name": "霓虹夜市",
+          "subtitle": "灯火通明的现代夜市"
+        }
+      },
+      "categories": {
+        "gifts": "礼物",
+        "cleaning": "清洁用品",
+        "food": "简易食物"
+      },
+      "merchants": {
+        "resident": {
+          "name": "珍妮",
+          "title": "常驻商人"
+        },
+        "garden": {
+          "name": "花见",
+          "title": "园艺商人"
+        },
+        "mystery": {
+          "name": "夜纱",
+          "title": "神秘商人"
+        }
+      },
+      "dialogues": {
+        "resident": {
+          "welcome": "欢迎光临～今天想给小家伙带点什么？",
+          "gifts": "送个小礼物，小家伙会开心一整天哦！",
+          "food": "这些简单小食最适合日常囤货了。",
+          "farewell": "常来坐坐呀，好货不等人～"
+        },
+        "garden": {
+          "waiting": "我的种子还在路上呢……再等等哦。",
+          "hint": "听说市场交易也在筹备中，到时候可热闹了。"
+        },
+        "mystery": {
+          "waiting": "呵呵……好东西总要等些机缘。",
+          "hint": "等你准备好了，我这里还有不少秘密呢。"
+        }
       }
     },
     "settings": {
@@ -276,7 +368,7 @@
       "boostCardsHint": "每日收益加成",
       "boostCardsActive": "{card}生效中",
       "weatherAria": "今日天气：{weather}",
-      "garden": "树园",
+      "garden": "树场",
       "gardenHint": "种下与收获",
       "gardenReady": "有树可收获",
       "gardenWithered": "有枯树待清理",
@@ -284,11 +376,19 @@
       "vegGardenHint": "种菜收获",
       "shop": "商店",
       "shopHint": "每日特价",
-      "partnerSchedule": "伙伴日程",
-      "partnerScheduleHint": "安排今天的活动",
+      "market": "万界之家",
+      "marketHint": "诸天万界的家",
+      "marketTrade": "万界交易行",
+      "marketTradeHint": "交易买卖",
+      "partnerSchedule": "日程",
+      "partnerScheduleHint": "今天的活动",
       "partnerScheduleLocked": "Lv.{level} 解锁",
       "partnerScheduleReady": "有活动收获待领取",
-      "partnerScheduleActive": "日程进行中"
+      "partnerScheduleActive": "日程进行中",
+      "wishingWell": "许愿井",
+      "wishingWellHint": "每日许愿",
+      "fishing": "钓鱼",
+      "fishingHint": "水边休闲"
     },
     "partnerSchedule": {
       "aria": "伙伴日程",
@@ -593,7 +693,7 @@
         "schedule": "日程",
         "care": "照顾",
         "daily": "日常",
-        "garden": "植物园",
+        "garden": "树场",
         "shop": "商店",
         "inventory": "背包",
         "pomodoro": "番茄钟",
@@ -620,7 +720,7 @@
       "aria": "种植页面",
       "back": "返回",
       "kicker": "Garden",
-      "title": "植物园",
+      "title": "树场",
       "prevSlot": "上一块地",
       "nextSlot": "下一块地",
       "slotsAria": "地块",
@@ -734,7 +834,7 @@
       "itemOwned": "背包 x{count}",
       "waterFree": "免费 · 缩短 {percent}%",
       "coinDropTitle": "收获 {coins} 金币",
-      "compensationGiftLabel": "领取植物园补偿 {coins} 金币",
+      "compensationGiftLabel": "领取树场补偿 {coins} 金币",
       "compensationGiftCoins": "+{coins}",
       "compostTitle": "堆肥桶",
       "compostLevel": "Lv.{level}",
@@ -864,10 +964,123 @@
       },
       "chooseSeedHint": "选择一种种子播种",
       "plantHint": "已选 {crop} · 剩余 {count} 颗",
-      
       "waterHint": "点击生长中的作物浇水，缩短 {percent}%（每日每格一次）",
       "idleHint": "点种子开始播种，或用水壶浇水，成熟的作物点击即可收获",
       "seasonBonus": "当季作物 · 生长加快 20%"
+    },
+    "fishing": {
+      "title": "钓鱼",
+      "kicker": "🎣 水边垂钓",
+      "btnCast": "抛竿",
+      "btnReel": "收竿！",
+      "btnSelectZone": "选择水域",
+      "btnSelectRod": "选择鱼竿",
+      "btnSelectBait": "选择鱼饵",
+      "btnEncyclopedia": "鱼类图鉴",
+      "btnShop": "商店",
+      "slotIdle": "就绪",
+      "slotCasting": "抛竿中…",
+      "slotWaiting": "等待咬钩…",
+      "slotBitten": "咬钩了！快收竿！",
+      "slotLost": "鱼跑了",
+      "slotJammed": "线卡住了",
+      "timeDawn": "清晨",
+      "timeDay": "白天",
+      "timeDusk": "黄昏",
+      "timeNight": "夜晚",
+      "timeDawnBonus": "清晨鱼群活跃",
+      "timeNightBonus": "深夜稀有鱼出没",
+      "timeNeutral": "时段无加成",
+      "weatherMatch": "天气匹配",
+      "weatherNeutral": "天气无影响",
+      "modalZoneTitle": "选择水域",
+      "modalRodTitle": "选择鱼竿",
+      "modalBaitTitle": "选择鱼饵",
+      "modalEncyclopediaTitle": "鱼类图鉴",
+      "zoneUnlock": "Lv.{level} 解锁",
+      "zones": {
+        "pond": {
+          "name": "后院池塘",
+          "desc": "平静的池塘，适合新手"
+        },
+        "river": {
+          "name": "城外河流",
+          "desc": "流动的河水，鱼种更丰富"
+        },
+        "lake": {
+          "name": "高山湖泊",
+          "desc": "深邃的湖泊，稀有鱼出没"
+        },
+        "deep_sea": {
+          "name": "深海远海",
+          "desc": "神秘的深海，传说鱼栖息地"
+        }
+      },
+      "rods": {
+        "bamboo": {
+          "name": "竹竿",
+          "desc": "简易竹竿，仅适用于池塘"
+        },
+        "iron": {
+          "name": "铁制鱼竿",
+          "desc": "铁制鱼竿，可用河流"
+        },
+        "fiber": {
+          "name": "玻璃纤维竿",
+          "desc": "玻璃纤维竿，可用湖泊"
+        },
+        "carbon": {
+          "name": "碳素竿",
+          "desc": "碳素竿，可用深海"
+        },
+        "titanium": {
+          "name": "钛合金竿",
+          "desc": "钛合金竿，全水域"
+        },
+        "sea_god": {
+          "name": "海神竿",
+          "desc": "传说鱼竿，全水域通吃"
+        }
+      },
+      "biteRate": "咬钩率",
+      "rareBonus": "稀有加成",
+      "activeCasts": "正在钓鱼",
+      "dailyCatchLimit": "今日钓鱼次数已达上限",
+      "slotBusy": "该钓位正在使用中",
+      "invalidSlot": "无效的钓位",
+      "castSuccess": "抛竿成功，静待鱼儿上钩…",
+      "notReeling": "现在没有鱼上钩",
+      "catchSuccess": "成功钓到了{fish}！",
+      "rarity": {
+        "common": "普通",
+        "rare": "稀有",
+        "epic": "史诗",
+        "legend": "传说"
+      }
+    },
+    "wishingWell": {
+      "title": "许愿池",
+      "kicker": "✨ 许愿池",
+      "freeWish": "免费许愿 ({remaining}/{total})",
+      "paidWish": "付费许愿 ({cost} 金币)",
+      "freeWishReady": "今天还可以免费许愿 1 次！",
+      "freeWishDone": "今天的免费许愿已用完",
+      "paidWishDisabled": "金币不足或次数已用完",
+      "wishButton": "抛一枚硬币 ✨",
+      "wishResult": "许愿结果",
+      "confirm": "开心收下",
+      "stats": "许愿统计",
+      "totalWishes": "总许愿次数：{count}",
+      "legendaryCount": "传说级：{count}",
+      "hiddenCount": "隐藏级：{count}",
+      "pityMeter": "幸运值：{pity}/{max}",
+      "pityGuaranteed": "下次必出传说！",
+      "events": {
+        "freeWish": "免费许愿，获得了{reward}！",
+        "paidWish": "花费 {cost} 金币许愿，获得了{reward}！",
+        "notEnoughCoins": "金币不够了…",
+        "dailyLimit": "今天的许愿次数已用完，明天再来吧。"
+      }
     }
   },
   "pet": {
@@ -1030,8 +1243,8 @@
           "summary": "收集后可兑换花园装饰（预留）"
         },
         "garden_token": {
-          "name": "树园代币",
-          "summary": "树园专属货币，可用于树园装饰"
+          "name": "树场代币",
+          "summary": "树场专属货币，可用于树场装饰"
         },
         "tomato": {
           "name": "番茄",
@@ -1080,6 +1293,170 @@
         "chili_seed": {
           "name": "辣椒种子",
           "summary": "种子袋（1 袋 9 颗），种下后可收获辣椒"
+        },
+        "world_anchor_chinese": {
+          "name": "古风集市锚点",
+          "summary": "锚定古风集市的世界信标，解锁定向传送"
+        },
+        "world_anchor_fantasy": {
+          "name": "星语集市锚点",
+          "summary": "锚定星语集市的世界信标，解锁定向传送"
+        },
+        "world_anchor_modern": {
+          "name": "霓虹夜市锚点",
+          "summary": "锚定霓虹夜市的世界信标，解锁定向传送"
+        },
+        "lucky_charm": {
+          "name": "幸运护符",
+          "summary": "蕴藏着好运的小饰品，使用后心情微升。"
+        },
+        "star_shard": {
+          "name": "星之碎片",
+          "summary": "从许愿井深处捞起的星辉碎片，使用后全面提升。"
+        },
+        "wishing_well_coin": {
+          "name": "许愿井纪念币",
+          "summary": "极其稀有的许愿井纪念币，证明你曾获得过隐藏级奖励！"
+        },
+        "crucian_carp": {
+          "name": "鲫鱼",
+          "summary": "池塘常见的小鱼"
+        },
+        "grass_carp": {
+          "name": "草鱼",
+          "summary": "以水草为食的淡水鱼"
+        },
+        "silver_carp": {
+          "name": "鲢鱼",
+          "summary": "银白色的淡水鱼"
+        },
+        "common_carp": {
+          "name": "鲤鱼",
+          "summary": "常见的鲤鱼"
+        },
+        "catfish": {
+          "name": "鲶鱼",
+          "summary": "长着胡子的鲶鱼"
+        },
+        "shrimp": {
+          "name": "鲜虾",
+          "summary": "活蹦乱跳的小虾"
+        },
+        "crab": {
+          "name": "螃蟹",
+          "summary": "挥舞双钳的螃蟹"
+        },
+        "perch": {
+          "name": "鲈鱼",
+          "summary": "味道鲜美的鲈鱼"
+        },
+        "bream": {
+          "name": "鳊鱼",
+          "summary": "扁平的鳊鱼"
+        },
+        "yellow_jacket": {
+          "name": "黄辣丁",
+          "summary": "黄色的淡水小鱼"
+        },
+        "trout": {
+          "name": "鳟鱼",
+          "summary": "生长在高海拔水域的鳟鱼"
+        },
+        "salmon": {
+          "name": "三文鱼",
+          "summary": "珍贵的三文鱼"
+        },
+        "octopus": {
+          "name": "章鱼",
+          "summary": "八爪深海软体动物"
+        },
+        "squid": {
+          "name": "鱿鱼",
+          "summary": "长条状深海鱿鱼"
+        },
+        "tuna": {
+          "name": "金枪鱼",
+          "summary": "力大无穷的深海金枪鱼"
+        },
+        "marlin": {
+          "name": "旗鱼",
+          "summary": "速度极快的深海旗鱼"
+        },
+        "ancient_koi": {
+          "name": "古银鲤",
+          "summary": "传说中的古银鲤，百年难遇"
+        },
+        "star_koi": {
+          "name": "星辉鲤",
+          "summary": "带有星光光芒的传说鲤鱼"
+        },
+        "mythical_fish": {
+          "name": "神话之鱼",
+          "summary": "从神话中现身的传说之鱼，极其罕见"
+        },
+        "fish_bone": {
+          "name": "鱼骨",
+          "summary": "钓鱼后留下的鱼骨，可作肥料"
+        },
+        "seashell": {
+          "name": "贝壳",
+          "summary": "从深海带上的贝壳"
+        },
+        "pearl": {
+          "name": "珍珠",
+          "summary": "深海中偶尔发现的珍珠"
+        },
+        "fish_roe": {
+          "name": "鱼子",
+          "summary": "珍贵的鱼子，可入料理"
+        },
+        "worm": {
+          "name": "蚯蚓",
+          "summary": "基础鱼饵，全水域通用"
+        },
+        "rice_ball": {
+          "name": "饭团",
+          "summary": "用饭团当鱼饵，钓率略升"
+        },
+        "insect_bait": {
+          "name": "昆虫饵",
+          "summary": "昆虫鱼饵，吸引池塘和河流鱼"
+        },
+        "glow_bait": {
+          "name": "发光饵",
+          "summary": "发光鱼饵，深海专用"
+        },
+        "magic_bait": {
+          "name": "魔法鱼饵",
+          "summary": "魔法鱼饵，稀有鱼吸引率大幅提升"
+        },
+        "bamboo_rod": {
+          "name": "竹竿",
+          "summary": "简易竹竿，仅适用于池塘"
+        },
+        "iron_rod": {
+          "name": "铁制鱼竿",
+          "summary": "铁制鱼竿，可钓河流"
+        },
+        "fiber_rod": {
+          "name": "玻璃纤维竿",
+          "summary": "玻璃纤维竿，可钓湖泊"
+        },
+        "carbon_rod": {
+          "name": "碳素竿",
+          "summary": "碳素竿，可钓深海"
+        },
+        "titanium_rod": {
+          "name": "钛合金竿",
+          "summary": "钛合金竿，全水域可用"
+        },
+        "sea_god_rod": {
+          "name": "海神竿",
+          "summary": "传说鱼竿，全水域通吃"
+        },
+        "fishing_token": {
+          "name": "钓鱼币",
+          "summary": "钓鱼专用代币"
         }
       },
       "categories": {
@@ -1345,7 +1722,7 @@
       "dailyCoins": "每日登录礼物：金币 +{coins}。",
       "dailyItem": "每日登录礼物：背包里多了一件惊喜道具。",
       "helpPageGift": "已领取玩法说明赠礼，金币 +{coins}。",
-      "gardenCompensation": "已领取植物园补偿，金币 +{coins}。",
+      "gardenCompensation": "已领取树场补偿，金币 +{coins}。",
       "anniversary": "今天是和 {name} 相遇的日子，纪念日奖励：金币 +{coins}，小心心 +{hearts}，闪亮贴纸 +1。",
       "monthlyGift": "新的月份开始了，月初礼物：金币 +{coins}，还有一份水果。",
       "dailyWithStipend": "每日登录礼物：金币 +{coins}（含成就津贴 +{stipend}）。",
@@ -1405,6 +1782,12 @@
       "claimed": "回归补给已领取，金币 +{coins}，背包里也多了照顾道具。",
       "notReady": "先完成回归恢复任务，再领取补给。",
       "alreadyClaimed": "回归补给已经领取过了。"
+    },
+    "multiverse": {
+      "randomTravel": {
+        "newAnchor": "随机传送抵达了「{world}」，探索发现了世界锚点！",
+        "visited": "随机传送抵达了「{world}」。"
+      }
     },
     "achievements": {
       "events": {
@@ -1534,23 +1917,23 @@
         },
         "garden_first_plant": {
           "title": "初次播种",
-          "description": "在植物园成功种下 1 棵树。"
+          "description": "在树场成功种下 1 棵树。"
         },
         "garden_first_harvest": {
           "title": "第一篮收获",
-          "description": "在植物园完成第 1 次收获。"
+          "description": "在树场完成第 1 次收获。"
         },
         "garden_water_20": {
           "title": "勤快浇水",
-          "description": "在植物园成功浇水 20 次。"
+          "description": "在树场成功浇水 20 次。"
         },
         "garden_harvest_30": {
           "title": "大丰收",
-          "description": "在植物园累计收获 30 次。"
+          "description": "在树场累计收获 30 次。"
         },
         "garden_harvest_100": {
           "title": "百次丰收",
-          "description": "在植物园累计收获 100 次。"
+          "description": "在树场累计收获 100 次。"
         },
         "garden_tree_catalogue": {
           "title": "园艺大师",
@@ -1558,7 +1941,7 @@
         },
         "garden_all_slots": {
           "title": "花园之主",
-          "description": "解锁植物园的全部 5 个栏位。"
+          "description": "解锁树场的全部 5 个栏位。"
         },
         "garden_tools_max": {
           "title": "工具专家",
@@ -1937,6 +2320,35 @@
       "waterSuccess": "浇水完成，生长时间缩短 {percent}%。",
       "cannotHarvest": "这里还没有可以收获的作物。",
       "harvestSuccess": "收获了 {count} 个{crop}。"
+    },
+    "wishingWell": {
+      "rewards": {
+        "common": "普通奖励",
+        "rare": "稀有奖励",
+        "epic": "史诗奖励",
+        "legend": "传说奖励！",
+        "hidden": "🌟 隐藏奖励！！"
+      },
+      "common": {
+        "label": "普通",
+        "color": "#9e9e9e"
+      },
+      "rare": {
+        "label": "稀有",
+        "color": "#4fc3f7"
+      },
+      "epic": {
+        "label": "史诗",
+        "color": "#ce93d8"
+      },
+      "legend": {
+        "label": "传说",
+        "color": "#ffd54f"
+      },
+      "hidden": {
+        "label": "隐藏",
+        "color": "#ff6f00"
+      }
     }
   }
 }

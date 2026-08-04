@@ -1,0 +1,452 @@
+.wishing-well-page {
+  padding-top: 4px;
+}
+
+.wishing-well-page__header {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 10px;
+}
+
+.wishing-well-page__heading {
+  display: grid;
+  min-width: 0;
+  gap: 2px;
+}
+
+.wishing-well-page__heading > span {
+  color: var(--text-muted);
+  font-size: 0.78rem;
+  letter-spacing: 0.04em;
+}
+
+.wishing-well-page__wallet {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 32px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  padding: 4px 12px;
+  background: var(--surface);
+  white-space: nowrap;
+}
+
+.wishing-well-page__wallet img {
+  width: 16px;
+  height: 16px;
+}
+
+.wishing-well-page__well {
+  position: relative;
+  margin-top: 14px;
+  border-radius: 18px;
+  overflow: hidden;
+  min-height: 320px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(180deg, #0a1628 0%, #1a2a4a 40%, #0d1f3c 100%);
+  box-shadow: var(--shadow), inset 0 0 60px rgba(100, 180, 255, 0.1);
+}
+
+.wishing-well-page__water {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.wishing-well-page__ripple {
+  position: absolute;
+  width: 200px;
+  height: 200px;
+  border: 2px solid rgba(100, 180, 255, 0.15);
+  border-radius: 50%;
+  animation: ripple 3s ease-out infinite;
+}
+
+.wishing-well-page__ripple:nth-child(2) {
+  animation-delay: 1s;
+  width: 160px;
+  height: 160px;
+}
+
+.wishing-well-page__ripple:nth-child(3) {
+  animation-delay: 2s;
+  width: 240px;
+  height: 240px;
+}
+
+@keyframes ripple {
+  0% {
+    transform: scale(0.5);
+    opacity: 0.8;
+  }
+  100% {
+    transform: scale(2);
+    opacity: 0;
+  }
+}
+
+.wishing-well-page__glow {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse at 50% 60%, rgba(100, 180, 255, 0.08) 0%, transparent 60%);
+  pointer-events: none;
+}
+
+.wishing-well-page__coin {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 64px;
+  height: 64px;
+  margin-left: -32px;
+  margin-top: -32px;
+  z-index: 2;
+  pointer-events: none;
+  opacity: 0;
+  perspective: 400px;
+  transform-style: preserve-3d;
+}
+
+.wishing-well-page__coin img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  backface-visibility: visible;
+}
+
+.wishing-well-page__coin img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.wishing-well-page__coin--rise {
+  opacity: 1;
+  animation: coinRise 0.5s ease-out forwards;
+}
+
+.wishing-well-page__coin--fall {
+  opacity: 1;
+  animation: coinFall 0.3s ease-in forwards;
+}
+
+.wishing-well-page__coin--splash {
+  opacity: 0;
+  animation: coinSplash 0.4s ease-out forwards;
+}
+
+@keyframes coinRise {
+  0% {
+    opacity: 1;
+    transform: translateY(0) rotateX(0deg) scale(0.5);
+  }
+  50% {
+    transform: translateY(-90px) rotateX(540deg) scale(1);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(-120px) rotateX(720deg) scale(0.8);
+  }
+}
+
+@keyframes coinFall {
+  0% {
+    opacity: 1;
+    transform: translateY(-120px) rotateX(720deg) scale(0.8);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(20px) rotateX(900deg) scale(0.6);
+  }
+}
+
+@keyframes coinSplash {
+  0% {
+    opacity: 1;
+    transform: translateY(20px) rotateX(900deg) scale(0.6);
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(0) rotateX(1080deg) scale(0);
+  }
+}
+
+.wishing-well-page__splash {
+  position: absolute;
+  left: 50%;
+  top: 60%;
+  width: 0;
+  height: 0;
+  z-index: 2;
+  pointer-events: none;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(100, 180, 255, 0.6) 0%, transparent 70%);
+}
+
+.wishing-well-page__coin--splash ~ .wishing-well-page__splash {
+  width: 80px;
+  height: 80px;
+  margin-left: -40px;
+  margin-top: -40px;
+  animation: splashExpand 0.4s ease-out forwards;
+}
+
+@keyframes splashExpand {
+  0% {
+    width: 0;
+    height: 0;
+    opacity: 1;
+  }
+  100% {
+    width: 80px;
+    height: 80px;
+    margin-left: -40px;
+    margin-top: -40px;
+    opacity: 0;
+  }
+}
+
+.wishing-well-page__well-content {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 24px;
+  padding: 40px 20px;
+  width: 100%;
+  max-width: 320px;
+}
+
+.wishing-well-page__wish-info {
+  text-align: center;
+}
+
+.wishing-well-page__wish-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--text-muted);
+  font-size: 0.85rem;
+  padding: 8px 16px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.wishing-well-page__actions {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  width: 100%;
+}
+
+.wishing-well-page__wish-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  padding: 14px 20px;
+  border: none;
+  border-radius: 14px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  background: linear-gradient(135deg, #4fc3f7, #2196f3);
+  color: #fff;
+  box-shadow: 0 4px 15px rgba(33, 150, 243, 0.3);
+  transition: transform 0.15s, box-shadow 0.15s, opacity 0.15s;
+}
+
+.wishing-well-page__wish-btn:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(33, 150, 243, 0.4);
+}
+
+.wishing-well-page__wish-btn:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+.wishing-well-page__wish-btn--disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+.wishing-well-page__wish-btn--paid {
+  background: linear-gradient(135deg, #ffa726, #ff9800);
+  box-shadow: 0 4px 15px rgba(255, 152, 0, 0.3);
+  font-size: 0.9rem;
+}
+
+.wishing-well-page__wish-btn--paid:hover:not(:disabled) {
+  box-shadow: 0 6px 20px rgba(255, 152, 0, 0.4);
+}
+
+.wishing-well-page__wish-btn small {
+  display: block;
+  font-size: 0.72rem;
+  font-weight: 400;
+  opacity: 0.8;
+}
+
+.wishing-well-page__well--animating .wishing-well-page__wish-btn {
+  opacity: 0.5;
+  pointer-events: none;
+}
+
+.wishing-well-page__well--animating .wishing-well-page__water {
+  animation: wellSplash 1.2s ease-out;
+}
+
+@keyframes wellSplash {
+  0% {
+    transform: scale(1);
+  }
+  20% {
+    transform: scale(1.08);
+    filter: brightness(1.3);
+  }
+  60% {
+    transform: scale(1.12);
+    filter: brightness(1.5);
+  }
+  100% {
+    transform: scale(1);
+    filter: brightness(1);
+  }
+}
+
+.wishing-well-page__well--has-result {
+  background: linear-gradient(180deg, #0a1628 0%, #1a2a4a 40%, #0d1f3c 100%);
+}
+
+.wishing-well-page__result {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  text-align: center;
+  animation: resultPop 0.5s ease-out;
+}
+
+@keyframes resultPop {
+  0% {
+    transform: scale(0.5);
+    opacity: 0;
+  }
+  60% {
+    transform: scale(1.1);
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+.wishing-well-page__result-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(255, 255, 255, 0.1) 0%, transparent 70%);
+  color: var(--rarity-color, #fff);
+  animation: sparkle 1s ease-in-out infinite;
+}
+
+@keyframes sparkle {
+  0%, 100% {
+    transform: scale(1);
+    opacity: 0.8;
+  }
+  50% {
+    transform: scale(1.15);
+    opacity: 1;
+  }
+}
+
+.wishing-well-page__result-title {
+  font-size: 1.3rem;
+  font-weight: 700;
+  margin: 0;
+}
+
+.wishing-well-page__result-label {
+  font-size: 0.9rem;
+  color: var(--text-muted);
+  margin: 0;
+}
+
+.wishing-well-page__result-items {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 8px;
+  margin: 8px 0;
+}
+
+.wishing-well-page__result-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 6px 12px;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.06);
+  font-size: 0.85rem;
+  font-weight: 500;
+}
+
+.wishing-well-page__result .primary-button {
+  margin-top: 8px;
+}
+
+.wishing-well-page__stats {
+  margin-top: 16px;
+  padding: 16px;
+  border-radius: 14px;
+  background: var(--surface);
+  border: 1px solid var(--line);
+}
+
+.wishing-well-page__stats h3 {
+  margin: 0 0 12px;
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  font-weight: 500;
+  letter-spacing: 0.03em;
+}
+
+.wishing-well-page__stats-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+}
+
+.wishing-well-page__stat {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  text-align: center;
+}
+
+.wishing-well-page__stat-value {
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: var(--text);
+}
+
+.wishing-well-page__stat-label {
+  font-size: 0.7rem;
+  color: var(--text-muted);
+  line-height: 1.2;
+}

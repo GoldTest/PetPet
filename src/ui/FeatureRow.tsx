@@ -1,46 +1,40 @@
-import { BadgeCheck, CalendarClock, Leaf, PackageOpen, Sprout, Store, Timer } from 'lucide-react';
-import { canClaimBoostCardDailyCoins, getActiveBoostCard, partnerScheduleUnlockLevel, type PetState } from '../core/pet';
+import { Anchor, CalendarClock, Fish, Leaf, Orbit, PackageOpen, Sparkles, Sprout, Store } from 'lucide-react';
+import { partnerScheduleUnlockLevel, type PetState } from '../core/pet';
 import { t } from '../i18n';
-import { formatPomodoroTime } from './time';
 
 interface FeatureRowProps {
   pet: PetState;
   inventoryKindCount: number;
-  isPomodoroOpen: boolean;
-  pomodoroRemainingMs: number;
-  pomodoroStartTitle?: string;
   gardenReminder?: 'ready' | 'withered';
+  vegGardenReminder?: 'ready';
   hasShopDiscount: boolean;
   onOpenInventory: () => void;
-  onOpenPomodoro: () => void;
   onOpenGarden: () => void;
   onOpenVegGarden: () => void;
-  onOpenBoostCards: () => void;
+  onOpenMarket: () => void;
+  onOpenMarketTrade: () => void;
   onOpenShop: () => void;
   onOpenPartnerSchedule: () => void;
+  onOpenWishingWell: () => void;
+  onOpenFishing: () => void;
 }
 
 export const FeatureRow = ({
   pet,
   inventoryKindCount,
-  isPomodoroOpen,
-  pomodoroRemainingMs,
-  pomodoroStartTitle,
   gardenReminder,
+  vegGardenReminder,
   hasShopDiscount,
   onOpenInventory,
-  onOpenPomodoro,
   onOpenGarden,
   onOpenVegGarden,
-  onOpenBoostCards,
+  onOpenMarket,
+  onOpenMarketTrade,
   onOpenShop,
   onOpenPartnerSchedule,
+  onOpenWishingWell,
+  onOpenFishing,
 }: FeatureRowProps) => {
-  const activeBoostCardId = getActiveBoostCard(pet);
-  const canClaimBoostCoins = canClaimBoostCardDailyCoins(pet);
-  const boostCardHint = activeBoostCardId
-    ? t('ui.features.boostCardsActive', { card: t(`ui.boostCards.cards.${activeBoostCardId}.name`) })
-    : t('ui.features.boostCardsHint');
   const gardenHint = gardenReminder === 'ready'
     ? t('ui.features.gardenReady')
     : gardenReminder === 'withered'
@@ -67,19 +61,31 @@ export const FeatureRow = ({
 
       <button
         type="button"
-        className={canClaimBoostCoins ? 'feature-button feature-button--boost-card feature-button--active' : 'feature-button feature-button--boost-card'}
-        onClick={onOpenBoostCards}
-        title={t('ui.top.openBoostCards')}
+        className={pet.partnerSchedule.active || pet.partnerSchedule.pendingResult ? 'feature-button feature-button--partner-schedule feature-button--active' : 'feature-button feature-button--partner-schedule'}
+        disabled={!isPartnerScheduleUnlocked}
+        onClick={onOpenPartnerSchedule}
+        title={partnerScheduleHint}
       >
-        <BadgeCheck size={20} aria-hidden="true" />
+        <CalendarClock size={20} aria-hidden="true" />
         <span>
-          {t('ui.features.boostCards')}
-          <small>{boostCardHint}</small>
+          {t('ui.features.partnerSchedule')}
+          <small>{partnerScheduleHint}</small>
         </span>
-        {canClaimBoostCoins && <i aria-hidden="true" />}
+        {pet.partnerSchedule.pendingResult ? <i aria-hidden="true" /> : null}
       </button>
 
-
+      <button
+        type="button"
+        className={vegGardenReminder ? 'feature-button feature-button--veg-garden feature-button--active' : 'feature-button feature-button--veg-garden'}
+        onClick={onOpenVegGarden}
+      >
+        <Leaf size={20} aria-hidden="true" />
+        <span>
+          {t('ui.features.vegGarden')}
+          <small>{t('ui.features.vegGardenHint')}</small>
+        </span>
+        {vegGardenReminder && <i aria-hidden="true" />}
+      </button>
 
       <button
         type="button"
@@ -96,29 +102,26 @@ export const FeatureRow = ({
 
       <button
         type="button"
-        className="feature-button feature-button--veg-garden"
-        onClick={onOpenVegGarden}
+        className="feature-button feature-button--wishing-well"
+        onClick={onOpenWishingWell}
       >
-        <Leaf size={20} aria-hidden="true" />
+        <Sparkles size={20} aria-hidden="true" />
         <span>
-          {t('ui.features.vegGarden')}
-          <small>{t('ui.features.vegGardenHint')}</small>
+          {t('ui.features.wishingWell')}
+          <small>{t('ui.features.wishingWellHint')}</small>
         </span>
       </button>
 
       <button
         type="button"
-        className={pet.pomodoro.isRunning ? 'feature-button feature-button--pomodoro feature-button--active' : 'feature-button feature-button--pomodoro'}
-        title={pomodoroStartTitle}
-        aria-pressed={isPomodoroOpen}
-        onClick={onOpenPomodoro}
+        className="feature-button feature-button--fishing"
+        onClick={onOpenFishing}
       >
-        <Timer size={20} aria-hidden="true" />
+        <Fish size={20} aria-hidden="true" />
         <span>
-          {t('ui.features.pomodoro')}
-          <small>{pet.pomodoro.isRunning ? t('ui.pomodoro.running') : formatPomodoroTime(pomodoroRemainingMs)}</small>
+          {t('ui.features.fishing')}
+          <small>{t('ui.features.fishingHint')}</small>
         </span>
-        {pet.pomodoro.isRunning && <i aria-hidden="true" />}
       </button>
 
       <button
@@ -136,17 +139,26 @@ export const FeatureRow = ({
 
       <button
         type="button"
-        className={pet.partnerSchedule.active || pet.partnerSchedule.pendingResult ? 'feature-button feature-button--partner-schedule feature-button--active' : 'feature-button feature-button--partner-schedule'}
-        disabled={!isPartnerScheduleUnlocked}
-        onClick={onOpenPartnerSchedule}
-        title={partnerScheduleHint}
+        className="feature-button feature-button--market"
+        onClick={onOpenMarket}
       >
-        <CalendarClock size={20} aria-hidden="true" />
+        <Orbit size={20} aria-hidden="true" />
         <span>
-          {t('ui.features.partnerSchedule')}
-          <small>{partnerScheduleHint}</small>
+          {t('ui.features.market')}
+          <small>{t('ui.features.marketHint')}</small>
         </span>
-        {pet.partnerSchedule.pendingResult ? <i aria-hidden="true" /> : null}
+      </button>
+
+      <button
+        type="button"
+        className="feature-button feature-button--market-trade"
+        onClick={onOpenMarketTrade}
+      >
+        <Store size={20} aria-hidden="true" />
+        <span>
+          {t('ui.features.marketTrade')}
+          <small>{t('ui.features.marketTradeHint')}</small>
+        </span>
       </button>
     </div>
   );

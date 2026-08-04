@@ -31,9 +31,9 @@ export const StatusBar = ({ label, value, max = 100, detail, tone }: StatusBarPr
           />
         </svg>
         <strong>{clampedValue}</strong>
+        {detail && <small className="status-bar__detail">{detail}</small>}
       </div>
       <span className="status-bar__label">{label}</span>
-      {detail && <small className="status-bar__detail">{detail}</small>}
     </div>
   );
 };

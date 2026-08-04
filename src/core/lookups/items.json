@@ -47,7 +47,10 @@
     { "id": "potato_seed", "category": "garden", "price": 90, "effects": {}, "tags": ["garden", "vegetable_seed"], "packSize": 9 },
     { "id": "chili_seed", "category": "garden", "price": 90, "effects": {}, "tags": ["garden", "vegetable_seed"], "packSize": 9 },
     { "id": "wood_plank", "category": "garden", "price": 0, "effects": {}, "tags": ["garden", "material"] },
-    { "id": "withered_fragment", "category": "garden", "price": 0, "effects": {}, "tags": ["garden", "compost"] }
+    { "id": "withered_fragment", "category": "garden", "price": 0, "effects": {}, "tags": ["garden", "compost"] },
+    { "id": "lucky_charm", "category": "item", "price": 0, "effects": { "mood": 10 }, "tags": ["material", "wishing_well"] },
+    { "id": "star_shard", "category": "item", "price": 0, "effects": { "mood": 20, "energy": 10, "health": 10 }, "tags": ["material", "wishing_well"] },
+    { "id": "wishing_well_coin", "category": "item", "price": 0, "effects": {}, "tags": ["material", "wishing_well", "special"] }
   ],
   "categories": ["food", "item", "care", "garden"],
   "favoriteFoodIds": ["pig_trotter", "strawberry_cake", "ad_milk"],

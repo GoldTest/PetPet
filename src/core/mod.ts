@@ -77,6 +77,9 @@ export const itemImageKeys = [
   'skill_fruit',
   'wish_fragment',
   'garden_token',
+  'world_anchor_chinese',
+  'world_anchor_fantasy',
+  'world_anchor_modern',
 ] as const satisfies readonly BuiltinItemId[];
 
 export type PetStatusImageKey = (typeof petStatusImageKeys)[number];

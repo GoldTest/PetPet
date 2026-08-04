@@ -1,12 +1,16 @@
 import { useCallback, useEffect, useMemo, useRef, useState, type ChangeEvent } from 'react';
-import { Heart, Layers, Settings, Trophy, Volume2, VolumeX } from 'lucide-react';
+import { Heart, Layers, Settings, Trophy, Volume1, Volume2, VolumeX } from 'lucide-react';
 import {
   buyBoostCard,
+  canClaimBoostCardDailyCoins,
   claimBoostCardDailyCoins,
   getDailyShopDiscountInfo,
   getGardenReminder,
+  getVegGardenReminder,
   cancelPartnerSchedule,
   claimPartnerScheduleResult,
+  castFishingRod,
+  reelInFish,
   applyPetAction,
   claimAllAchievementRewards,
   claimAchievementReward,
@@ -59,12 +63,22 @@ import {
   type PartnerScheduleRewardChoice,
   type PomodoroDurations,
   type ShopCategory,
+  merchantDefinitions,
+  performRandomTravel,
+  advanceFishing,
+  performWish,
+  type MarketDistrictId,
+  type FishingWaterZoneId,
+  type FishingRodId,
+  type FishingBaitId,
 } from '../core/pet';
 import { currencyIcon, giftBoxIcon, goodEndingImage, resolveItemIcons, resolvePetActivityImages, resolvePetStatusImages } from '../assets';
 import {
-  getAudioEnabled,
+  getBgmEnabled,
+  getSfxEnabled,
   playSfx,
-  setAudioEnabled,
+  setBgmEnabled,
+  setSfxEnabled,
   syncBgm,
   unlockAudio,
   type BgmMode,
@@ -92,11 +106,16 @@ import { ConfirmDialog } from './ConfirmDialog';
 import { GardenPage } from './GardenPage';
 import { HomePage } from './HomePage';
 import { VegetableGardenPage } from './VegetableGardenPage';
+import { FishingPage } from './FishingPage';
+import { AudioMenu } from './AudioMenu';
 import { InventoryModal } from './InventoryModal';
+import { MarketPage } from './MarketPage';
+import { TradeHallPage } from './TradeHallPage';
 import { ModSwitchPanel, type StoredModInfo } from './ModSwitchPanel';
 import { PomodoroOverlay } from './PomodoroOverlay';
 import { PartnerSchedulePage } from './PartnerSchedulePage';
 import { RolePicker } from './RolePicker';
+import { WishingWellPage } from './WishingWellPage';
 
 import { SettingsModal } from './SettingsModal';
 import { ShopModal } from './ShopModal';
@@ -208,7 +227,9 @@ const PetApp = ({ initialPet, initialActiveMod, onResetToPicker, onSyncFromCloud
   } = useAppNavigation();
   const { pet, petRef, setPet, commitPet, achievementToast, setAchievementToast } = usePetSession(initialPet, isHomeRef);
   const [isPomodoroOpen, setPomodoroOpen] = useState(false);
-  const [isAudioEnabled, setAudioEnabledState] = useState(() => getAudioEnabled());
+  const [isBgmEnabled, setBgmEnabledState] = useState(() => getBgmEnabled());
+  const [isSfxEnabled, setSfxEnabledState] = useState(() => getSfxEnabled());
+  const [isAudioMenuOpen, setAudioMenuOpen] = useState(false);
   const [language, setLanguageState] = useState<LanguageCode>(() => getLanguage());
   const [activeShopCategory, setActiveShopCategory] = useState(shopCategories[0].id);
   const [draftName, setDraftName] = useState(initialPet.name);
@@ -232,6 +253,7 @@ const PetApp = ({ initialPet, initialActiveMod, onResetToPicker, onSyncFromCloud
   const isSettingsOpen = utilityDialog === 'settings';
   const isModSwitchOpen = utilityDialog === 'modSwitch';
   const [storedMods, setStoredMods] = useState<StoredModInfo[]>([]);
+  const [isPortalSummoned, setPortalSummoned] = useState(false);
 
   const refreshStoredMods = () => {
     const entries = listStoredMods();
@@ -339,6 +361,11 @@ const PetApp = ({ initialPet, initialActiveMod, onResetToPicker, onSyncFromCloud
   const displayInventoryItems = useMemo(() => getInventoryDefinitions(itemRegistry, pet.inventory), [itemRegistry, pet.inventory]);
   const inventoryController = useInventoryController(displayInventoryItems);
   const displayShopItems = useMemo(() => getShopDefinitions(itemRegistry), [itemRegistry]);
+  const displayMarketItems = useMemo(() => {
+    const resident = merchantDefinitions.find((merchant) => merchant.id === 'resident');
+    const itemIds = new Set<string>(resident?.categories.flatMap((category) => category.itemIds) ?? []);
+    return displayShopItems.filter((item) => itemIds.has(item.id));
+  }, [displayShopItems]);
   const getStatusLabel = (status: PetStatus) => getModStatusText(activeMod, status) ?? t(`pet.status.${status}`);
   const ownedItems = displayInventoryItems;
   const isLowEnergy = isPetLowEnergy(pet);
@@ -359,6 +386,7 @@ const PetApp = ({ initialPet, initialActiveMod, onResetToPicker, onSyncFromCloud
   const achievementSummary = getAchievementSummary(pet);
   const hasAchievementNotice = achievementSummary.pendingReviewNotice || achievementSummary.claimable > 0;
   const gardenReminder = getGardenReminder(pet);
+  const vegGardenReminder = getVegGardenReminder(pet);
   const shopDiscountInfo = getDailyShopDiscountInfo(pet);
   const hasShopDiscount = Boolean(shopDiscountInfo && shopDiscountInfo.items.some((item) => !item.used));
 
@@ -367,6 +395,34 @@ const PetApp = ({ initialPet, initialActiveMod, onResetToPicker, onSyncFromCloud
   };
 
   const gardenController = useGardenController({ petRef, setPet, commitPet, playAfterUnlock });
+
+  const commitFishingAction = useCallback((action: (pet: PetState) => PetState, successSfx: SfxId = 'coin') => {
+    void unlockAudio();
+    const previousInteraction = petRef.current.lastInteractionAt;
+    setPet((current: PetState) => {
+      const next = action(current);
+      playSfx(next.lastInteractionAt === previousInteraction ? 'error' : successSfx);
+      return commitPet(next);
+    });
+  }, [petRef, setPet, commitPet]);
+
+  const fishingController = {
+    cast: useCallback((slotIndex: number) => commitFishingAction((p) => castFishingRod(p, slotIndex, Date.now()), 'purchase'), [commitFishingAction]),
+    reel: useCallback((slotIndex: number) => commitFishingAction((p) => reelInFish(p, slotIndex, Date.now()), 'coin'), [commitFishingAction]),
+    selectZone: useCallback((zoneId: FishingWaterZoneId) => {
+      const next = advanceFishing({ ...petRef.current, fishing: { ...petRef.current.fishing, activeWaterZone: zoneId } });
+      setPet(next); playAfterUnlock('tap');
+    }, [petRef, setPet, playAfterUnlock]),
+    selectRod: useCallback((rodId: FishingRodId) => {
+      const next = advanceFishing({ ...petRef.current, fishing: { ...petRef.current.fishing, rod: rodId } });
+      setPet(next); playAfterUnlock('tap');
+    }, [petRef, setPet, playAfterUnlock]),
+    selectBait: useCallback((baitId: FishingBaitId) => {
+      const next = advanceFishing({ ...petRef.current, fishing: { ...petRef.current.fishing, bait: baitId } });
+      setPet(next); playAfterUnlock('tap');
+    }, [petRef, setPet, playAfterUnlock]),
+  };
+
   const rewardController = useRewardController({ pet, setPet, commitPet, hasLoadedModRef, playAfterUnlock });
   const {
     clearConfirm: gardenClearConfirm,
@@ -408,7 +464,7 @@ const PetApp = ({ initialPet, initialActiveMod, onResetToPicker, onSyncFromCloud
 
   useEffect(() => {
     syncBgm(currentBgmMode);
-  }, [currentBgmMode, isAudioEnabled]);
+  }, [currentBgmMode, isBgmEnabled]);
 
   useEffect(() => {
     claimDateRewards();
@@ -434,15 +490,20 @@ const PetApp = ({ initialPet, initialActiveMod, onResetToPicker, onSyncFromCloud
     return () => window.clearInterval(id);
   }, []);
 
-  const handleAudioToggle = () => {
-    const nextEnabled = !isAudioEnabled;
-    setAudioEnabled(nextEnabled);
-    setAudioEnabledState(nextEnabled);
-    if (nextEnabled) {
-      void unlockAudio().then(() => {
-        syncBgm(currentBgmMode);
-        playSfx('tap');
-      });
+  const handleAudioMenuChange = (bgm: boolean, sfx: boolean) => {
+    if (bgm !== isBgmEnabled) {
+      setBgmEnabled(bgm);
+      setBgmEnabledState(bgm);
+      if (bgm) {
+        void unlockAudio().then(() => syncBgm(currentBgmMode));
+      }
+    }
+    if (sfx !== isSfxEnabled) {
+      setSfxEnabled(sfx);
+      setSfxEnabledState(sfx);
+      if (sfx) {
+        void unlockAudio().then(() => playSfx('tap'));
+      }
     }
   };
 
@@ -544,6 +605,70 @@ const PetApp = ({ initialPet, initialActiveMod, onResetToPicker, onSyncFromCloud
     setPet((current) => recordPetInteraction(current));
   };
 
+  const handleOpenMarket = () => {
+    playAfterUnlock('open');
+    setPortalSummoned(true);
+    setPet((current) => recordPetInteraction(current));
+  };
+
+  const handlePortalEnter = () => {
+    playAfterUnlock('open');
+    setPortalSummoned(false);
+    setActivePage('market');
+  };
+
+  const handlePortalCancel = () => {
+    playAfterUnlock('close');
+    setPortalSummoned(false);
+  };
+
+  const handleRandomTravel = () => {
+    playAfterUnlock('open');
+    const result = performRandomTravel(petRef.current);
+    if (!result) return null;
+    setPet(commitPet(result.pet));
+    return result.world.id;
+  };
+
+  const handleOpenMarketTrade = () => {
+    playAfterUnlock('open');
+    setActivePage('tradeHall');
+    setPet((current) => recordPetInteraction(current));
+  };
+
+  const handleCloseMarketTrade = () => {
+    playAfterUnlock('close');
+    setActivePage('home');
+  };
+
+  const handleCloseMarket = () => {
+    playAfterUnlock('close');
+    setActivePage('home');
+  };
+
+  const handleOpenWishingWell = () => {
+    playAfterUnlock('open');
+    setActivePage('wishingWell');
+    setPet((current) => recordPetInteraction(current));
+  };
+
+  const handleCloseWishingWell = () => {
+    playAfterUnlock('close');
+    setActivePage('home');
+  };
+
+  const handleWishingWellWish = (useCoins: boolean) => {
+    playAfterUnlock('tap');
+    const result = performWish(petRef.current, useCoins);
+    if (!result) {
+      playSfx('error');
+      return null;
+    }
+    setPet(commitPet(result.pet));
+    playSfx('coin');
+    return result;
+  };
+
   const handleCloseGarden = () => {
     playAfterUnlock('close');
     resetGardenClearConfirm();
@@ -557,6 +682,16 @@ const PetApp = ({ initialPet, initialActiveMod, onResetToPicker, onSyncFromCloud
   };
 
   const handleCloseVegGarden = () => {
+    playAfterUnlock('close');
+    setActivePage('home');
+  };
+
+  const handleOpenFishing = () => {
+    playAfterUnlock('open');
+    setActivePage('fishing');
+  };
+
+  const handleCloseFishing = () => {
     playAfterUnlock('close');
     setActivePage('home');
   };
@@ -1098,10 +1233,17 @@ const PetApp = ({ initialPet, initialActiveMod, onResetToPicker, onSyncFromCloud
             <img src={currencyIcon} alt="" aria-hidden="true" />
             <strong>{pet.coins}</strong>
           </button>
-          <div className="heart-pill" aria-label={t('ui.top.heartsAria', { hearts: pet.hearts })} title={t('ui.top.heartsAria', { hearts: pet.hearts })}>
+          <button
+            type="button"
+            className={canClaimBoostCardDailyCoins(pet) ? 'heart-pill heart-pill--claimable' : 'heart-pill'}
+            onClick={handleOpenBoostCards}
+            aria-label={t('ui.top.openBoostCards')}
+            title={t('ui.top.openBoostCards')}
+          >
             <Heart size={20} aria-hidden="true" />
             <strong>{pet.hearts}</strong>
-          </div>
+            {canClaimBoostCardDailyCoins(pet) && <i aria-hidden="true" />}
+          </button>
           <button
             type="button"
             className={`icon-button achievement-entry${hasAchievementNotice ? ' achievement-entry--notice' : ''}`}
@@ -1113,13 +1255,18 @@ const PetApp = ({ initialPet, initialActiveMod, onResetToPicker, onSyncFromCloud
           </button>
           <button
             type="button"
-            className="icon-button audio-button"
-            aria-label={isAudioEnabled ? t('ui.top.audioOn') : t('ui.top.audioOff')}
-            title={isAudioEnabled ? t('ui.top.audioOn') : t('ui.top.audioOff')}
-            aria-pressed={isAudioEnabled}
-            onClick={handleAudioToggle}
+            className={`icon-button audio-button${isBgmEnabled || isSfxEnabled ? '' : ' audio-button--off'}`}
+            aria-label={t('ui.top.audioMenu')}
+            title={t('ui.top.audioMenu')}
+            onClick={() => setAudioMenuOpen(true)}
           >
-            {isAudioEnabled ? <Volume2 size={21} aria-hidden="true" /> : <VolumeX size={21} aria-hidden="true" />}
+            {isBgmEnabled && isSfxEnabled ? (
+              <Volume2 size={21} aria-hidden="true" />
+            ) : isBgmEnabled || isSfxEnabled ? (
+              <Volume1 size={21} aria-hidden="true" />
+            ) : (
+              <VolumeX size={21} aria-hidden="true" />
+            )}
           </button>
           <button
             type="button"
@@ -1193,6 +1340,7 @@ const PetApp = ({ initialPet, initialActiveMod, onResetToPicker, onSyncFromCloud
           onWater={handleWaterVegCrop}
           onHarvest={handleHarvestVegCrop}
           onOpenShop={() => handleOpenShop('garden')}
+          onOpenGarden={handleOpenGarden}
         />
       ) : activePage === 'partnerSchedule' ? (
         <PartnerSchedulePage
@@ -1202,6 +1350,41 @@ const PetApp = ({ initialPet, initialActiveMod, onResetToPicker, onSyncFromCloud
           onStart={handleStartPartnerSchedule}
           onCancel={() => setPartnerScheduleCancelConfirmOpen(true)}
           onClaim={handleClaimPartnerSchedule}
+        />
+      ) : activePage === 'tradeHall' ? (
+        <TradeHallPage
+          pet={pet}
+          itemIconMap={itemIconMap}
+          items={displayMarketItems}
+          onBack={handleCloseMarketTrade}
+          onBuyItem={handleBuyItem}
+        />
+      ) : activePage === 'market' ? (
+        <MarketPage
+          pet={pet}
+          itemIconMap={itemIconMap}
+          items={displayMarketItems}
+          onBack={handleCloseMarket}
+          onBuyItem={handleBuyItem}
+          onRandomTravel={handleRandomTravel}
+        />
+      ) : activePage === 'wishingWell' ? (
+        <WishingWellPage
+          pet={pet}
+          onBack={handleCloseWishingWell}
+          onWish={handleWishingWellWish}
+        />
+      ) : activePage === 'fishing' ? (
+        <FishingPage
+          pet={pet}
+          itemIconMap={itemIconMap}
+          onBack={handleCloseFishing}
+          onCast={fishingController.cast}
+          onReel={fishingController.reel}
+          onSelectZone={fishingController.selectZone}
+          onSelectRod={fishingController.selectRod}
+          onSelectBait={fishingController.selectBait}
+          onOpenShop={() => openUtilityDialog('shop')}
         />
       ) : (
         <HomePage
@@ -1215,6 +1398,7 @@ const PetApp = ({ initialPet, initialActiveMod, onResetToPicker, onSyncFromCloud
           pomodoroRemainingMs={pomodoroRemainingMs}
           pomodoroStartTitle={pomodoroStartTitle}
           gardenReminder={gardenReminder}
+          vegGardenReminder={vegGardenReminder}
           pomodoroOverlay={pomodoroOverlay}
           petStatusImages={petStatusImageMap}
           petActivityImages={petActivityImageMap}
@@ -1228,10 +1412,16 @@ const PetApp = ({ initialPet, initialActiveMod, onResetToPicker, onSyncFromCloud
           onOpenPomodoro={handleOpenPomodoro}
           onOpenGarden={handleOpenGarden}
           onOpenVegGarden={handleOpenVegGarden}
-          onOpenBoostCards={handleOpenBoostCards}
+          onOpenMarket={handleOpenMarket}
+          onOpenMarketTrade={handleOpenMarketTrade}
           onOpenShop={handleOpenShop}
           onOpenPartnerSchedule={handleOpenPartnerSchedule}
+          onOpenWishingWell={handleOpenWishingWell}
+          onOpenFishing={handleOpenFishing}
           onAction={handleAction}
+          portalSummoned={isPortalSummoned}
+          onPortalEnter={handlePortalEnter}
+          onPortalCancel={handlePortalCancel}
         />
       )}
 
@@ -1336,6 +1526,15 @@ const PetApp = ({ initialPet, initialActiveMod, onResetToPicker, onSyncFromCloud
           onClose={handleCloseBoostCards}
           onBuyCard={handleBuyBoostCard}
           onClaimDailyCoins={handleClaimBoostCardCoins}
+        />
+      )}
+      {isAudioMenuOpen && (
+        <AudioMenu
+          bgmEnabled={isBgmEnabled}
+          sfxEnabled={isSfxEnabled}
+          onBgmChange={(value) => handleAudioMenuChange(value, isSfxEnabled)}
+          onSfxChange={(value) => handleAudioMenuChange(isBgmEnabled, value)}
+          onClose={() => setAudioMenuOpen(false)}
         />
       )}
       {isModSwitchOpen && (
@@ -1443,7 +1642,9 @@ const AppContent = () => {
   const [installedMod, setInstalledMod] = useState<ActivePetMod | null>(null);
   const [hasLoadedInitialMod, setHasLoadedInitialMod] = useState(false);
   const [modMessage, setModMessage] = useState('');
-  const [isAudioEnabled, setAudioEnabledState] = useState(() => getAudioEnabled());
+  const [isBgmEnabled, setBgmEnabledState] = useState(() => getBgmEnabled());
+  const [isSfxEnabled, setSfxEnabledState] = useState(() => getSfxEnabled());
+  const [isAudioMenuOpen, setAudioMenuOpen] = useState(false);
   const [pendingCloudModChoice, setPendingCloudModChoice] = useState<{
     cloudMod: CloudActiveModInfo;
     availableMods: StoredModInfo[];
@@ -1563,17 +1764,32 @@ const AppContent = () => {
     })();
   }, []);
 
-  const handleAudioToggle = () => {
-    const nextEnabled = !isAudioEnabled;
-    setAudioEnabled(nextEnabled);
-    setAudioEnabledState(nextEnabled);
-    if (nextEnabled) {
-      void unlockAudio().then(() => {
-        syncBgm('room');
-        playSfx('tap');
-      });
+  const handleAudioMenuChange = (bgm: boolean, sfx: boolean) => {
+    if (bgm !== isBgmEnabled) {
+      setBgmEnabled(bgm);
+      setBgmEnabledState(bgm);
+      if (bgm) {
+        void unlockAudio().then(() => syncBgm('room'));
+      }
+    }
+    if (sfx !== isSfxEnabled) {
+      setSfxEnabled(sfx);
+      setSfxEnabledState(sfx);
+      if (sfx) {
+        void unlockAudio().then(() => playSfx('tap'));
+      }
     }
   };
+
+  const audioMenuDialog = isAudioMenuOpen && (
+    <AudioMenu
+      bgmEnabled={isBgmEnabled}
+      sfxEnabled={isSfxEnabled}
+      onBgmChange={(value) => handleAudioMenuChange(value, isSfxEnabled)}
+      onSfxChange={(value) => handleAudioMenuChange(isBgmEnabled, value)}
+      onClose={() => setAudioMenuOpen(false)}
+    />
+  );
 
   const handleSyncFromCloud = useCallback(async () => {
     if (!user) return;
@@ -1736,13 +1952,14 @@ const AppContent = () => {
         <RolePicker
           installedMod={null}
           modMessage={modMessage}
-          isAudioEnabled={isAudioEnabled}
+          isSoundOn={isBgmEnabled && isSfxEnabled}
           isLoading
           onUseBuiltin={handleUseBuiltin}
           onUseInstalledMod={() => undefined}
           onImportMod={handleImportMod}
-          onAudioToggle={handleAudioToggle}
+          onOpenAudioMenu={() => setAudioMenuOpen(true)}
         />
+        {audioMenuDialog}
         {cloudModChoiceDialog}
       </>
     );
@@ -1754,12 +1971,13 @@ const AppContent = () => {
         <RolePicker
           installedMod={installedMod}
           modMessage={modMessage}
-          isAudioEnabled={isAudioEnabled}
+          isSoundOn={isBgmEnabled && isSfxEnabled}
           onUseBuiltin={handleUseBuiltin}
           onUseInstalledMod={() => installedMod && startWithMod(installedMod)}
           onImportMod={handleImportMod}
-          onAudioToggle={handleAudioToggle}
+          onOpenAudioMenu={() => setAudioMenuOpen(true)}
         />
+        {audioMenuDialog}
         {cloudModChoiceDialog}
       </>
     );

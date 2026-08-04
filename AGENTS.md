@@ -88,7 +88,7 @@
 | New feature requested | Follow HarnSpec SDD: Discover -> Create Spec -> Implement -> Verify |
 | Adding UI component | Check existing patterns in `src/ui/`, match DialogShell/FeatureRow style |
 | Adding game mechanic | Place pure logic in `src/core/`, not in `src/ui/` |
-| Adding i18n string | Add to both `zh-CN.json` and `en-US.json` |
+| Adding i18n string | Add to both `zh-CN.json` and `en-US.json`; UI strings go under `ui.*`, game event strings under `pet.*` — wrong parent causes silent fallback to raw key. 核心模块 (`core/`) 中的 `t()` 调用必须用 `pet.*` 路径，UI 组件中的 `t()` 调用用 `ui.*` 路径 |
 | Packaging build | Follow 打包规则 below for target selection |
 | Adding dependency | Ask first — we minimize deps |
 | Unsure about pattern | Check Golden Samples above |

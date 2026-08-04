@@ -1,5 +1,5 @@
 import { useRef, useState } from 'react';
-import { ArrowLeft, CalendarDays, Leaf, Sprout, X } from 'lucide-react';
+import { ArrowLeft, CalendarDays, Leaf, Sprout, TreePine, X } from 'lucide-react';
 import { DialogShell } from './DialogShell';
 import { WateringCanIcon } from './WateringCanIcon';
 import iconTomatoSprout from '../assets/icon/veg/icon_tomato_sprout.png';
@@ -88,11 +88,12 @@ interface VegetableGardenPageProps {
   onWater: (slotIndex: number) => void;
   onHarvest: (slotIndex: number) => void;
   onOpenShop: () => void;
+  onOpenGarden: () => void;
 }
 
 const getSwayDuration = (slotIndex: number) => `${2.4 + (slotIndex % 5) * 0.25}s`;
 
-export const VegetableGardenPage = ({ pet, itemIconMap, onBack, onPlant, onWater, onHarvest, onOpenShop }: VegetableGardenPageProps) => {
+export const VegetableGardenPage = ({ pet, itemIconMap, onBack, onPlant, onWater, onHarvest, onOpenShop, onOpenGarden }: VegetableGardenPageProps) => {
   const [mode, setMode] = useState<ToolMode>(null);
   const [selectedCrop, setSelectedCrop] = useState<VegetableCropId | null>(null);
   const [floats, setFloats] = useState<HarvestFloat[]>([]);
@@ -222,6 +223,10 @@ export const VegetableGardenPage = ({ pet, itemIconMap, onBack, onPlant, onWater
             <button type="button" className="garden-tools-button" onClick={onOpenShop} aria-label={t('ui.vegGarden.buySeedsShort')} title={t('ui.vegGarden.buySeedsShort')}>
               <Sprout size={17} aria-hidden="true" />
               <span>{t('ui.vegGarden.buySeedsShort')}</span>
+            </button>
+            <button type="button" className="garden-tools-button" onClick={onOpenGarden} aria-label={t('ui.garden.aria')} title={t('ui.garden.title')}>
+              <TreePine size={17} aria-hidden="true" />
+              <span>{t('ui.garden.title')}</span>
             </button>
             {view.readyCount > 0 && (
               <span className="veg-garden-ready-badge">{t('ui.vegGarden.readyHint', { count: view.readyCount })}</span>
